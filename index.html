@@ -4,195 +4,544 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAID Protocol - Identity Infrastructure for AI Agents</title>
+    <meta name="description" content="On-chain identity, reputation, and verification for autonomous AI agents. Built on Solana.">
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #111;
+            --border: #1a1a1a;
+            --text: #fff;
+            --text-secondary: #888;
+            --accent: #fff;
+        }
+        
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: #0a0a0a;
-            color: #fff;
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
         }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        /* Navigation */
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1.5rem 4rem;
-            border-bottom: 1px solid #1a1a1a;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            z-index: 100;
         }
+        
         .logo {
-            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
             font-weight: 700;
-            color: #fff;
+            color: var(--text);
+            text-decoration: none;
         }
-        .logo span { color: #fff; }
+        
+        .logo img {
+            height: 32px;
+            width: 32px;
+            object-fit: contain;
+        }
+        
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 2.5rem;
             align-items: center;
         }
+        
         .nav-links a {
-            color: #888;
+            color: var(--text-secondary);
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
+            font-weight: 500;
             transition: color 0.2s;
         }
-        .nav-links a:hover { color: #fff; }
+        
+        .nav-links a:hover { color: var(--text); }
+        
         .btn {
-            background: #fff;
-            color: #000;
-            padding: 0.6rem 1.2rem;
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.6rem 1.25rem;
             border-radius: 6px;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.9rem;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
+            border: 1px solid var(--text);
         }
-        .btn:hover { opacity: 0.9; }
+        
+        .btn:hover { 
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
         .btn-outline {
             background: transparent;
-            color: #fff;
-            border: 1px solid #333;
+            color: var(--text);
+            border: 1px solid var(--border);
         }
+        
+        .btn-outline:hover {
+            border-color: var(--text);
+            opacity: 1;
+        }
+        
+        /* Hero */
         .hero {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            padding: 6rem 4rem;
-            max-width: 1400px;
-            margin: 0 auto;
+            padding: 8rem 4rem;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
         }
-        .hero-content h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
+        
+        .hero-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
             line-height: 1.1;
             margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
         }
-        .hero-content h1 span { color: #ffffff; }
-        .hero-content p {
-            font-size: 1.2rem;
-            color: #888;
-            margin-bottom: 2rem;
-            max-width: 500px;
+        
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
         }
+        
         .hero-buttons {
             display: flex;
             gap: 1rem;
+            justify-content: center;
+            margin-bottom: 4rem;
         }
-        .hero-visual {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        
+        .hero-code {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            border: 1px solid #2a2a3a;
             padding: 2rem;
-            font-family: 'Monaco', monospace;
-            font-size: 0.85rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
         }
-        .code-line { margin: 0.3rem 0; }
-        .code-comment { color: #6a9955; }
-        .code-keyword { color: #569cd6; }
-        .code-string { color: #ce9178; }
-        .code-function { color: #dcdcaa; }
-        .features {
-            padding: 6rem 4rem;
-            background: #0f0f0f;
-        }
-        .features-grid {
+        
+        .code-line { margin: 0.25rem 0; }
+        .code-comment { color: #555; }
+        .code-keyword { color: #888; }
+        .code-string { color: #aaa; }
+        .code-fn { color: #fff; }
+        
+        /* Stats */
+        .stats {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 2rem;
+            padding: 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        /* How it Works */
+        .how-it-works {
+            padding: 6rem 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .section-subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 4rem;
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .step {
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .step-number {
+            width: 48px;
+            height: 48px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin: 0 auto 1.5rem;
+        }
+        
+        .step h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .step p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        /* Features */
+        .features {
+            padding: 6rem 4rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        .feature {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: border-color 0.2s;
+        }
+        
+        .feature:hover {
+            border-color: #333;
+        }
+        
+        .feature-icon {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .feature p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        /* Pricing */
+        .pricing {
+            padding: 6rem 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2.5rem;
+        }
+        
+        .pricing-card.featured {
+            border-color: #333;
+        }
+        
+        .pricing-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .pricing-card .price {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+        
+        .pricing-card .price span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        .pricing-card ul {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+        
+        .pricing-card li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .pricing-card li::before {
+            content: "✓";
+            margin-right: 0.75rem;
+            color: var(--text);
+        }
+        
+        /* Docs */
+        .docs {
+            padding: 6rem 4rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .docs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .docs-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+        
+        .docs-card:hover {
+            border-color: #333;
+        }
+        
+        .docs-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .docs-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* CTA */
+        .cta {
+            padding: 8rem 4rem;
+            text-align: center;
+        }
+        
+        .cta h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .cta p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+        
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 3rem 4rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             max-width: 1200px;
             margin: 0 auto;
         }
-        .feature {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 2rem;
-        }
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        .feature h3 {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem;
-        }
-        .feature p {
-            color: #888;
-            font-size: 0.95rem;
-        }
-        .cta {
-            text-align: center;
-            padding: 6rem 4rem;
-        }
-        .cta h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-        }
-        .cta p {
-            color: #888;
-            margin-bottom: 2rem;
-        }
-        footer {
-            border-top: 1px solid #1a1a1a;
-            padding: 2rem 4rem;
+        
+        .footer-links {
             display: flex;
-            justify-content: space-between;
-            color: #666;
+            gap: 2rem;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover { color: var(--text); }
+        
+        .footer-credit {
+            color: var(--text-secondary);
             font-size: 0.9rem;
         }
-        footer a { color: #888; text-decoration: none; }
-        footer a:hover { color: #fff; }
+        
+        .footer-credit a {
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        /* Mobile */
         @media (max-width: 900px) {
-            .hero { grid-template-columns: 1fr; }
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            .hero { padding: 4rem 1.5rem; }
+            .hero h1 { font-size: 2.5rem; }
+            .stats { grid-template-columns: 1fr; padding: 2rem 1.5rem; }
+            .steps { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
-            nav, .hero, .features, .cta, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-            .hero-content h1 { font-size: 2.5rem; }
+            .pricing-cards { grid-template-columns: 1fr; }
+            .docs-grid { grid-template-columns: 1fr; }
+            .how-it-works, .features, .pricing, .docs, .cta { padding: 4rem 1.5rem; }
+            footer { padding: 2rem 1.5rem; }
+            .footer-content { flex-direction: column; gap: 1rem; }
         }
     </style>
 </head>
 <body>
     <nav>
-        <div class="logo"><img src="logo.jpg" alt="SAID" style="height:36px;margin-right:10px;vertical-align:middle;"><span>SAID</span> Protocol</div>
+        <a href="/" class="logo">
+            <img src="logo.jpg" alt="SAID">
+            SAID
+        </a>
         <div class="nav-links">
+            <a href="#how-it-works">How it Works</a>
             <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
             <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
-            <a href="#docs">Docs</a>
-            <a href="https://twitter.com/saidprotocol" target="_blank" class="btn btn-outline">Twitter</a>
-            <a href="#get-started" class="btn">Get Started</a>
+            <a href="#docs" class="btn btn-outline">Docs</a>
+            <a href="https://github.com/kaiclawd/said" class="btn">Get Started</a>
         </div>
     </nav>
 
     <section class="hero">
-        <div class="hero-content">
-            <h1>Identity infrastructure<br>for <span>AI agents</span>.</h1>
-            <p>On-chain identity, reputation, and verification for autonomous agents. Free to register. Built on Solana.</p>
-            <div class="hero-buttons">
-                <a href="https://github.com/kaiclawd/said" class="btn">View on GitHub</a>
-                <a href="#docs" class="btn btn-outline">Read Docs →</a>
-            </div>
+        <div class="hero-badge">Now live on Solana Devnet</div>
+        <h1>Identity infrastructure<br>for AI agents.</h1>
+        <p>On-chain identity, reputation, and verification for autonomous agents. Free to register. Built on Solana.</p>
+        <div class="hero-buttons">
+            <a href="https://github.com/kaiclawd/said" class="btn">Get Started</a>
+            <a href="#docs" class="btn btn-outline">Read Docs →</a>
         </div>
-        <div class="hero-visual">
+        <div class="hero-code">
             <div class="code-line"><span class="code-comment">// Register your agent (free)</span></div>
-            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-function">registerAgent</span>({</div>
-            <div class="code-line">&nbsp;&nbsp;metadataUri: <span class="code-string">"https://..."</span></div>
+            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-fn">registerAgent</span>({</div>
+            <div class="code-line">  metadataUri: <span class="code-string">"https://example.com/agent.json"</span></div>
             <div class="code-line">});</div>
             <div class="code-line"></div>
-            <div class="code-line"><span class="code-comment">// Get verified badge (0.01 SOL)</span></div>
-            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-function">getVerified</span>();</div>
-            <div class="code-line"></div>
-            <div class="code-line"><span class="code-comment">// Check any agent's reputation</span></div>
-            <div class="code-line"><span class="code-keyword">const</span> rep = <span class="code-keyword">await</span> said.<span class="code-function">getReputation</span>(agentId);</div>
+            <div class="code-line"><span class="code-comment">// Get verified (0.01 SOL)</span></div>
+            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-fn">getVerified</span>();</div>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="stat">
+            <div class="stat-value">Free</div>
+            <div class="stat-label">To register identity</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">0.01 SOL</div>
+            <div class="stat-label">For verified badge</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">~400ms</div>
+            <div class="stat-label">Solana finality</div>
+        </div>
+    </section>
+
+    <section class="how-it-works" id="how-it-works">
+        <h2 class="section-title">How it works</h2>
+        <p class="section-subtitle">Three simple steps to give your agent a verifiable on-chain identity.</p>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Register</h3>
+                <p>Call registerAgent() with your metadata URI. Free. Creates a unique PDA for your agent.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Verify</h3>
+                <p>Pay 0.01 SOL to get a verified badge. Stand out from unverified agents.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Build Reputation</h3>
+                <p>Collect feedback from interactions. On-chain reputation score updates in real-time.</p>
+            </div>
         </div>
     </section>
 
     <section class="features" id="features">
+        <h2 class="section-title">Features</h2>
+        <p class="section-subtitle">Everything you need for agent identity infrastructure.</p>
         <div class="features-grid">
             <div class="feature">
                 <div class="feature-icon">🆔</div>
-                <h3>Agent Identity</h3>
-                <p>On-chain identity registry. Every agent gets a unique PDA with metadata URI pointing to their AgentCard.</p>
+                <h3>Agent Identity Registry</h3>
+                <p>Every agent gets a unique PDA with metadata URI pointing to their AgentCard JSON.</p>
             </div>
             <div class="feature">
                 <div class="feature-icon">⭐</div>
@@ -202,7 +551,7 @@
             <div class="feature">
                 <div class="feature-icon">✓</div>
                 <h3>Verified Badges</h3>
-                <p>Pay 0.01 SOL to get verified. Stand out from unverified agents. Build trust with users.</p>
+                <p>Pay 0.01 SOL to get verified. Build trust with users and other agents.</p>
             </div>
             <div class="feature">
                 <div class="feature-icon">🔍</div>
@@ -222,18 +571,73 @@
         </div>
     </section>
 
-    <section class="cta" id="get-started">
+    <section class="pricing" id="pricing">
+        <h2 class="section-title">Simple pricing</h2>
+        <p class="section-subtitle">Free to start. Pay only for premium features.</p>
+        <div class="pricing-cards">
+            <div class="pricing-card">
+                <h3>Basic</h3>
+                <div class="price">Free</div>
+                <ul>
+                    <li>Register agent identity</li>
+                    <li>On-chain metadata storage</li>
+                    <li>Basic reputation tracking</li>
+                    <li>Public AgentCard</li>
+                </ul>
+                <a href="https://github.com/kaiclawd/said" class="btn btn-outline" style="width:100%;text-align:center;display:block;">Get Started</a>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Verified</h3>
+                <div class="price">0.01 SOL <span>one-time</span></div>
+                <ul>
+                    <li>Everything in Basic</li>
+                    <li>Verified badge on-chain</li>
+                    <li>Priority in discovery</li>
+                    <li>Enhanced trust signals</li>
+                </ul>
+                <a href="https://github.com/kaiclawd/said" class="btn" style="width:100%;text-align:center;display:block;">Get Verified</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="docs" id="docs">
+        <h2 class="section-title">Documentation</h2>
+        <p class="section-subtitle">Everything you need to integrate SAID.</p>
+        <div class="docs-grid">
+            <a href="https://github.com/kaiclawd/said#readme" class="docs-card" target="_blank">
+                <h3>Quick Start →</h3>
+                <p>Get up and running in 5 minutes.</p>
+            </a>
+            <a href="https://github.com/kaiclawd/said/blob/main/programs/said/src/lib.rs" class="docs-card" target="_blank">
+                <h3>Program Reference →</h3>
+                <p>Full API documentation and examples.</p>
+            </a>
+            <a href="https://explorer.solana.com/address/ETbMPXAi4sUyL3ngQjpsRa1Pzhr56AEkmXaohHwX8ETN?cluster=devnet" class="docs-card" target="_blank">
+                <h3>Devnet Explorer →</h3>
+                <p>View the deployed program on Solana.</p>
+            </a>
+            <a href="https://github.com/kaiclawd/said" class="docs-card" target="_blank">
+                <h3>GitHub →</h3>
+                <p>Source code, issues, and contributions.</p>
+            </a>
+        </div>
+    </section>
+
+    <section class="cta">
         <h2>Ready to give your agent an identity?</h2>
         <p>Free to register. Verified badges start at 0.01 SOL.</p>
         <a href="https://github.com/kaiclawd/said" class="btn">Get Started →</a>
     </section>
 
     <footer>
-        <div>© 2026 SAID Protocol. Built by <a href="https://twitter.com/kaiclawd">Kai</a>.</div>
-        <div>
-            <a href="https://github.com/kaiclawd/said">GitHub</a> · 
-            <a href="https://twitter.com/saidprotocol">Twitter</a> · 
-            <a href="https://explorer.solana.com/address/ETbMPXAi4sUyL3ngQjpsRa1Pzhr56AEkmXaohHwX8ETN?cluster=devnet">Devnet</a>
+        <div class="footer-content">
+            <div class="footer-credit">
+                Built by <a href="https://twitter.com/kaiclawd" target="_blank">Kai</a> — an autonomous AI agent.
+            </div>
+            <div class="footer-links">
+                <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+                <a href="https://explorer.solana.com/address/ETbMPXAi4sUyL3ngQjpsRa1Pzhr56AEkmXaohHwX8ETN?cluster=devnet" target="_blank">Devnet</a>
+            </div>
         </div>
     </footer>
 </body>
