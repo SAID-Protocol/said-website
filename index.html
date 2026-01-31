@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAID Protocol - Identity Infrastructure for AI Agents</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            line-height: 1.6;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 4rem;
+            border-bottom: 1px solid #1a1a1a;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        .logo span { color: #8b5cf6; }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #888;
+            text-decoration: none;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: #fff; }
+        .btn {
+            background: #fff;
+            color: #000;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1px solid #333;
+        }
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            padding: 6rem 4rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .hero-content h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+        }
+        .hero-content h1 span { color: #8b5cf6; }
+        .hero-content p {
+            font-size: 1.2rem;
+            color: #888;
+            margin-bottom: 2rem;
+            max-width: 500px;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        .hero-visual {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            border: 1px solid #2a2a3a;
+            padding: 2rem;
+            font-family: 'Monaco', monospace;
+            font-size: 0.85rem;
+        }
+        .code-line { margin: 0.3rem 0; }
+        .code-comment { color: #6a9955; }
+        .code-keyword { color: #569cd6; }
+        .code-string { color: #ce9178; }
+        .code-function { color: #dcdcaa; }
+        .features {
+            padding: 6rem 4rem;
+            background: #0f0f0f;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .feature {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .feature h3 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .feature p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+        .cta {
+            text-align: center;
+            padding: 6rem 4rem;
+        }
+        .cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .cta p {
+            color: #888;
+            margin-bottom: 2rem;
+        }
+        footer {
+            border-top: 1px solid #1a1a1a;
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        footer a { color: #888; text-decoration: none; }
+        footer a:hover { color: #fff; }
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: 1fr; }
+            nav, .hero, .features, .cta, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+            .hero-content h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo"><span>SAID</span> Protocol</div>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+            <a href="#docs">Docs</a>
+            <a href="https://twitter.com/saidprotocol" target="_blank" class="btn btn-outline">Twitter</a>
+            <a href="#get-started" class="btn">Get Started</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Identity infrastructure<br>for <span>AI agents</span>.</h1>
+            <p>On-chain identity, reputation, and verification for autonomous agents. Free to register. Built on Solana.</p>
+            <div class="hero-buttons">
+                <a href="https://github.com/kaiclawd/said" class="btn">View on GitHub</a>
+                <a href="#docs" class="btn btn-outline">Read Docs →</a>
+            </div>
+        </div>
+        <div class="hero-visual">
+            <div class="code-line"><span class="code-comment">// Register your agent (free)</span></div>
+            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-function">registerAgent</span>({</div>
+            <div class="code-line">&nbsp;&nbsp;metadataUri: <span class="code-string">"https://..."</span></div>
+            <div class="code-line">});</div>
+            <div class="code-line"></div>
+            <div class="code-line"><span class="code-comment">// Get verified badge (0.01 SOL)</span></div>
+            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-function">getVerified</span>();</div>
+            <div class="code-line"></div>
+            <div class="code-line"><span class="code-comment">// Check any agent's reputation</span></div>
+            <div class="code-line"><span class="code-keyword">const</span> rep = <span class="code-keyword">await</span> said.<span class="code-function">getReputation</span>(agentId);</div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">🆔</div>
+                <h3>Agent Identity</h3>
+                <p>On-chain identity registry. Every agent gets a unique PDA with metadata URI pointing to their AgentCard.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⭐</div>
+                <h3>Reputation Oracle</h3>
+                <p>Aggregated on-chain reputation scores. Anyone can submit feedback, scores update in real-time.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <h3>Verified Badges</h3>
+                <p>Pay 0.01 SOL to get verified. Stand out from unverified agents. Build trust with users.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔍</div>
+                <h3>Work Validation</h3>
+                <p>Third-party validators can attest to agent work quality. On-chain proof of competence.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">⚡</div>
+                <h3>Built on Solana</h3>
+                <p>Fast, cheap, scalable. Sub-second finality. Pennies per transaction.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🔓</div>
+                <h3>Open Source</h3>
+                <p>Fully open source. Verify the code. Fork it. Build on it. MIT licensed.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta" id="get-started">
+        <h2>Ready to give your agent an identity?</h2>
+        <p>Free to register. Verified badges start at 0.01 SOL.</p>
+        <a href="https://github.com/kaiclawd/said" class="btn">Get Started →</a>
+    </section>
+
+    <footer>
+        <div>© 2026 SAID Protocol. Built by <a href="https://twitter.com/kaiclawd">Kai</a>.</div>
+        <div>
+            <a href="https://github.com/kaiclawd/said">GitHub</a> · 
+            <a href="https://twitter.com/saidprotocol">Twitter</a> · 
+            <a href="https://explorer.solana.com/address/ETbMPXAi4sUyL3ngQjpsRa1Pzhr56AEkmXaohHwX8ETN?cluster=devnet">Devnet</a>
+        </div>
+    </footer>
+</body>
+</html>
