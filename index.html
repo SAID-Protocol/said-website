@@ -190,6 +190,100 @@
             font-size: 0.95rem;
         }
         
+        /* Quick Start */
+        .quickstart {
+            padding: 6rem 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .quickstart-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .quickstart h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .quickstart > p {
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .code-block {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            overflow-x: auto;
+        }
+        
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #333;
+        }
+        
+        .code-block-title {
+            color: #888;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .code-block-copy {
+            background: #333;
+            color: #fff;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .code-block-copy:hover {
+            background: #444;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+        
+        .code-block .comment { color: #6a737d; }
+        .code-block .keyword { color: #ff79c6; }
+        .code-block .string { color: #a5d6ff; }
+        .code-block .function { color: #d2a8ff; }
+        .code-block .const { color: #79c0ff; }
+        
+        .step-label {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .step-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        
         /* How it Works */
         .how-it-works {
             padding: 6rem 4rem;
@@ -456,7 +550,7 @@
             .features-grid { grid-template-columns: 1fr; }
             .pricing-cards { grid-template-columns: 1fr; }
             .docs-grid { grid-template-columns: 1fr; }
-            .how-it-works, .features, .pricing, .docs, .cta { padding: 4rem 1.5rem; }
+            .quickstart, .how-it-works, .features, .pricing, .docs, .cta { padding: 4rem 1.5rem; }
             footer { padding: 2rem 1.5rem; }
             .footer-content { flex-direction: column; gap: 1rem; }
         }
@@ -469,12 +563,11 @@
             SAID
         </a>
         <div class="nav-links">
+            <a href="#quickstart">Quick Start</a>
             <a href="#how-it-works">How it Works</a>
             <a href="#features">Features</a>
-            <a href="#pricing">Pricing</a>
             <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
-            <a href="#docs" class="btn btn-outline">Docs</a>
-            <a href="https://github.com/kaiclawd/said" class="btn">Get Started</a>
+            <a href="#quickstart" class="btn">Get Started</a>
         </div>
     </nav>
 
@@ -483,17 +576,14 @@
         <h1>Identity infrastructure<br>for AI agents.</h1>
         <p>On-chain identity, reputation, and verification for autonomous agents. Free to register. Built on Solana.</p>
         <div class="hero-buttons">
-            <a href="https://github.com/kaiclawd/said" class="btn">Get Started</a>
-            <a href="#docs" class="btn btn-outline">Read Docs →</a>
+            <a href="#quickstart" class="btn">Get Started</a>
+            <a href="https://github.com/kaiclawd/said" class="btn btn-outline" target="_blank">View on GitHub →</a>
         </div>
         <div class="hero-code">
             <div class="code-line"><span class="code-comment">// Register your agent (free)</span></div>
-            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-fn">registerAgent</span>({</div>
-            <div class="code-line">  metadataUri: <span class="code-string">"https://example.com/agent.json"</span></div>
-            <div class="code-line">});</div>
-            <div class="code-line"></div>
-            <div class="code-line"><span class="code-comment">// Get verified (0.01 SOL)</span></div>
-            <div class="code-line"><span class="code-keyword">await</span> said.<span class="code-fn">getVerified</span>();</div>
+            <div class="code-line"><span class="code-keyword">await</span> program.methods.<span class="code-fn">registerAgent</span>(metadataUri)</div>
+            <div class="code-line">  .<span class="code-fn">accounts</span>({ owner: wallet.publicKey })</div>
+            <div class="code-line">  .<span class="code-fn">rpc</span>();</div>
         </div>
     </section>
 
@@ -509,6 +599,93 @@
         <div class="stat">
             <div class="stat-value">~400ms</div>
             <div class="stat-label">Solana finality</div>
+        </div>
+    </section>
+
+    <section class="quickstart" id="quickstart">
+        <h2 class="section-title">Quick Start</h2>
+        <p class="section-subtitle">Get your agent on-chain in under 5 minutes.</p>
+        
+        <div class="quickstart-content">
+            <div class="step-label">Step 1</div>
+            <p class="step-description">Install dependencies and clone the SDK</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <span class="code-block-title">Terminal</span>
+                </div>
+                <pre><span class="comment"># Clone the repo</span>
+git clone https://github.com/kaiclawd/said.git
+cd said
+
+<span class="comment"># Install Anchor dependencies</span>
+yarn install</pre>
+            </div>
+
+            <div class="step-label">Step 2</div>
+            <p class="step-description">Register your agent identity (free — you only pay Solana rent ~0.002 SOL)</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <span class="code-block-title">TypeScript</span>
+                </div>
+                <pre><span class="keyword">import</span> { Program } <span class="keyword">from</span> <span class="string">"@coral-xyz/anchor"</span>;
+<span class="keyword">import</span> { PublicKey } <span class="keyword">from</span> <span class="string">"@solana/web3.js"</span>;
+
+<span class="comment">// Program ID (devnet)</span>
+<span class="keyword">const</span> <span class="const">SAID_PROGRAM_ID</span> = <span class="keyword">new</span> PublicKey(
+  <span class="string">"SAiDxvWyuaGPah9EUPbbMWmzehvd6vZJgFykiDbKpump"</span>
+);
+
+<span class="comment">// Your agent's metadata (host this JSON somewhere)</span>
+<span class="keyword">const</span> metadataUri = <span class="string">"https://yoursite.com/agent.json"</span>;
+
+<span class="comment">// Derive your agent's PDA</span>
+<span class="keyword">const</span> [agentPDA] = PublicKey.<span class="function">findProgramAddressSync</span>(
+  [Buffer.<span class="function">from</span>(<span class="string">"agent"</span>), wallet.publicKey.<span class="function">toBuffer</span>()],
+  <span class="const">SAID_PROGRAM_ID</span>
+);
+
+<span class="comment">// Register (free!)</span>
+<span class="keyword">await</span> program.methods
+  .<span class="function">registerAgent</span>(metadataUri)
+  .<span class="function">accounts</span>({
+    agentIdentity: agentPDA,
+    owner: wallet.publicKey,
+    systemProgram: SystemProgram.programId,
+  })
+  .<span class="function">rpc</span>();
+
+console.<span class="function">log</span>(<span class="string">"✅ Agent registered:"</span>, agentPDA.<span class="function">toString</span>());</pre>
+            </div>
+
+            <div class="step-label">Step 3 (Optional)</div>
+            <p class="step-description">Get verified for 0.01 SOL — adds a verified badge to your identity</p>
+            <div class="code-block">
+                <div class="code-block-header">
+                    <span class="code-block-title">TypeScript</span>
+                </div>
+                <pre><span class="comment">// Treasury PDA (receives verification fees)</span>
+<span class="keyword">const</span> [treasuryPDA] = PublicKey.<span class="function">findProgramAddressSync</span>(
+  [Buffer.<span class="function">from</span>(<span class="string">"treasury"</span>)],
+  <span class="const">SAID_PROGRAM_ID</span>
+);
+
+<span class="comment">// Get verified (0.01 SOL)</span>
+<span class="keyword">await</span> program.methods
+  .<span class="function">getVerified</span>()
+  .<span class="function">accounts</span>({
+    agentIdentity: agentPDA,
+    treasury: treasuryPDA,
+    owner: wallet.publicKey,
+    systemProgram: SystemProgram.programId,
+  })
+  .<span class="function">rpc</span>();
+
+console.<span class="function">log</span>(<span class="string">"✅ Agent verified!"</span>);</pre>
+            </div>
+            
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="https://github.com/kaiclawd/said" class="btn" target="_blank">View Full Documentation →</a>
+            </div>
         </div>
     </section>
 
@@ -584,7 +761,7 @@
                     <li>Basic reputation tracking</li>
                     <li>Public AgentCard</li>
                 </ul>
-                <a href="https://github.com/kaiclawd/said" class="btn btn-outline" style="width:100%;text-align:center;display:block;">Get Started</a>
+                <a href="#quickstart" class="btn btn-outline" style="width:100%;text-align:center;display:block;">Get Started</a>
             </div>
             <div class="pricing-card featured">
                 <h3>Verified</h3>
@@ -595,24 +772,24 @@
                     <li>Priority in discovery</li>
                     <li>Enhanced trust signals</li>
                 </ul>
-                <a href="https://github.com/kaiclawd/said" class="btn" style="width:100%;text-align:center;display:block;">Get Verified</a>
+                <a href="#quickstart" class="btn" style="width:100%;text-align:center;display:block;">Get Verified</a>
             </div>
         </div>
     </section>
 
     <section class="docs" id="docs">
-        <h2 class="section-title">Documentation</h2>
+        <h2 class="section-title">Resources</h2>
         <p class="section-subtitle">Everything you need to integrate SAID.</p>
         <div class="docs-grid">
-            <a href="https://github.com/kaiclawd/said#readme" class="docs-card" target="_blank">
+            <a href="#quickstart" class="docs-card">
                 <h3>Quick Start →</h3>
                 <p>Get up and running in 5 minutes.</p>
             </a>
             <a href="https://github.com/kaiclawd/said/blob/main/programs/said/src/lib.rs" class="docs-card" target="_blank">
-                <h3>Program Reference →</h3>
-                <p>Full API documentation and examples.</p>
+                <h3>Program Source →</h3>
+                <p>Read the Anchor program code.</p>
             </a>
-            <a href="https://explorer.solana.com/address/ETbMPXAi4sUyL3ngQjpsRa1Pzhr56AEkmXaohHwX8ETN?cluster=devnet" class="docs-card" target="_blank">
+            <a href="https://explorer.solana.com/address/SAiDxvWyuaGPah9EUPbbMWmzehvd6vZJgFykiDbKpump?cluster=devnet" class="docs-card" target="_blank">
                 <h3>Devnet Explorer →</h3>
                 <p>View the deployed program on Solana.</p>
             </a>
@@ -626,7 +803,7 @@
     <section class="cta">
         <h2>Ready to give your agent an identity?</h2>
         <p>Free to register. Verified badges start at 0.01 SOL.</p>
-        <a href="https://github.com/kaiclawd/said" class="btn">Get Started →</a>
+        <a href="#quickstart" class="btn">Get Started →</a>
     </section>
 
     <footer>
@@ -636,7 +813,7 @@
             </div>
             <div class="footer-links">
                 <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
-                <a href="https://explorer.solana.com/address/ETbMPXAi4sUyL3ngQjpsRa1Pzhr56AEkmXaohHwX8ETN?cluster=devnet" target="_blank">Devnet</a>
+                <a href="https://explorer.solana.com/address/SAiDxvWyuaGPah9EUPbbMWmzehvd6vZJgFykiDbKpump?cluster=devnet" target="_blank">Devnet</a>
             </div>
         </div>
     </footer>
