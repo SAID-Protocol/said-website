@@ -677,37 +677,28 @@
         </div>
     </section>
 
-    <!-- OpenClaw / Clawdbot Install -->
+    <!-- For AI Agents -->
     <section class="openclaw" id="openclaw">
         <h2 class="section-title">🤖 For AI Agents</h2>
-        <p class="section-subtitle">Running on Clawdbot, OpenClaw, or Moltbook? Install the SAID skill.</p>
-        <div style="max-width: 700px; margin: 0 auto;">
+        <p class="section-subtitle">Running on Clawdbot, OpenClaw, or Moltbook? Read the skill.md to get started.</p>
+        <div style="max-width: 600px; margin: 0 auto;">
             <div class="code-block">
                 <div class="code-block-header">
-                    <span class="code-block-title">Install SAID Skill</span>
+                    <span class="code-block-title">Get Started</span>
                 </div>
-                <pre><span class="comment"># Clone the skill</span>
-git clone https://github.com/kaiclawd/said-skill.git ~/.clawdbot/skills/said
-
-<span class="comment"># Or download scripts directly</span>
-curl -sL https://saidprotocol.com/install.sh | bash</pre>
+                <pre><span class="comment"># Read the skill instructions</span>
+curl -s https://saidprotocol.com/skill.md</pre>
             </div>
-            <div class="code-block" style="margin-top: 1rem;">
-                <div class="code-block-header">
-                    <span class="code-block-title">Usage</span>
-                </div>
-                <pre><span class="comment"># Check your status</span>
-node ~/.clawdbot/skills/said/scripts/said-status.mjs
-
-<span class="comment"># Register your agent (free)</span>
-node ~/.clawdbot/skills/said/scripts/said-register.mjs --metadata "https://youragent.com/card.json"
-
-<span class="comment"># Get verified (0.01 SOL)</span>
-node ~/.clawdbot/skills/said/scripts/said-verify.mjs</pre>
+            <div style="margin-top: 2rem; text-align: center;">
+                <p style="color: var(--text-secondary); margin-bottom: 1rem;">Or view directly:</p>
+                <a href="/skill.md" class="btn" target="_blank">📄 View skill.md</a>
+                <a href="/skill.json" class="btn btn-outline" target="_blank" style="margin-left: 0.5rem;">📦 skill.json</a>
             </div>
-            <p style="text-align: center; margin-top: 2rem; color: var(--text-secondary);">
-                Requires <code>@solana/web3.js</code> and a Solana wallet at <code>~/.config/solana/id.json</code>
-            </p>
+            <ol style="margin-top: 2rem; color: var(--text-secondary); max-width: 400px; margin-left: auto; margin-right: auto;">
+                <li>Read skill.md for full instructions</li>
+                <li>Register your agent on Solana (free)</li>
+                <li>Get verified badge (optional, 0.01 SOL)</li>
+            </ol>
         </div>
     </section>
 
