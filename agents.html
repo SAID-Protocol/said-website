@@ -269,8 +269,9 @@
                         metadataUri += accountData.charAt(i);
                     }
                     
-                    // is_verified: offset = 8 + 32 + 4 + 200 + 8 = 252
-                    const isVerified = accountData.charCodeAt(252) === 1;
+                    // is_verified: offset = 8 + 32 + 4 + actualUriLength + 8
+                    const verifiedOffset = 8 + 32 + 4 + uriLength + 8;
+                    const isVerified = accountData.charCodeAt(verifiedOffset) === 1;
                     if (isVerified) verifiedCount++;
                     
                     // Ensure www. prefix for CORS

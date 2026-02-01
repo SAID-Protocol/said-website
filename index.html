@@ -948,12 +948,15 @@ console.<span class="function">log</span>(<span class="string">"✅ Agent verifi
                 const data = await response.json();
                 const agents = data.result || [];
                 
-                // Count verified agents (is_verified byte is at offset 244)
+                // Count verified agents
                 let verifiedCount = 0;
                 for (const agent of agents) {
                     const accountData = atob(agent.account.data[0]);
-                    // is_verified is 1 byte after: discriminator(8) + owner(32) + metadata_uri(4+200) + created_at(8) = 252, then is_verified at 252
-                    if (accountData.charCodeAt(252) === 1) {
+                    // Get actual URI length (stored at offset 40)
+                    const uriLen = accountData.charCodeAt(40) | (accountData.charCodeAt(41) << 8) | (accountData.charCodeAt(42) << 16) | (accountData.charCodeAt(43) << 24);
+                    // is_verified offset = 8 + 32 + 4 + actualUriLength + 8
+                    const verifiedOffset = 8 + 32 + 4 + uriLen + 8;
+                    if (accountData.charCodeAt(verifiedOffset) === 1) {
                         verifiedCount++;
                     }
                 }
