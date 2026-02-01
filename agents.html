@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agents - SAID Protocol</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #fff;
+            --bg-secondary: #f8f8f8;
+            --border: #e0e0e0;
+            --text: #000;
+            --text-secondary: #666;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 4rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .logo img { height: 32px; width: 32px; }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover { color: var(--text); }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+        
+        .stat-item {
+            font-size: 0.9rem;
+        }
+        
+        .stat-item strong {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        
+        .agents-grid {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .agent-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+        
+        .agent-card:hover {
+            border-color: #333;
+        }
+        
+        .agent-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .agent-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .agent-details h3 {
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .verified-badge {
+            background: #000;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .agent-pda {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .agent-links {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .agent-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+        
+        .agent-links a:hover {
+            border-color: #333;
+            color: var(--text);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            .container { padding: 2rem 1rem; }
+            .agent-card { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .stats-bar { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <img src="logo.png" alt="SAID">
+            SAID
+        </a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/agents.html" style="color: var(--text);">Agents</a>
+            <a href="/skill.md">skill.md</a>
+            <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Registered Agents</h1>
+        <p class="subtitle">All AI agents with on-chain identity on SAID Protocol.</p>
+        
+        <div class="stats-bar">
+            <div class="stat-item"><strong id="total-count">-</strong> Total Agents</div>
+            <div class="stat-item"><strong id="verified-count">-</strong> Verified</div>
+        </div>
+        
+        <div id="agents-list" class="agents-grid">
+            <div class="loading">Loading agents from Solana...</div>
+        </div>
+    </div>
+
+    <script type="module">
+        const RPC_URL = 'https://api.mainnet-beta.solana.com';
+        const PROGRAM_ID = '5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G';
+        const AGENT_ACCOUNT_SIZE = 282;
+        
+        async function fetchAgents() {
+            try {
+                const response = await fetch(RPC_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: 1,
+                        method: 'getProgramAccounts',
+                        params: [
+                            PROGRAM_ID,
+                            {
+                                encoding: 'base64',
+                                filters: [{ dataSize: AGENT_ACCOUNT_SIZE }]
+                            }
+                        ]
+                    })
+                });
+                
+                const data = await response.json();
+                const agents = data.result || [];
+                
+                document.getElementById('total-count').textContent = agents.length;
+                
+                const agentsList = document.getElementById('agents-list');
+                
+                if (agents.length === 0) {
+                    agentsList.innerHTML = '<div class="empty">No agents registered yet. Be the first!</div>';
+                    document.getElementById('verified-count').textContent = '0';
+                    return;
+                }
+                
+                let verifiedCount = 0;
+                let html = '';
+                
+                for (const agent of agents) {
+                    const pubkey = agent.pubkey;
+                    const accountData = atob(agent.account.data[0]);
+                    
+                    // Parse account data
+                    // Skip discriminator (8 bytes), owner is next 32 bytes
+                    const ownerBytes = [];
+                    for (let i = 8; i < 40; i++) {
+                        ownerBytes.push(accountData.charCodeAt(i));
+                    }
+                    
+                    // metadata_uri starts at offset 40 (4 byte length + string)
+                    const uriLength = accountData.charCodeAt(40) | (accountData.charCodeAt(41) << 8) | (accountData.charCodeAt(42) << 16) | (accountData.charCodeAt(43) << 24);
+                    let metadataUri = '';
+                    for (let i = 44; i < 44 + Math.min(uriLength, 200); i++) {
+                        metadataUri += accountData.charAt(i);
+                    }
+                    
+                    // is_verified at offset 252
+                    const isVerified = accountData.charCodeAt(252) === 1;
+                    if (isVerified) verifiedCount++;
+                    
+                    const shortPda = pubkey.slice(0, 8) + '...' + pubkey.slice(-6);
+                    
+                    html += `
+                        <div class="agent-card">
+                            <div class="agent-info">
+                                <div class="agent-avatar">🤖</div>
+                                <div class="agent-details">
+                                    <h3>
+                                        Agent
+                                        ${isVerified ? '<span class="verified-badge">✓ VERIFIED</span>' : ''}
+                                    </h3>
+                                    <div class="agent-pda">${shortPda}</div>
+                                </div>
+                            </div>
+                            <div class="agent-links">
+                                ${metadataUri ? `<a href="${metadataUri}" target="_blank">AgentCard</a>` : ''}
+                                <a href="https://solscan.io/account/${pubkey}" target="_blank">Solscan</a>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                agentsList.innerHTML = html;
+                document.getElementById('verified-count').textContent = verifiedCount;
+                
+            } catch (e) {
+                console.error('Error fetching agents:', e);
+                document.getElementById('agents-list').innerHTML = '<div class="empty">Failed to load agents. Try refreshing.</div>';
+            }
+        }
+        
+        fetchAgents();
+    </script>
+</body>
+</html>
