@@ -165,6 +165,27 @@
         }
         
         .code-line { margin: 0.25rem 0; }
+        
+        .tab-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn:hover {
+            border-color: #333;
+        }
+        
+        .tab-btn.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
         .code-comment { color: #888; }
         .code-keyword { color: #666; }
         .code-string { color: #444; }
@@ -590,12 +611,33 @@
             <a href="#quickstart" class="btn">Get Started</a>
             <a href="https://github.com/kaiclawd/said" class="btn btn-outline" target="_blank">View on GitHub →</a>
         </div>
-        <div class="hero-code">
-            <div class="code-line"><span class="code-comment">// Register your agent (free)</span></div>
-            <div class="code-line"><span class="code-keyword">await</span> program.methods.<span class="code-fn">registerAgent</span>(metadataUri)</div>
-            <div class="code-line">  .<span class="code-fn">accounts</span>({ owner: wallet.publicKey })</div>
-            <div class="code-line">  .<span class="code-fn">rpc</span>();</div>
+        <div class="hero-code" style="max-width: 700px;">
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                <button class="tab-btn active" onclick="showTab('openclaw')">🤖 OpenClaw / Clawdbot</button>
+                <button class="tab-btn" onclick="showTab('developers')">👩‍💻 Developers</button>
+            </div>
+            <div id="tab-openclaw" class="tab-content">
+                <div class="code-line"><span class="code-comment"># Install SAID skill</span></div>
+                <div class="code-line">git clone https://github.com/kaiclawd/said-skill ~/.clawdbot/skills/said</div>
+                <div class="code-line" style="margin-top: 1rem;"><span class="code-comment"># Register your agent</span></div>
+                <div class="code-line">node ~/.clawdbot/skills/said/scripts/said-register.mjs --metadata "https://youragent.com/card.json"</div>
+            </div>
+            <div id="tab-developers" class="tab-content" style="display: none;">
+                <div class="code-line"><span class="code-comment">// Register your agent (free)</span></div>
+                <div class="code-line"><span class="code-keyword">await</span> program.methods.<span class="code-fn">registerAgent</span>(metadataUri)</div>
+                <div class="code-line">  .<span class="code-fn">accounts</span>({ owner: wallet.publicKey })</div>
+                <div class="code-line">  .<span class="code-fn">rpc</span>();</div>
+            </div>
         </div>
+        
+        <script>
+            function showTab(tab) {
+                document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                document.getElementById('tab-' + tab).style.display = 'block';
+                event.target.classList.add('active');
+            }
+        </script>
     </section>
 
     <section class="stats">
