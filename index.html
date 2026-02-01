@@ -671,11 +671,7 @@
             <div class="stat-value" id="verified-count">-</div>
             <div class="stat-label">Verified Agents</div>
         </div>
-        <div class="stat">
-            <div class="stat-value" id="treasury-balance">-</div>
-            <div class="stat-label">Treasury (SOL)</div>
-        </div>
-    </section>
+        </section>
 
     <!-- For AI Agents -->
     <section class="openclaw" id="openclaw">
@@ -964,27 +960,10 @@ console.<span class="function">log</span>(<span class="string">"✅ Agent verifi
                 document.getElementById('agent-count').textContent = agents.length;
                 document.getElementById('verified-count').textContent = verifiedCount;
                 
-                // Fetch treasury balance
-                const balanceResponse = await fetch(RPC_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        id: 2,
-                        method: 'getBalance',
-                        params: [TREASURY]
-                    })
-                });
-                
-                const balanceData = await balanceResponse.json();
-                const solBalance = (balanceData.result?.value || 0) / 1e9;
-                document.getElementById('treasury-balance').textContent = solBalance.toFixed(3);
-                
             } catch (e) {
                 console.error('Failed to fetch stats:', e);
                 document.getElementById('agent-count').textContent = '1';
                 document.getElementById('verified-count').textContent = '1';
-                document.getElementById('treasury-balance').textContent = '0.01';
             }
         }
         
