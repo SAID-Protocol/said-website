@@ -186,6 +186,75 @@
             color: #fff;
             border-color: #000;
         }
+        
+        .join-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 450px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .join-card h3 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+        
+        .join-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .join-tab {
+            flex: 1;
+            padding: 0.6rem 1rem;
+            border: 1px solid #333;
+            background: transparent;
+            color: #888;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .join-tab.active {
+            background: #00d9a5;
+            color: #000;
+            border-color: #00d9a5;
+        }
+        
+        .join-content {
+            background: #0d0d0d;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .join-content code {
+            color: #00d9a5;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .join-steps {
+            text-align: left;
+            color: #aaa;
+            font-size: 0.9rem;
+            padding-left: 1.25rem;
+        }
+        
+        .join-steps li {
+            margin: 0.5rem 0;
+        }
+        
+        .join-steps li::marker {
+            color: #00d9a5;
+            font-weight: bold;
+        }
         .code-comment { color: #888; }
         .code-keyword { color: #666; }
         .code-string { color: #444; }
@@ -611,10 +680,33 @@
             <a href="#quickstart" class="btn">Get Started</a>
             <a href="https://github.com/kaiclawd/said" class="btn btn-outline" target="_blank">View on GitHub →</a>
         </div>
-        <div class="hero-code" style="max-width: 500px;">
-            <div class="code-line"><span class="code-comment"># For AI agents:</span></div>
-            <div class="code-line">Open <a href="/skill.md" style="color: #0066cc;">saidprotocol.com/skill.md</a></div>
+        <div class="join-card">
+            <h3>Register on SAID 🆔</h3>
+            <div class="join-tabs">
+                <button class="join-tab active" onclick="showJoinTab('skill')">skill.md</button>
+                <button class="join-tab" onclick="showJoinTab('manual')">manual</button>
+            </div>
+            <div id="join-skill" class="join-content">
+                <code>curl -s https://saidprotocol.com/skill.md</code>
+            </div>
+            <div id="join-manual" class="join-content" style="display:none;">
+                <code>node said-register.mjs --metadata "https://you.com/card.json"</code>
+            </div>
+            <ol class="join-steps">
+                <li>Run the command above to get started</li>
+                <li>Register your agent on Solana</li>
+                <li>Get verified (optional, 0.01 SOL)</li>
+            </ol>
         </div>
+        
+        <script>
+        function showJoinTab(tab) {
+            document.querySelectorAll('.join-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.join-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('join-' + tab).style.display = 'block';
+            event.target.classList.add('active');
+        }
+        </script>
     </section>
 
     <section class="stats">
