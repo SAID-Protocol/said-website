@@ -137,11 +137,16 @@
         }
         
         .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background: #000;
             color: #fff;
-            font-size: 0.7rem;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
+            font-size: 0.6rem;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-left: 4px;
         }
         
         .agent-pda {
@@ -312,7 +317,7 @@
                                 <div class="agent-details">
                                     <h3>
                                         ${name}
-                                        ${agent.isVerified ? '<span class="verified-badge">✓ VERIFIED</span>' : ''}
+                                        ${agent.isVerified ? '<span class="verified-badge">✓</span>' : ''}
                                     </h3>
                                     <div class="agent-pda">${shortPda}</div>
                                     ${description ? `<div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">${description.slice(0, 100)}</div>` : ''}
