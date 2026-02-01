@@ -195,9 +195,9 @@
         
         /* Stats */
         .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 6rem;
             padding: 4rem;
             border-bottom: 1px solid var(--border);
         }
@@ -579,7 +579,7 @@
             .nav-links { display: none; }
             .hero { padding: 4rem 1.5rem; }
             .hero h1 { font-size: 2.5rem; }
-            .stats { grid-template-columns: 1fr; padding: 2rem 1.5rem; }
+            .stats { flex-direction: column; gap: 2rem; padding: 2rem 1.5rem; }
             .steps { grid-template-columns: 1fr; }
             .features-grid { grid-template-columns: 1fr; }
             .pricing-cards { grid-template-columns: 1fr; }
