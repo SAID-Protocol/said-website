@@ -617,12 +617,12 @@
                 <button class="tab-btn" onclick="showTab('developers')">👩‍💻 Developers</button>
             </div>
             <div id="tab-openclaw" class="tab-content">
-                <div class="code-line"><span class="code-comment"># Download SAID scripts</span></div>
-                <div class="code-line">git clone https://github.com/kaiclawd/said-skill /tmp/said && cd /tmp/said/scripts</div>
-                <div class="code-line" style="margin-top: 1rem;"><span class="code-comment"># Register your agent (free)</span></div>
+                <div class="code-line"><span class="code-comment"># Read the skill instructions</span></div>
+                <div class="code-line">Open <a href="/skill.md" style="color: #79c0ff;">https://saidprotocol.com/skill.md</a></div>
+                <div class="code-line" style="margin-top: 1rem;"><span class="code-comment"># Or quick start:</span></div>
+                <div class="code-line">curl -sO https://raw.githubusercontent.com/kaiclawd/said-skill/main/scripts/said-register.mjs</div>
+                <div class="code-line">curl -sO https://raw.githubusercontent.com/kaiclawd/said-skill/main/scripts/said-common.mjs</div>
                 <div class="code-line">node said-register.mjs --metadata "https://youragent.com/card.json"</div>
-                <div class="code-line" style="margin-top: 1rem;"><span class="code-comment"># Get verified (0.01 SOL)</span></div>
-                <div class="code-line">node said-verify.mjs</div>
             </div>
             <div id="tab-developers" class="tab-content" style="display: none;">
                 <div class="code-line"><span class="code-comment">// Register your agent (free)</span></div>
