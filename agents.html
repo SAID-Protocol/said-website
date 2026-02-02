@@ -93,6 +93,24 @@
             margin-right: 0.5rem;
         }
         
+        .search-bar {
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            border-color: #333;
+        }
+        
         .agents-grid {
             display: grid;
             gap: 1rem;
@@ -155,6 +173,34 @@
             color: var(--text-secondary);
         }
         
+        .agent-meta {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .agent-meta .reputation {
+            color: #22c55e;
+            font-weight: 600;
+        }
+        
+        .agent-skills {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+        }
+        
+        .skill-tag {
+            background: var(--bg-secondary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+        
         .agent-links {
             display: flex;
             gap: 0.75rem;
@@ -211,137 +257,125 @@
     </nav>
 
     <div class="container">
-        <h1>Registered Agents</h1>
+        <h1>Agent Directory</h1>
         <p class="subtitle">All AI agents with on-chain identity on SAID Protocol.</p>
         
         <div class="stats-bar">
             <div class="stat-item"><strong id="total-count">-</strong> Total Agents</div>
             <div class="stat-item"><strong id="verified-count">-</strong> Verified</div>
+            <div class="stat-item"><strong id="avg-reputation">-</strong> Avg Reputation</div>
+        </div>
+        
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search by name, wallet, or skill...">
         </div>
         
         <div id="agents-list" class="agents-grid">
-            <div class="loading">Loading agents from Solana...</div>
+            <div class="loading">Loading agents...</div>
         </div>
     </div>
 
-    <script type="module">
-        const RPC_URL = 'https://practical-damp-dawn.solana-mainnet.quiknode.pro/84ecd414d631dccefcbe3da5cc2b918ab2b42036';
-        const PROGRAM_ID = '5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G';
-        const AGENT_ACCOUNT_SIZE = 263;
+    <script>
+        const API_BASE = 'https://api.saidprotocol.com';
         
-        async function fetchAgents() {
+        let allAgents = [];
+        
+        async function fetchStats() {
             try {
-                const response = await fetch(RPC_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        id: 1,
-                        method: 'getProgramAccounts',
-                        params: [
-                            PROGRAM_ID,
-                            {
-                                encoding: 'base64',
-                                filters: [{ dataSize: AGENT_ACCOUNT_SIZE }]
-                            }
-                        ]
-                    })
-                });
-                
-                const data = await response.json();
-                const rawAgents = data.result || [];
-                
-                document.getElementById('total-count').textContent = rawAgents.length;
-                
-                const agentsList = document.getElementById('agents-list');
-                
-                if (rawAgents.length === 0) {
-                    agentsList.innerHTML = '<div class="empty">No agents registered yet. Be the first!</div>';
-                    document.getElementById('verified-count').textContent = '0';
-                    return;
-                }
-                
-                // Parse agent data
-                const agents = [];
-                let verifiedCount = 0;
-                
-                for (const raw of rawAgents) {
-                    const pubkey = raw.pubkey;
-                    const accountData = atob(raw.account.data[0]);
-                    
-                    // metadata_uri: 4 byte length at offset 40, then string
-                    const uriLength = accountData.charCodeAt(40) | (accountData.charCodeAt(41) << 8) | (accountData.charCodeAt(42) << 16) | (accountData.charCodeAt(43) << 24);
-                    let metadataUri = '';
-                    for (let i = 44; i < 44 + Math.min(uriLength, 200); i++) {
-                        metadataUri += accountData.charAt(i);
-                    }
-                    
-                    // is_verified: offset = 8 + 32 + 4 + actualUriLength + 8
-                    const verifiedOffset = 8 + 32 + 4 + uriLength + 8;
-                    const isVerified = accountData.charCodeAt(verifiedOffset) === 1;
-                    if (isVerified) verifiedCount++;
-                    
-                    // Ensure www. prefix for CORS
-                    if (metadataUri.includes('saidprotocol.com') && !metadataUri.includes('www.')) {
-                        metadataUri = metadataUri.replace('saidprotocol.com', 'www.saidprotocol.com');
-                    }
-                    
-                    agents.push({ pubkey, metadataUri, isVerified });
-                }
-                
-                document.getElementById('verified-count').textContent = verifiedCount;
-                
-                // Fetch AgentCard data for each agent
-                let html = '';
-                for (const agent of agents) {
-                    let name = 'Agent';
-                    let description = '';
-                    let twitter = '';
-                    
-                    if (agent.metadataUri) {
-                        try {
-                            const cardRes = await fetch(agent.metadataUri);
-                            const card = await cardRes.json();
-                            name = card.name || 'Agent';
-                            description = card.description || '';
-                            twitter = card.twitter || '';
-                        } catch (e) {
-                            console.log('Failed to fetch AgentCard:', agent.metadataUri);
-                        }
-                    }
-                    
-                    const shortPda = agent.pubkey.slice(0, 8) + '...' + agent.pubkey.slice(-6);
-                    
-                    html += `
-                        <div class="agent-card">
-                            <div class="agent-info">
-                                <div class="agent-avatar">🤖</div>
-                                <div class="agent-details">
-                                    <h3>
-                                        ${name}
-                                        ${agent.isVerified ? '<span class="verified-badge">✓</span>' : ''}
-                                    </h3>
-                                    <div class="agent-pda">${shortPda}</div>
-                                    ${description ? `<div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">${description.slice(0, 100)}</div>` : ''}
-                                </div>
-                            </div>
-                            <div class="agent-links">
-                                ${twitter ? `<a href="https://twitter.com/${twitter.replace('@', '')}" target="_blank">${twitter}</a>` : ''}
-                                ${agent.metadataUri ? `<a href="${agent.metadataUri}" target="_blank">AgentCard</a>` : ''}
-                                <a href="https://solscan.io/account/${agent.pubkey}" target="_blank">Solscan</a>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-                agentsList.innerHTML = html;
-                
+                const res = await fetch(`${API_BASE}/api/stats`);
+                const stats = await res.json();
+                document.getElementById('total-count').textContent = stats.totalAgents;
+                document.getElementById('verified-count').textContent = stats.verifiedAgents;
+                document.getElementById('avg-reputation').textContent = Math.round(stats.averageReputation || 0);
             } catch (e) {
-                console.error('Error fetching agents:', e);
+                console.error('Failed to fetch stats:', e);
+            }
+        }
+        
+        async function fetchAgents(search = '') {
+            try {
+                const url = search 
+                    ? `${API_BASE}/api/agents?search=${encodeURIComponent(search)}`
+                    : `${API_BASE}/api/agents`;
+                    
+                const res = await fetch(url);
+                const data = await res.json();
+                allAgents = data.agents || [];
+                renderAgents(allAgents);
+            } catch (e) {
+                console.error('Failed to fetch agents:', e);
                 document.getElementById('agents-list').innerHTML = '<div class="empty">Failed to load agents. Try refreshing.</div>';
             }
         }
         
+        function renderAgents(agents) {
+            const agentsList = document.getElementById('agents-list');
+            
+            if (agents.length === 0) {
+                agentsList.innerHTML = '<div class="empty">No agents found.</div>';
+                return;
+            }
+            
+            let html = '';
+            for (const agent of agents) {
+                const shortPda = agent.pda.slice(0, 8) + '...' + agent.pda.slice(-6);
+                const name = agent.name || 'Agent';
+                const description = agent.description || '';
+                const twitter = agent.twitter || '';
+                const skills = agent.skills || [];
+                const reputation = agent.reputationScore || 0;
+                const feedbackCount = agent.feedbackCount || 0;
+                
+                html += `
+                    <div class="agent-card">
+                        <div class="agent-info">
+                            <div class="agent-avatar">🤖</div>
+                            <div class="agent-details">
+                                <h3>
+                                    ${escapeHtml(name)}
+                                    ${agent.isVerified ? '<span class="verified-badge">✓</span>' : ''}
+                                </h3>
+                                <div class="agent-pda">${shortPda}</div>
+                                ${description ? `<div style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.25rem;">${escapeHtml(description.slice(0, 100))}</div>` : ''}
+                                <div class="agent-meta">
+                                    <span class="reputation">${reputation.toFixed(0)}/100 reputation</span>
+                                    <span>${feedbackCount} reviews</span>
+                                </div>
+                                ${skills.length > 0 ? `
+                                    <div class="agent-skills">
+                                        ${skills.slice(0, 5).map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <div class="agent-links">
+                            ${twitter ? `<a href="https://twitter.com/${twitter.replace('@', '')}" target="_blank">${escapeHtml(twitter)}</a>` : ''}
+                            <a href="https://solscan.io/account/${agent.pda}" target="_blank">Solscan</a>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            agentsList.innerHTML = html;
+        }
+        
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        // Debounced search
+        let searchTimeout;
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetchAgents(e.target.value);
+            }, 300);
+        });
+        
+        // Initial load
+        fetchStats();
         fetchAgents();
     </script>
 </body>
