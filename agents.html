@@ -17,6 +17,32 @@
             --text-secondary: #666;
         }
         
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --bg-secondary: #141414;
+            --border: #2a2a2a;
+            --text: #fff;
+            --text-secondary: #999;
+        }
+        
+        [data-theme="dark"] nav {
+            background: rgba(10,10,10,0.95);
+        }
+        
+        [data-theme="dark"] .verified-badge {
+            background: #fff;
+            color: #000;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg);
@@ -253,6 +279,7 @@
             <a href="/agents.html" style="color: var(--text);">Directory</a>
             <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
             <a href="/#quickstart">Quick Start</a>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">🌙</button>
         </div>
     </nav>
 
@@ -385,6 +412,27 @@
         // Initial load
         fetchStats();
         fetchAgents(initialSearch);
+        
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            document.querySelector('.theme-toggle').textContent = next === 'dark' ? '☀️' : '🌙';
+        }
+        
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = saved || (prefersDark ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.querySelector('.theme-toggle').textContent = '☀️';
+            }
+        })();
     </script>
 </body>
 </html>
