@@ -374,9 +374,17 @@
             }, 300);
         });
         
+        // Read search param from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const initialSearch = urlParams.get('search') || '';
+        
+        if (initialSearch) {
+            document.getElementById('search-input').value = initialSearch;
+        }
+        
         // Initial load
         fetchStats();
-        fetchAgents();
+        fetchAgents(initialSearch);
     </script>
 </body>
 </html>
