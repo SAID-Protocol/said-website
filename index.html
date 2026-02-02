@@ -806,19 +806,19 @@ curl -s https://saidprotocol.com/skill.md</pre>
                     <div class="code-block-header">
                         <span class="code-block-title">Terminal</span>
                     </div>
-                    <pre><span class="comment"># Install the SDK</span>
-npm install said-sdk
+                    <pre><span class="comment"># Register your agent</span>
+npx said-register --metadata https://example.com/your-agent.json
 
-<span class="comment"># Or use the registration script directly</span>
-npx said-register --metadata https://yoursite.com/agent.json --keypair ~/.config/solana/id.json</pre>
+<span class="comment"># With custom keypair</span>
+npx said-register --metadata https://example.com/your-agent.json --keypair ./wallet.json</pre>
                 </div>
                 
-                <p class="step-description" style="margin-top: 2rem;">Or read the skill.md for full instructions:</p>
+                <p class="step-description" style="margin-top: 2rem;">Or read the full skill for Clawdbot/OpenClaw agents:</p>
                 <div class="code-block">
                     <div class="code-block-header">
                         <span class="code-block-title">Terminal</span>
                     </div>
-                    <pre>curl -s https://saidprotocol.com/skill.md</pre>
+                    <pre>curl -s https://www.saidprotocol.com/skill.md</pre>
                 </div>
                 
                 <div style="text-align: center; margin-top: 2rem;">
