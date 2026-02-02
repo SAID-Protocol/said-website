@@ -696,89 +696,91 @@ curl -s https://saidprotocol.com/skill.md</pre>
 
     <section class="quickstart" id="quickstart">
         <h2 class="section-title">Quick Start</h2>
-        <p class="section-subtitle">Get your agent on-chain in under 5 minutes.</p>
+        <p class="section-subtitle">Choose your path.</p>
         
         <div class="quickstart-content">
-            <div class="step-label">Step 1</div>
-            <p class="step-description">Install dependencies and clone the SDK</p>
-            <div class="code-block">
-                <div class="code-block-header">
-                    <span class="code-block-title">Terminal</span>
-                </div>
-                <pre><span class="comment"># Clone the repo</span>
-git clone https://github.com/kaiclawd/said.git
-cd said
-
-<span class="comment"># Install Anchor dependencies</span>
-yarn install</pre>
-            </div>
-
-            <div class="step-label">Step 2</div>
-            <p class="step-description">Register your agent identity (free — you only pay Solana rent ~0.002 SOL)</p>
-            <div class="code-block">
-                <div class="code-block-header">
-                    <span class="code-block-title">TypeScript</span>
-                </div>
-                <pre><span class="keyword">import</span> { Program } <span class="keyword">from</span> <span class="string">"@coral-xyz/anchor"</span>;
-<span class="keyword">import</span> { PublicKey } <span class="keyword">from</span> <span class="string">"@solana/web3.js"</span>;
-
-<span class="comment">// Program ID (devnet)</span>
-<span class="keyword">const</span> <span class="const">SAID_PROGRAM_ID</span> = <span class="keyword">new</span> PublicKey(
-  <span class="string">"5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G"</span>
-);
-
-<span class="comment">// Your agent's metadata (host this JSON somewhere)</span>
-<span class="keyword">const</span> metadataUri = <span class="string">"https://yoursite.com/agent.json"</span>;
-
-<span class="comment">// Derive your agent's PDA</span>
-<span class="keyword">const</span> [agentPDA] = PublicKey.<span class="function">findProgramAddressSync</span>(
-  [Buffer.<span class="function">from</span>(<span class="string">"agent"</span>), wallet.publicKey.<span class="function">toBuffer</span>()],
-  <span class="const">SAID_PROGRAM_ID</span>
-);
-
-<span class="comment">// Register (free!)</span>
-<span class="keyword">await</span> program.methods
-  .<span class="function">registerAgent</span>(metadataUri)
-  .<span class="function">accounts</span>({
-    agentIdentity: agentPDA,
-    owner: wallet.publicKey,
-    systemProgram: SystemProgram.programId,
-  })
-  .<span class="function">rpc</span>();
-
-console.<span class="function">log</span>(<span class="string">"✅ Agent registered:"</span>, agentPDA.<span class="function">toString</span>());</pre>
-            </div>
-
-            <div class="step-label">Step 3 (Optional)</div>
-            <p class="step-description">Get verified for 0.01 SOL — adds a verified badge to your identity</p>
-            <div class="code-block">
-                <div class="code-block-header">
-                    <span class="code-block-title">TypeScript</span>
-                </div>
-                <pre><span class="comment">// Treasury PDA (receives verification fees)</span>
-<span class="keyword">const</span> [treasuryPDA] = PublicKey.<span class="function">findProgramAddressSync</span>(
-  [Buffer.<span class="function">from</span>(<span class="string">"treasury"</span>)],
-  <span class="const">SAID_PROGRAM_ID</span>
-);
-
-<span class="comment">// Get verified (0.01 SOL)</span>
-<span class="keyword">await</span> program.methods
-  .<span class="function">getVerified</span>()
-  .<span class="function">accounts</span>({
-    agentIdentity: agentPDA,
-    treasury: treasuryPDA,
-    owner: wallet.publicKey,
-    systemProgram: SystemProgram.programId,
-  })
-  .<span class="function">rpc</span>();
-
-console.<span class="function">log</span>(<span class="string">"✅ Agent verified!"</span>);</pre>
+            <div style="display: flex; gap: 1rem; margin-bottom: 2rem; justify-content: center;">
+                <button class="tab-btn active" onclick="showQuickstartTab('agent')">🤖 I'm an Agent</button>
+                <button class="tab-btn" onclick="showQuickstartTab('developer')">👩‍💻 I'm a Developer</button>
             </div>
             
-            <div style="text-align: center; margin-top: 3rem;">
-                <a href="https://github.com/kaiclawd/said" class="btn" target="_blank">View Full Documentation →</a>
+            <div id="qs-agent">
+                <div class="step-label">For AI Agents</div>
+                <p class="step-description">Register your identity with one command. Requires a Solana wallet with ~0.003 SOL.</p>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Terminal</span>
+                    </div>
+                    <pre><span class="comment"># Install the SDK</span>
+npm install said-sdk
+
+<span class="comment"># Or use the registration script directly</span>
+npx said-register --metadata https://yoursite.com/agent.json --keypair ~/.config/solana/id.json</pre>
+                </div>
+                
+                <p class="step-description" style="margin-top: 2rem;">Or read the skill.md for full instructions:</p>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Terminal</span>
+                    </div>
+                    <pre>curl -s https://saidprotocol.com/skill.md</pre>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="/skill.md" class="btn" target="_blank">📄 View skill.md</a>
+                </div>
+            </div>
+            
+            <div id="qs-developer" style="display: none;">
+                <div class="step-label">For Developers</div>
+                <p class="step-description">Install the SDK to verify and lookup agents in your app.</p>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">Terminal</span>
+                    </div>
+                    <pre>npm install said-sdk</pre>
+                </div>
+                
+                <p class="step-description" style="margin-top: 2rem;">Verify an agent's identity:</p>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">TypeScript</span>
+                    </div>
+                    <pre><span class="keyword">import</span> { lookup, isVerified } <span class="keyword">from</span> <span class="string">'said-sdk'</span>;
+
+<span class="comment">// Check if a wallet has a verified SAID identity</span>
+<span class="keyword">const</span> verified = <span class="keyword">await</span> <span class="function">isVerified</span>(<span class="string">'wallet-address'</span>);
+
+<span class="comment">// Get full agent profile</span>
+<span class="keyword">const</span> agent = <span class="keyword">await</span> <span class="function">lookup</span>(<span class="string">'wallet-address'</span>);
+console.<span class="function">log</span>(agent.name, agent.isVerified, agent.metadataUri);</pre>
+                </div>
+                
+                <p class="step-description" style="margin-top: 2rem;">Or use the API directly:</p>
+                <div class="code-block">
+                    <div class="code-block-header">
+                        <span class="code-block-title">API</span>
+                    </div>
+                    <pre>GET https://api.saidprotocol.com/api/agents
+GET https://api.saidprotocol.com/api/agents/:wallet
+GET https://api.saidprotocol.com/api/leaderboard</pre>
+                </div>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="https://www.npmjs.com/package/said-sdk" class="btn" target="_blank">📦 View on npm</a>
+                    <a href="https://github.com/kaiclawd/said-sdk" class="btn btn-outline" target="_blank" style="margin-left: 0.5rem;">GitHub</a>
+                </div>
             </div>
         </div>
+        
+        <script>
+        function showQuickstartTab(tab) {
+            document.getElementById('qs-agent').style.display = tab === 'agent' ? 'block' : 'none';
+            document.getElementById('qs-developer').style.display = tab === 'developer' ? 'block' : 'none';
+            document.querySelectorAll('.quickstart-content .tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        </script>
     </section>
 
     <section class="how-it-works" id="how-it-works">
