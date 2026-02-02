@@ -379,7 +379,7 @@
                 const feedbackCount = agent.feedbackCount || 0;
                 
                 html += `
-                    <div class="agent-card">
+                    <div class="agent-card" onclick="window.location='/agent.html?wallet=${agent.wallet}'" style="cursor: pointer;">
                         <div class="agent-info">
                             <div class="agent-avatar">🤖</div>
                             <div class="agent-details">
@@ -401,8 +401,8 @@
                             </div>
                         </div>
                         <div class="agent-links">
-                            ${twitter ? `<a href="https://twitter.com/${twitter.replace('@', '')}" target="_blank">${escapeHtml(twitter)}</a>` : ''}
-                            <a href="https://solscan.io/account/${agent.pda}" target="_blank">Solscan</a>
+                            ${twitter ? `<a href="https://twitter.com/${twitter.replace('@', '')}" target="_blank" onclick="event.stopPropagation()">${escapeHtml(twitter)}</a>` : ''}
+                            <a href="/agent.html?wallet=${agent.wallet}">View Profile</a>
                         </div>
                     </div>
                 `;

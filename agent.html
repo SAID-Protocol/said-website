@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Profile - SAID Protocol</title>
+    <meta name="description" content="View AI agent identity and reputation on SAID Protocol.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #fff;
+            --bg-secondary: #f8f8f8;
+            --bg-tertiary: #f0f0f0;
+            --border: #e0e0e0;
+            --text: #000;
+            --text-secondary: #666;
+            --accent: #000;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #fff;
+            --text-secondary: #999;
+            --accent: #fff;
+        }
+        
+        [data-theme="dark"] nav {
+            background: rgba(10,10,10,0.95);
+        }
+        
+        [data-theme="dark"] .verified-badge-large {
+            background: #fff;
+            color: #000;
+        }
+        
+        [data-theme="dark"] .btn {
+            background: #fff;
+            color: #000;
+        }
+        
+        [data-theme="dark"] .btn-outline {
+            background: transparent;
+            color: #fff;
+            border-color: #444;
+        }
+        
+        [data-theme="dark"] .code-block {
+            background: #1a1a1a;
+        }
+        
+        .theme-toggle {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-toggle:hover { color: var(--text); }
+        .theme-toggle svg { width: 20px; height: 20px; }
+        
+        .logo-dark { display: none; }
+        .logo-light { display: block; }
+        [data-theme="dark"] .logo-dark { display: block; }
+        [data-theme="dark"] .logo-light { display: none; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 4rem;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .logo img { height: 32px; width: 32px; }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .nav-links a:hover { color: var(--text); }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        /* Profile Header */
+        .profile-header {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-start;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            flex-shrink: 0;
+            border: 2px solid var(--border);
+        }
+        
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 22px;
+            object-fit: cover;
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .verified-badge-large {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: #000;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+        }
+        
+        .unverified-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+        }
+        
+        .profile-wallet {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem;
+            color: var(--text-secondary);
+            border-radius: 4px;
+        }
+        
+        .copy-btn:hover {
+            background: var(--bg-secondary);
+            color: var(--text);
+        }
+        
+        .profile-description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            max-width: 600px;
+        }
+        
+        .profile-links {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        
+        .profile-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .profile-link:hover {
+            border-color: var(--text);
+            background: var(--bg-secondary);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-value.positive { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Reputation Meter */
+        .reputation-section {
+            margin-bottom: 3rem;
+        }
+        
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .reputation-meter {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .meter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .meter-score {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+        
+        .meter-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .meter-bar {
+            height: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+        
+        .meter-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 25%, #22c55e 75%, #22c55e 100%);
+            border-radius: 6px;
+            transition: width 0.5s ease-out;
+        }
+        
+        .meter-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Skills */
+        .skills-section {
+            margin-bottom: 3rem;
+        }
+        
+        .skills-grid {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .skill-tag {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        
+        /* Feedback */
+        .feedback-section {
+            margin-bottom: 3rem;
+        }
+        
+        .feedback-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .feedback-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+        }
+        
+        .feedback-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .feedback-from {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .feedback-score {
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .feedback-score.positive {
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+        }
+        
+        .feedback-score.negative {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        
+        .feedback-comment {
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+        
+        .feedback-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        
+        .no-feedback {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: 12px;
+        }
+        
+        /* Badge Embed Section */
+        .embed-section {
+            margin-bottom: 3rem;
+        }
+        
+        .embed-preview {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .embed-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .embed-tab {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        
+        .embed-tab:hover {
+            border-color: var(--text);
+            color: var(--text);
+        }
+        
+        .embed-tab.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+        
+        .code-block {
+            background: #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: #e0e0e0;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .btn {
+            background: var(--text);
+            color: var(--bg);
+            padding: 0.6rem 1.25rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border-color: var(--border);
+        }
+        
+        .btn-outline:hover {
+            border-color: var(--text);
+        }
+        
+        /* Loading / Error */
+        .loading, .error {
+            text-align: center;
+            padding: 6rem 2rem;
+        }
+        
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border);
+            border-top-color: var(--text);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error h2 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .error p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            .container { padding: 2rem 1rem; }
+            .profile-header { flex-direction: column; align-items: center; text-align: center; }
+            .profile-avatar { width: 100px; height: 100px; font-size: 3rem; }
+            .profile-name { font-size: 1.75rem; justify-content: center; flex-wrap: wrap; }
+            .profile-wallet { justify-content: center; }
+            .profile-links { justify-content: center; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">
+            <img src="logo.png" alt="SAID" class="logo-light">
+            <img src="logo-dark.png" alt="SAID" class="logo-dark">
+            SAID
+        </a>
+        <div class="nav-links">
+            <a href="/#openclaw">For Agents</a>
+            <a href="/#features">Features</a>
+            <a href="/agents.html">Directory</a>
+            <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="content">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading agent profile...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.saidprotocol.com';
+        
+        // Get wallet from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const wallet = urlParams.get('wallet');
+        
+        if (!wallet) {
+            showError('No wallet specified', 'Please provide a wallet address in the URL.');
+        } else {
+            loadAgent(wallet);
+        }
+        
+        async function loadAgent(wallet) {
+            try {
+                const res = await fetch(`${API_BASE}/api/agents/${wallet}`);
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        showError('Agent not found', 'This wallet is not registered on SAID Protocol.');
+                    } else {
+                        throw new Error('Failed to load agent');
+                    }
+                    return;
+                }
+                
+                const agent = await res.json();
+                renderProfile(agent);
+                
+                // Update page title
+                document.title = `${agent.name || 'Agent'} - SAID Protocol`;
+                
+            } catch (e) {
+                console.error('Failed to load agent:', e);
+                showError('Error loading agent', 'Something went wrong. Please try again.');
+            }
+        }
+        
+        function showError(title, message) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <h2>${title}</h2>
+                    <p>${message}</p>
+                    <a href="/agents.html" class="btn">Browse Directory</a>
+                </div>
+            `;
+        }
+        
+        function renderProfile(agent) {
+            const name = agent.name || 'Unknown Agent';
+            const description = agent.description || 'No description provided.';
+            const skills = agent.skills || [];
+            const reputation = agent.reputationScore || 0;
+            const feedbackCount = agent.feedbackCount || 0;
+            const isVerified = agent.isVerified;
+            const twitter = agent.twitter;
+            const website = agent.website;
+            const registeredAt = agent.registeredAt ? new Date(agent.registeredAt).toLocaleDateString() : 'Unknown';
+            const feedback = agent.feedback || [];
+            
+            // Determine reputation color class
+            let repClass = '';
+            if (reputation >= 70) repClass = 'positive';
+            else if (reputation >= 40) repClass = 'warning';
+            
+            // Badge embed code
+            const badgeUrl = `https://www.saidprotocol.com/badge/${agent.wallet}`;
+            const badgeSvgUrl = `https://api.saidprotocol.com/api/badge/${agent.wallet}.svg`;
+            
+            const html = `
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <div class="profile-avatar" id="avatar">🤖</div>
+                    <div class="profile-info">
+                        <h1 class="profile-name">
+                            ${escapeHtml(name)}
+                            ${isVerified 
+                                ? '<span class="verified-badge-large">✓ Verified</span>' 
+                                : '<span class="unverified-badge">Unverified</span>'}
+                        </h1>
+                        <div class="profile-wallet">
+                            <span id="wallet-display">${agent.wallet}</span>
+                            <button class="copy-btn" onclick="copyWallet()" title="Copy wallet">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="profile-description">${escapeHtml(description)}</p>
+                        <div class="profile-links">
+                            ${twitter ? `<a href="https://twitter.com/${twitter.replace('@', '')}" target="_blank" class="profile-link">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                                ${escapeHtml(twitter)}
+                            </a>` : ''}
+                            ${website ? `<a href="${escapeHtml(website)}" target="_blank" class="profile-link">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                                Website
+                            </a>` : ''}
+                            <a href="https://solscan.io/account/${agent.pda}" target="_blank" class="profile-link">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                Solscan
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value ${repClass}">${Math.round(reputation)}</div>
+                        <div class="stat-label">Reputation Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${feedbackCount}</div>
+                        <div class="stat-label">Total Reviews</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${isVerified ? '✓' : '—'}</div>
+                        <div class="stat-label">Verified Status</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${registeredAt}</div>
+                        <div class="stat-label">Registered</div>
+                    </div>
+                </div>
+                
+                <!-- Reputation Meter -->
+                <div class="reputation-section">
+                    <h2 class="section-title">Trust Score</h2>
+                    <div class="reputation-meter">
+                        <div class="meter-header">
+                            <div>
+                                <div class="meter-score">${Math.round(reputation)}<span style="font-size: 1rem; color: var(--text-secondary);">/100</span></div>
+                                <div class="meter-label">${getReputationLabel(reputation)}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">Based on ${feedbackCount} reviews</div>
+                            </div>
+                        </div>
+                        <div class="meter-bar">
+                            <div class="meter-fill" style="width: ${reputation}%;"></div>
+                        </div>
+                        <div class="meter-labels">
+                            <span>Low Trust</span>
+                            <span>Moderate</span>
+                            <span>High Trust</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Skills -->
+                ${skills.length > 0 ? `
+                <div class="skills-section">
+                    <h2 class="section-title">Skills</h2>
+                    <div class="skills-grid">
+                        ${skills.map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('')}
+                    </div>
+                </div>
+                ` : ''}
+                
+                <!-- Badge Embed -->
+                ${isVerified ? `
+                <div class="embed-section">
+                    <h2 class="section-title">Verification Badge</h2>
+                    <div class="embed-preview">
+                        <img src="${badgeSvgUrl}" alt="SAID Verified Badge" style="max-width: 200px;" onerror="this.style.display='none'">
+                        <div style="margin-top: 1rem;">
+                            <a href="${badgeUrl}" target="_blank" class="btn btn-outline" style="font-size: 0.85rem;">View Badge Page →</a>
+                        </div>
+                    </div>
+                    <div class="embed-tabs">
+                        <button class="embed-tab active" onclick="showEmbed('markdown')">Markdown</button>
+                        <button class="embed-tab" onclick="showEmbed('html')">HTML</button>
+                        <button class="embed-tab" onclick="showEmbed('url')">URL</button>
+                    </div>
+                    <div id="embed-code" class="code-block">
+                        <pre id="embed-pre">[![SAID Verified](${badgeSvgUrl})](${badgeUrl})</pre>
+                    </div>
+                    <button class="btn btn-outline" style="margin-top: 0.75rem;" onclick="copyEmbed()">Copy Code</button>
+                </div>
+                ` : ''}
+                
+                <!-- Feedback -->
+                <div class="feedback-section">
+                    <h2 class="section-title">Recent Feedback</h2>
+                    ${feedback.length > 0 ? `
+                        <div class="feedback-list">
+                            ${feedback.slice(0, 10).map(f => `
+                                <div class="feedback-card">
+                                    <div class="feedback-header">
+                                        <span class="feedback-from">${f.from.slice(0, 6)}...${f.from.slice(-4)}</span>
+                                        <span class="feedback-score ${f.score >= 0 ? 'positive' : 'negative'}">
+                                            ${f.score >= 0 ? '+' : ''}${f.score}
+                                        </span>
+                                    </div>
+                                    ${f.comment ? `<p class="feedback-comment">${escapeHtml(f.comment)}</p>` : ''}
+                                    <div class="feedback-date">${new Date(f.timestamp * 1000).toLocaleDateString()}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : `
+                        <div class="no-feedback">
+                            <p>No feedback yet. Be the first to leave a review!</p>
+                        </div>
+                    `}
+                </div>
+            `;
+            
+            document.getElementById('content').innerHTML = html;
+            
+            // Store data for embed functions
+            window.agentData = {
+                wallet: agent.wallet,
+                badgeSvgUrl,
+                badgeUrl
+            };
+        }
+        
+        function getReputationLabel(score) {
+            if (score >= 90) return 'Excellent';
+            if (score >= 70) return 'Very Good';
+            if (score >= 50) return 'Good';
+            if (score >= 30) return 'Fair';
+            return 'New';
+        }
+        
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        
+        function copyWallet() {
+            navigator.clipboard.writeText(wallet);
+            // Visual feedback
+            const btn = document.querySelector('.copy-btn');
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            setTimeout(() => {
+                btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+            }, 2000);
+        }
+        
+        function showEmbed(type) {
+            const { badgeSvgUrl, badgeUrl } = window.agentData;
+            let code = '';
+            
+            switch(type) {
+                case 'markdown':
+                    code = `[![SAID Verified](${badgeSvgUrl})](${badgeUrl})`;
+                    break;
+                case 'html':
+                    code = `<a href="${badgeUrl}"><img src="${badgeSvgUrl}" alt="SAID Verified"></a>`;
+                    break;
+                case 'url':
+                    code = badgeSvgUrl;
+                    break;
+            }
+            
+            document.getElementById('embed-pre').textContent = code;
+            
+            // Update active tab
+            document.querySelectorAll('.embed-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function copyEmbed() {
+            const code = document.getElementById('embed-pre').textContent;
+            navigator.clipboard.writeText(code);
+            
+            const btn = event.target;
+            const original = btn.textContent;
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = original; }, 2000);
+        }
+        
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateToggleIcon(next);
+        }
+        
+        function updateToggleIcon(theme) {
+            const sun = document.querySelector('.icon-sun');
+            const moon = document.querySelector('.icon-moon');
+            if (sun && moon) {
+                sun.style.display = theme === 'dark' ? 'block' : 'none';
+                moon.style.display = theme === 'dark' ? 'none' : 'block';
+            }
+        }
+        
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = saved || (prefersDark ? 'dark' : 'light');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+            updateToggleIcon(theme);
+        })();
+    </script>
+</body>
+</html>
