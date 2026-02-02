@@ -225,31 +225,12 @@
     </div>
 
     <script type="module">
-        const RPC_URL = 'https://newest-restless-mansion.solana-mainnet.quiknode.pro/af7d979a4ef8558eb0da3166819eac8af0d3dd2b';
-        const PROGRAM_ID = '5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G';
-        const AGENT_ACCOUNT_SIZE = 263;
-        
         async function fetchAgents() {
             try {
-                const response = await fetch(RPC_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        jsonrpc: '2.0',
-                        id: 1,
-                        method: 'getProgramAccounts',
-                        params: [
-                            PROGRAM_ID,
-                            {
-                                encoding: 'base64',
-                                filters: [{ dataSize: AGENT_ACCOUNT_SIZE }]
-                            }
-                        ]
-                    })
-                });
-                
+                // Fetch pre-rendered agent list (updated periodically)
+                const response = await fetch('/agents/index.json');
                 const data = await response.json();
-                const agents = data.result || [];
+                const agents = data.agents || [];
                 
                 document.getElementById('total-count').textContent = agents.length;
                 
@@ -261,38 +242,12 @@
                     return;
                 }
                 
-                let verifiedCount = 0;
-                const agentCards = [];
-                
-                for (const agent of agents) {
-                    const pubkey = agent.pubkey;
-                    const accountData = atob(agent.account.data[0]);
-                    
-                    // metadata_uri: 4 byte length at offset 40, then string
-                    const uriLength = accountData.charCodeAt(40) | (accountData.charCodeAt(41) << 8) | (accountData.charCodeAt(42) << 16) | (accountData.charCodeAt(43) << 24);
-                    let metadataUri = '';
-                    for (let i = 44; i < 44 + Math.min(uriLength, 200); i++) {
-                        metadataUri += accountData.charAt(i);
-                    }
-                    
-                    // is_verified: offset = 8 + 32 + 4 + actualUriLength + 8
-                    const verifiedOffset = 8 + 32 + 4 + uriLength + 8;
-                    const isVerified = accountData.charCodeAt(verifiedOffset) === 1;
-                    if (isVerified) verifiedCount++;
-                    
-                    // Ensure www. prefix for CORS
-                    if (metadataUri.includes('saidprotocol.com') && !metadataUri.includes('www.')) {
-                        metadataUri = metadataUri.replace('saidprotocol.com', 'www.saidprotocol.com');
-                    }
-                    
-                    agentCards.push({ pubkey, metadataUri, isVerified });
-                }
-                
+                let verifiedCount = agents.filter(a => a.isVerified).length;
                 document.getElementById('verified-count').textContent = verifiedCount;
                 
                 // Fetch AgentCard data for each agent
                 let html = '';
-                for (const agent of agentCards) {
+                for (const agent of agents) {
                     let name = 'Agent';
                     let description = '';
                     let twitter = '';
