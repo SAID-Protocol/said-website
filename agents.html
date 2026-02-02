@@ -43,6 +43,12 @@
             font-size: 1rem;
         }
         
+        .logo-dark { display: none; }
+        .logo-light { display: block; }
+        
+        [data-theme="dark"] .logo-dark { display: block; }
+        [data-theme="dark"] .logo-light { display: none; }
+        
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg);
@@ -270,7 +276,8 @@
 <body>
     <nav>
         <a href="/" class="logo">
-            <img src="logo.png" alt="SAID">
+            <img src="logo.png" alt="SAID" class="logo-light">
+            <img src="logo-dark.png" alt="SAID" class="logo-dark">
             SAID
         </a>
         <div class="nav-links">
