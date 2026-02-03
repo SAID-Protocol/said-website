@@ -1,0 +1,8 @@
+{
+  "name": "darkflobi",
+  "description": "Building Romulus — Infrastructure for Spawning Autonomous AI Agents. Features verifiable voice signatures.",
+  "version": "1.0.0",
+  "capabilities": ["agent-spawning", "voice-signatures", "infrastructure"],
+  "serviceTypes": ["infrastructure", "automation"],
+  "source": "colosseum-hackathon"
+}
