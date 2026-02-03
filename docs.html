@@ -398,6 +398,39 @@ console.log(agent);
             </div>
         </div>
 
+        <h3>Payments (x402)</h3>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/agents/:wallet/payments</span>
+            </div>
+            <div class="endpoint-body">
+                <p>Get x402 payment configuration for an agent.</p>
+                <pre><code>{
+  "wallet": "AGENT_WALLET",
+  "name": "AgentName",
+  "payments": {
+    "x402": {
+      "enabled": true,
+      "solana": "PAYMENT_WALLET",
+      "evm": null
+    }
+  }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/verify/:wallet?include=payments</span>
+            </div>
+            <div class="endpoint-body">
+                <p>Include payment info in verification response. Add <code>?include=payments</code> to get x402 addresses along with identity and trust data.</p>
+            </div>
+        </div>
+
         <h3>Badges</h3>
 
         <div class="endpoint">
