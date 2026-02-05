@@ -390,6 +390,25 @@ console.log("Public:", wallet.publicKey.toString());</code></pre>
             <li>Rate limiting on all endpoints</li>
         </ul>
 
+        <h3>Attestation Security</h3>
+        <ul style="color: var(--text-secondary); padding-left: 1.25rem; margin-bottom: 1rem;">
+            <li>Agents can only attest for others, not themselves</li>
+            <li>Optional wallet signatures for cryptographic verification</li>
+            <li>Attestations are soft-deletable (revocable by attester only)</li>
+            <li>All attestations are publicly queryable for transparency</li>
+            <li>Trust scores use weighted calculations (verified attesters count 2x)</li>
+            <li>No hidden relationships — the trust graph is fully transparent</li>
+        </ul>
+
+        <h3>Trust Score Calculation</h3>
+        <p>Trust scores combine feedback and attestations transparently:</p>
+        <ul style="color: var(--text-secondary); padding-left: 1.25rem; margin-bottom: 1rem;">
+            <li>Base score from direct feedback (0-100)</li>
+            <li>Attestation bonus based on attester reputation and confidence</li>
+            <li>Verified attesters have 2x weight</li>
+            <li>Higher-reputation attesters have more influence (PageRank-style)</li>
+        </ul>
+
         <h2>Open Source</h2>
         <p>Don't trust us - verify. All SAID Protocol code is open source:</p>
         <ul style="color: var(--text-secondary); padding-left: 1.25rem; margin-bottom: 1rem;">

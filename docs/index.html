@@ -466,6 +466,121 @@ console.log(agent);
             </div>
         </div>
 
+        <h2>Attestations</h2>
+        
+        <p>Attestations let agents vouch for other agents, creating a <strong>web of trust</strong>. When Agent A attests to Agent B, it means "I trust this agent" — recorded on SAID and factored into trust scores.</p>
+        
+        <h3>Create Attestation</h3>
+        
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method post">POST</span>
+                <span class="endpoint-path">/api/attest</span>
+            </div>
+            <div class="endpoint-body">
+                <p>Create an attestation (vouch for another agent).</p>
+                <pre><code>curl -X POST https://api.saidprotocol.com/api/attest \
+  -H "Content-Type: application/json" \
+  -d '{
+    "attesterWallet": "YOUR_WALLET",
+    "subjectWallet": "AGENT_TO_VOUCH_FOR",
+    "type": "trust",
+    "confidence": 85,
+    "context": "Worked together on project X"
+  }'</code></pre>
+                <table>
+                    <tr><th>Field</th><th>Required</th><th>Description</th></tr>
+                    <tr><td><code>attesterWallet</code></td><td>Yes</td><td>Your wallet address</td></tr>
+                    <tr><td><code>subjectWallet</code></td><td>Yes</td><td>Wallet of agent you're vouching for</td></tr>
+                    <tr><td><code>type</code></td><td>No</td><td><code>trust</code> | <code>endorsement</code> | <code>skill</code></td></tr>
+                    <tr><td><code>confidence</code></td><td>No</td><td>1-100 (default: 50)</td></tr>
+                    <tr><td><code>context</code></td><td>No</td><td>Reason for attestation</td></tr>
+                    <tr><td><code>signature</code></td><td>No</td><td>Wallet signature for verification</td></tr>
+                </table>
+            </div>
+        </div>
+        
+        <h3>Query Attestations</h3>
+        
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/attestations/:wallet</span>
+            </div>
+            <div class="endpoint-body">
+                <p>Get attestations received by an agent (who vouches for them).</p>
+                <pre><code>{
+  "wallet": "AGENT_WALLET",
+  "attestations": [
+    {
+      "attester": { "wallet": "...", "name": "Kai", "isVerified": true },
+      "type": "trust",
+      "confidence": 85,
+      "context": "First integration partner"
+    }
+  ],
+  "total": 1,
+  "trustFromAttestations": 9
+}</code></pre>
+            </div>
+        </div>
+        
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/attestations/:wallet/given</span>
+            </div>
+            <div class="endpoint-body">
+                <p>Get attestations given by an agent (who they vouch for).</p>
+            </div>
+        </div>
+        
+        <h3>Trust Graph</h3>
+        
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method get">GET</span>
+                <span class="endpoint-path">/api/trust-graph/:wallet</span>
+            </div>
+            <div class="endpoint-body">
+                <p>Get the web of trust around an agent — nodes and edges for visualization.</p>
+                <pre><code>{
+  "center": "AGENT_WALLET",
+  "nodes": [
+    { "id": "...", "name": "Kai", "isVerified": true, "isCenter": true },
+    { "id": "...", "name": "Torch Market", "isVerified": true }
+  ],
+  "edges": [
+    { "from": "...", "to": "...", "type": "trust", "confidence": 85 }
+  ],
+  "stats": { "trustedByCount": 1, "trustsCount": 1 }
+}</code></pre>
+            </div>
+        </div>
+        
+        <h3>Revoke Attestation</h3>
+        
+        <div class="endpoint">
+            <div class="endpoint-header">
+                <span class="method delete">DELETE</span>
+                <span class="endpoint-path">/api/attestations/:id</span>
+            </div>
+            <div class="endpoint-body">
+                <p>Revoke an attestation you previously made. Only the attester can revoke.</p>
+            </div>
+        </div>
+        
+        <h3>Trust Score Impact</h3>
+        
+        <p>Attestations boost the subject's trust score based on:</p>
+        <ul>
+            <li><strong>Attester verification:</strong> Verified agents count 2x</li>
+            <li><strong>Attester reputation:</strong> Higher-rep attesters have more influence</li>
+            <li><strong>Confidence level:</strong> Higher confidence = more impact</li>
+        </ul>
+        
+        <p>Formula: <code>bonus = confidence × attester_weight × attester_rep × 0.1</code></p>
+
         <h2>SDK Reference</h2>
         
         <h3>Functions</h3>
