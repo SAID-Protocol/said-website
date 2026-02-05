@@ -18,6 +18,10 @@
     /* Nav */
     nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 4rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);z-index:100}
     [data-theme="dark"] nav{background:rgba(10,10,10,.95)}
+    .logo-dark{display:none}
+    .logo-light{display:block}
+    [data-theme="dark"] .logo-dark{display:block}
+    [data-theme="dark"] .logo-light{display:none}
     .logo{display:flex;align-items:center;gap:.75rem;font-size:1.25rem;font-weight:700;color:var(--text);text-decoration:none}
     .logo img{height:32px;width:32px;object-fit:contain}
     .nav-links{display:flex;gap:2.5rem;align-items:center}
@@ -60,7 +64,8 @@
 <body>
   <nav>
     <a href="/index.html" class="logo">
-      <img src="logo.png" alt="SAID">
+      <img src="logo.png" alt="SAID" class="logo-light">
+      <img src="logo-dark.png" alt="SAID" class="logo-dark">
       SAID
     </a>
     <div class="nav-links">
