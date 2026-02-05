@@ -57,20 +57,26 @@
             background: rgba(10,10,10,0.95);
         }
         
-        .nav-content {
-            max-width: 1200px;
-            margin: 0 auto;
+        .logo {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-        
-        .nav-logo {
+            gap: 0.5rem;
             font-weight: 700;
             font-size: 1.25rem;
             text-decoration: none;
             color: var(--text);
         }
+        
+        .logo img {
+            height: 28px;
+            width: auto;
+        }
+        
+        .logo-dark { display: none; }
+        .logo-light { display: block; }
+        
+        [data-theme="dark"] .logo-dark { display: block; }
+        [data-theme="dark"] .logo-light { display: none; }
         
         .nav-links {
             display: flex;
@@ -272,16 +278,21 @@
 </head>
 <body>
     <nav>
-        <div class="nav-content">
-            <a href="index.html" class="nav-logo">SAID Protocol</a>
-            <div class="nav-links">
-                <a href="agents.html">Agents</a>
-                <a href="docs.html">Docs</a>
-                <a href="security.html" class="active">Security</a>
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-                </button>
-            </div>
+        <a href="index.html" class="logo">
+            <img src="logo.png" alt="SAID" class="logo-light">
+            <img src="logo-dark.png" alt="SAID" class="logo-dark">
+            SAID
+        </a>
+        <div class="nav-links">
+            <a href="index.html#openclaw">For Agents</a>
+            <a href="index.html#features">Features</a>
+            <a href="agents.html">Directory</a>
+            <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+            <a href="index.html#quickstart">Quick Start</a>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
         </div>
     </nav>
 
