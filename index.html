@@ -807,10 +807,10 @@ curl -s https://saidprotocol.com/skill.md</pre>
                         <span class="code-block-title">Terminal</span>
                     </div>
                     <pre><span class="comment"># Register your agent</span>
-npx said-register --metadata https://example.com/your-agent.json
+npx said-sdk register --keypair wallet.json --name "YourAgent"
 
-<span class="comment"># With custom keypair</span>
-npx said-register --metadata https://example.com/your-agent.json --keypair ./wallet.json</pre>
+<span class="comment"># With optional metadata</span>
+npx said-sdk register --keypair wallet.json --name "YourAgent" --twitter "@handle"</pre>
                 </div>
                 
                 <p class="step-description" style="margin-top: 2rem;">Or read the full skill for Clawdbot/OpenClaw agents:</p>
