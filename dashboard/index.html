@@ -3,22 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SAID Protocol - Dashboard</title>
+  <title>SAID Protocol Dashboard</title>
+  <meta name="description" content="Live agent registration stats for SAID Protocol (Solana)." />
   <link rel="icon" type="image/png" href="favicon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    html{scroll-behavior:smooth}
-
     :root{--bg:#fff;--bg-secondary:#f8f8f8;--bg-tertiary:#f0f0f0;--border:#e0e0e0;--text:#000;--text-secondary:#666;--accent:#000}
     [data-theme="dark"]{--bg:#0a0a0a;--bg-secondary:#141414;--bg-tertiary:#1a1a1a;--border:#2a2a2a;--text:#fff;--text-secondary:#999;--accent:#fff}
-
     body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
     .container{max-width:1200px;margin:0 auto;padding:0 2rem}
-
-    /* Nav + Footer copied from site */
+    /* Nav */
     nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 4rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);z-index:100}
     [data-theme="dark"] nav{background:rgba(10,10,10,.95)}
     .logo{display:flex;align-items:center;gap:.75rem;font-size:1.25rem;font-weight:700;color:var(--text);text-decoration:none}
@@ -26,27 +23,21 @@
     .nav-links{display:flex;gap:2.5rem;align-items:center}
     .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500}
     .nav-links a:hover{color:var(--text)}
-
-    footer{border-top:1px solid var(--border);padding:3rem 4rem;margin-top:3rem}
-    .footer-content{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto}
-    .footer-links{display:flex;gap:2rem}
-    .footer-links a{color:var(--text-secondary);text-decoration:none;font-size:.9rem}
-
-    /* Page heading */
+    .theme-toggle{background:none;border:none;padding:0.5rem;cursor:pointer;color:var(--text-secondary);transition:color 0.2s;display:flex;align-items:center}
+    .theme-toggle:hover{color:var(--text)}
+    .theme-toggle svg{width:20px;height:20px}
+    /* Page hero */
     .page-hero{padding:3rem 4rem 1.5rem;border-bottom:1px solid var(--border);text-align:center}
     .page-hero h1{font-size:2.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
     .page-hero p{color:var(--text-secondary)}
-
-    /* Cards/sections styled to site */
+    /* Stats/Sections */
     .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:2rem auto;max-width:1100px}
     .stat-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center}
     .stat-value{font-size:2.25rem;font-weight:800;margin-bottom:.25rem}
     .stat-label{color:var(--text-secondary);font-size:.9rem}
-
     .section{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1rem auto;max-width:1100px}
     .section h2{font-size:1.25rem;margin-bottom:1rem}
     .chart-container{height:300px;position:relative}
-
     .agent-list{list-style:none}
     .agent-item{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.5rem;background:var(--bg-secondary)}
     .agent-info{display:flex;align-items:center;gap:.75rem}
@@ -56,25 +47,32 @@
     .badge.verified{background:#e8fff1;color:#137a3a}
     .badge.unverified{background:#fff6e5;color:#8a5a00}
     .timestamp{color:var(--text-secondary);font-size:.8rem}
-
     .cta-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;margin:1rem auto;max-width:1100px}
     .cta-card code{background:var(--bg);border:1px solid var(--border);padding:.6rem 1rem;border-radius:8px;font-family:'JetBrains Mono',monospace;display:inline-block}
-
-    @media(max-width:900px){nav{padding:1rem 1.5rem}.nav-links{display:none}.page-hero{padding:2rem 1.5rem}.section,.cta-card{margin:1rem}}
+    /* Footer */
+    footer{border-top:1px solid var(--border);padding:3rem 4rem;margin-top:3rem}
+    .footer-content{display:flex;justify-content:space-between;align-items:center;max-width:1200px;margin:0 auto}
+    .footer-links{display:flex;gap:2rem}
+    .footer-links a{color:var(--text-secondary);text-decoration:none;font-size:.9rem}
+    @media(max-width:900px){nav{padding:1rem 1.5rem}.nav-links{display:none}.page-hero{padding:2rem 1.5rem}}
   </style>
 </head>
 <body>
   <nav>
-    <a href="/" class="logo">
-      <img src="logo.png" alt="SAID" class="logo-light">
-      <img src="logo-dark.png" alt="SAID" class="logo-dark" style="display:none">
+    <a href="/index.html" class="logo">
+      <img src="logo.png" alt="SAID">
       SAID
     </a>
     <div class="nav-links">
+      <a href="/index.html#openclaw">For Agents</a>
+      <a href="/index.html#features">Features</a>
       <a href="/agents.html">Directory</a>
-      <a href="/docs.html">Docs</a>
-      <a href="/index.html#quickstart">Quick Start</a>
       <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+      <a href="/index.html#quickstart">Quick Start</a>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
     </div>
   </nav>
 
@@ -98,13 +96,13 @@
 
     <section class="section">
       <h2>Recent Registrations</h2>
-      <ul class="agent-list" id="agent-list"><li class="loading" style="text-align:center;color:var(--text-secondary);padding:1rem">Loading agents...</li></ul>
+      <ul class="agent-list" id="agent-list"><li style="text-align:center;color:var(--text-secondary);padding:1rem">Loading agents...</li></ul>
     </section>
 
     <section class="cta-card">
       <h3>Register Your Agent</h3>
       <p style="color:var(--text-secondary)">First 40 registrations are sponsored (0.005 SOL). You sign; we cover rent.</p>
-      <code>npx said-register --keypair wallet.json --name "YourAgent"</code>
+      <code>npx said-sdk register --keypair wallet.json --name "YourAgent"</code>
     </section>
   </main>
 
@@ -120,6 +118,37 @@
   </footer>
 
   <script>
+    // Theme toggle (match index.html behavior)
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateToggleIcon(next);
+    }
+    
+    function updateToggleIcon(theme) {
+        const sun = document.querySelector('.icon-sun');
+        const moon = document.querySelector('.icon-moon');
+        if (sun && moon) {
+            sun.style.display = theme === 'dark' ? 'block' : 'none';
+            moon.style.display = theme === 'dark' ? 'none' : 'block';
+        }
+    }
+    
+    // Load saved theme or respect system preference
+    (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved || (prefersDark ? 'dark' : 'light');
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        updateToggleIcon(theme);
+    })();
+
+    // Dashboard data
     const API_BASE='https://api.saidprotocol.com';
     const FUNDED_TOTAL=40; let chart=null;
     async function loadData(){
@@ -131,7 +160,6 @@
         document.getElementById('unverified-agents').textContent=Math.max(total-verified,0);
         const fundedRemaining=Math.max(FUNDED_TOTAL-Math.min(total,FUNDED_TOTAL),0);
         document.getElementById('funded-remaining').textContent=fundedRemaining;
-
         const agentsRes=await fetch(`${API_BASE}/api/agents?limit=50`);
         const agents=(await agentsRes.json()).agents||[];
         agents.sort((a,b)=>new Date(b.registeredAt)-new Date(a.registeredAt));
@@ -146,12 +174,13 @@
               <span class="badge ${a.isVerified?'verified':'unverified'}">${a.isVerified?'✓ Verified':'Registered'}</span>
               <span class="timestamp">${formatTime(a.registeredAt)}</span>
             </div>
-          </li>`).join('') : '<li class="loading" style="text-align:center;color:var(--text-secondary);padding:1rem">No agents yet. Be the first!</li>';
+          </li>`).join('') : '<li style="text-align:center;color:var(--text-secondary);padding:1rem">No agents yet. Be the first!</li>';
         updateChart(agents);
       }catch(e){console.error('Failed to load data',e)}
     }
     function formatTime(d){const date=new Date(d),now=new Date();const ms=now-date, m=Math.floor(ms/6e4), h=Math.floor(ms/36e5), dd=Math.floor(ms/864e5); if(m<1)return 'just now'; if(m<60)return `${m}m ago`; if(h<24)return `${h}h ago`; return `${dd}d ago`;}
-    function updateChart(agents){const daily={}; agents.forEach(a=>{const k=new Date(a.registeredAt).toISOString().split('T')[0]; daily[k]=(daily[k]||0)+1}); const labels=[], cumulative=[]; let total=0; for(let i=6;i>=0;i--){const d=new Date(); d.setDate(d.getDate()-i); const key=d.toISOString().split('T')[0]; total += (daily[key]||0); labels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'})); cumulative.push(total)} cumulative[cumulative.length-1]=agents.length; const ctx=document.getElementById('registrationChart').getContext('2d'); if(chart)chart.destroy(); chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Total Agents',data:cumulative,borderColor:'#0f0f0f',backgroundColor:'rgba(0,0,0,0)',}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{color:'var(--text-secondary)'},grid:{color:'var(--border)'}},x:{ticks:{color:'var(--text-secondary)'},grid:{color:'transparent'}}}})}
+    function cssVar(name){return getComputedStyle(document.documentElement).getPropertyValue(name).trim()}
+    function updateChart(agents){const daily={}; agents.forEach(a=>{const k=new Date(a.registeredAt).toISOString().split('T')[0]; daily[k]=(daily[k]||0)+1}); const labels=[], cumulative=[]; let total=0; for(let i=6;i>=0;i--){const d=new Date(); d.setDate(d.getDate()-i); const key=d.toISOString().split('T')[0]; total += (daily[key]||0); labels.push(d.toLocaleDateString('en-US',{month:'short',day:'numeric'})); cumulative.push(total)} cumulative[cumulative.length-1]=agents.length; const ctx=document.getElementById('registrationChart').getContext('2d'); if(chart)chart.destroy(); chart=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Total Agents',data:cumulative,borderColor: cssVar('--text'),backgroundColor:'transparent'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{color: cssVar('--text-secondary')},grid:{color: cssVar('--border')}},x:{ticks:{color: cssVar('--text-secondary')},grid:{color:'transparent'}}}})}
     loadData(); setInterval(loadData,30000);
   </script>
 </body>
