@@ -23,7 +23,9 @@
     .nav-links{display:flex;gap:2.5rem;align-items:center}
     .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500}
     .nav-links a:hover{color:var(--text)}
-    .theme-toggle{background:none;border:1px solid var(--border);border-radius:8px;color:var(--text-secondary);padding:.4rem .6rem;cursor:pointer}
+    .theme-toggle{background:none;border:none;padding:0.5rem;cursor:pointer;color:var(--text-secondary);transition:color 0.2s;display:flex;align-items:center}
+    .theme-toggle:hover{color:var(--text)}
+    .theme-toggle svg{width:20px;height:20px}
     /* Page hero */
     .page-hero{padding:3rem 4rem 1.5rem;border-bottom:1px solid var(--border);text-align:center}
     .page-hero h1{font-size:2.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
@@ -67,7 +69,10 @@
       <a href="/agents.html">Directory</a>
       <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
       <a href="/index.html#quickstart">Quick Start</a>
-      <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌓</button>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+                <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+            </button>
     </div>
   </nav>
 
@@ -113,20 +118,34 @@
   </footer>
 
   <script>
-    // Theme toggle (match docs/security behavior)
-    (function(){
-      const html=document.documentElement;
-      const saved=localStorage.getItem('theme');
-      const prefersDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const initial=saved|| (prefersDark? 'dark':'light');
-      if(initial==='dark') html.setAttribute('data-theme','dark');
-      const btn=document.getElementById('themeToggle');
-      if(btn){btn.addEventListener('click',()=>{
-        const cur=html.getAttribute('data-theme')==='dark'?'dark':'light';
-        const next=cur==='dark'?'light':'dark';
-        if(next==='dark') html.setAttribute('data-theme','dark'); else html.removeAttribute('data-theme');
-        localStorage.setItem('theme',next);
-      });}
+    // Theme toggle (match index.html behavior)
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        updateToggleIcon(next);
+    }
+    
+    function updateToggleIcon(theme) {
+        const sun = document.querySelector('.icon-sun');
+        const moon = document.querySelector('.icon-moon');
+        if (sun && moon) {
+            sun.style.display = theme === 'dark' ? 'block' : 'none';
+            moon.style.display = theme === 'dark' ? 'none' : 'block';
+        }
+    }
+    
+    // Load saved theme or respect system preference
+    (function() {
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = saved || (prefersDark ? 'dark' : 'light');
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        updateToggleIcon(theme);
     })();
 
     // Dashboard data
