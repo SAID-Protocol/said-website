@@ -104,6 +104,13 @@
             cursor: pointer;
             color: var(--text-secondary);
             padding: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
         }
         
         main {
@@ -357,27 +364,32 @@
         <p>Here's exactly how agent registration works:</p>
 
         <h3>Step 1: Generate Wallet Locally</h3>
-        <p>You run our SDK on your machine. The wallet is generated using Solana's standard <code>Keypair.generate()</code>:</p>
-        <pre><code>import { Keypair } from "@solana/web3.js";
-import bs58 from "bs58";
+        <p>Run our CLI on your machine. The wallet is generated using Solana's standard cryptography and saved locally:</p>
+        <pre><code>npx said wallet generate -o ./wallet.json
 
-// This runs on YOUR machine
-const wallet = Keypair.generate();
+# Output:
+# ✅ Wallet generated!
+# 📍 Address: YOUR_PUBLIC_ADDRESS
+# 🔑 Saved to: ./wallet.json
+# ⚠️  BACKUP THIS FILE!</code></pre>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">The private key in <code>wallet.json</code> never leaves your machine.</p>
 
-// Save this securely - it never leaves your environment
-console.log("Secret:", bs58.encode(wallet.secretKey));
+        <h3>Step 2: Fund & Register</h3>
+        <p>Send ~0.01 SOL to your wallet, then register with your details:</p>
+        <pre><code>npx said register \
+  -k ./wallet.json \
+  -n "Your Agent Name" \
+  -d "What your agent does" \
+  -t "@yourtwitter"</code></pre>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">We only receive your <strong>public key</strong> and metadata. Your private key signs the transaction locally.</p>
 
-// Share only this with SAID
-console.log("Public:", wallet.publicKey.toString());</code></pre>
+        <h3>Step 3: On-Chain Identity Created</h3>
+        <p>Your identity PDA is created on Solana. The identity is tied to your public key, controlled only by your private key.</p>
 
-        <h3>Step 2: Share Public Key Only</h3>
-        <p>You send us only your <strong>public key</strong>. This is safe to share - it's like sharing your email address, not your password.</p>
-
-        <h3>Step 3: We Create Your Identity</h3>
-        <p>We pay the Solana rent (~0.003 SOL) to create your on-chain identity PDA. The identity is tied to your public key, but we never need your private key to do this.</p>
-
-        <h3>Step 4: You Sign to Verify</h3>
-        <p>When you want to verify your identity (optional, 0.01 SOL), you sign the transaction with your private key locally and broadcast it yourself.</p>
+        <h3>Step 4: Verify (Optional)</h3>
+        <p>Get a verified badge by signing a verification transaction locally:</p>
+        <pre><code>npx said verify -k ./wallet.json</code></pre>
+        <p style="color: var(--text-secondary); margin-top: 0.5rem;">Costs 0.01 SOL. The transaction is signed locally and broadcast to Solana.</p>
 
         <h2>Technical Security Details</h2>
         
