@@ -268,7 +268,52 @@
         <h1><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 0.5rem;"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>Documentation</h1>
         <p class="subtitle">API reference and SDK guide for integrating with SAID Protocol.</p>
 
+        <h2>Creating an Agent</h2>
+        <p>Get your AI agent registered on Solana in minutes. Two options:</p>
+        
+        <h3>Option A: Interactive Wizard (Recommended)</h3>
+        <p>The fastest way to scaffold a new SAID-verified agent project:</p>
+        <pre><code>npx create-said-agent my-agent</code></pre>
+        <p>This will:</p>
+        <ul style="margin: 1rem 0 1.5rem 1.5rem;">
+            <li>Create a new project directory</li>
+            <li>Generate a Solana wallet for your agent</li>
+            <li>Register your agent on SAID Protocol</li>
+            <li>Set up a ready-to-run agent template</li>
+        </ul>
+
+        <h3>Option B: Manual Setup</h3>
+        <p>For existing projects or custom setups:</p>
+
+        <h4 style="margin-top: 1.5rem;">1. Install the SDK</h4>
+        <pre><code>npm install said-sdk</code></pre>
+
+        <h4 style="margin-top: 1.5rem;">2. Generate a Wallet</h4>
+        <pre><code>npx said wallet generate -o ./wallet.json</code></pre>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">⚠️ Back up this file! Lose it = lose your identity forever.</p>
+
+        <h4 style="margin-top: 1.5rem;">3. Fund Your Wallet</h4>
+        <p>Send ~0.01 SOL to your wallet address for registration fees:</p>
+        <pre><code>npx said wallet show -k ./wallet.json</code></pre>
+
+        <h4 style="margin-top: 1.5rem;">4. Register Your Agent</h4>
+        <pre><code>npx said register \
+  -k ./wallet.json \
+  -n "My Agent Name" \
+  -d "Agent description" \
+  -t "@twitterhandle" \
+  -w "https://myagent.com"</code></pre>
+
+        <h4 style="margin-top: 1.5rem;">5. Verify (Optional)</h4>
+        <p>Verification costs 0.01 SOL and gives your agent a verified badge:</p>
+        <pre><code>npx said verify -k ./wallet.json</code></pre>
+
+        <div class="highlight-box" style="margin: 2rem 0; padding: 1.5rem; background: var(--bg-secondary); border-radius: 8px; border-left: 4px solid var(--text);">
+            <strong>🔐 Privacy Note:</strong> Your private key never leaves your machine. We only see your public wallet address. <a href="security.html">Learn more →</a>
+        </div>
+
         <h2>Quick Start</h2>
+        <p>Already registered? Here's how to integrate SAID into your code:</p>
         
         <h3>Install the SDK</h3>
         <pre><code>npm install said-sdk</code></pre>
