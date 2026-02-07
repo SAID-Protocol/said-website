@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Agent - SAID Protocol</title>
+    <meta name="description" content="Create a verified AI agent with on-chain identity in minutes. No CLI required.">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #fff;
+            --text-secondary: #999;
+            --accent: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10,10,10,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover { color: var(--text); }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 7rem 2rem 4rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .step-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            flex: 1;
+            height: 4px;
+            background: var(--border);
+            border-radius: 2px;
+            transition: background 0.3s;
+        }
+        
+        .step.active { background: var(--accent); }
+        .step.completed { background: var(--accent); }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        
+        .label-hint {
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .skill-tag {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .skill-tag:hover { border-color: var(--text-secondary); }
+        .skill-tag.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--text);
+            color: var(--bg);
+        }
+        
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-row .btn { flex: 1; }
+        
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .warning-box h4 {
+            color: var(--warning);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .key-display {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            word-break: break-all;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text);
+            cursor: pointer;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-top: 0.25rem;
+        }
+        
+        .success-box {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .success-box h3 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .hidden { display: none !important; }
+        
+        @media (max-width: 600px) {
+            .skills-grid { grid-template-columns: repeat(2, 1fr); }
+            .btn-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">SAID Protocol</a>
+        <div class="nav-links">
+            <a href="/agents.html">Agents</a>
+            <a href="/docs.html">Docs</a>
+            <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1>Create Your Agent</h1>
+        <p class="subtitle">Get on-chain identity in minutes. No CLI required.</p>
+        
+        <div class="step-indicator">
+            <div class="step active" id="step-1"></div>
+            <div class="step" id="step-2"></div>
+            <div class="step" id="step-3"></div>
+        </div>
+        
+        <!-- Step 1: Agent Details -->
+        <div class="card" id="form-step-1">
+            <h2 style="margin-bottom: 1.5rem;">Agent Details</h2>
+            
+            <div class="form-group">
+                <label>Agent Name <span class="label-hint">*required</span></label>
+                <input type="text" id="agent-name" placeholder="MyAwesomeAgent" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="agent-description" placeholder="An autonomous AI agent that helps with..."></textarea>
+                <p class="hint">What does your agent do? Keep it short.</p>
+            </div>
+            
+            <div class="form-group">
+                <label>Twitter Handle</label>
+                <input type="text" id="agent-twitter" placeholder="@youragent">
+            </div>
+            
+            <div class="form-group">
+                <label>Website</label>
+                <input type="url" id="agent-website" placeholder="https://youragent.com">
+            </div>
+            
+            <div class="form-group">
+                <label>Skills <span class="label-hint">(select all that apply)</span></label>
+                <div class="skills-grid">
+                    <div class="skill-tag" data-skill="trading">Trading</div>
+                    <div class="skill-tag" data-skill="research">Research</div>
+                    <div class="skill-tag" data-skill="coding">Coding</div>
+                    <div class="skill-tag" data-skill="defi">DeFi</div>
+                    <div class="skill-tag" data-skill="nft">NFTs</div>
+                    <div class="skill-tag" data-skill="data">Data</div>
+                    <div class="skill-tag" data-skill="social">Social</div>
+                    <div class="skill-tag" data-skill="gaming">Gaming</div>
+                    <div class="skill-tag" data-skill="infra">Infra</div>
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="goToStep(2)">Continue</button>
+        </div>
+        
+        <!-- Step 2: Wallet Generation -->
+        <div class="card hidden" id="form-step-2">
+            <h2 style="margin-bottom: 1.5rem;">Generate Wallet</h2>
+            
+            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                Your agent needs a Solana wallet. We'll generate one for you in your browser.
+            </p>
+            
+            <div class="warning-box">
+                <h4>⚠️ Important</h4>
+                <p style="font-size: 0.9rem;">
+                    Your private key will be shown <strong>once</strong>. We don't store it.
+                    If you lose it, you'll need to create a new agent.
+                </p>
+            </div>
+            
+            <div id="wallet-generated" class="hidden">
+                <div class="form-group">
+                    <label>Your Wallet Address</label>
+                    <div class="key-display" id="wallet-address">
+                        <button class="copy-btn" onclick="copyToClipboard('wallet-address')">Copy</button>
+                        <span id="wallet-address-text"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label style="color: var(--warning);">Private Key (SAVE THIS!)</label>
+                    <div class="key-display" id="private-key" style="border-color: var(--warning);">
+                        <button class="copy-btn" onclick="copyToClipboard('private-key')">Copy</button>
+                        <span id="private-key-text"></span>
+                    </div>
+                    <p class="hint" style="color: var(--warning);">
+                        Save this somewhere safe. We cannot recover it for you.
+                    </p>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="saved-key-checkbox">
+                    <label for="saved-key-checkbox" style="margin-bottom: 0;">
+                        I have saved my private key in a safe place
+                    </label>
+                </div>
+            </div>
+            
+            <div id="wallet-not-generated">
+                <button class="btn btn-primary" onclick="generateWallet()">Generate Wallet</button>
+            </div>
+            
+            <div class="btn-row hidden" id="step-2-buttons">
+                <button class="btn btn-secondary" onclick="goToStep(1)">Back</button>
+                <button class="btn btn-primary" id="continue-step-2" onclick="goToStep(3)" disabled>Continue</button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Register -->
+        <div class="card hidden" id="form-step-3">
+            <h2 style="margin-bottom: 1.5rem;">Register Your Agent</h2>
+            
+            <div id="registration-pending">
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                    Ready to register <strong id="confirm-name"></strong> on SAID Protocol.
+                </p>
+                
+                <div style="background: var(--bg); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span>Registration</span>
+                        <span style="color: var(--accent);">FREE</span>
+                    </div>
+                    <p class="hint">Off-chain pending status. Upgrade to on-chain anytime (~$0.50).</p>
+                </div>
+                
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="goToStep(2)">Back</button>
+                    <button class="btn btn-primary" onclick="registerAgent()">Register Agent</button>
+                </div>
+            </div>
+            
+            <div id="registration-success" class="hidden">
+                <div class="success-box">
+                    <h3>🎉 Agent Registered!</h3>
+                    <p style="margin-bottom: 1rem;">Your agent is now on SAID Protocol.</p>
+                    <a href="/agents.html" class="btn btn-primary" style="width: auto; display: inline-flex;">
+                        View Agent Directory
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script>
+        let selectedSkills = [];
+        let generatedWallet = null;
+        
+        // Skill selection
+        document.querySelectorAll('.skill-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                tag.classList.toggle('selected');
+                const skill = tag.dataset.skill;
+                if (tag.classList.contains('selected')) {
+                    selectedSkills.push(skill);
+                } else {
+                    selectedSkills = selectedSkills.filter(s => s !== skill);
+                }
+            });
+        });
+        
+        // Step navigation
+        function goToStep(step) {
+            // Validate step 1
+            if (step === 2) {
+                const name = document.getElementById('agent-name').value.trim();
+                if (!name) {
+                    alert('Please enter an agent name');
+                    return;
+                }
+            }
+            
+            // Hide all steps
+            document.querySelectorAll('[id^="form-step-"]').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            
+            // Show current step
+            document.getElementById(`form-step-${step}`).classList.remove('hidden');
+            
+            // Update indicators
+            for (let i = 1; i <= 3; i++) {
+                const stepEl = document.getElementById(`step-${i}`);
+                if (i < step) stepEl.classList.add('completed');
+                if (i === step) stepEl.classList.add('active');
+            }
+            
+            // Update confirmation name
+            if (step === 3) {
+                document.getElementById('confirm-name').textContent = document.getElementById('agent-name').value;
+            }
+        }
+        
+        // Generate wallet
+        async function generateWallet() {
+            try {
+                const keypair = solanaWeb3.Keypair.generate();
+                generatedWallet = {
+                    publicKey: keypair.publicKey.toBase58(),
+                    secretKey: Array.from(keypair.secretKey)
+                };
+                
+                document.getElementById('wallet-address-text').textContent = generatedWallet.publicKey;
+                document.getElementById('private-key-text').textContent = JSON.stringify(generatedWallet.secretKey);
+                
+                document.getElementById('wallet-not-generated').classList.add('hidden');
+                document.getElementById('wallet-generated').classList.remove('hidden');
+                document.getElementById('step-2-buttons').classList.remove('hidden');
+                
+                // Enable continue when checkbox is checked
+                document.getElementById('saved-key-checkbox').addEventListener('change', (e) => {
+                    document.getElementById('continue-step-2').disabled = !e.target.checked;
+                });
+            } catch (err) {
+                console.error('Failed to generate wallet:', err);
+                alert('Failed to generate wallet. Please try again.');
+            }
+        }
+        
+        // Copy to clipboard
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId + '-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.querySelector(`#${elementId} .copy-btn`);
+                btn.textContent = 'Copied!';
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            });
+        }
+        
+        // Register agent
+        async function registerAgent() {
+            const data = {
+                name: document.getElementById('agent-name').value.trim(),
+                description: document.getElementById('agent-description').value.trim(),
+                twitter: document.getElementById('agent-twitter').value.trim(),
+                website: document.getElementById('agent-website').value.trim(),
+                skills: selectedSkills,
+                wallet: generatedWallet.publicKey
+            };
+            
+            try {
+                const res = await fetch('https://api.saidprotocol.com/api/agents/pending', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!res.ok) throw new Error('Registration failed');
+                
+                document.getElementById('registration-pending').classList.add('hidden');
+                document.getElementById('registration-success').classList.remove('hidden');
+            } catch (err) {
+                console.error('Registration failed:', err);
+                alert('Registration failed. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>
