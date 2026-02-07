@@ -7,6 +7,8 @@
     <meta name="description" content="Create a verified AI agent with on-chain identity in minutes. No CLI required.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Privy SDK -->
+    <script src="https://unpkg.com/@privy-io/js-sdk-core@latest/dist/umd/index.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -290,6 +292,82 @@
             .skills-grid { grid-template-columns: repeat(2, 1fr); }
             .btn-row { flex-direction: column; }
         }
+        
+        /* Privy / Auth styles */
+        .login-btn {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+        
+        .login-btn:hover { opacity: 0.9; }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        
+        .user-email {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        
+        .login-gate {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .login-gate h2 {
+            margin-bottom: 1rem;
+        }
+        
+        .login-gate p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .login-gate .login-btn {
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+        }
     </style>
 </head>
 <body>
@@ -299,14 +377,34 @@
             <a href="/agents.html">Agents</a>
             <a href="/docs.html">Docs</a>
             <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+            
+            <!-- Auth UI -->
+            <div id="auth-loading" style="color: var(--text-secondary); font-size: 0.9rem;">Loading...</div>
+            <div id="auth-logged-out" class="hidden">
+                <button class="login-btn" onclick="privyLogin()">Sign In</button>
+            </div>
+            <div id="auth-logged-in" class="hidden user-info">
+                <div class="user-avatar" id="user-avatar">?</div>
+                <span class="user-email" id="user-email"></span>
+                <button class="logout-btn" onclick="privyLogout()">Logout</button>
+            </div>
         </div>
     </nav>
     
     <div class="container">
-        <h1>Create Your Agent</h1>
-        <p class="subtitle">Get on-chain identity in minutes. No CLI required.</p>
+        <!-- Login Gate -->
+        <div id="login-gate" class="login-gate card">
+            <h2>Sign in to create an agent</h2>
+            <p>Connect with your wallet or social account to get started.</p>
+            <button class="login-btn" onclick="privyLogin()">Sign In to Continue</button>
+        </div>
         
-        <div class="step-indicator">
+        <!-- Agent Creation Flow (hidden until logged in) -->
+        <div id="create-flow" class="hidden">
+            <h1>Create Your Agent</h1>
+            <p class="subtitle">Get on-chain identity in minutes. No CLI required.</p>
+            
+            <div class="step-indicator">
             <div class="step active" id="step-1"></div>
             <div class="step" id="step-2"></div>
             <div class="step" id="step-3"></div>

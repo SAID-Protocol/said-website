@@ -112,33 +112,60 @@
         
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
+            background-color: var(--bg);
             color: var(--text);
             line-height: 1.6;
             transition: background-color 0.3s ease, color 0.3s ease;
             position: relative;
+            min-height: 100vh;
         }
         
-        /* Grid texture background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+        /* Haze + vignette (dark mode) */
+        [data-theme="dark"] body {
             background-image: 
-                linear-gradient(rgba(128,128,128,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(128,128,128,0.03) 1px, transparent 1px);
-            background-size: 24px 24px;
+                radial-gradient(600px 600px at 92% 18%, rgba(255,255,255,0.12), transparent 60%),
+                radial-gradient(520px 520px at 8% 92%, rgba(255,255,255,0.08), transparent 65%),
+                radial-gradient(1200px 600px at 50% 50%, rgba(0,0,0,0), rgba(0,0,0,0.55));
+        }
+        
+        /* Haze + vignette (light mode) */
+        body {
+            background-image: 
+                radial-gradient(600px 600px at 92% 18%, rgba(0,0,0,0.04), transparent 60%),
+                radial-gradient(520px 520px at 8% 92%, rgba(0,0,0,0.03), transparent 65%);
+        }
+        
+        /* Grid layer */
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
             pointer-events: none;
             z-index: 0;
+            opacity: 0.4;
+            background-image: 
+                repeating-linear-gradient(to right, transparent 0 47px, rgba(128,128,128,0.08) 47px 48px),
+                repeating-linear-gradient(to bottom, transparent 0 47px, rgba(128,128,128,0.08) 47px 48px);
         }
         
         [data-theme="dark"] body::before {
+            opacity: 0.55;
             background-image: 
-                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+                repeating-linear-gradient(to right, transparent 0 47px, rgba(255,255,255,0.05) 47px 48px),
+                repeating-linear-gradient(to bottom, transparent 0 47px, rgba(255,255,255,0.05) 47px 48px);
+        }
+        
+        /* Grain layer */
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.08;
+            mix-blend-mode: overlay;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+            background-repeat: repeat;
         }
         
         body > * {
@@ -235,36 +262,6 @@
             padding: 8rem 4rem;
             text-align: center;
             border-bottom: 1px solid var(--border);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Subtle corner glows */
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -20%;
-            width: 60%;
-            height: 100%;
-            background: radial-gradient(ellipse, rgba(100,100,100,0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        
-        .hero::after {
-            content: '';
-            position: absolute;
-            bottom: -50%;
-            right: -20%;
-            width: 60%;
-            height: 100%;
-            background: radial-gradient(ellipse, rgba(100,100,100,0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        
-        [data-theme="dark"] .hero::before,
-        [data-theme="dark"] .hero::after {
-            background: radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 70%);
         }
         
         .hero-badge {
