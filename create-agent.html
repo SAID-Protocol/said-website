@@ -540,9 +540,95 @@
                 </div>
             </div>
         </div>
+        </div><!-- end create-flow -->
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script type="module">
+        // Privy SDK initialization
+        import { PrivyClient } from 'https://esm.sh/@privy-io/js-sdk-core@latest';
+        
+        const PRIVY_APP_ID = 'cmlbxd3qu00jqi80c4pibohzv';
+        let privy = null;
+        let currentUser = null;
+        
+        // Initialize Privy
+        async function initPrivy() {
+            try {
+                privy = new PrivyClient({
+                    appId: PRIVY_APP_ID,
+                });
+                
+                // Check if already authenticated
+                const user = await privy.getUser();
+                if (user) {
+                    handleLogin(user);
+                } else {
+                    showLoggedOut();
+                }
+            } catch (err) {
+                console.error('Privy init error:', err);
+                showLoggedOut();
+            }
+        }
+        
+        // Login with Privy
+        window.privyLogin = async function() {
+            try {
+                if (!privy) await initPrivy();
+                const user = await privy.login();
+                if (user) handleLogin(user);
+            } catch (err) {
+                console.error('Login error:', err);
+            }
+        };
+        
+        // Logout
+        window.privyLogout = async function() {
+            try {
+                await privy.logout();
+                currentUser = null;
+                showLoggedOut();
+            } catch (err) {
+                console.error('Logout error:', err);
+            }
+        };
+        
+        // Handle successful login
+        function handleLogin(user) {
+            currentUser = user;
+            window.privyUser = user; // Expose for registration
+            
+            // Update nav UI
+            document.getElementById('auth-loading').classList.add('hidden');
+            document.getElementById('auth-logged-out').classList.add('hidden');
+            document.getElementById('auth-logged-in').classList.remove('hidden');
+            
+            // Set user info
+            const email = user.email?.address || user.wallet?.address?.slice(0, 8) + '...' || 'User';
+            document.getElementById('user-email').textContent = email;
+            document.getElementById('user-avatar').textContent = email.charAt(0).toUpperCase();
+            
+            // Show create flow, hide login gate
+            document.getElementById('login-gate').classList.add('hidden');
+            document.getElementById('create-flow').classList.remove('hidden');
+        }
+        
+        // Show logged out state
+        function showLoggedOut() {
+            document.getElementById('auth-loading').classList.add('hidden');
+            document.getElementById('auth-logged-out').classList.remove('hidden');
+            document.getElementById('auth-logged-in').classList.add('hidden');
+            
+            // Show login gate, hide create flow
+            document.getElementById('login-gate').classList.remove('hidden');
+            document.getElementById('create-flow').classList.add('hidden');
+        }
+        
+        // Init on page load
+        initPrivy();
+    </script>
+    
     <script>
         let selectedSkills = [];
         let generatedWallet = null;
@@ -635,7 +721,10 @@
                 twitter: document.getElementById('agent-twitter').value.trim(),
                 website: document.getElementById('agent-website').value.trim(),
                 skills: selectedSkills,
-                wallet: generatedWallet.publicKey
+                wallet: generatedWallet.publicKey,
+                // Link to Privy user
+                privyUserId: window.privyUser?.id || null,
+                privyUserEmail: window.privyUser?.email?.address || null
             };
             
             try {
