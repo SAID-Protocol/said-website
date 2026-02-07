@@ -7,8 +7,6 @@
     <meta name="description" content="Create a verified AI agent with on-chain identity in minutes. No CLI required.">
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Privy SDK -->
-    <script src="https://unpkg.com/@privy-io/js-sdk-core@latest/dist/umd/index.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -41,16 +39,10 @@
             background: rgba(10,10,10,0.95);
             backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border);
-            padding: 0.75rem 2rem;
+            padding: 1rem 2rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
         }
         
         .logo {
@@ -58,38 +50,6 @@
             font-size: 1.25rem;
             color: var(--text);
             text-decoration: none;
-        }
-        
-        .nav-badge {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: 600;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .nav-center {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-        
-        .nav-center a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: color 0.2s;
-        }
-        
-        .nav-center a:hover { color: var(--text); }
-        
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
         
         .nav-links {
@@ -330,127 +290,23 @@
             .skills-grid { grid-template-columns: repeat(2, 1fr); }
             .btn-row { flex-direction: column; }
         }
-        
-        /* Privy / Auth styles */
-        .login-btn {
-            background: var(--accent);
-            color: #000;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: opacity 0.2s;
-        }
-        
-        .login-btn:hover { opacity: 0.9; }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-        }
-        
-        .user-email {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        
-        .logout-btn {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            padding: 0.4rem 0.75rem;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .logout-btn:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-        
-        .login-gate {
-            text-align: center;
-            padding: 4rem 2rem;
-        }
-        
-        .login-gate h2 {
-            margin-bottom: 1rem;
-        }
-        
-        .login-gate p {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-        
-        .login-gate .login-btn {
-            padding: 0.75rem 2rem;
-            font-size: 1rem;
-        }
     </style>
 </head>
 <body>
     <nav>
-        <!-- Left: Logo + Badge -->
-        <div class="nav-left">
-            <a href="/" class="logo">SAID</a>
-            <span class="nav-badge">Mainnet</span>
-        </div>
-        
-        <!-- Center: Navigation Links -->
-        <div class="nav-center">
+        <a href="/" class="logo">SAID Protocol</a>
+        <div class="nav-links">
             <a href="/agents.html">Agents</a>
             <a href="/docs.html">Docs</a>
             <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
         </div>
-        
-        <!-- Right: Auth -->
-        <div class="nav-right">
-            <div id="auth-loading" style="color: var(--text-secondary); font-size: 0.9rem;">Loading...</div>
-            <div id="auth-logged-out" class="hidden">
-                <button class="login-btn" onclick="privyLogin()">Log In</button>
-            </div>
-            <div id="auth-logged-in" class="hidden user-info">
-                <div class="user-avatar" id="user-avatar">?</div>
-                <span class="user-email" id="user-email"></span>
-                <button class="logout-btn" onclick="privyLogout()">Logout</button>
-            </div>
-        </div>
     </nav>
     
     <div class="container">
-        <!-- Login Gate -->
-        <div id="login-gate" class="login-gate card">
-            <h2>Sign in to create an agent</h2>
-            <p>Connect with your wallet or social account to get started.</p>
-            <button class="login-btn" onclick="privyLogin()">Sign In to Continue</button>
-        </div>
+        <h1>Create Your Agent</h1>
+        <p class="subtitle">Get on-chain identity in minutes. No CLI required.</p>
         
-        <!-- Agent Creation Flow (hidden until logged in) -->
-        <div id="create-flow" class="hidden">
-            <h1>Create Your Agent</h1>
-            <p class="subtitle">Get on-chain identity in minutes. No CLI required.</p>
-            
-            <div class="step-indicator">
+        <div class="step-indicator">
             <div class="step active" id="step-1"></div>
             <div class="step" id="step-2"></div>
             <div class="step" id="step-3"></div>
@@ -586,95 +442,9 @@
                 </div>
             </div>
         </div>
-        </div><!-- end create-flow -->
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
-    <script type="module">
-        // Privy SDK initialization
-        import { PrivyClient } from 'https://esm.sh/@privy-io/js-sdk-core@latest';
-        
-        const PRIVY_APP_ID = 'cmlbxd3qu00jqi80c4pibohzv';
-        let privy = null;
-        let currentUser = null;
-        
-        // Initialize Privy
-        async function initPrivy() {
-            try {
-                privy = new PrivyClient({
-                    appId: PRIVY_APP_ID,
-                });
-                
-                // Check if already authenticated
-                const user = await privy.getUser();
-                if (user) {
-                    handleLogin(user);
-                } else {
-                    showLoggedOut();
-                }
-            } catch (err) {
-                console.error('Privy init error:', err);
-                showLoggedOut();
-            }
-        }
-        
-        // Login with Privy
-        window.privyLogin = async function() {
-            try {
-                if (!privy) await initPrivy();
-                const user = await privy.login();
-                if (user) handleLogin(user);
-            } catch (err) {
-                console.error('Login error:', err);
-            }
-        };
-        
-        // Logout
-        window.privyLogout = async function() {
-            try {
-                await privy.logout();
-                currentUser = null;
-                showLoggedOut();
-            } catch (err) {
-                console.error('Logout error:', err);
-            }
-        };
-        
-        // Handle successful login
-        function handleLogin(user) {
-            currentUser = user;
-            window.privyUser = user; // Expose for registration
-            
-            // Update nav UI
-            document.getElementById('auth-loading').classList.add('hidden');
-            document.getElementById('auth-logged-out').classList.add('hidden');
-            document.getElementById('auth-logged-in').classList.remove('hidden');
-            
-            // Set user info
-            const email = user.email?.address || user.wallet?.address?.slice(0, 8) + '...' || 'User';
-            document.getElementById('user-email').textContent = email;
-            document.getElementById('user-avatar').textContent = email.charAt(0).toUpperCase();
-            
-            // Show create flow, hide login gate
-            document.getElementById('login-gate').classList.add('hidden');
-            document.getElementById('create-flow').classList.remove('hidden');
-        }
-        
-        // Show logged out state
-        function showLoggedOut() {
-            document.getElementById('auth-loading').classList.add('hidden');
-            document.getElementById('auth-logged-out').classList.remove('hidden');
-            document.getElementById('auth-logged-in').classList.add('hidden');
-            
-            // Show login gate, hide create flow
-            document.getElementById('login-gate').classList.remove('hidden');
-            document.getElementById('create-flow').classList.add('hidden');
-        }
-        
-        // Init on page load
-        initPrivy();
-    </script>
-    
     <script>
         let selectedSkills = [];
         let generatedWallet = null;
@@ -767,10 +537,7 @@
                 twitter: document.getElementById('agent-twitter').value.trim(),
                 website: document.getElementById('agent-website').value.trim(),
                 skills: selectedSkills,
-                wallet: generatedWallet.publicKey,
-                // Link to Privy user
-                privyUserId: window.privyUser?.id || null,
-                privyUserEmail: window.privyUser?.email?.address || null
+                wallet: generatedWallet.publicKey
             };
             
             try {
