@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - SAID Protocol</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    .container {
+      max-width: 450px;
+      width: 100%;
+      background: white;
+      border-radius: 16px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .logo h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .logo p {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+    }
+    #privy-container {
+      margin: 2rem 0;
+    }
+    .login-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+    .login-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .status {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    .status.success {
+      background: #e8fff1;
+      color: #137a3a;
+    }
+    .status.error {
+      background: #ffe8e8;
+      color: #c92a2a;
+    }
+    .hidden { display: none; }
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      color: #666;
+    }
+    .user-info {
+      background: #f8f8f8;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+    }
+    .user-info h3 {
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+    .user-info p {
+      color: #666;
+      font-size: 0.9rem;
+      margin: 0.25rem 0;
+    }
+    .logout-btn {
+      margin-top: 1rem;
+      width: 100%;
+      padding: 0.75rem;
+      background: #666;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <h1>SAID Protocol</h1>
+      <p>AI Agent Identity & Reputation</p>
+    </div>
+
+    <div id="loading" class="loading">
+      Initializing...
+    </div>
+
+    <div id="logged-out" class="hidden">
+      <button id="login-btn" class="login-btn">Connect Wallet or Email</button>
+      <div id="status" class="hidden status"></div>
+    </div>
+
+    <div id="logged-in" class="hidden">
+      <div class="user-info">
+        <h3>✅ Logged In</h3>
+        <p id="user-wallet"></p>
+        <p id="user-email"></p>
+      </div>
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import Privy, { LocalStorage } from 'https://esm.sh/@privy-io/js-sdk-core@0.58.5';
+
+    const APP_ID = 'cmlbxd3qu00jqi80c4pibohzv';
+    
+    const loadingEl = document.getElementById('loading');
+    const loggedOutEl = document.getElementById('logged-out');
+    const loggedInEl = document.getElementById('logged-in');
+    const statusEl = document.getElementById('status');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    let privy;
+    let currentUser = null;
+
+    function showStatus(message, type = 'error') {
+      statusEl.textContent = message;
+      statusEl.className = `status ${type}`;
+      statusEl.classList.remove('hidden');
+      setTimeout(() => statusEl.classList.add('hidden'), 5000);
+    }
+
+    function updateUI(user) {
+      if (user) {
+        currentUser = user;
+        
+        // Get wallet or email
+        const wallet = user.wallet?.address;
+        const email = user.email?.address;
+        
+        document.getElementById('user-wallet').textContent = wallet ? `Wallet: ${wallet}` : '';
+        document.getElementById('user-email').textContent = email ? `Email: ${email}` : '';
+        
+        loadingEl.classList.add('hidden');
+        loggedOutEl.classList.add('hidden');
+        loggedInEl.classList.remove('hidden');
+        
+        // Store session for other pages
+        localStorage.setItem('said-privy-user', JSON.stringify({
+          wallet,
+          email,
+          userId: user.id,
+        }));
+      } else {
+        currentUser = null;
+        loadingEl.classList.add('hidden');
+        loggedInEl.classList.add('hidden');
+        loggedOutEl.classList.remove('hidden');
+        localStorage.removeItem('said-privy-user');
+      }
+    }
+
+    async function init() {
+      try {
+        privy = new Privy({
+          appId: APP_ID,
+          storage: new LocalStorage(),
+        });
+
+        // Check if already logged in
+        const user = await privy.getUser();
+        updateUI(user);
+      } catch (err) {
+        console.error('Init error:', err);
+        showStatus('Failed to initialize. Please refresh.', 'error');
+        loggedOutEl.classList.remove('hidden');
+        loadingEl.classList.add('hidden');
+      }
+    }
+
+    loginBtn.addEventListener('click', async () => {
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Opening login...';
+      
+      try {
+        // Privy will open a modal with login options
+        await privy.login.email({ email: prompt('Enter your email:') });
+        
+        // After login, get the user
+        const user = await privy.getUser();
+        updateUI(user);
+        showStatus('Login successful!', 'success');
+      } catch (err) {
+        console.error('Login error:', err);
+        showStatus(err.message || 'Login failed', 'error');
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Connect Wallet or Email';
+      }
+    });
+
+    logoutBtn.addEventListener('click', async () => {
+      try {
+        await privy.logout();
+        updateUI(null);
+      } catch (err) {
+        console.error('Logout error:', err);
+        showStatus('Logout failed', 'error');
+      }
+    });
+
+    init();
+  </script>
+</body>
+</html>
