@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Agents - SAID Protocol</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #fff;
+            --text-secondary: #999;
+            --accent: #667eea;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10,10,10,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 7rem 2rem 4rem;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        
+        .btn:hover { opacity: 0.9; }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(102, 126, 234, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .agents-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-header h2 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            opacity: 0.5;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        
+        .agent-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .agent-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+        
+        .agent-card:hover {
+            border-color: var(--accent);
+        }
+        
+        .agent-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .agent-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+        
+        .agent-details h3 {
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .agent-wallet {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .agent-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(34, 197, 94, 0.1);
+            color: #22c55e;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        @media (max-width: 900px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/index.html" class="logo">SAID</a>
+        <div class="nav-right">
+            <div id="profile-nav-placeholder"></div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>My Agents</h1>
+                <p class="subtitle">Manage your agents registered on the ERC-8004 registry</p>
+            </div>
+            <a href="/create-agent.html" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Create Agent
+            </a>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect></svg>
+                </div>
+                <div class="stat-value" id="stat-total">0</div>
+                <div class="stat-label">Total Agents</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div class="stat-value" id="stat-feedback">0</div>
+                <div class="stat-label">Total Feedback</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </div>
+                <div class="stat-value" id="stat-score">0</div>
+                <div class="stat-label">Average Score</div>
+            </div>
+        </div>
+        
+        <!-- Agents List -->
+        <div class="agents-section">
+            <div class="section-header">
+                <h2>Your Agents</h2>
+                <p class="section-subtitle">All agents registered under your wallet address</p>
+            </div>
+            
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state">
+                <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <h3>You're connected. Now, create your first agent</h3>
+                <p>We don't see any agents registered for this wallet yet.<br>Register one to start tracking, managing, and sharing it.</p>
+                <a href="/create-agent.html" class="btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Create Agent
+                </a>
+            </div>
+            
+            <!-- Agent List (hidden by default) -->
+            <div id="agent-list" class="agent-list" style="display: none;">
+                <!-- Agents will be inserted here -->
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        const API_BASE = 'https://api.saidprotocol.com';
+        
+        // Get current user
+        const user = JSON.parse(localStorage.getItem('said-privy-user') || '{}');
+        
+        if (!user || (!user.email && !user.walletAddress)) {
+            window.location.href = '/index.html';
+        }
+        
+        // Fetch user's agents
+        async function loadAgents() {
+            if (!user.walletAddress) {
+                // No wallet = can't have agents yet
+                return;
+            }
+            
+            try {
+                // TODO: Replace with actual API endpoint
+                // const res = await fetch(`${API_BASE}/api/users/me/agents`, {
+                //     headers: { 'Authorization': `Bearer ${user.sessionToken}` }
+                // });
+                // const data = await res.json();
+                
+                // For now, showing empty state
+                const agents = [];
+                
+                if (agents.length === 0) {
+                    document.getElementById('empty-state').style.display = 'block';
+                    document.getElementById('agent-list').style.display = 'none';
+                } else {
+                    document.getElementById('empty-state').style.display = 'none';
+                    document.getElementById('agent-list').style.display = 'block';
+                    renderAgents(agents);
+                }
+                
+                updateStats(agents);
+            } catch (err) {
+                console.error('Failed to load agents:', err);
+            }
+        }
+        
+        function renderAgents(agents) {
+            const list = document.getElementById('agent-list');
+            list.innerHTML = agents.map(agent => `
+                <div class="agent-card">
+                    <div class="agent-info">
+                        <div class="agent-avatar">${agent.name[0]}</div>
+                        <div class="agent-details">
+                            <h3>${agent.name}</h3>
+                            <div class="agent-wallet">${agent.wallet.substring(0, 8)}...${agent.wallet.substring(agent.wallet.length - 8)}</div>
+                        </div>
+                    </div>
+                    ${agent.isVerified ? '<span class="agent-badge">✓ Verified</span>' : ''}
+                </div>
+            `).join('');
+        }
+        
+        function updateStats(agents) {
+            document.getElementById('stat-total').textContent = agents.length;
+            // TODO: Calculate from agent data
+            document.getElementById('stat-feedback').textContent = '0';
+            document.getElementById('stat-score').textContent = '0';
+        }
+        
+        loadAgents();
+    </script>
+    
+    <!-- Load profile dropdown -->
+    <script>
+        fetch('/profile-dropdown.html')
+            .then(r => r.text())
+            .then(html => {
+                document.getElementById('profile-nav-placeholder').innerHTML = html;
+                const user = JSON.parse(localStorage.getItem('said-privy-user') || '{}');
+                if (window.updateProfileDropdown) {
+                    window.updateProfileDropdown(user);
+                }
+            });
+    </script>
+    
+    <!-- Privy Auth -->
+    <script type="module" src="/privy-auth.js"></script>
+</body>
+</html>

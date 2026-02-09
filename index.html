@@ -876,15 +876,12 @@
             </button>
             
             <!-- Auth UI -->
-            <div id="auth-loading" style="display:none;"></div>
             <div id="auth-logged-out">
                 <button class="login-btn" onclick="privyLogin()">Log In</button>
             </div>
-            <div id="auth-logged-in" class="user-info" style="display:none;">
-                <div class="user-avatar" id="user-avatar">?</div>
-                <span class="user-email" id="user-email"></span>
-                <button class="logout-btn" onclick="privyLogout()">Logout</button>
-            </div>
+            
+            <!-- Profile Dropdown (loaded dynamically when logged in) -->
+            <div id="profile-nav-container"></div>
             
             <!-- Create Agent Button (shown when logged in) -->
             <a id="create-agent-btn" href="/create-agent.html" class="btn btn-primary" style="display:none; padding: 0.5rem 1rem; font-size: 0.9rem; margin-left: 0.5rem;">Create Agent</a>
