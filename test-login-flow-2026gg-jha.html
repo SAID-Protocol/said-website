@@ -170,7 +170,7 @@
       btn.textContent = 'Sending...';
 
       try {
-        const res = await fetch(`${API_BASE}/auth/login-email`, {
+        const res = await fetch(`${API_BASE}/auth/send-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })
@@ -207,7 +207,7 @@
       btn.textContent = 'Verifying...';
 
       try {
-        const res = await fetch(`${API_BASE}/auth/verify-email`, {
+        const res = await fetch(`${API_BASE}/auth/verify-otp`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email: currentEmail, code: otp })
