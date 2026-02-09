@@ -29,27 +29,23 @@ async function initPrivyAuth() {
 function updateNavUI() {
     const loggedOutEl = document.getElementById('auth-logged-out');
     const loggedInEl = document.getElementById('auth-logged-in');
-    const userEmailEl = document.getElementById('user-email');
     const userAvatarEl = document.getElementById('user-avatar');
-    const createAgentBtn = document.getElementById('create-agent-btn');
     
     if (currentUser) {
+        // Hide login, show profile avatar
         if (loggedOutEl) loggedOutEl.style.display = 'none';
-        if (loggedInEl) loggedInEl.style.display = 'flex';
+        if (loggedInEl) loggedInEl.style.display = 'block';
         
-        const displayText = currentUser.email || 
-                          (currentUser.walletAddress ? currentUser.walletAddress.substring(0, 8) + '...' : 'User');
-        
-        if (userEmailEl) userEmailEl.textContent = displayText;
+        // Update avatar with first letter of email or wallet
         if (userAvatarEl) {
-            userAvatarEl.textContent = currentUser.email ? currentUser.email[0].toUpperCase() : 'U';
+            const displayText = currentUser.email || 
+                              (currentUser.walletAddress ? currentUser.walletAddress : 'User');
+            userAvatarEl.textContent = displayText[0].toUpperCase();
         }
-        
-        if (createAgentBtn) createAgentBtn.style.display = 'inline-flex';
     } else {
+        // Show login, hide profile
         if (loggedOutEl) loggedOutEl.style.display = 'block';
         if (loggedInEl) loggedInEl.style.display = 'none';
-        if (createAgentBtn) createAgentBtn.style.display = 'none';
     }
 }
 
