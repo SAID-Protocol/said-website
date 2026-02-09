@@ -4,8 +4,8 @@
   "description": "SAID Protocol - Static Website",
   "main": "index.html",
   "scripts": {
-    "start": "serve . -p ${PORT:-3000} --single",
-    "dev": "serve . -p 3000 --single"
+    "start": "serve . -p ${PORT:-3000}",
+    "dev": "serve . -p 3000"
   },
   "repository": {
     "type": "git",
