@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Agents - SAID Protocol</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #fff;
+            --bg-secondary: #f8f8f8;
+            --bg-tertiary: #f0f0f0;
+            --border: #e0e0e0;
+            --text: #000;
+            --text-secondary: #666;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #fff;
+            --text-secondary: #999;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .agents-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .agent-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .agent-info {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .agent-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+        
+        .agent-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .agent-wallet {
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .agent-badge {
+            padding: 0.25rem 0.75rem;
+            background: #22c55e20;
+            color: #22c55e;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+        
+        .empty-state h3 {
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+        
+        .not-logged-in {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .not-logged-in p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">SAID</a>
+    </nav>
+    
+    <div class="container">
+        <!-- Not logged in state -->
+        <div id="not-logged-in" class="not-logged-in">
+            <p>Please log in to view your agents.</p>
+            <a href="/" class="btn">Go to Homepage</a>
+        </div>
+        
+        <!-- Logged in state -->
+        <div id="agents-content" style="display: none;">
+            <div class="page-header">
+                <h1>My Agents</h1>
+                <a href="/create-agent.html" class="btn">+ Create Agent</a>
+            </div>
+            
+            <div id="agents-list" class="agents-list">
+                <!-- Agents will be loaded here -->
+            </div>
+            
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <h3>No agents yet</h3>
+                <p>Register your first agent to get started.</p>
+                <a href="/create-agent.html" class="btn">Create Agent</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'https://api.saidprotocol.com';
+        
+        // Theme
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        
+        // Check login
+        const user = JSON.parse(localStorage.getItem('said-user') || 'null');
+        
+        if (user) {
+            document.getElementById('not-logged-in').style.display = 'none';
+            document.getElementById('agents-content').style.display = 'block';
+            
+            loadAgents();
+        }
+        
+        async function loadAgents() {
+            const email = user.email?.address || user.email;
+            const wallet = user.wallet?.address || user.walletAddress;
+            
+            // For now, show empty state
+            // TODO: Fetch agents from API based on user's wallet/email
+            document.getElementById('agents-list').innerHTML = '';
+            document.getElementById('empty-state').style.display = 'block';
+            
+            // Placeholder: In production, fetch from API
+            /*
+            try {
+                const res = await fetch(`${API_BASE}/api/users/${wallet}/agents`);
+                const agents = await res.json();
+                
+                if (agents.length === 0) {
+                    document.getElementById('empty-state').style.display = 'block';
+                } else {
+                    renderAgents(agents);
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('empty-state').style.display = 'block';
+            }
+            */
+        }
+        
+        function renderAgents(agents) {
+            const list = document.getElementById('agents-list');
+            list.innerHTML = agents.map(agent => `
+                <div class="agent-card">
+                    <div class="agent-info">
+                        <div class="agent-avatar">${agent.name[0]}</div>
+                        <div>
+                            <div class="agent-name">${agent.name}</div>
+                            <div class="agent-wallet">${agent.wallet.substring(0, 8)}...${agent.wallet.substring(agent.wallet.length - 8)}</div>
+                        </div>
+                    </div>
+                    ${agent.isVerified ? '<span class="agent-badge">✓ Verified</span>' : ''}
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

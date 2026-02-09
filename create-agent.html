@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Agent - SAID Protocol</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #fff;
+            --bg-secondary: #f8f8f8;
+            --bg-tertiary: #f0f0f0;
+            --border: #e0e0e0;
+            --text: #000;
+            --text-secondary: #666;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #fff;
+            --text-secondary: #999;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        
+        .options {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .option-card {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            text-decoration: none;
+            color: var(--text);
+        }
+        
+        .option-card:hover {
+            border-color: var(--text);
+        }
+        
+        .option-card h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .option-card p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        /* Form styles */
+        .form-section {
+            display: none;
+        }
+        
+        .form-section.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--text);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        
+        .back-link:hover {
+            color: var(--text);
+        }
+        
+        .success-message {
+            background: #22c55e20;
+            border: 1px solid #22c55e;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .success-message h3 {
+            color: #22c55e;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">SAID</a>
+    </nav>
+    
+    <div class="container">
+        <!-- Step 1: Choose option -->
+        <div id="step-choose" class="form-section active">
+            <h1>Get Started with SAID</h1>
+            <p class="subtitle">Register your agent on the Solana identity registry</p>
+            
+            <div class="options">
+                <div class="option-card" onclick="showRegisterForm()">
+                    <h3>🔗 Register Existing Agent</h3>
+                    <p>I already have a Solana wallet for my agent. Register it on SAID.</p>
+                </div>
+                
+                <div class="option-card" onclick="showCreateForm()">
+                    <h3>✨ Create New Agent</h3>
+                    <p>Generate a new wallet and register a fresh agent identity.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Step 2a: Register existing agent -->
+        <div id="step-register" class="form-section">
+            <a href="#" class="back-link" onclick="showChoose(); return false;">← Back</a>
+            <h1>Register Existing Agent</h1>
+            <p class="subtitle">Enter your agent's wallet address and details</p>
+            
+            <form onsubmit="submitRegistration(event)">
+                <div class="form-group">
+                    <label>Agent Name *</label>
+                    <input type="text" id="reg-name" placeholder="My Awesome Agent" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Wallet Address *</label>
+                    <input type="text" id="reg-wallet" placeholder="So1ana..." required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="reg-description" placeholder="What does your agent do?"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Twitter Handle</label>
+                    <input type="text" id="reg-twitter" placeholder="@youragent">
+                </div>
+                
+                <div class="form-group">
+                    <label>Website</label>
+                    <input type="url" id="reg-website" placeholder="https://youragent.com">
+                </div>
+                
+                <button type="submit" class="btn">Register Agent</button>
+            </form>
+        </div>
+        
+        <!-- Step 2b: Create new agent -->
+        <div id="step-create" class="form-section">
+            <a href="#" class="back-link" onclick="showChoose(); return false;">← Back</a>
+            <h1>Create New Agent</h1>
+            <p class="subtitle">We'll generate a wallet for your agent</p>
+            
+            <form onsubmit="submitCreation(event)">
+                <div class="form-group">
+                    <label>Agent Name *</label>
+                    <input type="text" id="create-name" placeholder="My Awesome Agent" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="create-description" placeholder="What does your agent do?"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Twitter Handle</label>
+                    <input type="text" id="create-twitter" placeholder="@youragent">
+                </div>
+                
+                <div class="form-group">
+                    <label>Website</label>
+                    <input type="url" id="create-website" placeholder="https://youragent.com">
+                </div>
+                
+                <button type="submit" class="btn">Create & Register Agent</button>
+            </form>
+        </div>
+        
+        <!-- Step 3: Success -->
+        <div id="step-success" class="form-section">
+            <div class="success-message">
+                <h3>🎉 Agent Registered!</h3>
+                <p>Your agent is now on SAID Protocol.</p>
+            </div>
+            
+            <div class="btn-row" style="justify-content: center; margin-top: 1.5rem;">
+                <a href="/agents.html" class="btn">View Directory</a>
+                <a href="/my-agents.html" class="btn btn-secondary">My Agents</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script>
+        const API_BASE = 'https://api.saidprotocol.com';
+        
+        // Theme
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        
+        function showSection(id) {
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function showChoose() { showSection('step-choose'); }
+        function showRegisterForm() { showSection('step-register'); }
+        function showCreateForm() { showSection('step-create'); }
+        function showSuccess() { showSection('step-success'); }
+        
+        async function submitRegistration(e) {
+            e.preventDefault();
+            
+            const data = {
+                name: document.getElementById('reg-name').value.trim(),
+                wallet: document.getElementById('reg-wallet').value.trim(),
+                description: document.getElementById('reg-description').value.trim(),
+                twitter: document.getElementById('reg-twitter').value.trim(),
+                website: document.getElementById('reg-website').value.trim()
+            };
+            
+            try {
+                const res = await fetch(`${API_BASE}/api/agents/pending`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!res.ok) throw new Error('Registration failed');
+                
+                showSuccess();
+            } catch (err) {
+                console.error(err);
+                alert('Registration failed. Please try again.');
+            }
+        }
+        
+        async function submitCreation(e) {
+            e.preventDefault();
+            
+            // Generate wallet
+            const keypair = solanaWeb3.Keypair.generate();
+            const walletAddress = keypair.publicKey.toBase58();
+            const privateKey = JSON.stringify(Array.from(keypair.secretKey));
+            
+            // Save private key (user should backup)
+            const saveKey = confirm(
+                'Your agent wallet has been generated!\n\n' +
+                'Wallet: ' + walletAddress + '\n\n' +
+                'IMPORTANT: Save your private key somewhere safe. Click OK to copy it to clipboard.'
+            );
+            
+            if (saveKey) {
+                navigator.clipboard.writeText(privateKey);
+                alert('Private key copied to clipboard. Save it somewhere safe!');
+            }
+            
+            const data = {
+                name: document.getElementById('create-name').value.trim(),
+                wallet: walletAddress,
+                description: document.getElementById('create-description').value.trim(),
+                twitter: document.getElementById('create-twitter').value.trim(),
+                website: document.getElementById('create-website').value.trim()
+            };
+            
+            try {
+                const res = await fetch(`${API_BASE}/api/agents/pending`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!res.ok) throw new Error('Registration failed');
+                
+                showSuccess();
+            } catch (err) {
+                console.error(err);
+                alert('Registration failed. Please try again.');
+            }
+        }
+    </script>
+</body>
+</html>

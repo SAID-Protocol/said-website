@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - SAID Protocol</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg: #fff;
+            --bg-secondary: #f8f8f8;
+            --bg-tertiary: #f0f0f0;
+            --border: #e0e0e0;
+            --text: #000;
+            --text-secondary: #666;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --text: #fff;
+            --text-secondary: #999;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
+            text-decoration: none;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .profile-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .profile-info h2 {
+            margin-bottom: 0.25rem;
+        }
+        
+        .profile-info p {
+            color: var(--text-secondary);
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .not-logged-in {
+            text-align: center;
+            padding: 3rem;
+        }
+        
+        .not-logged-in p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">SAID</a>
+    </nav>
+    
+    <div class="container">
+        <h1>My Profile</h1>
+        
+        <!-- Not logged in state -->
+        <div id="not-logged-in" class="not-logged-in">
+            <p>Please log in to view your profile.</p>
+            <a href="/" class="btn">Go to Homepage</a>
+        </div>
+        
+        <!-- Logged in state -->
+        <div id="profile-content" style="display: none;">
+            <div class="profile-card">
+                <div class="profile-avatar" id="avatar">?</div>
+                <div class="profile-info">
+                    <h2 id="user-name">User</h2>
+                    <p id="user-email"></p>
+                    <p id="user-wallet" style="font-family: monospace; font-size: 0.85rem;"></p>
+                </div>
+                
+                <div class="stat-grid">
+                    <div class="stat">
+                        <div class="stat-value" id="stat-agents">0</div>
+                        <div class="stat-label">Agents</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-verified">0</div>
+                        <div class="stat-label">Verified</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-reputation">-</div>
+                        <div class="stat-label">Reputation</div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="/my-agents.html" class="btn">View My Agents →</a>
+        </div>
+    </div>
+    
+    <script>
+        // Theme
+        const saved = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+        
+        // Check login
+        const user = JSON.parse(localStorage.getItem('said-user') || 'null');
+        
+        if (user) {
+            document.getElementById('not-logged-in').style.display = 'none';
+            document.getElementById('profile-content').style.display = 'block';
+            
+            const email = user.email?.address || user.email;
+            const wallet = user.wallet?.address || user.walletAddress;
+            
+            if (email) {
+                document.getElementById('avatar').textContent = email[0].toUpperCase();
+                document.getElementById('user-name').textContent = email.split('@')[0];
+                document.getElementById('user-email').textContent = email;
+            } else if (wallet) {
+                document.getElementById('avatar').textContent = wallet[0].toUpperCase();
+                document.getElementById('user-name').textContent = 'Wallet User';
+                document.getElementById('user-wallet').textContent = wallet.substring(0, 8) + '...' + wallet.substring(wallet.length - 8);
+            }
+        }
+    </script>
+</body>
+</html>
