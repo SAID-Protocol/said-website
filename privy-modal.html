@@ -1,0 +1,249 @@
+<!-- Privy Login Modal - Include this in pages that need auth -->
+<div id="privy-login-modal" class="privy-modal" style="display: none;">
+    <div class="privy-modal-overlay" onclick="closePrivyModal()"></div>
+    <div class="privy-modal-content">
+        <button class="privy-modal-close" onclick="closePrivyModal()">×</button>
+        
+        <div id="privy-step-select">
+            <h2>Log in to SAID</h2>
+            <p style="color: #666; margin-bottom: 2rem;">Choose how you want to connect</p>
+            
+            <button class="privy-btn privy-btn-primary" onclick="showPrivyEmailStep()">
+                📧 Continue with Email
+            </button>
+            
+            <div style="margin: 1.5rem 0; text-align: center; color: #999;">or connect wallet</div>
+            
+            <button class="privy-btn privy-btn-wallet" onclick="loginWithSolanaWallet('phantom')">
+                <img src="https://avatars.githubusercontent.com/u/78782331?s=200&v=4" style="width: 24px; height: 24px;">
+                Phantom
+            </button>
+            
+            <button class="privy-btn privy-btn-wallet" onclick="loginWithSolanaWallet('solflare')">
+                <img src="https://solflare.com/favicon.ico" style="width: 24px; height: 24px;">
+                Solflare
+            </button>
+        </div>
+        
+        <div id="privy-step-email" style="display: none;">
+            <button class="privy-back-btn" onclick="showPrivySelectStep()">← Back</button>
+            <h2>Enter your email</h2>
+            <input type="email" id="privy-email-input" placeholder="your@email.com" class="privy-input" />
+            <button class="privy-btn privy-btn-primary" onclick="sendPrivyEmailCode()">Send Code</button>
+        </div>
+        
+        <div id="privy-step-code" style="display: none;">
+            <button class="privy-back-btn" onclick="showPrivyEmailStep()">← Back</button>
+            <h2>Enter verification code</h2>
+            <p style="color: #666; margin-bottom: 1.5rem;">Check your email for the 6-digit code</p>
+            <input type="text" id="privy-code-input" placeholder="000000" maxlength="6" class="privy-input" style="text-align: center; font-size: 24px; letter-spacing: 4px;" />
+            <button class="privy-btn privy-btn-primary" onclick="verifyPrivyEmailCode()">Verify & Log In</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.privy-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+}
+
+.privy-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.privy-modal-content {
+    position: relative;
+    max-width: 400px;
+    margin: 10vh auto;
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+[data-theme="dark"] .privy-modal-content {
+    background: #1a1a1a;
+    border: 1px solid #333;
+}
+
+.privy-modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.privy-modal-close:hover { color: #000; }
+[data-theme="dark"] .privy-modal-close:hover { color: #fff; }
+
+.privy-modal h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.privy-btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.2s;
+}
+
+.privy-btn-primary {
+    background: #000;
+    color: #fff;
+}
+
+.privy-btn-primary:hover {
+    opacity: 0.9;
+}
+
+[data-theme="dark"] .privy-btn-primary {
+    background: #fff;
+    color: #000;
+}
+
+.privy-btn-wallet {
+    background: #f5f5f5;
+    color: #000;
+    border: 1px solid #ddd;
+}
+
+.privy-btn-wallet:hover {
+    background: #e8e8e8;
+}
+
+[data-theme="dark"] .privy-btn-wallet {
+    background: #2a2a2a;
+    color: #fff;
+    border-color: #444;
+}
+
+[data-theme="dark"] .privy-btn-wallet:hover {
+    background: #333;
+}
+
+.privy-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.privy-input:focus {
+    outline: none;
+    border-color: #000;
+}
+
+[data-theme="dark"] .privy-input {
+    background: #2a2a2a;
+    border-color: #444;
+    color: #fff;
+}
+
+.privy-back-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.privy-back-btn:hover {
+    color: #000;
+}
+
+[data-theme="dark"] .privy-back-btn:hover {
+    color: #fff;
+}
+</style>
+
+<script>
+function openPrivyModal() {
+    document.getElementById('privy-login-modal').style.display = 'block';
+    showPrivySelectStep();
+}
+
+function closePrivyModal() {
+    document.getElementById('privy-login-modal').style.display = 'none';
+}
+
+function showPrivySelectStep() {
+    document.getElementById('privy-step-select').style.display = 'block';
+    document.getElementById('privy-step-email').style.display = 'none';
+    document.getElementById('privy-step-code').style.display = 'none';
+}
+
+function showPrivyEmailStep() {
+    document.getElementById('privy-step-select').style.display = 'none';
+    document.getElementById('privy-step-email').style.display = 'block';
+    document.getElementById('privy-step-code').style.display = 'none';
+}
+
+function showPrivyCodeStep() {
+    document.getElementById('privy-step-select').style.display = 'none';
+    document.getElementById('privy-step-email').style.display = 'none';
+    document.getElementById('privy-step-code').style.display = 'block';
+}
+
+// These functions will be implemented in privy-auth.js
+async function sendPrivyEmailCode() {
+    const email = document.getElementById('privy-email-input').value.trim();
+    if (!email || !email.includes('@')) {
+        alert('Please enter a valid email');
+        return;
+    }
+    
+    if (window.privySendEmailCode) {
+        await window.privySendEmailCode(email);
+    }
+}
+
+async function verifyPrivyEmailCode() {
+    const code = document.getElementById('privy-code-input').value.trim();
+    if (!code || code.length !== 6) {
+        alert('Please enter the 6-digit code');
+        return;
+    }
+    
+    if (window.privyVerifyEmailCode) {
+        await window.privyVerifyEmailCode(code);
+    }
+}
+
+async function loginWithSolanaWallet(walletType) {
+    if (window.privyLoginWithWallet) {
+        await window.privyLoginWithWallet(walletType);
+    }
+}
+
+// Override global login function
+window.privyLogin = openPrivyModal;
+</script>
