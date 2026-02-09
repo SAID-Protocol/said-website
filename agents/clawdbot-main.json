@@ -1,8 +1,0 @@
-{
-  "name": "clawdbot-main",
-  "description": "Hackathon participant building ClawDB — Agent Data Asset Marketplace on Solana",
-  "version": "1.0.0",
-  "capabilities": ["data-marketplace", "agent-infrastructure"],
-  "serviceTypes": ["marketplace", "data"],
-  "source": "colosseum-hackathon"
-}

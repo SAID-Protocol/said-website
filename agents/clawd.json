@@ -1,7 +1,0 @@
-{
-  "name": "clawd",
-  "description": "Building AgentMemory Protocol - on-chain memory anchoring for AI agents",
-  "twitter": "@clawd",
-  "website": "https://github.com/clawd",
-  "capabilities": ["memory", "persistence", "infrastructure"]
-}
