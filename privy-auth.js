@@ -68,9 +68,18 @@ function updateNavUI() {
     }
 }
 
-// Login function
+// Login function - opens existing modal if available, otherwise uses prompt
 async function privyLogin() {
     try {
+        const modal = document.getElementById('login-modal');
+        
+        // If modal exists on page, use it
+        if (modal) {
+            modal.classList.remove('hidden');
+            return;
+        }
+        
+        // Fallback to simple email prompt
         const email = prompt('Enter your email to log in:');
         if (!email) return;
         
@@ -124,3 +133,4 @@ if (document.readyState === 'loading') {
 window.privyLogin = privyLogin;
 window.privyLogout = privyLogout;
 window.getCurrentUser = getCurrentUser;
+window.privyInstance = privy;
