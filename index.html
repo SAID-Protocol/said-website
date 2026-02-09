@@ -1256,70 +1256,138 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
     })();
     </script>
     
-    <!-- Privy SDK -->
-    <script src="https://cdn.privy.io/js/privy-js/1.0.0/privy-sdk.js"></script>
+    <!-- Login Modal -->
+    <div id="login-modal" class="login-modal">
+        <div class="login-modal-content">
+            <h2>Log in to SAID</h2>
+            
+            <div id="login-step-email">
+                <input type="email" id="login-email" class="login-input" placeholder="Enter your email">
+                <button class="login-btn-primary" onclick="sendEmailCode()">Continue with Email</button>
+                <div class="login-divider">or</div>
+                <button class="login-btn-secondary" onclick="connectWallet()">Connect Wallet</button>
+            </div>
+            
+            <div id="login-step-code" style="display: none;">
+                <p style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary);">Enter the code sent to your email</p>
+                <input type="text" id="login-code" class="login-input" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 4px;">
+                <button class="login-btn-primary" onclick="verifyCode()">Verify</button>
+                <button class="login-btn-secondary" onclick="showEmailStep()">Back</button>
+            </div>
+            
+            <button class="login-btn-secondary" style="margin-top: 1rem;" onclick="closeLoginModal()">Cancel</button>
+        </div>
+    </div>
     
-    <!-- Auth Script (Privy) -->
+    <!-- Auth Script -->
     <script>
-    const PRIVY_APP_ID = 'cmlbxd3qu00jqi80c4pibohzv';
-    let privy = null;
+    const API_BASE = 'https://api.saidprotocol.com';
     let currentUser = null;
+    let pendingEmail = null;
     
-    // Initialize Privy
-    async function initPrivy() {
-        try {
-            privy = new Privy({
-                appId: PRIVY_APP_ID,
-                config: {
-                    loginMethods: ['email', 'wallet'],
-                    appearance: {
-                        theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
-                    }
-                }
-            });
-            
-            // Check if user is already logged in
-            const user = await privy.getUser();
-            if (user) {
-                currentUser = user;
-                updateAuthUI();
-            }
-            
-            // Listen for auth state changes
-            privy.on('login', (user) => {
-                currentUser = user;
-                localStorage.setItem('said-user', JSON.stringify(user));
-                updateAuthUI();
-            });
-            
-            privy.on('logout', () => {
-                currentUser = null;
-                localStorage.removeItem('said-user');
-                updateAuthUI();
-            });
-        } catch (err) {
-            console.error('Privy init error:', err);
-            // Fallback: check localStorage
-            const saved = localStorage.getItem('said-user');
-            if (saved) {
-                currentUser = JSON.parse(saved);
-                updateAuthUI();
-            }
+    // Check for existing session on load
+    (function() {
+        const saved = localStorage.getItem('said-user');
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            updateAuthUI();
         }
-    }
+    })();
     
     function openLoginModal() {
-        if (privy) {
-            privy.login();
-        } else {
-            alert('Auth not ready. Please refresh the page.');
+        document.getElementById('login-modal').classList.add('active');
+    }
+    
+    function closeLoginModal() {
+        document.getElementById('login-modal').classList.remove('active');
+        showEmailStep();
+    }
+    
+    function showEmailStep() {
+        document.getElementById('login-step-email').style.display = 'block';
+        document.getElementById('login-step-code').style.display = 'none';
+    }
+    
+    function showCodeStep() {
+        document.getElementById('login-step-email').style.display = 'none';
+        document.getElementById('login-step-code').style.display = 'block';
+    }
+    
+    async function sendEmailCode() {
+        const email = document.getElementById('login-email').value.trim();
+        if (!email || !email.includes('@')) {
+            alert('Please enter a valid email');
+            return;
+        }
+        
+        pendingEmail = email;
+        
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            
+            if (!res.ok) throw new Error('Failed to send code');
+            
+            showCodeStep();
+        } catch (err) {
+            console.error(err);
+            alert('Failed to send code. Try again.');
         }
     }
     
-    async function logout() {
-        if (privy) {
-            await privy.logout();
+    async function verifyCode() {
+        const code = document.getElementById('login-code').value.trim();
+        if (!code || code.length !== 6) {
+            alert('Please enter the 6-digit code');
+            return;
         }
+        
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: pendingEmail, code })
+            });
+            
+            if (!res.ok) throw new Error('Invalid code');
+            
+            const data = await res.json();
+            currentUser = { email: pendingEmail, ...data };
+            localStorage.setItem('said-user', JSON.stringify(currentUser));
+            
+            closeLoginModal();
+            updateAuthUI();
+        } catch (err) {
+            console.error(err);
+            alert('Invalid code. Try again.');
+        }
+    }
+    
+    async function connectWallet() {
+        if (!window.solana) {
+            alert('Please install Phantom wallet');
+            return;
+        }
+        
+        try {
+            const resp = await window.solana.connect();
+            const walletAddress = resp.publicKey.toString();
+            
+            currentUser = { walletAddress };
+            localStorage.setItem('said-user', JSON.stringify(currentUser));
+            
+            closeLoginModal();
+            updateAuthUI();
+        } catch (err) {
+            console.error(err);
+            alert('Failed to connect wallet');
+        }
+    }
+    
+    function logout() {
         currentUser = null;
         localStorage.removeItem('said-user');
         updateAuthUI();
@@ -1336,13 +1404,10 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
             profileDropdown.style.display = 'block';
             
             // Set avatar initial
-            const email = currentUser.email?.address || currentUser.email;
-            const wallet = currentUser.wallet?.address || currentUser.walletAddress;
-            
-            if (email) {
-                avatar.textContent = email[0].toUpperCase();
-            } else if (wallet) {
-                avatar.textContent = wallet[0].toUpperCase();
+            if (currentUser.email) {
+                avatar.textContent = currentUser.email[0].toUpperCase();
+            } else if (currentUser.walletAddress) {
+                avatar.textContent = currentUser.walletAddress[0].toUpperCase();
             } else {
                 avatar.textContent = 'U';
             }
@@ -1368,9 +1433,6 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
             closeProfileMenu();
         }
     });
-    
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', initPrivy);
     </script>
 </body>
 </html>
