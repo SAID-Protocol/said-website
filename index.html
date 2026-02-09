@@ -885,6 +885,9 @@
                 <span class="user-email" id="user-email"></span>
                 <button class="logout-btn" onclick="privyLogout()">Logout</button>
             </div>
+            
+            <!-- Create Agent Button (shown when logged in) -->
+            <a id="create-agent-btn" href="/create-agent.html" class="btn btn-primary" style="display:none; padding: 0.5rem 1rem; font-size: 0.9rem; margin-left: 0.5rem;">Create Agent</a>
         </div>
     </nav>
 
@@ -1539,5 +1542,8 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
             checkSession();
         });
     </script>
+    
+    <!-- Privy Auth (shared across site) -->
+    <script type="module" src="/privy-auth.js"></script>
 </body>
 </html>

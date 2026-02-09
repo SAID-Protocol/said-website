@@ -498,18 +498,164 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
-    <script type="module">
+    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-base@0.9.23/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-wallets@0.19.27/lib/index.iife.min.js"></script>
+    <script>
         const API_BASE = 'https://api.saidprotocol.com';
+        let currentUser = null;
+        let sessionToken = localStorage.getItem('said_session_token');
         let selectedSkills = [];
         let generatedWallet = null;
+        let walletAdapter = null;
         
-        // Get current user from shared auth
-        function getCurrentPageUser() {
-            return window.getCurrentUser ? window.getCurrentUser() : null;
+        // ========== AUTH ==========
+        
+        async function checkSession() {
+            if (!sessionToken) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${sessionToken}` }
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data.user;
+                    updateUI();
+                } else {
+                    localStorage.removeItem('said_session_token');
+                    sessionToken = null;
+                }
+            } catch (e) {
+                console.error('Session check failed:', e);
+            }
+        }
+        
+        function updateUI() {
+            const loginBtn = document.getElementById('login-btn');
+            const userMenu = document.getElementById('user-menu');
+            const userDisplay = document.getElementById('user-display');
+            
+            if (currentUser) {
+                loginBtn.classList.add('hidden');
+                userMenu.classList.remove('hidden');
+                
+                const displayText = currentUser.displayName || 
+                                  currentUser.walletAddress?.substring(0, 8) + '...' || 
+                                  currentUser.email;
+                userDisplay.textContent = displayText;
+            } else {
+                loginBtn.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+            }
+        }
+        
+        async function loginWithWallet() {
+            try {
+                // Initialize wallet adapter
+                const { PhantomWalletAdapter } = window.SolanaWalletAdapterWallets;
+                walletAdapter = new PhantomWalletAdapter();
+                
+                await walletAdapter.connect();
+                const walletAddress = walletAdapter.publicKey.toString();
+                
+                // Login to API
+                const res = await fetch(`${API_BASE}/auth/login-wallet`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ walletAddress })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    sessionToken = data.sessionToken;
+                    localStorage.setItem('said_session_token', sessionToken);
+                    currentUser = data.user;
+                    updateUI();
+                    closeModal();
+                } else {
+                    alert('Login failed: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Wallet login error:', e);
+                alert('Failed to connect wallet. Make sure Phantom is installed.');
+            }
+        }
+        
+        async function loginWithEmail() {
+            const email = document.getElementById('email-input').value.trim();
+            
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/login-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    sessionToken = data.sessionToken;
+                    localStorage.setItem('said_session_token', sessionToken);
+                    currentUser = data.user;
+                    updateUI();
+                    closeModal();
+                } else {
+                    alert('Login failed: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Email login error:', e);
+                alert('Login failed. Please try again.');
+            }
+        }
+        
+        function logout() {
+            currentUser = null;
+            sessionToken = null;
+            localStorage.removeItem('said_session_token');
+            updateUI();
+        }
+        
+        function openModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+        
+        async function linkAgentToUser(agentWallet) {
+            if (!sessionToken) return;
+            
+            try {
+                await fetch(`${API_BASE}/users/me/agents`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ agentWallet })
+                });
+            } catch (e) {
+                console.error('Failed to link agent:', e);
+            }
         }
         
         // Initialize on DOM ready
         document.addEventListener('DOMContentLoaded', () => {
+            // Auth event listeners
+            document.getElementById('login-btn').addEventListener('click', openModal);
+            document.getElementById('logout-btn').addEventListener('click', logout);
+            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+            document.getElementById('wallet-login-btn').addEventListener('click', loginWithWallet);
+            document.getElementById('email-login-btn').addEventListener('click', loginWithEmail);
+            
             // Skill selection
             document.querySelectorAll('.skill-tag').forEach(tag => {
                 tag.addEventListener('click', () => {
@@ -522,6 +668,9 @@
                     }
                 });
             });
+            
+            // Check session on load
+            checkSession();
         });
         
         // Step navigation
@@ -624,8 +773,5 @@
             }
         }
     </script>
-    
-    <!-- Privy Auth (shared across site) -->
-    <script type="module" src="/privy-auth.js"></script>
 </body>
 </html>
