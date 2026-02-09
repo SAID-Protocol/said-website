@@ -286,6 +286,29 @@
         
         .hidden { display: none !important; }
         
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+        }
+        
         @media (max-width: 600px) {
             .skills-grid { grid-template-columns: repeat(2, 1fr); }
             .btn-row { flex-direction: column; }
@@ -299,8 +322,38 @@
             <a href="/agents.html">Agents</a>
             <a href="/docs.html">Docs</a>
             <a href="https://github.com/kaiclawd/said" target="_blank">GitHub</a>
+            <button id="login-btn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Login</button>
+            <div id="user-menu" class="hidden" style="display: flex; align-items: center; gap: 1rem;">
+                <span id="user-display" style="color: var(--text-secondary); font-size: 0.9rem;"></span>
+                <button id="logout-btn" class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem; background: var(--bg-tertiary);">Logout</button>
+            </div>
         </div>
     </nav>
+    
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 1.5rem;">Login to SAID</h2>
+            
+            <div class="login-options">
+                <button id="wallet-login-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
+                    Connect Wallet
+                </button>
+                
+                <div style="text-align: center; color: var(--text-secondary); margin: 1rem 0;">or</div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email-input" placeholder="your@email.com" />
+                </div>
+                <button id="email-login-btn" class="btn btn-primary" style="width: 100%;">
+                    Login with Email
+                </button>
+            </div>
+            
+            <button id="close-modal-btn" class="btn" style="margin-top: 1.5rem; width: 100%; background: var(--bg-tertiary);">Cancel</button>
+        </div>
+    </div>
     
     <div class="container">
         <h1>Create Your Agent</h1>
@@ -445,9 +498,164 @@
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-base@0.9.23/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/wallet-adapter-wallets@0.19.27/lib/index.iife.min.js"></script>
     <script>
+        const API_BASE = 'https://api.saidprotocol.com';
+        let currentUser = null;
+        let sessionToken = localStorage.getItem('said_session_token');
         let selectedSkills = [];
         let generatedWallet = null;
+        let walletAdapter = null;
+        
+        // ========== AUTH ==========
+        
+        async function checkSession() {
+            if (!sessionToken) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${sessionToken}` }
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data.user;
+                    updateUI();
+                } else {
+                    localStorage.removeItem('said_session_token');
+                    sessionToken = null;
+                }
+            } catch (e) {
+                console.error('Session check failed:', e);
+            }
+        }
+        
+        function updateUI() {
+            const loginBtn = document.getElementById('login-btn');
+            const userMenu = document.getElementById('user-menu');
+            const userDisplay = document.getElementById('user-display');
+            
+            if (currentUser) {
+                loginBtn.classList.add('hidden');
+                userMenu.classList.remove('hidden');
+                
+                const displayText = currentUser.displayName || 
+                                  currentUser.walletAddress?.substring(0, 8) + '...' || 
+                                  currentUser.email;
+                userDisplay.textContent = displayText;
+            } else {
+                loginBtn.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+            }
+        }
+        
+        async function loginWithWallet() {
+            try {
+                // Initialize wallet adapter
+                const { PhantomWalletAdapter } = window.SolanaWalletAdapterWallets;
+                walletAdapter = new PhantomWalletAdapter();
+                
+                await walletAdapter.connect();
+                const walletAddress = walletAdapter.publicKey.toString();
+                
+                // Login to API
+                const res = await fetch(`${API_BASE}/auth/login-wallet`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ walletAddress })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    sessionToken = data.sessionToken;
+                    localStorage.setItem('said_session_token', sessionToken);
+                    currentUser = data.user;
+                    updateUI();
+                    closeModal();
+                } else {
+                    alert('Login failed: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Wallet login error:', e);
+                alert('Failed to connect wallet. Make sure Phantom is installed.');
+            }
+        }
+        
+        async function loginWithEmail() {
+            const email = document.getElementById('email-input').value.trim();
+            
+            if (!email || !email.includes('@')) {
+                alert('Please enter a valid email');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/login-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    sessionToken = data.sessionToken;
+                    localStorage.setItem('said_session_token', sessionToken);
+                    currentUser = data.user;
+                    updateUI();
+                    closeModal();
+                } else {
+                    alert('Login failed: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Email login error:', e);
+                alert('Login failed. Please try again.');
+            }
+        }
+        
+        function logout() {
+            currentUser = null;
+            sessionToken = null;
+            localStorage.removeItem('said_session_token');
+            updateUI();
+        }
+        
+        function openModal() {
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+        
+        async function linkAgentToUser(agentWallet) {
+            if (!sessionToken) return;
+            
+            try {
+                await fetch(`${API_BASE}/users/me/agents`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${sessionToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ agentWallet })
+                });
+            } catch (e) {
+                console.error('Failed to link agent:', e);
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('login-btn').addEventListener('click', openModal);
+        document.getElementById('logout-btn').addEventListener('click', logout);
+        document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+        document.getElementById('wallet-login-btn').addEventListener('click', loginWithWallet);
+        document.getElementById('email-login-btn').addEventListener('click', loginWithEmail);
+        
+        // Check session on load
+        checkSession();
         
         // Skill selection
         document.querySelectorAll('.skill-tag').forEach(tag => {
@@ -548,6 +756,11 @@
                 });
                 
                 if (!res.ok) throw new Error('Registration failed');
+                
+                // Link agent to user if logged in
+                if (currentUser) {
+                    await linkAgentToUser(generatedWallet.publicKey);
+                }
                 
                 document.getElementById('registration-pending').classList.add('hidden');
                 document.getElementById('registration-success').classList.remove('hidden');
