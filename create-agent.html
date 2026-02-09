@@ -591,8 +591,15 @@
         </div>
     </div>
     
-    <!-- Profile Menu Toggle -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
+    
     <script>
+        // Global variables
+        const API_BASE = 'https://api.saidprotocol.com';
+        let selectedSkills = [];
+        let generatedWallet = null;
+        
+        // Profile Menu Toggle
         function toggleProfileMenu() {
             const menu = document.getElementById('profile-menu');
             if (menu) {
@@ -609,24 +616,6 @@
                 menu.style.display = 'none';
             }
         });
-        
-        // Make functions global
-        window.goToStep = goToStep;
-        window.generateWallet = generateWallet;
-        window.copyToClipboard = copyToClipboard;
-        window.registerAgent = registerAgent;
-    </script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@1.87.6/lib/index.iife.min.js"></script>
-    <script type="module">
-        const API_BASE = 'https://api.saidprotocol.com';
-        let selectedSkills = [];
-        let generatedWallet = null;
-        
-        // Get current user from shared auth
-        function getCurrentPageUser() {
-            return window.getCurrentUser ? window.getCurrentUser() : null;
-        }
         
         // Initialize on DOM ready
         document.addEventListener('DOMContentLoaded', () => {
@@ -730,11 +719,6 @@
                 });
                 
                 if (!res.ok) throw new Error('Registration failed');
-                
-                // Link agent to user if logged in
-                if (currentUser) {
-                    await linkAgentToUser(generatedWallet.publicKey);
-                }
                 
                 document.getElementById('registration-pending').classList.add('hidden');
                 document.getElementById('registration-success').classList.remove('hidden');
