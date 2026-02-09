@@ -28,40 +28,28 @@ async function initPrivyAuth() {
 // Update navbar UI across all pages
 function updateNavUI() {
     const loggedOutEl = document.getElementById('auth-logged-out');
+    const loggedInEl = document.getElementById('auth-logged-in');
+    const userEmailEl = document.getElementById('user-email');
+    const userAvatarEl = document.getElementById('user-avatar');
     const createAgentBtn = document.getElementById('create-agent-btn');
-    const profileContainer = document.getElementById('profile-nav-container');
     
     if (currentUser) {
-        // Hide login button
         if (loggedOutEl) loggedOutEl.style.display = 'none';
+        if (loggedInEl) loggedInEl.style.display = 'flex';
         
-        // Show Create Agent button
-        if (createAgentBtn) createAgentBtn.style.display = 'inline-flex';
+        const displayText = currentUser.email || 
+                          (currentUser.walletAddress ? currentUser.walletAddress.substring(0, 8) + '...' : 'User');
         
-        // Load profile dropdown if not already loaded
-        if (profileContainer && !profileContainer.innerHTML) {
-            fetch('/profile-dropdown.html')
-                .then(r => r.text())
-                .then(html => {
-                    profileContainer.innerHTML = html;
-                    // Update dropdown with user data
-                    if (window.updateProfileDropdown) {
-                        window.updateProfileDropdown(currentUser);
-                    }
-                });
-        } else if (window.updateProfileDropdown) {
-            // Already loaded, just update
-            window.updateProfileDropdown(currentUser);
+        if (userEmailEl) userEmailEl.textContent = displayText;
+        if (userAvatarEl) {
+            userAvatarEl.textContent = currentUser.email ? currentUser.email[0].toUpperCase() : 'U';
         }
+        
+        if (createAgentBtn) createAgentBtn.style.display = 'inline-flex';
     } else {
-        // Show login button
         if (loggedOutEl) loggedOutEl.style.display = 'block';
-        
-        // Hide Create Agent button
+        if (loggedInEl) loggedInEl.style.display = 'none';
         if (createAgentBtn) createAgentBtn.style.display = 'none';
-        
-        // Clear profile dropdown
-        if (profileContainer) profileContainer.innerHTML = '';
     }
 }
 
