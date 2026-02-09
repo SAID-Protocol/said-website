@@ -14,24 +14,12 @@ async function initPrivyAuth() {
             storage: new LocalStorage(),
         });
 
-        // Check if already logged in
-        const user = await privy.getUser();
-        if (user) {
-            currentUser = {
-                id: user.id,
-                walletAddress: user.wallet?.address,
-                email: user.email?.address,
-            };
-            localStorage.setItem('said-privy-user', JSON.stringify(currentUser));
-        } else {
-            // Check localStorage for cached user
-            const cached = localStorage.getItem('said-privy-user');
-            if (cached) {
-                currentUser = JSON.parse(cached);
-            }
+        // Check localStorage for cached user
+        const cached = localStorage.getItem('said-privy-user');
+        if (cached) {
+            currentUser = JSON.parse(cached);
+            updateNavUI();
         }
-        
-        updateNavUI();
     } catch (err) {
         console.error('Privy init error:', err);
     }
@@ -86,12 +74,11 @@ async function privyVerifyEmailCode(code) {
     try {
         const session = await privy.auth.email.loginWithCode(currentEmail, code);
         
-        // Get user after login
-        const user = await privy.getUser();
+        // Session object contains user info
         currentUser = {
-            id: user.id,
-            walletAddress: user.wallet?.address,
-            email: user.email?.address,
+            id: session.user?.id || 'user-' + Date.now(),
+            email: currentEmail,
+            session: session,
         };
         
         localStorage.setItem('said-privy-user', JSON.stringify(currentUser));
@@ -132,9 +119,7 @@ async function privyLoginWithWallet(walletType) {
         await wallet.connect();
         const walletAddress = wallet.publicKey.toString();
         
-        // Login with wallet via Privy
-        // Note: Privy js-sdk-core doesn't have direct Solana wallet login
-        // We'll store the wallet address and create a user session
+        // Store wallet user session
         currentUser = {
             id: 'wallet-' + walletAddress,
             walletAddress: walletAddress,
@@ -157,7 +142,9 @@ async function privyLoginWithWallet(walletType) {
 // Logout
 async function privyLogout() {
     try {
-        await privy.logout();
+        if (privy && privy.logout) {
+            await privy.logout();
+        }
         currentUser = null;
         localStorage.removeItem('said-privy-user');
         updateNavUI();
