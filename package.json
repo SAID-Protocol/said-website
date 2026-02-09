@@ -4,8 +4,8 @@
   "description": "SAID Protocol - Static Website",
   "main": "index.html",
   "scripts": {
-    "start": "serve . -p ${PORT:-3000}",
-    "dev": "serve . -p 3000"
+    "start": "npx http-server . -p ${PORT:-3000} --proxy http://localhost:${PORT:-3000}?",
+    "dev": "npx http-server . -p 3000"
   },
   "repository": {
     "type": "git",
