@@ -829,6 +829,25 @@
             font-size: 1rem;
         }
         
+        .wallet-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .wallet-btn:hover {
+            background: var(--bg);
+            border-color: var(--accent);
+        }
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -874,10 +893,26 @@
         <div class="modal-content">
             <h2 style="margin-bottom: 1.5rem;">Login to SAID</h2>
             
-            <div class="login-options">
-                <button id="wallet-login-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">
-                    Connect Wallet
-                </button>
+            <!-- Step 1: Choose method -->
+            <div id="login-step-1">
+                <div class="wallet-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+                    <button class="wallet-btn" data-wallet="phantom">
+                        <img src="https://avatars.githubusercontent.com/u/78782331?s=200&v=4" alt="Phantom" style="width: 32px; height: 32px;">
+                        <span>Phantom</span>
+                    </button>
+                    <button class="wallet-btn" data-wallet="solflare">
+                        <img src="https://avatars.githubusercontent.com/u/78782331?s=200&v=4" alt="Solflare" style="width: 32px; height: 32px;">
+                        <span>Solflare</span>
+                    </button>
+                    <button class="wallet-btn" data-wallet="backpack">
+                        <img src="https://avatars.githubusercontent.com/u/78782331?s=200&v=4" alt="Backpack" style="width: 32px; height: 32px;">
+                        <span>Backpack</span>
+                    </button>
+                    <button class="wallet-btn" data-wallet="trust">
+                        <img src="https://avatars.githubusercontent.com/u/78782331?s=200&v=4" alt="Trust" style="width: 32px; height: 32px;">
+                        <span>Trust</span>
+                    </button>
+                </div>
                 
                 <div style="text-align: center; color: var(--text-secondary); margin: 1rem 0;">or</div>
                 
@@ -885,8 +920,24 @@
                     <label>Email</label>
                     <input type="email" id="email-input" placeholder="your@email.com" />
                 </div>
-                <button id="email-login-btn" class="btn btn-primary" style="width: 100%;">
-                    Login with Email
+                <button id="email-send-btn" class="btn btn-primary" style="width: 100%;">
+                    Send Login Code
+                </button>
+            </div>
+            
+            <!-- Step 2: Verify OTP -->
+            <div id="login-step-2" class="hidden">
+                <p style="margin-bottom: 1.5rem; color: var(--text-secondary);">
+                    Enter the 6-digit code we sent to <strong id="otp-email"></strong>
+                </p>
+                <div class="form-group">
+                    <input type="text" id="otp-input" placeholder="000000" maxlength="6" style="text-align: center; font-size: 24px; letter-spacing: 8px;" />
+                </div>
+                <button id="otp-verify-btn" class="btn btn-primary" style="width: 100%;">
+                    Verify Code
+                </button>
+                <button id="otp-back-btn" class="btn" style="margin-top: 1rem; width: 100%; background: var(--bg-tertiary);">
+                    Back
                 </button>
             </div>
             
@@ -1318,10 +1369,26 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
             document.getElementById('login-modal').classList.add('hidden');
         }
         
-        async function loginWithWallet() {
+        async function loginWithWallet(walletType) {
             try {
-                const { PhantomWalletAdapter } = window.SolanaWalletAdapterWallets;
-                walletAdapter = new PhantomWalletAdapter();
+                const { PhantomWalletAdapter, SolflareWalletAdapter, BackpackWalletAdapter, TrustWalletAdapter } = window.SolanaWalletAdapterWallets;
+                
+                switch(walletType) {
+                    case 'phantom':
+                        walletAdapter = new PhantomWalletAdapter();
+                        break;
+                    case 'solflare':
+                        walletAdapter = new SolflareWalletAdapter();
+                        break;
+                    case 'backpack':
+                        walletAdapter = new BackpackWalletAdapter();
+                        break;
+                    case 'trust':
+                        walletAdapter = new TrustWalletAdapter();
+                        break;
+                    default:
+                        walletAdapter = new PhantomWalletAdapter();
+                }
                 
                 await walletAdapter.connect();
                 const walletAddress = walletAdapter.publicKey.toString();
@@ -1345,11 +1412,11 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
                 }
             } catch (e) {
                 console.error('Wallet login error:', e);
-                alert('Failed to connect wallet. Make sure Phantom is installed.');
+                alert(`Failed to connect ${walletType}. Make sure it's installed.`);
             }
         }
         
-        async function loginWithEmail() {
+        async function sendOTP() {
             const email = document.getElementById('email-input').value.trim();
             
             if (!email || !email.includes('@')) {
@@ -1358,10 +1425,41 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
             }
             
             try {
-                const res = await fetch(`${API_BASE}/auth/login-email`, {
+                const res = await fetch(`${API_BASE}/auth/send-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
+                });
+                
+                const data = await res.json();
+                
+                if (data.ok) {
+                    document.getElementById('otp-email').textContent = email;
+                    document.getElementById('login-step-1').classList.add('hidden');
+                    document.getElementById('login-step-2').classList.remove('hidden');
+                } else {
+                    alert('Failed to send code: ' + data.error);
+                }
+            } catch (e) {
+                console.error('Send OTP error:', e);
+                alert('Failed to send code. Please try again.');
+            }
+        }
+        
+        async function verifyOTP() {
+            const email = document.getElementById('otp-email').textContent;
+            const code = document.getElementById('otp-input').value.trim();
+            
+            if (!code || code.length !== 6) {
+                alert('Please enter the 6-digit code');
+                return;
+            }
+            
+            try {
+                const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code })
                 });
                 
                 const data = await res.json();
@@ -1372,13 +1470,21 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
                     currentUser = data.user;
                     handleLogin(currentUser);
                     closeModal();
+                    resetModal();
                 } else {
-                    alert('Login failed: ' + data.error);
+                    alert('Invalid code: ' + data.error);
                 }
             } catch (e) {
-                console.error('Email login error:', e);
-                alert('Login failed. Please try again.');
+                console.error('Verify OTP error:', e);
+                alert('Verification failed. Please try again.');
             }
+        }
+        
+        function resetModal() {
+            document.getElementById('login-step-1').classList.remove('hidden');
+            document.getElementById('login-step-2').classList.add('hidden');
+            document.getElementById('email-input').value = '';
+            document.getElementById('otp-input').value = '';
         }
         
         window.privyLogin = function() {
@@ -1410,9 +1516,24 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
         
         // Event listeners
         document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('close-modal-btn').addEventListener('click', closeModal);
-            document.getElementById('wallet-login-btn').addEventListener('click', loginWithWallet);
-            document.getElementById('email-login-btn').addEventListener('click', loginWithEmail);
+            // Modal controls
+            document.getElementById('close-modal-btn').addEventListener('click', () => {
+                closeModal();
+                resetModal();
+            });
+            
+            // Wallet buttons
+            document.querySelectorAll('.wallet-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const walletType = btn.dataset.wallet;
+                    loginWithWallet(walletType);
+                });
+            });
+            
+            // Email OTP
+            document.getElementById('email-send-btn').addEventListener('click', sendOTP);
+            document.getElementById('otp-verify-btn').addEventListener('click', verifyOTP);
+            document.getElementById('otp-back-btn').addEventListener('click', resetModal);
             
             // Check session on load
             checkSession();
