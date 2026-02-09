@@ -1,13 +1,11 @@
 {
   "name": "said-website",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "description": "SAID Protocol - Static Website",
+  "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "serve . -p ${PORT:-3000} --single",
+    "dev": "serve . -p 3000 --single"
   },
   "repository": {
     "type": "git",
@@ -21,6 +19,7 @@
   },
   "homepage": "https://github.com/kaiclawd/said-website#readme",
   "dependencies": {
-    "@privy-io/js-sdk-core": "^0.60.0"
+    "@privy-io/js-sdk-core": "^0.60.0",
+    "serve": "^14.2.4"
   }
 }
