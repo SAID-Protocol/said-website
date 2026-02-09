@@ -703,6 +703,149 @@
             footer { padding: 2rem 1.5rem; }
             .footer-content { flex-direction: column; gap: 1rem; }
         }
+        
+        /* Auth Styles */
+        #login-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .profile-dropdown {
+            position: relative;
+        }
+        
+        .profile-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .profile-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 180px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .profile-menu-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+        
+        .profile-menu-item:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .profile-menu-divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 0.25rem 0;
+        }
+        
+        .profile-menu-logout {
+            color: #ef4444;
+        }
+        
+        /* Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-modal.active {
+            display: flex;
+        }
+        
+        .login-modal-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .login-modal h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .login-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text);
+            font-size: 1rem;
+        }
+        
+        .login-input:focus {
+            outline: none;
+            border-color: var(--text);
+        }
+        
+        .login-btn-primary {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--text);
+            color: var(--bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 0.75rem;
+        }
+        
+        .login-btn-secondary {
+            width: 100%;
+            padding: 0.75rem;
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        
+        .login-divider {
+            text-align: center;
+            margin: 1rem 0;
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
@@ -1111,6 +1254,183 @@ GET https://api.saidprotocol.com/api/leaderboard</pre>
         }
         updateToggleIcon(theme);
     })();
+    </script>
+    
+    <!-- Login Modal -->
+    <div id="login-modal" class="login-modal">
+        <div class="login-modal-content">
+            <h2>Log in to SAID</h2>
+            
+            <div id="login-step-email">
+                <input type="email" id="login-email" class="login-input" placeholder="Enter your email">
+                <button class="login-btn-primary" onclick="sendEmailCode()">Continue with Email</button>
+                <div class="login-divider">or</div>
+                <button class="login-btn-secondary" onclick="connectWallet()">Connect Wallet</button>
+            </div>
+            
+            <div id="login-step-code" style="display: none;">
+                <p style="text-align: center; margin-bottom: 1rem; color: var(--text-secondary);">Enter the code sent to your email</p>
+                <input type="text" id="login-code" class="login-input" placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 4px;">
+                <button class="login-btn-primary" onclick="verifyCode()">Verify</button>
+                <button class="login-btn-secondary" onclick="showEmailStep()">Back</button>
+            </div>
+            
+            <button class="login-btn-secondary" style="margin-top: 1rem;" onclick="closeLoginModal()">Cancel</button>
+        </div>
+    </div>
+    
+    <!-- Auth Script -->
+    <script>
+    const API_BASE = 'https://api.saidprotocol.com';
+    let currentUser = null;
+    let pendingEmail = null;
+    
+    // Check for existing session on load
+    (function() {
+        const saved = localStorage.getItem('said-user');
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            updateAuthUI();
+        }
+    })();
+    
+    function openLoginModal() {
+        document.getElementById('login-modal').classList.add('active');
+    }
+    
+    function closeLoginModal() {
+        document.getElementById('login-modal').classList.remove('active');
+        showEmailStep();
+    }
+    
+    function showEmailStep() {
+        document.getElementById('login-step-email').style.display = 'block';
+        document.getElementById('login-step-code').style.display = 'none';
+    }
+    
+    function showCodeStep() {
+        document.getElementById('login-step-email').style.display = 'none';
+        document.getElementById('login-step-code').style.display = 'block';
+    }
+    
+    async function sendEmailCode() {
+        const email = document.getElementById('login-email').value.trim();
+        if (!email || !email.includes('@')) {
+            alert('Please enter a valid email');
+            return;
+        }
+        
+        pendingEmail = email;
+        
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            
+            if (!res.ok) throw new Error('Failed to send code');
+            
+            showCodeStep();
+        } catch (err) {
+            console.error(err);
+            alert('Failed to send code. Try again.');
+        }
+    }
+    
+    async function verifyCode() {
+        const code = document.getElementById('login-code').value.trim();
+        if (!code || code.length !== 6) {
+            alert('Please enter the 6-digit code');
+            return;
+        }
+        
+        try {
+            const res = await fetch(`${API_BASE}/api/auth/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: pendingEmail, code })
+            });
+            
+            if (!res.ok) throw new Error('Invalid code');
+            
+            const data = await res.json();
+            currentUser = { email: pendingEmail, ...data };
+            localStorage.setItem('said-user', JSON.stringify(currentUser));
+            
+            closeLoginModal();
+            updateAuthUI();
+        } catch (err) {
+            console.error(err);
+            alert('Invalid code. Try again.');
+        }
+    }
+    
+    async function connectWallet() {
+        if (!window.solana || !window.solana.isPhantom) {
+            alert('Please install Phantom wallet');
+            return;
+        }
+        
+        try {
+            const resp = await window.solana.connect();
+            const walletAddress = resp.publicKey.toString();
+            
+            currentUser = { walletAddress };
+            localStorage.setItem('said-user', JSON.stringify(currentUser));
+            
+            closeLoginModal();
+            updateAuthUI();
+        } catch (err) {
+            console.error(err);
+            alert('Failed to connect wallet');
+        }
+    }
+    
+    function logout() {
+        currentUser = null;
+        localStorage.removeItem('said-user');
+        updateAuthUI();
+        closeProfileMenu();
+    }
+    
+    function updateAuthUI() {
+        const loginBtn = document.getElementById('login-btn');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const avatar = document.getElementById('profile-avatar');
+        
+        if (currentUser) {
+            loginBtn.style.display = 'none';
+            profileDropdown.style.display = 'block';
+            
+            // Set avatar initial
+            if (currentUser.email) {
+                avatar.textContent = currentUser.email[0].toUpperCase();
+            } else if (currentUser.walletAddress) {
+                avatar.textContent = currentUser.walletAddress[0].toUpperCase();
+            }
+        } else {
+            loginBtn.style.display = 'block';
+            profileDropdown.style.display = 'none';
+        }
+    }
+    
+    function toggleProfileMenu() {
+        const menu = document.getElementById('profile-menu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function closeProfileMenu() {
+        document.getElementById('profile-menu').style.display = 'none';
+    }
+    
+    // Close profile menu when clicking outside
+    document.addEventListener('click', (e) => {
+        const dropdown = document.getElementById('profile-dropdown');
+        if (dropdown && !dropdown.contains(e.target)) {
+            closeProfileMenu();
+        }
+    });
     </script>
 </body>
 </html>
