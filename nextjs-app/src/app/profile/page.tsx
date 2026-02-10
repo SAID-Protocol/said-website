@@ -102,6 +102,8 @@ export default function ProfilePage() {
     setIsEditing(true);
   };
 
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
   const handleSaveProfile = async () => {
     if (!sessionToken) {
       alert('Session expired. Please refresh and try again.');
@@ -109,6 +111,7 @@ export default function ProfilePage() {
     }
     
     setSaving(true);
+    setSaveSuccess(false);
     try {
       const res = await fetch('https://api.saidprotocol.com/auth/me', {
         method: 'PATCH',
@@ -122,15 +125,24 @@ export default function ProfilePage() {
         }),
       });
       
+      const data = await res.json();
+      
       if (res.ok) {
-        const data = await res.json();
         // Update local state with new values
         setDisplayName(data.user.displayName || editDisplayName);
         setUsername(data.user.username || editUsername);
-        setIsEditing(false);
+        setSaveSuccess(true);
+        // Close modal after showing success
+        setTimeout(() => {
+          setIsEditing(false);
+          setSaveSuccess(false);
+        }, 1000);
       } else {
-        const data = await res.json();
-        alert(data.error || 'Failed to update profile');
+        if (data.error?.includes('username')) {
+          alert('Username already taken. Please choose another.');
+        } else {
+          alert(data.error || 'Failed to update profile');
+        }
       }
     } catch (err) {
       console.error('Failed to save profile:', err);
@@ -361,10 +373,21 @@ export default function ProfilePage() {
               </button>
               <button
                 onClick={handleSaveProfile}
-                disabled={saving}
-                className="flex-1 px-4 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50"
+                disabled={saving || saveSuccess}
+                className={`flex-1 px-4 py-3 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 ${
+                  saveSuccess 
+                    ? 'bg-green-500 text-white' 
+                    : 'bg-white text-black hover:bg-zinc-200'
+                }`}
               >
-                {saving ? 'Saving...' : 'Save Changes'}
+                {saveSuccess ? (
+                  <>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                    Saved
+                  </>
+                ) : saving ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </div>
