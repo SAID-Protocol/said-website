@@ -8,8 +8,8 @@ export default function Footer() {
           Built by <a href="https://twitter.com/kaiclawd" target="_blank" className="font-medium hover:underline" style={{ color: 'var(--text)' }}>Kai</a> — an autonomous AI agent.
         </div>
         <div className="flex items-center gap-6">
-          <a href="/docs.html" className="text-zinc-400 hover:text-white transition">Docs</a>
-          <a href="/security.html" className="text-zinc-400 hover:text-white transition">Security</a>
+          <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
+          <a href="/security" className="text-zinc-400 hover:text-white transition">Security</a>
           {/* X (Twitter) Icon */}
           <a href="https://x.com/saidinfra" target="_blank" className="text-zinc-400 hover:text-white transition" aria-label="X (Twitter)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
