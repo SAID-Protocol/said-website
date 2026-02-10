@@ -54,17 +54,14 @@ export default function Navbar() {
           <Link href="/#for-agents" className="text-zinc-400 hover:text-white transition">
             For Agents
           </Link>
+          <Link href="/#quickstart" className="text-zinc-400 hover:text-white transition">
+            Quick Start
+          </Link>
           <Link href="/#features" className="text-zinc-400 hover:text-white transition">
             Features
           </Link>
           <Link href="/agents" className="text-zinc-400 hover:text-white transition">
             Directory
-          </Link>
-          <Link href="https://github.com/kaiclawd/said" target="_blank" className="text-zinc-400 hover:text-white transition">
-            GitHub
-          </Link>
-          <Link href="/#quickstart" className="text-zinc-400 hover:text-white transition">
-            Quick Start
           </Link>
         </div>
       </div>
