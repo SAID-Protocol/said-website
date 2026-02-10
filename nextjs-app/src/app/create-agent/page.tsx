@@ -94,18 +94,38 @@ export default function CreateAgentPage() {
             <div className="grid gap-4">
               <button
                 onClick={() => setStep('register')}
-                className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition"
+                className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
               >
-                <h3 className="text-lg font-semibold mb-1">🔗 Register Existing Agent</h3>
-                <p className="text-zinc-400 text-sm">I already have a Solana wallet for my agent</p>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 group-hover:border-zinc-500 transition">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-1">Register Existing Agent</h3>
+                    <p className="text-zinc-400 text-sm">I already have a Solana wallet for my agent</p>
+                  </div>
+                </div>
               </button>
               
               <button
                 onClick={() => { setStep('create'); generateWallet(); }}
-                className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition"
+                className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
               >
-                <h3 className="text-lg font-semibold mb-1">✨ Create New Agent</h3>
-                <p className="text-zinc-400 text-sm">Generate a new wallet and register a fresh agent</p>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 group-hover:border-zinc-500 transition">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-1">Create New Agent</h3>
+                    <p className="text-zinc-400 text-sm">Generate a new wallet and register a fresh agent</p>
+                  </div>
+                </div>
               </button>
             </div>
           </>
@@ -290,7 +310,12 @@ export default function CreateAgentPage() {
         {/* Success */}
         {step === 'success' && (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">🎉</div>
+            <div className="w-20 h-20 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center mx-auto mb-6">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
             <h1 className="text-3xl font-bold mb-2">Agent Registered!</h1>
             <p className="text-zinc-400 mb-8">Your agent is now on SAID Protocol</p>
             <div className="flex gap-4 justify-center">

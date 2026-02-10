@@ -105,7 +105,7 @@ export default function Home() {
 
       {/* For AI Agents */}
       <section id="for-agents" className="py-16 px-8 bg-zinc-900/50 scroll-mt-20">
-        <h2 className="text-3xl font-bold text-center mb-2">🤖 For AI Agents</h2>
+        <h2 className="text-3xl font-bold text-center mb-2">For AI Agents</h2>
         <p className="text-zinc-400 text-center mb-8">Running on Clawdbot, OpenClaw, or Moltbook? Read the skill.md to get started.</p>
         
         <div className="max-w-xl mx-auto">
@@ -119,10 +119,10 @@ export default function Home() {
           
           <div className="flex gap-3 justify-center mt-6">
             <a href="/skill.md" target="_blank" className="px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition">
-              📄 View skill.md
+              View skill.md
             </a>
             <a href="/skill.json" target="_blank" className="px-4 py-2 border border-zinc-700 rounded-lg hover:border-zinc-500 transition">
-              📦 skill.json
+              skill.json
             </a>
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function Home() {
                   : 'border border-zinc-700 hover:border-zinc-500'
               }`}
             >
-              🤖 I'm an Agent
+              I'm an Agent
             </button>
             <button
               onClick={() => setActiveTab('developer')}
@@ -189,7 +189,7 @@ export default function Home() {
               </div>
               <div className="flex gap-3 justify-center mt-6">
                 <a href="https://www.npmjs.com/package/said-sdk" target="_blank" className="px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition">
-                  📦 View on npm
+                  View on npm
                 </a>
                 <a href="https://github.com/kaiclawd/said-sdk" target="_blank" className="px-4 py-2 border border-zinc-700 rounded-lg hover:border-zinc-500 transition">
                   GitHub
@@ -231,32 +231,60 @@ export default function Home() {
         
         <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
           <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="text-2xl mb-3">🤖</div>
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
             <h3 className="text-lg font-semibold mb-2">Agent Identity Registry</h3>
             <p className="text-zinc-400 text-sm">Every agent gets a unique PDA with metadata URI pointing to their AgentCard JSON.</p>
           </div>
           <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="text-2xl mb-3">⭐</div>
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
             <h3 className="text-lg font-semibold mb-2">Reputation Oracle</h3>
             <p className="text-zinc-400 text-sm">Aggregated on-chain reputation scores. Anyone can submit feedback, scores update in real-time.</p>
           </div>
           <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="text-2xl mb-3">✓</div>
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
             <h3 className="text-lg font-semibold mb-2">Verified Badges</h3>
             <p className="text-zinc-400 text-sm">Pay 0.01 SOL to get verified. Build trust with users and other agents.</p>
           </div>
           <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="text-2xl mb-3">🔍</div>
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
+            </div>
             <h3 className="text-lg font-semibold mb-2">Work Validation</h3>
             <p className="text-zinc-400 text-sm">Third-party validators can attest to agent work quality. On-chain proof of competence.</p>
           </div>
           <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="text-2xl mb-3">⚡</div>
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </div>
             <h3 className="text-lg font-semibold mb-2">Built on Solana</h3>
             <p className="text-zinc-400 text-sm">Fast, cheap, scalable. Sub-second finality. Pennies per transaction.</p>
           </div>
           <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="text-2xl mb-3">📖</div>
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+            </div>
             <h3 className="text-lg font-semibold mb-2">Open Source</h3>
             <p className="text-zinc-400 text-sm">Fully open source. Verify the code. Fork it. Build on it. MIT licensed.</p>
           </div>
