@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -11,16 +12,23 @@ interface Agent {
   description: string;
   isVerified: boolean;
   registeredAt: string;
+  skills?: string[];
 }
 
 export default function AgentsPage() {
+  const searchParams = useSearchParams();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
+    // Initialize search from URL params
+    const urlSearch = searchParams.get('search');
+    if (urlSearch) {
+      setSearchQuery(urlSearch);
+    }
     fetchAgents();
-  }, []);
+  }, [searchParams]);
 
   const fetchAgents = async () => {
     try {
@@ -36,11 +44,15 @@ export default function AgentsPage() {
     }
   };
 
-  const filteredAgents = agents.filter(agent => 
-    agent.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    agent.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    agent.wallet.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredAgents = agents.filter(agent => {
+    const query = searchQuery.toLowerCase();
+    return (
+      agent.name?.toLowerCase().includes(query) ||
+      agent.description?.toLowerCase().includes(query) ||
+      agent.wallet.toLowerCase().includes(query) ||
+      agent.skills?.some(skill => skill.toLowerCase().includes(query))
+    );
+  });
 
   const verifiedAgents = filteredAgents.filter(a => a.isVerified);
   const unverifiedAgents = filteredAgents.filter(a => !a.isVerified);
