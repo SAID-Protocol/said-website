@@ -16,6 +16,10 @@ export default function ProfilePage() {
   const [memberSince, setMemberSince] = useState('');
   const [loading, setLoading] = useState(true);
   
+  // Profile data from database
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  
   // Edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState('');
@@ -25,13 +29,41 @@ export default function ProfilePage() {
   // Profile picture
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const email = user?.email?.address;
+
   useEffect(() => {
     if (sessionToken) {
+      fetchUserProfile();
       fetchAgentStats();
     } else {
       setLoading(false);
     }
   }, [sessionToken]);
+
+  const fetchUserProfile = async () => {
+    if (!sessionToken) return;
+    
+    try {
+      const res = await fetch('https://api.saidprotocol.com/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        const user = data.user;
+        // Use database values, or fall back to email-derived defaults
+        setDisplayName(user.displayName || email?.split('@')[0] || 'Anonymous');
+        setUsername(user.username || email?.split('@')[0] || 'anonymous');
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+      // Fall back to email-derived defaults
+      setDisplayName(email?.split('@')[0] || 'Anonymous');
+      setUsername(email?.split('@')[0] || 'anonymous');
+    }
+  };
 
   const fetchAgentStats = async () => {
     if (!sessionToken) return;
@@ -64,13 +96,9 @@ export default function ProfilePage() {
     }
   };
 
-  const email = user?.email?.address;
-  const displayName = email ? email.split('@')[0] : 'Anonymous';
-  const username = email ? `@${email.split('@')[0]}` : '@anonymous';
-
   const handleEditClick = () => {
     setEditDisplayName(displayName);
-    setEditUsername(username.replace('@', ''));
+    setEditUsername(username);
     setIsEditing(true);
   };
 
@@ -90,12 +118,16 @@ export default function ProfilePage() {
         },
         body: JSON.stringify({
           displayName: editDisplayName,
+          username: editUsername,
         }),
       });
       
       if (res.ok) {
-        alert('Profile updated!');
-        window.location.reload();
+        const data = await res.json();
+        // Update local state with new values
+        setDisplayName(data.user.displayName || editDisplayName);
+        setUsername(data.user.username || editUsername);
+        setIsEditing(false);
       } else {
         const data = await res.json();
         alert(data.error || 'Failed to update profile');
@@ -105,7 +137,6 @@ export default function ProfilePage() {
       alert('Failed to save profile. Please try again.');
     } finally {
       setSaving(false);
-      setIsEditing(false);
     }
   };
 
@@ -178,7 +209,7 @@ export default function ProfilePage() {
             </div>
             
             <h1 className="text-xl font-bold mb-1">{displayName}</h1>
-            <p className="text-zinc-400 text-sm">{username}</p>
+            <p className="text-zinc-400 text-sm">@{username}</p>
             
             <button 
               onClick={handleEditClick}
