@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import BackgroundEffects from "@/components/BackgroundEffects";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,12 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased bg-[#0a0a0b]`}>
+      <body className={`${inter.variable} antialiased`}>
         <Providers>
-          <BackgroundEffects />
-          <div className="relative z-10">
-            {children}
-          </div>
+          {children}
         </Providers>
       </body>
     </html>
