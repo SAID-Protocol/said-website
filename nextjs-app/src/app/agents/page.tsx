@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -15,7 +15,7 @@ interface Agent {
   skills?: string[];
 }
 
-export default function AgentsPage() {
+function AgentsContent() {
   const searchParams = useSearchParams();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,6 +148,25 @@ export default function AgentsPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function AgentsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin"></div>
+            <p className="mt-4 text-zinc-400">Loading agents...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <AgentsContent />
+    </Suspense>
   );
 }
 
