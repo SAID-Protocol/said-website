@@ -11,7 +11,6 @@ export default function Navbar() {
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
-    // Load saved theme or default to dark
     const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const initial = saved || (prefersDark ? 'dark' : 'light');
@@ -33,37 +32,51 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="flex justify-between items-center px-8 py-4 border-b border-zinc-800 sticky top-0 bg-zinc-950/95 backdrop-blur-sm z-50">
-      <Link href="/" className="flex items-center gap-2">
-        {/* Dark mode logo (white) */}
-        <Image
-          src="/logo-dark.png"
-          alt="SAID"
-          width={32}
-          height={32}
-          className="dark-logo"
-          style={{ display: theme === 'dark' ? 'block' : 'none' }}
-        />
-        {/* Light mode logo (dark) */}
-        <Image
-          src="/logo.png"
-          alt="SAID"
-          width={32}
-          height={32}
-          className="light-logo"
-          style={{ display: theme === 'light' ? 'block' : 'none' }}
-        />
-        <span className="text-xl font-bold">SAID</span>
-      </Link>
-      
+    <nav className="flex justify-between items-center px-4 md:px-8 py-4 border-b border-zinc-800 sticky top-0 bg-zinc-950/95 backdrop-blur-sm z-50">
+      {/* Left side: Logo + Nav Links */}
       <div className="flex items-center gap-6">
-        <Link href="/agents" className="hidden md:block text-zinc-400 hover:text-white transition">
-          Directory
-        </Link>
-        <Link href="https://github.com/kaiclawd/said" target="_blank" className="hidden md:block text-zinc-400 hover:text-white transition">
-          GitHub
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logo-dark.png"
+            alt="SAID"
+            width={32}
+            height={32}
+            className="dark-logo"
+            style={{ display: theme === 'dark' ? 'block' : 'none' }}
+          />
+          <Image
+            src="/logo.png"
+            alt="SAID"
+            width={32}
+            height={32}
+            className="light-logo"
+            style={{ display: theme === 'light' ? 'block' : 'none' }}
+          />
+          <span className="text-xl font-bold">SAID</span>
         </Link>
         
+        {/* Nav Links */}
+        <div className="hidden md:flex items-center gap-5 text-sm">
+          <Link href="/agents" className="text-zinc-400 hover:text-white transition">
+            Agents
+          </Link>
+          <Link href="/#features" className="text-zinc-400 hover:text-white transition">
+            Features
+          </Link>
+          <Link href="/agents" className="text-zinc-400 hover:text-white transition">
+            Directory
+          </Link>
+          <Link href="https://github.com/kaiclawd/said" target="_blank" className="text-zinc-400 hover:text-white transition">
+            GitHub
+          </Link>
+          <Link href="/#quickstart" className="text-zinc-400 hover:text-white transition">
+            Quick Start
+          </Link>
+        </div>
+      </div>
+      
+      {/* Right side: Theme toggle + Auth */}
+      <div className="flex items-center gap-4">
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
@@ -71,7 +84,6 @@ export default function Navbar() {
           aria-label="Toggle theme"
         >
           {theme === 'dark' ? (
-            // Sun icon for dark mode (click to go light)
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="4"/>
               <path d="M12 2v2"/>
@@ -84,7 +96,6 @@ export default function Navbar() {
               <path d="m19.07 4.93-1.41 1.41"/>
             </svg>
           ) : (
-            // Moon icon for light mode (click to go dark)
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
             </svg>
