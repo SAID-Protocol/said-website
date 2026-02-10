@@ -57,7 +57,7 @@ export default function CreateAgentPage() {
     setLoading(true);
     
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents/pending', {
+      const res = await fetch('https://api.saidprotocol.com/api/register/pending', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

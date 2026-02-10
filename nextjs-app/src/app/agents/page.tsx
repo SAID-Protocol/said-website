@@ -24,7 +24,7 @@ export default function AgentsPage() {
 
   const fetchAgents = async () => {
     try {
-      const res = await fetch('https://api.saidprotocol.com/agents');
+      const res = await fetch('https://api.saidprotocol.com/api/agents');
       if (res.ok) {
         const data = await res.json();
         setAgents(data.agents || []);
