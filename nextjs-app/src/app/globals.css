@@ -27,6 +27,16 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Ensure all interactive elements have pointer cursor */
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+a,
+.cursor-pointer {
+  cursor: pointer;
+}
+
 /* Override Tailwind colors based on theme */
 [data-theme="light"] {
   /* Backgrounds */
