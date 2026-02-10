@@ -51,8 +51,8 @@ export default function Navbar() {
         
         {/* Nav Links */}
         <div className="hidden md:flex items-center gap-5 text-sm">
-          <Link href="/#agents" className="text-zinc-400 hover:text-white transition">
-            4 Agents
+          <Link href="/#for-agents" className="text-zinc-400 hover:text-white transition">
+            For Agents
           </Link>
           <Link href="/#features" className="text-zinc-400 hover:text-white transition">
             Features

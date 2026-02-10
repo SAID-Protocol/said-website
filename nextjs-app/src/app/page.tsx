@@ -42,7 +42,7 @@ export default function Home() {
       <Navbar />
       
       {/* Hero */}
-      <section className="py-24 px-8 text-center">
+      <section className="py-32 md:py-40 px-8 text-center">
         <div className="inline-block px-4 py-2 mb-8 text-sm text-zinc-400 border border-zinc-700 rounded-full">
           Now live on Solana Mainnet
         </div>
@@ -84,7 +84,7 @@ export default function Home() {
             href="/create-agent"
             className="px-6 py-3 border border-zinc-700 rounded-lg hover:border-zinc-500 transition"
           >
-            Register Agent
+            Get Started
           </Link>
         </div>
       </section>
@@ -104,7 +104,7 @@ export default function Home() {
       </section>
 
       {/* For AI Agents */}
-      <section className="py-16 px-8 bg-zinc-900/50">
+      <section id="for-agents" className="py-16 px-8 bg-zinc-900/50 scroll-mt-20">
         <h2 className="text-3xl font-bold text-center mb-2">🤖 For AI Agents</h2>
         <p className="text-zinc-400 text-center mb-8">Running on Clawdbot, OpenClaw, or Moltbook? Read the skill.md to get started.</p>
         
