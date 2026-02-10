@@ -19,6 +19,8 @@ export default function ProfilePage() {
   // Profile data from database
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
   // Edit mode
   const [isEditing, setIsEditing] = useState(false);
@@ -56,6 +58,7 @@ export default function ProfilePage() {
         // Use database values, or fall back to email-derived defaults
         setDisplayName(user.displayName || email?.split('@')[0] || 'Anonymous');
         setUsername(user.username || email?.split('@')[0] || 'anonymous');
+        setAvatarUrl(user.avatarUrl || '');
       }
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
@@ -156,12 +159,56 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // TODO: Implement file upload
-      console.log('Selected file:', file.name);
-      alert('Profile picture upload coming soon!');
+    if (!file || !sessionToken) return;
+    
+    // Validate file type and size
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+    if (file.size > 500000) { // 500KB max
+      alert('Image too large. Please select an image under 500KB.');
+      return;
+    }
+    
+    setUploadingAvatar(true);
+    
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64 = event.target?.result as string;
+        
+        // Upload to API
+        const res = await fetch('https://api.saidprotocol.com/auth/me', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionToken}`,
+          },
+          body: JSON.stringify({ avatarUrl: base64 }),
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          setAvatarUrl(data.user.avatarUrl || base64);
+        } else {
+          const data = await res.json();
+          alert(data.error || 'Failed to upload avatar');
+        }
+        setUploadingAvatar(false);
+      };
+      reader.onerror = () => {
+        alert('Failed to read image file');
+        setUploadingAvatar(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Failed to upload avatar:', err);
+      alert('Failed to upload avatar');
+      setUploadingAvatar(false);
     }
   };
 
@@ -199,12 +246,25 @@ export default function ProfilePage() {
               className="relative w-28 h-28 mx-auto mb-5 group cursor-pointer"
               onClick={handleAvatarClick}
             >
-              <div className="w-28 h-28 rounded-full bg-zinc-700 flex items-center justify-center border-2 border-zinc-600">
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                  <circle cx="12" cy="7" r="4"></circle>
-                </svg>
-              </div>
+              {avatarUrl ? (
+                <img 
+                  src={avatarUrl} 
+                  alt="Profile" 
+                  className="w-28 h-28 rounded-full object-cover border-2 border-zinc-600"
+                />
+              ) : (
+                <div className="w-28 h-28 rounded-full bg-zinc-700 flex items-center justify-center border-2 border-zinc-600">
+                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                </div>
+              )}
+              {uploadingAvatar && (
+                <div className="absolute inset-0 bg-black/80 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
               <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                   <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
