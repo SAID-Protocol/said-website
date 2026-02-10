@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -10,6 +11,7 @@ type Step = 'choose' | 'register' | 'create' | 'success';
 
 export default function CreateAgentPage() {
   const { authenticated, login } = usePrivy();
+  const { sessionToken } = useAuth();
   const [step, setStep] = useState<Step>('choose');
   const [loading, setLoading] = useState(false);
   
@@ -69,6 +71,8 @@ export default function CreateAgentPage() {
     setLoading(true);
     
     try {
+      const agentWallet = wallet || generatedWallet?.publicKey;
+      
       const res = await fetch('https://api.saidprotocol.com/api/register/pending', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -77,12 +81,24 @@ export default function CreateAgentPage() {
           description,
           twitter,
           website,
-          wallet: wallet || generatedWallet?.publicKey,
+          wallet: agentWallet,
           skills: skills.split(',').map(s => s.trim()).filter(Boolean)
         })
       });
       
       if (!res.ok) throw new Error('Registration failed');
+      
+      // Link agent to user's account
+      if (sessionToken && agentWallet) {
+        await fetch('https://api.saidprotocol.com/users/me/agents', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${sessionToken}`,
+          },
+          body: JSON.stringify({ agentWallet })
+        });
+      }
       
       setStep('success');
     } catch (err) {
