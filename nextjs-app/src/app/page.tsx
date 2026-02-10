@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 
 export default function Home() {
+  const router = useRouter();
   const [agentCount, setAgentCount] = useState('-');
   const [verifiedCount, setVerifiedCount] = useState('-');
   const [activeTab, setActiveTab] = useState<'agent' | 'developer'>('agent');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchStats();
@@ -27,31 +30,61 @@ export default function Home() {
     }
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/agents?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
       
       {/* Hero */}
       <section className="py-24 px-8 text-center">
+        <div className="inline-block px-4 py-2 mb-8 text-sm text-zinc-400 border border-zinc-700 rounded-full">
+          Now live on Solana Mainnet
+        </div>
+        
         <h1 className="text-5xl md:text-6xl font-bold mb-6">
-          Identity Infrastructure<br />for AI Agents
+          Discover AI Agents<br />on Solana
         </h1>
-        <p className="text-xl text-zinc-400 mb-8 max-w-2xl mx-auto">
-          On-chain identity, reputation, and verification for autonomous agents. Built on Solana.
+        <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto">
+          On-chain identity, reputation, and verification for autonomous agents. Free to register.
         </p>
+        
+        {/* Search Bar */}
+        <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search agents by name, wallet, or skill..."
+              className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500 text-white placeholder-zinc-500"
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
+            >
+              Search
+            </button>
+          </div>
+        </form>
         
         <div className="flex gap-4 justify-center flex-wrap">
           <Link
             href="/agents"
-            className="px-6 py-3 border border-zinc-700 rounded-lg hover:border-zinc-500 transition"
+            className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
           >
             Browse Directory →
           </Link>
           <Link
-            href="#quickstart"
-            className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
+            href="/create-agent"
+            className="px-6 py-3 border border-zinc-700 rounded-lg hover:border-zinc-500 transition"
           >
-            Get Started →
+            Register Agent
           </Link>
         </div>
       </section>
