@@ -1,7 +1,7 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -15,6 +15,15 @@ export default function ProfilePage() {
   const [feedbackGiven, setFeedbackGiven] = useState(0);
   const [memberSince, setMemberSince] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // Edit mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editUsername, setEditUsername] = useState('');
+  const [saving, setSaving] = useState(false);
+  
+  // Profile picture
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (sessionToken) {
@@ -55,6 +64,39 @@ export default function ProfilePage() {
     }
   };
 
+  const email = user?.email?.address;
+  const wallet = user?.wallet?.address;
+  const displayName = email ? email.split('@')[0] : 'Anonymous';
+  const username = email ? `@${email.split('@')[0]}` : '@anonymous';
+
+  const handleEditClick = () => {
+    setEditDisplayName(displayName);
+    setEditUsername(username.replace('@', ''));
+    setIsEditing(true);
+  };
+
+  const handleSaveProfile = async () => {
+    setSaving(true);
+    // TODO: Implement API call to save profile
+    // For now, just close the modal after a brief delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setSaving(false);
+    setIsEditing(false);
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // TODO: Implement file upload
+      console.log('Selected file:', file.name);
+      alert('Profile picture upload coming soon!');
+    }
+  };
+
   if (!authenticated) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -75,11 +117,6 @@ export default function ProfilePage() {
     );
   }
 
-  const email = user?.email?.address;
-  const wallet = user?.wallet?.address;
-  const displayName = email ? email.split('@')[0] : 'Anonymous';
-  const username = email ? `@${email.split('@')[0]}` : '@anonymous';
-
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -89,7 +126,11 @@ export default function ProfilePage() {
           
           {/* Left: User Card */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center h-fit lg:sticky lg:top-24">
-            <div className="relative w-28 h-28 mx-auto mb-5 group cursor-pointer">
+            {/* Avatar with hover edit */}
+            <div 
+              className="relative w-28 h-28 mx-auto mb-5 group cursor-pointer"
+              onClick={handleAvatarClick}
+            >
               <div className="w-28 h-28 rounded-full bg-zinc-700 flex items-center justify-center border-2 border-zinc-600">
                 <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -102,6 +143,13 @@ export default function ProfilePage() {
                   <circle cx="12" cy="13" r="4"></circle>
                 </svg>
               </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
             
             <h1 className="text-xl font-bold mb-1">{displayName}</h1>
@@ -125,7 +173,10 @@ export default function ProfilePage() {
               </div>
             )}
             
-            <button className="w-full mt-5 px-4 py-2.5 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition flex items-center justify-center gap-2 text-sm">
+            <button 
+              onClick={handleEditClick}
+              className="w-full mt-5 px-4 py-2.5 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition flex items-center justify-center gap-2 text-sm"
+            >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
@@ -192,25 +243,95 @@ export default function ProfilePage() {
               </div>
             </section>
 
-            {/* API Keys - Coming Soon */}
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-zinc-900/95 backdrop-blur-sm z-10"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 bg-white text-black px-6 py-3 rounded-full font-bold tracking-wide">
-                Coming Soon
-              </div>
-              <div className="relative z-0 blur-sm opacity-40">
-                <h2 className="text-lg font-semibold mb-5">API Keys</h2>
-                <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 font-mono text-sm mb-4">
-                  said_api_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+            {/* API Keys - Coming Soon (Frosted Glass) */}
+            <section className="relative rounded-xl overflow-hidden">
+              {/* Background content (blurred) */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 filter blur-[2px]">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-lg font-semibold">API Keys</h2>
+                  <button className="px-3 py-1.5 bg-white text-black rounded-lg text-sm font-medium">
+                    + Create Key
+                  </button>
                 </div>
-                <button className="px-4 py-2 bg-white text-black rounded-lg font-semibold text-sm">
-                  + Create Key
-                </button>
+                <div className="space-y-3">
+                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 font-mono text-sm flex justify-between items-center">
+                    <span className="text-zinc-400">said_api_xxxx...xxxx</span>
+                    <span className="text-xs text-zinc-500">Created Feb 10</span>
+                  </div>
+                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 font-mono text-sm flex justify-between items-center">
+                    <span className="text-zinc-400">said_api_yyyy...yyyy</span>
+                    <span className="text-xs text-zinc-500">Created Feb 8</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Frosted glass overlay */}
+              <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-md rounded-xl border border-zinc-700/50 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
+                    </svg>
+                    <span className="font-semibold">API Keys Coming Soon</span>
+                  </div>
+                </div>
               </div>
             </section>
           </div>
         </div>
       </main>
+
+      {/* Edit Profile Modal */}
+      {isEditing && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold mb-6">Edit Profile</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Display Name</label>
+                <input
+                  type="text"
+                  value={editDisplayName}
+                  onChange={(e) => setEditDisplayName(e.target.value)}
+                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500"
+                  placeholder="Your display name"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-zinc-400 mb-2">Username</label>
+                <div className="flex">
+                  <span className="px-4 py-3 bg-zinc-800 border border-r-0 border-zinc-700 rounded-l-lg text-zinc-500">@</span>
+                  <input
+                    type="text"
+                    value={editUsername}
+                    onChange={(e) => setEditUsername(e.target.value)}
+                    className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-r-lg focus:outline-none focus:border-zinc-500"
+                    placeholder="username"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="flex-1 px-4 py-3 border border-zinc-700 rounded-lg font-medium hover:border-zinc-500 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                disabled={saving}
+                className="flex-1 px-4 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
