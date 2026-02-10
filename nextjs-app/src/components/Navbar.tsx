@@ -25,12 +25,6 @@ export default function Navbar() {
     localStorage.setItem('theme', next);
   };
 
-  const getInitial = () => {
-    if (user?.email?.address) return user.email.address[0].toUpperCase();
-    if (user?.wallet?.address) return user.wallet.address[0].toUpperCase();
-    return 'U';
-  };
-
   return (
     <nav className="flex justify-between items-center px-4 md:px-8 py-4 border-b border-zinc-800 sticky top-0 bg-zinc-950/95 backdrop-blur-sm z-50">
       {/* Left side: Logo + Nav Links */}
@@ -57,21 +51,21 @@ export default function Navbar() {
         
         {/* Nav Links */}
         <div className="hidden md:flex items-center gap-5 text-sm">
-          <Link href="/agents" className="text-zinc-400 hover:text-white transition">
-            Agents
+          <Link href="/#agents" className="text-zinc-400 hover:text-white transition">
+            4 Agents
           </Link>
-          <a href="#features" className="text-zinc-400 hover:text-white transition">
+          <Link href="/#features" className="text-zinc-400 hover:text-white transition">
             Features
-          </a>
+          </Link>
           <Link href="/agents" className="text-zinc-400 hover:text-white transition">
             Directory
           </Link>
           <Link href="https://github.com/kaiclawd/said" target="_blank" className="text-zinc-400 hover:text-white transition">
             GitHub
           </Link>
-          <a href="#quickstart" className="text-zinc-400 hover:text-white transition">
+          <Link href="/#quickstart" className="text-zinc-400 hover:text-white transition">
             Quick Start
-          </a>
+          </Link>
         </div>
       </div>
       
@@ -106,9 +100,12 @@ export default function Navbar() {
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold"
+              className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center"
             >
-              {getInitial()}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
             </button>
             
             {menuOpen && (

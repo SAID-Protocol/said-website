@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 type Step = 'choose' | 'register' | 'create' | 'success';
 
@@ -19,17 +20,30 @@ export default function CreateAgentPage() {
   const [website, setWebsite] = useState('');
   const [wallet, setWallet] = useState('');
   const [generatedWallet, setGeneratedWallet] = useState<{ publicKey: string; secretKey: string } | null>(null);
+  const [showPrivateKey, setShowPrivateKey] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const generateWallet = async () => {
-    // Dynamic import for browser
     const { Keypair } = await import('@solana/web3.js');
     const keypair = Keypair.generate();
+    
+    // Convert secretKey to base64
+    const secretKeyBase64 = Buffer.from(keypair.secretKey).toString('base64');
+    
     const walletData = {
       publicKey: keypair.publicKey.toBase58(),
-      secretKey: JSON.stringify(Array.from(keypair.secretKey))
+      secretKey: secretKeyBase64
     };
     setGeneratedWallet(walletData);
     setWallet(walletData.publicKey);
+  };
+
+  const copyPrivateKey = () => {
+    if (generatedWallet) {
+      navigator.clipboard.writeText(generatedWallet.secretKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -67,10 +81,10 @@ export default function CreateAgentPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <div className="max-w-xl mx-auto px-8 py-12">
+      <main className="flex-1 max-w-xl mx-auto w-full px-8 py-12">
         {/* Choose Step */}
         {step === 'choose' && (
           <>
@@ -188,15 +202,35 @@ export default function CreateAgentPage() {
               <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg mb-6">
                 <h4 className="font-semibold text-yellow-400 mb-2">⚠️ Save Your Private Key!</h4>
                 <p className="text-sm text-zinc-400 mb-3">This will only be shown once. We don't store it.</p>
-                <div className="p-3 bg-zinc-900 rounded font-mono text-xs break-all mb-2">
-                  {generatedWallet.secretKey}
-                </div>
-                <button
-                  onClick={() => navigator.clipboard.writeText(generatedWallet.secretKey)}
-                  className="text-sm text-yellow-400 hover:underline"
-                >
-                  Copy to Clipboard
-                </button>
+                
+                {!showPrivateKey ? (
+                  <button
+                    onClick={() => setShowPrivateKey(true)}
+                    className="w-full py-3 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-medium hover:bg-zinc-700 transition flex items-center justify-center gap-2"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Click to Reveal Private Key
+                  </button>
+                ) : (
+                  <div>
+                    <div className="p-3 bg-zinc-900 rounded font-mono text-xs break-all mb-2 select-all">
+                      {generatedWallet.secretKey}
+                    </div>
+                    <button
+                      onClick={copyPrivateKey}
+                      className="text-sm text-yellow-400 hover:underline flex items-center gap-1"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      {copied ? 'Copied!' : 'Copy to Clipboard'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
             
@@ -269,7 +303,9 @@ export default function CreateAgentPage() {
             </div>
           </div>
         )}
-      </div>
+      </main>
+
+      <Footer />
     </div>
   );
 }
