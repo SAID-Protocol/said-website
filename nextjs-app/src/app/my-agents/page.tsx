@@ -1,11 +1,54 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import { useAuth } from '@/hooks/useAuth';
+
+interface Agent {
+  id: string;
+  wallet: string;
+  name: string;
+  description?: string;
+  isVerified: boolean;
+  twitter?: string;
+}
 
 export default function MyAgentsPage() {
-  const { authenticated, user, login } = usePrivy();
+  const { authenticated, login } = usePrivy();
+  const { sessionToken, loading: authLoading } = useAuth();
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (sessionToken) {
+      fetchMyAgents();
+    } else {
+      setLoading(false);
+    }
+  }, [sessionToken]);
+
+  const fetchMyAgents = async () => {
+    if (!sessionToken) return;
+    
+    try {
+      const res = await fetch('https://api.saidprotocol.com/users/me/agents', {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      });
+      
+      if (!res.ok) throw new Error('Failed to fetch agents');
+      
+      const data = await res.json();
+      setAgents(data.agents || []);
+    } catch (err) {
+      console.error('Failed to fetch agents:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!authenticated) {
     return (
@@ -24,8 +67,18 @@ export default function MyAgentsPage() {
     );
   }
 
-  // TODO: Fetch user's agents from API based on their wallet/email
-  const agents: any[] = [];
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-8 py-12">
+          <div className="text-center py-16">
+            <div className="text-zinc-400">Loading your agents...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -58,7 +111,7 @@ export default function MyAgentsPage() {
           <div className="grid gap-4">
             {agents.map((agent) => (
               <div
-                key={agent.wallet}
+                key={agent.id}
                 className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl"
               >
                 <div className="flex justify-between items-center">
@@ -67,16 +120,30 @@ export default function MyAgentsPage() {
                       {agent.name[0]}
                     </div>
                     <div>
-                      <h3 className="font-semibold">{agent.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold">{agent.name}</h3>
+                        {agent.isVerified && (
+                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">
+                            ✓ Verified
+                          </span>
+                        )}
+                      </div>
                       <p className="text-zinc-500 font-mono text-sm">
                         {agent.wallet.substring(0, 8)}...{agent.wallet.substring(agent.wallet.length - 8)}
                       </p>
+                      {agent.description && (
+                        <p className="text-zinc-400 text-sm mt-1">{agent.description}</p>
+                      )}
                     </div>
                   </div>
-                  {agent.isVerified && (
-                    <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded">
-                      ✓ Verified
-                    </span>
+                  {agent.twitter && (
+                    <a
+                      href={`https://twitter.com/${agent.twitter.replace('@', '')}`}
+                      target="_blank"
+                      className="text-zinc-400 hover:text-white transition"
+                    >
+                      @{agent.twitter.replace('@', '')}
+                    </a>
                   )}
                 </div>
               </div>
