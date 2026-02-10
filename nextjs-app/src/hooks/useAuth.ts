@@ -1,27 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 
 const API_URL = 'https://api.saidprotocol.com';
 
 export function useAuth() {
-  const { user, authenticated } = usePrivy();
+  const { user, authenticated, ready } = usePrivy();
   const [sessionToken, setSessionToken] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem('said_session_token');
     if (saved) {
       setSessionToken(saved);
     }
+    setLoading(false);
   }, []);
 
-  useEffect(() => {
-    if (authenticated && user && !sessionToken) {
-      loginToBackend();
-    }
-  }, [authenticated, user, sessionToken]);
-
-  const loginToBackend = async () => {
+  const loginToBackend = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -30,6 +26,8 @@ export function useAuth() {
       const email = user.email?.address;
       const walletAddress = user.wallet?.address;
       const displayName = email?.split('@')[0] || 'User';
+
+      console.log('Logging into backend with:', { privyId, email, walletAddress, displayName });
 
       const res = await fetch(`${API_URL}/auth/login-privy`, {
         method: 'POST',
@@ -42,10 +40,15 @@ export function useAuth() {
         }),
       });
 
-      if (!res.ok) throw new Error('Login failed');
-
       const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('Backend login error:', data);
+        throw new Error(data.error || 'Login failed');
+      }
+
       const token = data.sessionToken;
+      console.log('Got session token:', token ? 'yes' : 'no');
       
       setSessionToken(token);
       localStorage.setItem('said_session_token', token);
@@ -54,7 +57,14 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Auto-login when Privy is ready and user is authenticated
+  useEffect(() => {
+    if (ready && authenticated && user && !sessionToken) {
+      loginToBackend();
+    }
+  }, [ready, authenticated, user, sessionToken, loginToBackend]);
 
   const logout = () => {
     setSessionToken(null);
@@ -65,5 +75,6 @@ export function useAuth() {
     sessionToken,
     loading,
     logout,
+    refreshSession: loginToBackend,
   };
 }
