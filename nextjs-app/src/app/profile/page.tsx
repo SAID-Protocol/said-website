@@ -86,19 +86,19 @@ export default function ProfilePage() {
           
           {/* Left: User Card */}
           <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-8 text-center h-fit lg:sticky lg:top-24">
-            <div className="relative w-32 h-32 mx-auto mb-6">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-5xl font-bold border-4 border-[var(--border)]">
-                {displayName[0].toUpperCase()}
-              </div>
-              <button 
-                className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-[var(--accent)] text-[var(--bg)] border-2 border-[var(--bg)] flex items-center justify-center hover:scale-110 transition"
-                title="Change avatar"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            <div className="relative w-32 h-32 mx-auto mb-6 group cursor-pointer">
+              <div className="w-32 h-32 rounded-full bg-zinc-700 flex items-center justify-center border-4 border-[var(--border)]">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
                 </svg>
-              </button>
+              </div>
+              <div className="absolute inset-0 bg-black bg-opacity-60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                  <circle cx="12" cy="13" r="4"></circle>
+                </svg>
+              </div>
             </div>
             
             <h1 className="text-2xl font-bold mb-1">{displayName}</h1>
@@ -125,8 +125,8 @@ export default function ProfilePage() {
             
             <button className="w-full mt-6 px-4 py-3 bg-[var(--accent)] text-[var(--bg)] rounded-xl font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
               </svg>
               Edit Profile
             </button>
@@ -141,8 +141,11 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-xl">
-                    🤖
+                  <div className="w-12 h-12 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
                   </div>
                   <div>
                     <div className="text-3xl font-bold">{loading ? '-' : agentCount}</div>
@@ -151,8 +154,10 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-xl">
-                    💬
+                  <div className="w-12 h-12 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
                   </div>
                   <div>
                     <div className="text-3xl font-bold">{feedbackGiven}</div>
@@ -161,8 +166,13 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-xl">
-                    📅
+                  <div className="w-12 h-12 rounded-xl bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
                   </div>
                   <div>
                     <div className="text-lg font-bold">{memberSince || 'Feb 2026'}</div>
