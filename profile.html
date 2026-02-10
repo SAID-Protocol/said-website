@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - SAID Protocol</title>
+  <meta name="description" content="Your SAID Protocol profile and activity" />
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#fff;--bg-secondary:#f8f8f8;--bg-tertiary:#f0f0f0;--border:#e0e0e0;--text:#000;--text-secondary:#666;--accent:#000}
+    [data-theme="dark"]{--bg:#0a0a0a;--bg-secondary:#141414;--bg-tertiary:#1a1a1a;--border:#2a2a2a;--text:#fff;--text-secondary:#999;--accent:#fff}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+    
+    /* Nav */
+    nav{display:flex;justify-content:space-between;align-items:center;padding:1.5rem 4rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(10px);z-index:100}
+    [data-theme="dark"] nav{background:rgba(10,10,10,.95)}
+    .logo-dark{display:none}
+    .logo-light{display:block}
+    [data-theme="dark"] .logo-dark{display:block}
+    [data-theme="dark"] .logo-light{display:none}
+    .logo{display:flex;align-items:center;gap:.75rem;font-size:1.25rem;font-weight:700;color:var(--text);text-decoration:none}
+    .logo img{height:32px;width:32px;object-fit:contain}
+    .nav-links{display:flex;gap:2.5rem;align-items:center}
+    .nav-links a{color:var(--text-secondary);text-decoration:none;font-size:.9rem;font-weight:500}
+    .nav-links a:hover{color:var(--text)}
+    .theme-toggle{background:none;border:none;padding:0.5rem;cursor:pointer;color:var(--text-secondary);transition:color 0.2s;display:flex;align-items:center}
+    .theme-toggle:hover{color:var(--text)}
+    .theme-toggle svg{width:20px;height:20px}
+
+    /* Profile Layout */
+    .profile-container{max-width:1200px;margin:2rem auto;padding:0 2rem;display:grid;grid-template-columns:320px 1fr;gap:2rem}
+    
+    /* User Card */
+    .user-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center;height:fit-content;position:sticky;top:100px}
+    .avatar-container{position:relative;width:120px;height:120px;margin:0 auto 1.5rem}
+    .avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;color:#fff;border:3px solid var(--border)}
+    .avatar-edit{position:absolute;bottom:0;right:0;width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--bg);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.2s}
+    .avatar-edit:hover{transform:scale(1.1)}
+    .user-name{font-size:1.5rem;font-weight:700;margin-bottom:.25rem}
+    .username{color:var(--text-secondary);font-size:.95rem;margin-bottom:.5rem}
+    .wallet-address{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--text-secondary);background:var(--bg);border:1px solid var(--border);padding:.5rem .75rem;border-radius:8px;margin-top:1rem;display:flex;align-items:center;justify-content:space-between}
+    .copy-btn{background:none;border:none;color:var(--text-secondary);cursor:pointer;padding:4px}
+    .copy-btn:hover{color:var(--text)}
+    .edit-profile-btn{width:100%;padding:.75rem;margin-top:1.5rem;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-weight:600;cursor:pointer;transition:opacity 0.2s}
+    .edit-profile-btn:hover{opacity:0.9}
+    
+    /* Right Column */
+    .profile-content{display:flex;flex-direction:column;gap:1.5rem}
+    
+    /* Activity Stats */
+    .stats-section{background:var(--bg-secondary);border:1px solid var(--border);border-radius:16px;padding:2rem}
+    .section-title{font-size:1.25rem;font-weight:700;margin-bottom:1.5rem}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.5rem}
+    .stat-item{display:flex;align-items:center;gap:1rem}
+    .stat-icon{width:48px;height:48px;border-radius:12px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.25rem}
+    .stat-details .stat-value{font-size:1.75rem;font-weight:700;line-height:1}
+    .stat-details .stat-label{color:var(--text-secondary);font-size:.875rem}
+    
+    /* Recent Activity */
+    .activity-section{background:var(--bg-secondary);border:1px solid var(--border);border-radius:16px;padding:2rem}
+    .activity-list{display:flex;flex-direction:column;gap:.75rem}
+    .activity-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;display:flex;justify-content:space-between;align-items:center}
+    .activity-info{display:flex;align-items:center;gap:.75rem}
+    .activity-dot{width:10px;height:10px;border-radius:50%;background:#22c55e}
+    .activity-text{font-size:.9rem}
+    .activity-time{color:var(--text-secondary);font-size:.85rem}
+    .no-activity{text-align:center;color:var(--text-secondary);padding:2rem}
+    
+    /* API Keys (Coming Soon) */
+    .api-section{background:var(--bg-secondary);border:1px solid var(--border);border-radius:16px;padding:2rem;position:relative;overflow:hidden}
+    .api-section::before{content:'';position:absolute;inset:0;background:var(--bg-secondary);backdrop-filter:blur(8px);z-index:1;opacity:0.95}
+    .api-content{position:relative;z-index:2;filter:blur(4px);opacity:0.4}
+    .coming-soon-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;background:var(--accent);color:var(--bg);padding:1rem 2rem;border-radius:30px;font-weight:700;font-size:1.1rem;letter-spacing:.02em}
+    
+    /* Responsive */
+    @media(max-width:900px){
+      nav{padding:1rem 1.5rem}
+      .nav-links{display:none}
+      .profile-container{grid-template-columns:1fr;padding:1rem}
+      .user-card{position:static}
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/index.html" class="logo">
+      <img src="logo.png" alt="SAID" class="logo-light">
+      <img src="logo-dark.png" alt="SAID" class="logo-dark">
+      SAID
+    </a>
+    <div class="nav-links">
+      <a href="/index.html#openclaw">For Agents</a>
+      <a href="/index.html#features">Features</a>
+      <a href="/agents.html">Directory</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/profile.html">Profile</a>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle dark mode">
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display:none"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <div class="profile-container">
+    <!-- User Card (Left) -->
+    <div class="user-card">
+      <div class="avatar-container">
+        <div class="avatar" id="avatar">A</div>
+        <button class="avatar-edit" title="Change avatar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </button>
+      </div>
+      <h1 class="user-name" id="user-name">Anonymous</h1>
+      <div class="username" id="username">@anonymous</div>
+      <div class="wallet-address">
+        <span id="wallet-short">0x2bD...B8D2</span>
+        <button class="copy-btn" onclick="copyWallet()" title="Copy wallet">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+      </div>
+      <button class="edit-profile-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:8px;vertical-align:middle">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        Edit Profile
+      </button>
+    </div>
+
+    <!-- Right Column -->
+    <div class="profile-content">
+      <!-- Activity Stats -->
+      <section class="stats-section">
+        <h2 class="section-title">Activity Stats</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-icon">🤖</div>
+            <div class="stat-details">
+              <div class="stat-value" id="agents-created">0</div>
+              <div class="stat-label">Agents Created</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">💬</div>
+            <div class="stat-details">
+              <div class="stat-value" id="feedback-given">0</div>
+              <div class="stat-label">Feedback Given</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon">📅</div>
+            <div class="stat-details">
+              <div class="stat-value" id="member-since">Feb 2026</div>
+              <div class="stat-label">Member Since</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Activity -->
+      <section class="activity-section">
+        <h2 class="section-title">Recent Activity</h2>
+        <div class="activity-list" id="activity-list">
+          <div class="no-activity">No recent activity</div>
+        </div>
+      </section>
+
+      <!-- API Keys (Coming Soon) -->
+      <section class="api-section">
+        <div class="coming-soon-badge">Coming Soon</div>
+        <div class="api-content">
+          <h2 class="section-title">API Keys</h2>
+          <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.85rem">
+            said_api_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+          </div>
+          <button style="margin-top:1rem;padding:.75rem 1.5rem;background:var(--accent);color:var(--bg);border:none;border-radius:10px;font-weight:600">
+            + Create Key
+          </button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      const current = html.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateToggleIcon(next);
+    }
+    
+    function updateToggleIcon(theme) {
+      const sun = document.querySelector('.icon-sun');
+      const moon = document.querySelector('.icon-moon');
+      if (sun && moon) {
+        sun.style.display = theme === 'dark' ? 'block' : 'none';
+        moon.style.display = theme === 'dark' ? 'none' : 'block';
+      }
+    }
+    
+    // Load saved theme
+    (function() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = saved || (prefersDark ? 'dark' : 'light');
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+      updateToggleIcon(theme);
+    })();
+
+    // Copy wallet address
+    function copyWallet() {
+      const wallet = '0x2bDf8e9Be3A61Bb8b0B5ce9A52b8f8F1c5E7B8D2'; // Replace with actual wallet
+      navigator.clipboard.writeText(wallet).then(() => {
+        alert('Wallet address copied!');
+      });
+    }
+
+    // Load user data (mock for now)
+    async function loadUserData() {
+      // TODO: Integrate with auth system
+      // For now, show placeholder data
+      document.getElementById('user-name').textContent = 'Anonymous';
+      document.getElementById('username').textContent = '@anonymous';
+      document.getElementById('avatar').textContent = 'A';
+      document.getElementById('agents-created').textContent = '0';
+      document.getElementById('feedback-given').textContent = '0';
+      document.getElementById('member-since').textContent = 'February 2, 2026';
+    }
+
+    loadUserData();
+  </script>
+</body>
+</html>
