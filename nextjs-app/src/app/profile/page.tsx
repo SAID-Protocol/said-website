@@ -75,7 +75,10 @@ export default function ProfilePage() {
   };
 
   const handleSaveProfile = async () => {
-    if (!sessionToken) return;
+    if (!sessionToken) {
+      alert('Session expired. Please refresh and try again.');
+      return;
+    }
     
     setSaving(true);
     try {
@@ -91,7 +94,7 @@ export default function ProfilePage() {
       });
       
       if (res.ok) {
-        // Refresh the page to show updated data
+        alert('Profile updated!');
         window.location.reload();
       } else {
         const data = await res.json();
@@ -99,7 +102,7 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error('Failed to save profile:', err);
-      alert('Failed to save profile');
+      alert('Failed to save profile. Please try again.');
     } finally {
       setSaving(false);
       setIsEditing(false);
