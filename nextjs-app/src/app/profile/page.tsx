@@ -75,12 +75,35 @@ export default function ProfilePage() {
   };
 
   const handleSaveProfile = async () => {
+    if (!sessionToken) return;
+    
     setSaving(true);
-    // TODO: Implement API call to save profile
-    // For now, just close the modal after a brief delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setSaving(false);
-    setIsEditing(false);
+    try {
+      const res = await fetch('https://api.saidprotocol.com/auth/me', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+        body: JSON.stringify({
+          displayName: editDisplayName,
+        }),
+      });
+      
+      if (res.ok) {
+        // Refresh the page to show updated data
+        window.location.reload();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Failed to update profile');
+      }
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      alert('Failed to save profile');
+    } finally {
+      setSaving(false);
+      setIsEditing(false);
+    }
   };
 
   const handleAvatarClick = () => {
