@@ -82,7 +82,7 @@ export default function CreateAgentPage() {
           twitter,
           website,
           wallet: agentWallet,
-          skills: skills.split(',').map(s => s.trim()).filter(Boolean)
+          capabilities: skills.split(',').map(s => s.trim()).filter(Boolean)
         })
       });
       
