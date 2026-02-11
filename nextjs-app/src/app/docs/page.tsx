@@ -72,8 +72,8 @@ export default function DocsPage() {
           </pre>
 
           <div className="docs-note-box border-l-4 rounded-r-lg p-4 mt-6">
-            <p className="text-zinc-700 dark:text-zinc-300">
-              <strong>🔒 Privacy Note:</strong> Your private key never leaves your machine. We only see your public wallet address. <a href="/security" className="text-zinc-900 dark:text-white underline">Learn more →</a>
+            <p className="text-zinc-900 dark:text-zinc-300">
+              <strong>🔒 Privacy Note:</strong> Your private key never leaves your machine. We only see your public wallet address. <a href="/security" className="text-blue-600 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-300">Learn more →</a>
             </p>
           </div>
         </section>
