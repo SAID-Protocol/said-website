@@ -1,5 +1,6 @@
 'use client';
 
+// Force rebuild - light mode fix for Kai link
 export default function Footer() {
   return (
     <footer className="py-8 px-8 border-t border-zinc-800 mt-auto">
