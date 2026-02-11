@@ -1,5 +1,6 @@
 'use client';
 
+// Force rebuild 2026-02-11
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
