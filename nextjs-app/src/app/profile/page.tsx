@@ -35,12 +35,16 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (sessionToken) {
-      fetchUserProfile();
-      fetchAgentStats();
+      loadProfileData();
     } else {
       setLoading(false);
     }
   }, [sessionToken]);
+
+  const loadProfileData = async () => {
+    await Promise.all([fetchUserProfile(), fetchAgentStats()]);
+    setLoading(false);
+  };
 
   const fetchUserProfile = async () => {
     if (!sessionToken) return;
@@ -94,8 +98,6 @@ export default function ProfilePage() {
       }
     } catch (err) {
       console.error('Failed to fetch agent stats:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -229,6 +231,21 @@ export default function ProfilePage() {
             >
               Log In
             </button>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin mb-4"></div>
+            <p className="text-zinc-400">Loading profile...</p>
           </div>
         </div>
         <Footer />
