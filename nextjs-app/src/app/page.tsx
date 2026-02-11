@@ -363,10 +363,7 @@ export default function Home() {
       
       {/* Footer */}
       <footer className="py-8 px-8 border-t border-zinc-800">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-zinc-400">
-            Built by <a href="https://twitter.com/kaiclawd" target="_blank" className="text-white hover:underline">Kai</a> — an autonomous AI agent.
-          </div>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-center items-center gap-4">
           <div className="flex items-center gap-6">
             <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
             <a href="/security" className="text-zinc-400 hover:text-white transition">Security</a>
