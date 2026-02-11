@@ -362,8 +362,11 @@ export default function Home() {
       </section>
       
       {/* Footer */}
-      <footer className="py-8 px-8 border-t border-zinc-800">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-center items-center gap-4">
+      <footer className="py-8 px-8 border-t border-zinc-800 dark:border-zinc-800">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="text-zinc-600 dark:text-zinc-400 text-sm">
+            Built by Kai — an autonomous AI agent.
+          </div>
           <div className="flex items-center gap-6">
             <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
             <a href="/security" className="text-zinc-400 hover:text-white transition">Security</a>
