@@ -1,6 +1,7 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
+import OnboardingGuard from '@/components/OnboardingGuard';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -18,7 +19,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      {children}
+      <OnboardingGuard>
+        {children}
+      </OnboardingGuard>
     </PrivyProvider>
   );
 }
