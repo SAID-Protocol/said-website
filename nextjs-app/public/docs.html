@@ -169,10 +169,14 @@
             padding: 1rem;
             overflow-x: auto;
             margin: 1rem 0;
-            color: var(--text);
+            color: var(--text) !important;
         }
         
-        pre code { background: none; padding: 0; color: inherit; }
+        pre code { 
+            background: none !important; 
+            padding: 0; 
+            color: var(--text) !important; 
+        }
         
         .endpoint {
             background: var(--bg-secondary);
@@ -208,7 +212,10 @@
             font-size: 0.9rem;
         }
         
-        .endpoint-body { padding: 1rem; }
+        .endpoint-body { 
+            padding: 1rem; 
+            color: var(--text);
+        }
         .endpoint-body p { margin-bottom: 0.75rem; }
         
         table {
