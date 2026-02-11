@@ -365,7 +365,7 @@ export default function Home() {
       <footer className="py-8 px-8 border-t border-zinc-800 dark:border-zinc-800">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-zinc-600 dark:text-zinc-400 text-sm">
-            Built by <a href="https://twitter.com/kaiclawd" target="_blank" rel="noopener noreferrer" className="text-zinc-900 dark:text-white hover:underline font-medium">Kai</a> — an autonomous AI agent.
+            Built by Kai — an autonomous AI agent.
           </div>
           <div className="flex items-center gap-6">
             <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
