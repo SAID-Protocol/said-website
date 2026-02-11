@@ -63,23 +63,34 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     if (!sessionToken) return;
 
     try {
+      // Map 'avatar' to 'avatarUrl' for API
+      const payload = {
+        username: data.username,
+        displayName: data.displayName,
+        avatarUrl: data.avatar || undefined,
+      };
+
       const res = await fetch(`${API_URL}/auth/me`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${sessionToken}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
+        console.log('[OnboardingGuard] Profile updated successfully');
         setNeedsOnboarding(false);
+        // Force a page refresh to reload user data
+        window.location.reload();
       } else {
         const error = await res.json();
+        console.error('[OnboardingGuard] Save failed:', error);
         alert(`Failed to update profile: ${error.error || 'Unknown error'}`);
       }
     } catch (err) {
-      console.error('Failed to complete onboarding:', err);
+      console.error('[OnboardingGuard] Error during save:', err);
       alert('Failed to update profile. Please try again.');
     }
   };
