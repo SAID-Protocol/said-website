@@ -71,7 +71,7 @@ export default function DocsPage() {
             <code>said verify -k ./wallet.json</code>
           </pre>
 
-          <div className="bg-white dark:bg-zinc-900 border-l-4 border-zinc-900 dark:border-white rounded-r-lg p-4 mt-6">
+          <div className="docs-note-box border-l-4 rounded-r-lg p-4 mt-6">
             <p className="text-zinc-700 dark:text-zinc-300">
               <strong>🔒 Privacy Note:</strong> Your private key never leaves your machine. We only see your public wallet address. <a href="/security" className="text-zinc-900 dark:text-white underline">Learn more →</a>
             </p>
@@ -120,8 +120,8 @@ console.log(agent);
 
           <h3 className="text-lg font-semibold mt-6 mb-4">Verification & Trust</h3>
           
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg mb-4 overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+          <div className="docs-card border rounded-lg mb-4 overflow-hidden">
+            <div className="docs-card-header flex items-center gap-3 px-4 py-3 border-b">
               <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
               <code className="text-sm">/api/verify/:wallet</code>
             </div>
@@ -133,8 +133,8 @@ console.log(agent);
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg mb-4 overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+          <div className="docs-card border rounded-lg mb-4 overflow-hidden">
+            <div className="docs-card-header flex items-center gap-3 px-4 py-3 border-b">
               <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
               <code className="text-sm">/api/trust/:wallet</code>
             </div>
@@ -148,8 +148,8 @@ console.log(agent);
 
           <h3 className="text-lg font-semibold mt-8 mb-4">Agents</h3>
           
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg mb-4 overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+          <div className="docs-card border rounded-lg mb-4 overflow-hidden">
+            <div className="docs-card-header flex items-center gap-3 px-4 py-3 border-b">
               <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
               <code className="text-sm">/api/agents</code>
             </div>
@@ -158,8 +158,8 @@ console.log(agent);
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg mb-4 overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+          <div className="docs-card border rounded-lg mb-4 overflow-hidden">
+            <div className="docs-card-header flex items-center gap-3 px-4 py-3 border-b">
               <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
               <code className="text-sm">/api/agents/:wallet</code>
             </div>
@@ -170,8 +170,8 @@ console.log(agent);
 
           <h3 className="text-lg font-semibold mt-8 mb-4">Feedback & Reputation</h3>
           
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg mb-4 overflow-hidden">
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+          <div className="docs-card border rounded-lg mb-4 overflow-hidden">
+            <div className="docs-card-header flex items-center gap-3 px-4 py-3 border-b">
               <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-mono rounded">POST</span>
               <code className="text-sm">/api/agents/:wallet/feedback</code>
             </div>
@@ -185,19 +185,19 @@ console.log(agent);
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4 pt-6 border-t border-zinc-800">Resources</h2>
           <div className="grid md:grid-cols-2 gap-4">
-            <a href="https://github.com/kaiclawd/said" target="_blank" className="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-zinc-600 transition">
+            <a href="https://github.com/kaiclawd/said" target="_blank" className="docs-card p-4 border rounded-lg hover:border-zinc-600 transition">
               <h3 className="font-semibold mb-1">GitHub Repository →</h3>
               <p className="text-zinc-400 text-sm">Source code for the Solana program</p>
             </a>
-            <a href="https://www.npmjs.com/package/said-sdk" target="_blank" className="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-zinc-600 transition">
+            <a href="https://www.npmjs.com/package/said-sdk" target="_blank" className="docs-card p-4 border rounded-lg hover:border-zinc-600 transition">
               <h3 className="font-semibold mb-1">npm Package →</h3>
               <p className="text-zinc-400 text-sm">said-sdk on npm</p>
             </a>
-            <a href="https://explorer.solana.com/address/5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G" target="_blank" className="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-zinc-600 transition">
+            <a href="https://explorer.solana.com/address/5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G" target="_blank" className="docs-card p-4 border rounded-lg hover:border-zinc-600 transition">
               <h3 className="font-semibold mb-1">Solana Explorer →</h3>
               <p className="text-zinc-400 text-sm">View the deployed program</p>
             </a>
-            <a href="/security" className="p-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg hover:border-zinc-600 transition">
+            <a href="/security" className="docs-card p-4 border rounded-lg hover:border-zinc-600 transition">
               <h3 className="font-semibold mb-1">Security & Privacy →</h3>
               <p className="text-zinc-400 text-sm">How we protect your data</p>
             </a>

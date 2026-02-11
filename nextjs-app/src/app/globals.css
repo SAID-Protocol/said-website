@@ -50,6 +50,35 @@ body {
   color: #f4f4f5 !important;
 }
 
+/* Docs page cards and containers */
+[data-theme="light"] .docs-card {
+  background: #ffffff !important;
+  border-color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .docs-card {
+  background: #18181b !important;
+  border-color: #3f3f46 !important;
+}
+
+[data-theme="light"] .docs-card-header {
+  border-bottom-color: #e5e5e5 !important;
+}
+
+[data-theme="dark"] .docs-card-header {
+  border-bottom-color: #3f3f46 !important;
+}
+
+[data-theme="light"] .docs-note-box {
+  background: #f5f5f5 !important;
+  border-left-color: #18181b !important;
+}
+
+[data-theme="dark"] .docs-note-box {
+  background: #18181b !important;
+  border-left-color: #ffffff !important;
+}
+
 /* Ensure all interactive elements have pointer cursor */
 button,
 [role="button"],
