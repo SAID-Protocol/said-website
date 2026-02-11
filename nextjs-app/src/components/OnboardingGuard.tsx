@@ -34,13 +34,15 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
         const data = await res.json();
         
-        // Check if user has username and displayName set
-        const hasProfile = data.username && 
-                          data.username !== 'anonymous' && 
-                          data.displayName && 
-                          data.displayName !== 'User';
+        console.log('[OnboardingGuard] User data:', data);
         
-        setNeedsOnboarding(!hasProfile);
+        // Only trigger onboarding if username is null/undefined OR exactly 'anonymous'
+        // This catches truly new users, not existing ones
+        const needsSetup = !data.username || data.username === 'anonymous';
+        
+        console.log('[OnboardingGuard] needsSetup:', needsSetup);
+        
+        setNeedsOnboarding(needsSetup);
       } catch (err) {
         console.error('Failed to check profile:', err);
       } finally {
