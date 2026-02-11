@@ -27,6 +27,29 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Docs page code blocks - explicit theme handling */
+[data-theme="light"] .docs-code-block {
+  background: #f5f5f5 !important;
+  border-color: #e5e5e5 !important;
+  color: #18181b !important;
+}
+
+[data-theme="dark"] .docs-code-block {
+  background: #18181b !important;
+  border-color: #3f3f46 !important;
+  color: #f4f4f5 !important;
+}
+
+[data-theme="light"] .docs-code-inline {
+  background: #e5e5e5 !important;
+  color: #18181b !important;
+}
+
+[data-theme="dark"] .docs-code-inline {
+  background: #3f3f46 !important;
+  color: #f4f4f5 !important;
+}
+
 /* Ensure all interactive elements have pointer cursor */
 button,
 [role="button"],

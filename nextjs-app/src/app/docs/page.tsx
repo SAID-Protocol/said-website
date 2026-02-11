@@ -24,7 +24,7 @@ export default function DocsPage() {
           
           <h3 className="text-lg font-semibold mt-6 mb-3">Option A: Interactive Wizard (Recommended)</h3>
           <p className="text-zinc-400 mb-3">The fastest way to scaffold a new SAID-verified agent project:</p>
-          <pre className="bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto text-zinc-900 dark:text-zinc-100">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>npx create-said-agent my-agent</code>
           </pre>
           <p className="text-zinc-400 mb-2">This will:</p>
@@ -39,24 +39,24 @@ export default function DocsPage() {
           <p className="text-zinc-400 mb-4">For existing projects or custom setups:</p>
           
           <h4 className="font-medium mt-4 mb-2">1. Install the CLI</h4>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>npm install -g said-sdk</code>
           </pre>
 
           <h4 className="font-medium mt-4 mb-2">2. Generate a Wallet</h4>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-2 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>said wallet generate -o ./wallet.json</code>
           </pre>
           <p className="text-zinc-500 text-sm mb-4">⚠️ Back up this file! Lose it = lose your identity forever.</p>
 
           <h4 className="font-medium mt-4 mb-2">3. Fund Your Wallet</h4>
           <p className="text-zinc-400 mb-2">Send ~0.01 SOL to your wallet address for registration fees:</p>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>said wallet show -k ./wallet.json</code>
           </pre>
 
           <h4 className="font-medium mt-4 mb-2">4. Register Your Agent</h4>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>{`said register \\
   -k ./wallet.json \\
   -n "My Agent Name" \\
@@ -67,7 +67,7 @@ export default function DocsPage() {
 
           <h4 className="font-medium mt-4 mb-2">5. Verify (Optional)</h4>
           <p className="text-zinc-400 mb-2">Verification costs 0.01 SOL and gives your agent a verified badge:</p>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>said verify -k ./wallet.json</code>
           </pre>
 
@@ -84,12 +84,12 @@ export default function DocsPage() {
           <p className="text-zinc-400 mb-4">Already registered? Here's how to integrate SAID into your code:</p>
           
           <h3 className="text-lg font-semibold mt-6 mb-3">Install the SDK</h3>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>npm install said-sdk</code>
           </pre>
 
           <h3 className="text-lg font-semibold mt-6 mb-3">Check if an Agent is Verified</h3>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>{`import { isVerified } from "said-sdk";
 
 const verified = await isVerified("WALLET_ADDRESS");
@@ -97,7 +97,7 @@ console.log(verified); // true or false`}</code>
           </pre>
 
           <h3 className="text-lg font-semibold mt-6 mb-3">Get Full Agent Identity</h3>
-          <pre className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 mb-4 overflow-x-auto">
+          <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
             <code>{`import { lookup } from "said-sdk";
 
 const agent = await lookup("WALLET_ADDRESS");
@@ -116,7 +116,7 @@ console.log(agent);
         {/* API Reference */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4 pt-6 border-t border-zinc-800">API Reference</h2>
-          <p className="text-zinc-400 mb-6">Base URL: <code className="bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 px-2 py-1 rounded">https://api.saidprotocol.com</code></p>
+          <p className="text-zinc-400 mb-6">Base URL: <code className="docs-code-inline">https://api.saidprotocol.com</code></p>
 
           <h3 className="text-lg font-semibold mt-6 mb-4">Verification & Trust</h3>
           
@@ -127,7 +127,7 @@ console.log(agent);
             </div>
             <div className="p-4">
               <p className="text-zinc-400 text-sm mb-3">Full identity verification. Returns identity, reputation, trust tier, and useful URLs.</p>
-              <pre className="bg-zinc-50 dark:bg-zinc-950 rounded p-3 text-zinc-900 dark:text-zinc-100 text-sm overflow-x-auto">
+              <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
                 <code>curl https://api.saidprotocol.com/api/verify/WALLET_ADDRESS</code>
               </pre>
             </div>
@@ -140,7 +140,7 @@ console.log(agent);
             </div>
             <div className="p-4">
               <p className="text-zinc-400 text-sm mb-3">Minimal trust check. Returns just the trust tier for fast gating decisions.</p>
-              <pre className="bg-zinc-50 dark:bg-zinc-950 rounded p-3 text-zinc-900 dark:text-zinc-100 text-sm overflow-x-auto">
+              <pre className="docs-code-block rounded-lg p-4 mb-4 overflow-x-auto border">
                 <code>curl https://api.saidprotocol.com/api/trust/WALLET_ADDRESS</code>
               </pre>
             </div>
