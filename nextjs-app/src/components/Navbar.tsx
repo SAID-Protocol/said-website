@@ -4,11 +4,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Navbar() {
   const { login, logout, authenticated, user } = usePrivy();
+  const { sessionToken } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [avatarUrl, setAvatarUrl] = useState<string>('');
 
   useEffect(() => {
     const saved = localStorage.getItem('theme') as 'light' | 'dark' | null;
@@ -17,6 +20,31 @@ export default function Navbar() {
     setTheme(initial);
     document.documentElement.setAttribute('data-theme', initial);
   }, []);
+
+  useEffect(() => {
+    if (authenticated && sessionToken) {
+      fetchUserProfile();
+    }
+  }, [authenticated, sessionToken]);
+
+  const fetchUserProfile = async () => {
+    if (!sessionToken) return;
+    
+    try {
+      const res = await fetch('https://api.saidprotocol.com/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      });
+      
+      if (res.ok) {
+        const data = await res.json();
+        setAvatarUrl(data.user?.avatarUrl || '');
+      }
+    } catch (err) {
+      console.error('Failed to fetch user profile:', err);
+    }
+  };
 
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
@@ -97,12 +125,20 @@ export default function Navbar() {
           <div className="relative">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center"
+              className="w-9 h-9 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
+              {avatarUrl ? (
+                <img 
+                  src={avatarUrl} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              )}
             </button>
             
             {menuOpen && (
