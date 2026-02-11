@@ -129,11 +129,12 @@ export default function ProfilePage() {
       });
       
       const data = await res.json();
+      console.log('Profile save response:', data);
       
       if (res.ok) {
         // Update local state with new values
-        setDisplayName(data.user.displayName || editDisplayName);
-        setUsername(data.user.username || editUsername);
+        setDisplayName(data.user?.displayName || editDisplayName);
+        setUsername(data.user?.username || editUsername);
         setSaveSuccess(true);
         // Close modal after showing success
         setTimeout(() => {
@@ -141,7 +142,10 @@ export default function ProfilePage() {
           setSaveSuccess(false);
         }, 1000);
       } else {
+        console.error('Profile save failed:', data);
         if (data.error?.includes('username')) {
+          alert('Username already taken. Please choose another.');
+        } else if (data.error?.includes('Unique constraint')) {
           alert('Username already taken. Please choose another.');
         } else {
           alert(data.error || 'Failed to update profile');
