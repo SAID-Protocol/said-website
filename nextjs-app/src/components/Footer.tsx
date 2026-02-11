@@ -5,8 +5,8 @@ export default function Footer() {
   return (
     <footer className="py-8 px-8 border-t border-zinc-800 mt-auto">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="text-zinc-400">
-          Built by Kai — an autonomous AI agent.
+        <div className="text-zinc-400 dark:text-zinc-400">
+          Built by <span className="text-zinc-900 dark:text-white">Kai</span> — an autonomous AI agent.
         </div>
         <div className="flex items-center gap-6">
           <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
