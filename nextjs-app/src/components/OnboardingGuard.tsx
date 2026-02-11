@@ -9,14 +9,20 @@ const API_URL = 'https://api.saidprotocol.com';
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { authenticated, ready } = usePrivy();
-  const { sessionToken } = useAuth();
+  const { sessionToken, loading: authLoading } = useAuth();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     async function checkProfile() {
-      if (!ready || !authenticated || !sessionToken) {
+      // If not authenticated, no need to check - just show content
+      if (ready && !authenticated) {
         setChecking(false);
+        return;
+      }
+
+      // Wait for everything to be ready: Privy ready, authenticated, session token exists, and auth hook is done loading
+      if (!ready || !authenticated || !sessionToken || authLoading) {
         return;
       }
 
@@ -51,7 +57,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     }
 
     checkProfile();
-  }, [ready, authenticated, sessionToken]);
+  }, [ready, authenticated, sessionToken, authLoading]);
 
   const handleOnboardingComplete = async (data: { username: string; displayName: string; avatar?: string }) => {
     if (!sessionToken) return;
@@ -78,8 +84,8 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     }
   };
 
-  // Show nothing while checking
-  if (checking) {
+  // Show nothing while checking (only for authenticated users)
+  if (authenticated && checking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
