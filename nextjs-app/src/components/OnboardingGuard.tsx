@@ -44,7 +44,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         
         // Only trigger onboarding if username is null/undefined OR exactly 'anonymous'
         // This catches truly new users, not existing ones
-        const needsSetup = !data.username || data.username === 'anonymous';
+        const needsSetup = !data.user?.username || data.user?.username === 'anonymous';
         
         console.log('[OnboardingGuard] needsSetup:', needsSetup);
         
