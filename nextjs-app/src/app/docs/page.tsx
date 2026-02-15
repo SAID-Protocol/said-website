@@ -136,8 +136,8 @@ export default function DocsPage() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      const yOffset = -80; // Offset to show divider + title below navbar
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      const navbarHeight = 64;
+      const y = element.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
@@ -148,7 +148,7 @@ export default function DocsPage() {
       
       <div className="flex flex-1">
         {/* Left Sidebar */}
-        <aside className="hidden lg:block w-64 border-r border-zinc-800 p-6 sticky top-0 h-screen">
+        <aside className="hidden lg:block w-64 border-r border-zinc-800 p-6 fixed top-[64px] left-0 h-[calc(100vh-64px)] bg-zinc-950">
           <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
           <nav className="space-y-1">
             {sections.map((section) => (
@@ -168,7 +168,7 @@ export default function DocsPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-4xl px-8 py-12">
+        <main className="flex-1 max-w-4xl px-8 py-12 lg:ml-64">
           
           {/* Introduction */}
           <section id="introduction" className="mb-16">
