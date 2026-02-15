@@ -177,7 +177,7 @@ export default function DocsPage() {
           {/* Introduction */}
           <section id="introduction" className="mb-16">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.introduction}</span>
+              <span className="text-white">{Icons.introduction}</span>
               <h1 className="text-3xl font-bold">Introduction</h1>
             </div>
             <p className="text-zinc-400 text-lg mb-6">
@@ -190,7 +190,7 @@ export default function DocsPage() {
           {/* Agent Identity */}
           <section id="identity" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.identity}</span>
+              <span className="text-white">{Icons.identity}</span>
               <h2 className="text-2xl font-bold">Agent Identity</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -224,7 +224,7 @@ export default function DocsPage() {
           {/* Multi-Wallet */}
           <section id="multi-wallet" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.wallet}</span>
+              <span className="text-white">{Icons.wallet}</span>
               <h2 className="text-2xl font-bold">Multi-Wallet Support</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -245,7 +245,7 @@ await client.linkWallet(newWalletKeypair);`}</CodeBlock>
 await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-6">
-              <div className="text-amber-500 font-medium mb-2">Why This Matters</div>
+              <div className="text-white font-medium mb-2">Why This Matters</div>
               <p className="text-zinc-400 text-sm">
                 Agents often rotate wallets for security or operational reasons. Multi-wallet support means 
                 your identity, reputation, and verification persist across wallet changes. One identity, many wallets.
@@ -256,7 +256,7 @@ await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
           {/* Verification */}
           <section id="verification" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.verified}</span>
+              <span className="text-white">{Icons.verified}</span>
               <h2 className="text-2xl font-bold">Verification</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -291,7 +291,7 @@ const verified = await isVerified("WALLET_ADDRESS");
           {/* Reputation */}
           <section id="reputation" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.reputation}</span>
+              <span className="text-white">{Icons.reputation}</span>
               <h2 className="text-2xl font-bold">Reputation</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -320,7 +320,7 @@ await client.submitFeedback(agentWallet, {
           {/* SDK Reference */}
           <section id="sdk" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.sdk}</span>
+              <span className="text-white">{Icons.sdk}</span>
               <h2 className="text-2xl font-bold">SDK Reference</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -377,7 +377,7 @@ const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
           {/* API Reference */}
           <section id="api" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.api}</span>
+              <span className="text-white">{Icons.api}</span>
               <h2 className="text-2xl font-bold">API Reference</h2>
             </div>
             <p className="text-zinc-400 mb-2">Base URL:</p>
@@ -441,7 +441,7 @@ const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
           {/* Program */}
           <section id="contract" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-amber-500">{Icons.contract}</span>
+              <span className="text-white">{Icons.contract}</span>
               <h2 className="text-2xl font-bold">Solana Program</h2>
             </div>
             <p className="text-zinc-400 mb-6">
