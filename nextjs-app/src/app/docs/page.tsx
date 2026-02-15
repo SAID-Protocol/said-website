@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -133,13 +132,12 @@ function ContractBox({ label, address }: { label: string; address: string }) {
 }
 
 export default function DocsPage() {
-  const [activeSection, setActiveSection] = useState('introduction');
-
   const scrollToSection = (id: string) => {
-    setActiveSection(id);
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const yOffset = -24; // Small offset to show divider
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
@@ -156,11 +154,7 @@ export default function DocsPage() {
               <button
                 key={section.id}
                 onClick={() => scrollToSection(section.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                  activeSection === section.id
-                    ? 'bg-zinc-800 text-white'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                }`}
+                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
               >
                 <span className="text-zinc-500">{section.icon}</span>
                 {section.title}
@@ -485,26 +479,6 @@ const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
           </section>
 
         </main>
-
-        {/* Right Sidebar - On This Page */}
-        <aside className="hidden xl:block w-56 p-6 sticky top-0 h-screen">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">On This Page</div>
-          <nav className="space-y-2">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => scrollToSection(section.id)}
-                className={`block text-sm transition-colors ${
-                  activeSection === section.id
-                    ? 'text-white'
-                    : 'text-zinc-500 hover:text-zinc-300'
-                }`}
-              >
-                {section.title}
-              </button>
-            ))}
-          </nav>
-        </aside>
       </div>
 
       <Footer />
