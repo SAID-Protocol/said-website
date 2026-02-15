@@ -134,6 +134,10 @@ function ContractBox({ label, address }: { label: string; address: string }) {
 
 export default function DocsPage() {
   const scrollToSection = (id: string) => {
+    if (id === 'introduction') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     const element = document.getElementById(id);
     if (element) {
       const navbarHeight = 64;
@@ -148,7 +152,7 @@ export default function DocsPage() {
       
       <div className="flex flex-1">
         {/* Left Sidebar */}
-        <aside className="hidden lg:block w-64 border-r border-zinc-800 p-6 fixed top-[64px] left-0 h-[calc(100vh-64px)] bg-zinc-950">
+        <aside className="hidden lg:block w-64 p-6 fixed top-[64px] left-0 bg-zinc-950">
           <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
           <nav className="space-y-1">
             {sections.map((section) => (
