@@ -35,7 +35,9 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         });
 
         if (!res.ok) {
+          // Can't fetch user data - let them through
           setChecking(false);
+          setNeedsOnboarding(false);
           return;
         }
 
@@ -52,6 +54,8 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         setNeedsOnboarding(needsSetup);
       } catch (err) {
         console.error('Failed to check profile:', err);
+        // On error, don't block - let them browse
+        setNeedsOnboarding(false);
       } finally {
         setChecking(false);
       }

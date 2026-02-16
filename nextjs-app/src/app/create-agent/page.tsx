@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,10 +10,17 @@ import Footer from '@/components/Footer';
 type Step = 'choose' | 'register' | 'create' | 'success';
 
 export default function CreateAgentPage() {
-  const { authenticated, login } = usePrivy();
+  const { authenticated, login, ready } = usePrivy();
   const { sessionToken } = useAuth();
   const [step, setStep] = useState<Step>('choose');
   const [loading, setLoading] = useState(false);
+
+  // Require authentication to create agents
+  useEffect(() => {
+    if (ready && !authenticated) {
+      login();
+    }
+  }, [ready, authenticated, login]);
   
   // Form state
   const [name, setName] = useState('');
