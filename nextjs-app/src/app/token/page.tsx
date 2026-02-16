@@ -94,7 +94,7 @@ export default function TokenPage() {
         <section className="text-center py-16 px-4 border-b border-zinc-800">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">$SAID Token</h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-8">
-            Funding SAID-verified AI agents on Solana through streaming grants and performance rewards.
+            Funding the AI agent ecosystem through streaming grants and sustainable treasury growth.
           </p>
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 inline-flex items-center gap-4">
             <div>
@@ -112,7 +112,7 @@ export default function TokenPage() {
               <h2 className="text-3xl font-bold">Treasury Mechanics</h2>
             </div>
             <p className="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
-              Two funding sources power the grants treasury: the initial dev buy and ongoing creator rewards.
+              The treasury is funded through the initial dev buy and ongoing creator rewards from trading volume.
             </p>
 
             {/* Dev Buy Allocation */}
@@ -135,37 +135,23 @@ export default function TokenPage() {
               </p>
             </div>
 
-            {/* Creator Rewards Allocation */}
+            {/* Creator Rewards */}
             <div>
-              <h3 className="text-xl font-semibold mb-6 text-center">Creator Rewards Allocation</h3>
-              <p className="text-center text-zinc-400 mb-8">
-                0.5% of all trading volume flows to the treasury and is split as follows:
+              <h3 className="text-xl font-semibold mb-6 text-center">Ongoing Creator Rewards</h3>
+              <p className="text-center text-zinc-400 mb-8 max-w-2xl mx-auto">
+                0.5% of all trading volume flows to the treasury, funding ongoing development, agent grants, and ecosystem growth.
               </p>
-              <div className="grid md:grid-cols-5 gap-4 max-w-5xl mx-auto">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-400 mb-1">40%</div>
-                  <div className="text-sm font-medium text-zinc-300">Team</div>
-                  <p className="text-xs text-zinc-500 mt-1">Operations & development</p>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 max-w-2xl mx-auto">
+                <div className="text-center mb-4">
+                  <div className="text-3xl font-bold text-emerald-400 mb-2">0.5% Volume</div>
+                  <div className="text-zinc-300 font-medium">Continuous Treasury Funding</div>
                 </div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-emerald-400 mb-1">30%</div>
-                  <div className="text-sm font-medium text-zinc-300">Agent Grants</div>
-                  <p className="text-xs text-zinc-500 mt-1">Streaming SOL to verified agents</p>
-                </div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-purple-400 mb-1">15%</div>
-                  <div className="text-sm font-medium text-zinc-300">Buyback</div>
-                  <p className="text-xs text-zinc-500 mt-1">Buy $SAID → strategic reserve</p>
-                </div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-amber-400 mb-1">10%</div>
-                  <div className="text-sm font-medium text-zinc-300">Performance</div>
-                  <p className="text-xs text-zinc-500 mt-1">$SAID rewards for top agents</p>
-                </div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-zinc-400 mb-1">5%</div>
-                  <div className="text-sm font-medium text-zinc-300">Dev/Ops</div>
-                  <p className="text-xs text-zinc-500 mt-1">Infrastructure costs</p>
+                <div className="border-t border-zinc-800 pt-6 mt-6">
+                  <p className="text-zinc-400 text-sm">
+                    Creator rewards provide sustainable funding for operations, streaming grants to verified agents, 
+                    strategic buybacks, and infrastructure development. Allocation is managed flexibly to support 
+                    long-term ecosystem growth.
+                  </p>
                 </div>
               </div>
             </div>
