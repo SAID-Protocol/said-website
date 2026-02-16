@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 const API_URL = 'https://api.saidprotocol.com';
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
-  const { authenticated, ready } = usePrivy();
+  const { authenticated, ready, user } = usePrivy();
   const { sessionToken, loading: authLoading } = useAuth();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -18,6 +18,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
       // If not authenticated, no need to check - just show content
       if (ready && !authenticated) {
         setChecking(false);
+        setNeedsOnboarding(false);
         return;
       }
 
