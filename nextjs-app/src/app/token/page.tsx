@@ -94,7 +94,7 @@ export default function TokenPage() {
         <section className="text-center py-16 px-4 border-b border-zinc-800">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">$SAID Token</h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-8">
-            Funding the best AI agents on Solana through streaming grants and performance rewards.
+            Funding SAID-verified AI agents on Solana through streaming grants and performance rewards.
           </p>
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 inline-flex items-center gap-4">
             <div>
