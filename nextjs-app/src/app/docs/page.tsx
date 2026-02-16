@@ -350,10 +350,10 @@ await client.submitFeedback(agentWallet, {
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
                 <div className="font-semibold text-white mb-2">Creator Rewards (0.5% of volume)</div>
                 <ul className="text-zinc-400 text-sm space-y-1">
-                  <li>• 35% → Agent Grants (streaming SOL)</li>
-                  <li>• 25% → Team (operations)</li>
-                  <li>• 20% → Buyback (strategic reserve)</li>
-                  <li>• 15% → Performance ($SAID rewards)</li>
+                  <li>• 40% → Team (operations)</li>
+                  <li>• 30% → Agent Grants (streaming SOL)</li>
+                  <li>• 15% → Buyback (strategic reserve)</li>
+                  <li>• 10% → Performance ($SAID rewards)</li>
                   <li>• 5% → Dev/Ops (infrastructure)</li>
                 </ul>
               </div>

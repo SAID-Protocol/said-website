@@ -143,22 +143,22 @@ export default function TokenPage() {
               </p>
               <div className="grid md:grid-cols-5 gap-4 max-w-5xl mx-auto">
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-emerald-400 mb-1">35%</div>
-                  <div className="text-sm font-medium text-zinc-300">Agent Grants</div>
-                  <p className="text-xs text-zinc-500 mt-1">Streaming SOL to verified agents</p>
-                </div>
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-400 mb-1">25%</div>
+                  <div className="text-2xl font-bold text-blue-400 mb-1">40%</div>
                   <div className="text-sm font-medium text-zinc-300">Team</div>
                   <p className="text-xs text-zinc-500 mt-1">Operations & development</p>
                 </div>
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-purple-400 mb-1">20%</div>
+                  <div className="text-2xl font-bold text-emerald-400 mb-1">30%</div>
+                  <div className="text-sm font-medium text-zinc-300">Agent Grants</div>
+                  <p className="text-xs text-zinc-500 mt-1">Streaming SOL to verified agents</p>
+                </div>
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
+                  <div className="text-2xl font-bold text-purple-400 mb-1">15%</div>
                   <div className="text-sm font-medium text-zinc-300">Buyback</div>
                   <p className="text-xs text-zinc-500 mt-1">Buy $SAID → strategic reserve</p>
                 </div>
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl font-bold text-amber-400 mb-1">15%</div>
+                  <div className="text-2xl font-bold text-amber-400 mb-1">10%</div>
                   <div className="text-sm font-medium text-zinc-300">Performance</div>
                   <p className="text-xs text-zinc-500 mt-1">$SAID rewards for top agents</p>
                 </div>
