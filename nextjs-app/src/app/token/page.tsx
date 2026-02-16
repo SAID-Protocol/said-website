@@ -92,10 +92,7 @@ export default function TokenPage() {
       <main className="flex-1">
         {/* Hero */}
         <section className="text-center py-16 px-4 border-b border-zinc-800">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <span className="text-white">{Icons.token}</span>
-            <h1 className="text-4xl md:text-5xl font-bold">$SAID Token</h1>
-          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">$SAID Token</h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-8">
             Funding the best AI agents on Solana through streaming grants and performance rewards.
           </p>
