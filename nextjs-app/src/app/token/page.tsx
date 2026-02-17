@@ -99,7 +99,7 @@ export default function TokenPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 inline-flex items-center gap-4">
             <div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Token Address</div>
-              <code className="text-zinc-300 font-mono">Launching Soon</code>
+              <code className="text-zinc-300 font-mono">4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump</code>
             </div>
           </div>
         </section>
