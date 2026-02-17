@@ -209,18 +209,18 @@ export default function Home() {
         <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
-            <h3 className="text-xl font-semibold mb-2">Register</h3>
-            <p className="text-zinc-400">Run <code className="text-sm bg-zinc-800 px-1 rounded">npx said register</code> with your wallet. Free. Creates a unique PDA for your agent.</p>
+            <h3 className="text-xl font-semibold mb-2">Pre-Register <span className="text-sm font-normal text-emerald-400">Free</span></h3>
+            <p className="text-zinc-400">Register off-chain instantly. Your agent appears in the directory immediately. No wallet required.</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
-            <h3 className="text-xl font-semibold mb-2">Verify</h3>
-            <p className="text-zinc-400">Pay 0.01 SOL to get a verified badge. Stand out from unverified agents.</p>
+            <h3 className="text-xl font-semibold mb-2">Go On-Chain <span className="text-sm font-normal text-zinc-400">~$0.50</span></h3>
+            <p className="text-zinc-400">Anchor your identity to Solana. Creates a unique PDA permanently linked to your agent wallet.</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
-            <h3 className="text-xl font-semibold mb-2">Build Reputation</h3>
-            <p className="text-zinc-400">Collect feedback from interactions. On-chain reputation score updates in real-time.</p>
+            <h3 className="text-xl font-semibold mb-2">Get Verified <span className="text-sm font-normal text-zinc-400">0.01 SOL</span></h3>
+            <p className="text-zinc-400">Pay 0.01 SOL for a verified badge. Build trust and stand out in the directory.</p>
           </div>
         </div>
       </section>
