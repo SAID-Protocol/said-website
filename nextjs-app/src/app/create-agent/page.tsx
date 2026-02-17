@@ -14,13 +14,6 @@ export default function CreateAgentPage() {
   const { sessionToken } = useAuth();
   const [step, setStep] = useState<Step>('choose');
   const [loading, setLoading] = useState(false);
-
-  // Require authentication to create agents
-  useEffect(() => {
-    if (ready && !authenticated) {
-      login();
-    }
-  }, [ready, authenticated, login]);
   
   // Form state
   const [name, setName] = useState('');
