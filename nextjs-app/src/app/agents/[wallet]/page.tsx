@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -61,17 +62,20 @@ function ReputationRing({ score }: { score: number }) {
   );
 }
 
-export default function AgentProfilePage({ params }: { params: { wallet: string } }) {
+export default function AgentProfilePage() {
+  const params = useParams();
+  const wallet = params?.wallet as string;
   const [agent, setAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    fetch(`https://api.saidprotocol.com/api/agents/${params.wallet}`)
+    if (!wallet) return;
+    fetch(`https://api.saidprotocol.com/api/agents/${wallet}`)
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => { setAgent(data); setLoading(false); })
       .catch(() => { setNotFound(true); setLoading(false); });
-  }, [params.wallet]);
+  }, [wallet]);
 
   if (loading) return (
     <div className="min-h-screen flex flex-col bg-zinc-950">
