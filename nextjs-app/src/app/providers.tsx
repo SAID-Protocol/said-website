@@ -12,7 +12,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         appearance: {
           theme: 'dark',
           accentColor: '#667eea',
-          logo: '/logo.png',
+          logo: '/logo-dark.png',
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
