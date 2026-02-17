@@ -77,7 +77,7 @@ function CopyButton({ text }: { text: string }) {
 function StatCard({ value, label, description }: { value: string; label: string; description: string }) {
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center">
-      <div className="text-4xl font-bold text-white mb-2">{value}</div>
+      <div className="text-4xl font-bold mb-2">{value}</div>
       <div className="text-lg font-semibold text-zinc-300 mb-2">{label}</div>
       <p className="text-sm text-zinc-500">{description}</p>
     </div>
@@ -138,21 +138,10 @@ export default function TokenPage() {
             {/* Creator Rewards */}
             <div>
               <h3 className="text-xl font-semibold mb-6 text-center">Ongoing Creator Rewards</h3>
-              <p className="text-center text-zinc-400 mb-8 max-w-2xl mx-auto">
-                0.5% of all trading volume flows to the treasury, funding ongoing development, agent grants, and ecosystem growth.
-              </p>
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-8 max-w-2xl mx-auto">
-                <div className="text-center mb-4">
-                  <div className="text-3xl font-bold text-emerald-400 mb-2">0.5% Volume</div>
-                  <div className="text-zinc-300 font-medium">Continuous Treasury Funding</div>
-                </div>
-                <div className="border-t border-zinc-800 pt-6 mt-6">
-                  <p className="text-zinc-400 text-sm">
-                    Creator rewards provide sustainable funding for operations, streaming grants to verified agents, 
-                    strategic buybacks, and infrastructure development. Allocation is managed flexibly to support 
-                    long-term ecosystem growth.
-                  </p>
-                </div>
+                <p className="text-zinc-400 text-center">
+                  Trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.
+                </p>
               </div>
             </div>
           </div>

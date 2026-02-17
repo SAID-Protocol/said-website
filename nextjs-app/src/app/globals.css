@@ -105,6 +105,7 @@ a,
   .border-zinc-600 { border-color: #999 !important; }
   
   /* Text */
+  .text-white { color: #000000 !important; }
   .text-zinc-300 { color: #333 !important; }
   .text-zinc-400 { color: #666 !important; }
   .text-zinc-500 { color: #888 !important; }

@@ -186,7 +186,7 @@ export default function DocsPage() {
           {/* Introduction */}
           <section id="introduction" className="mb-16">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.introduction}</span>
+              <span className="">{Icons.introduction}</span>
               <h1 className="text-3xl font-bold">Introduction</h1>
             </div>
             <p className="text-zinc-400 text-lg mb-6">
@@ -199,7 +199,7 @@ export default function DocsPage() {
           {/* Agent Identity */}
           <section id="identity" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.identity}</span>
+              <span className="">{Icons.identity}</span>
               <h2 className="text-2xl font-bold">Agent Identity</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -233,7 +233,7 @@ export default function DocsPage() {
           {/* Multi-Wallet */}
           <section id="multi-wallet" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.wallet}</span>
+              <span className="">{Icons.wallet}</span>
               <h2 className="text-2xl font-bold">Multi-Wallet Support</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -254,7 +254,7 @@ await client.linkWallet(newWalletKeypair);`}</CodeBlock>
 await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-6">
-              <div className="text-white font-medium mb-2">Why This Matters</div>
+              <div className="font-medium mb-2">Why This Matters</div>
               <p className="text-zinc-400 text-sm">
                 Agents often rotate wallets for security or operational reasons. Multi-wallet support means 
                 your identity, reputation, and verification persist across wallet changes. One identity, many wallets.
@@ -265,7 +265,7 @@ await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
           {/* Verification */}
           <section id="verification" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.verified}</span>
+              <span className="">{Icons.verified}</span>
               <h2 className="text-2xl font-bold">Verification</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -283,15 +283,15 @@ const verified = await isVerified("WALLET_ADDRESS");
 
             <div className="grid md:grid-cols-3 gap-4 mt-8">
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">FREE</div>
+                <div className="text-2xl font-bold mb-1">FREE</div>
                 <div className="text-zinc-500 text-sm">Registration</div>
               </div>
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">0.01 SOL</div>
+                <div className="text-2xl font-bold mb-1">0.01 SOL</div>
                 <div className="text-zinc-500 text-sm">Verification Badge</div>
               </div>
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
-                <div className="text-2xl font-bold text-white mb-1">Forever</div>
+                <div className="text-2xl font-bold mb-1">Forever</div>
                 <div className="text-zinc-500 text-sm">On-chain Identity</div>
               </div>
             </div>
@@ -300,7 +300,7 @@ const verified = await isVerified("WALLET_ADDRESS");
           {/* Reputation */}
           <section id="reputation" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.reputation}</span>
+              <span className="">{Icons.reputation}</span>
               <h2 className="text-2xl font-bold">Reputation</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -329,7 +329,7 @@ await client.submitFeedback(agentWallet, {
           {/* $SAID Token */}
           <section id="token" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.token}</span>
+              <span className="">{Icons.token}</span>
               <h2 className="text-2xl font-bold">$SAID Token</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -341,21 +341,15 @@ await client.submitFeedback(agentWallet, {
             
             <div className="space-y-4 mb-6">
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                <div className="font-semibold text-white mb-2">30% Dev Buy</div>
+                <div className="font-semibold mb-2">30% Dev Buy</div>
                 <ul className="text-zinc-400 text-sm space-y-1">
                   <li>• 15% locked for 1 year (long-term commitment)</li>
                   <li>• 15% liquid for grants, LP, and development</li>
                 </ul>
               </div>
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
-                <div className="font-semibold text-white mb-2">Creator Rewards (0.5% of volume)</div>
-                <ul className="text-zinc-400 text-sm space-y-1">
-                  <li>• 40% → Team (operations)</li>
-                  <li>• 30% → Agent Grants (streaming SOL)</li>
-                  <li>• 15% → Buyback (strategic reserve)</li>
-                  <li>• 10% → Performance ($SAID rewards)</li>
-                  <li>• 5% → Dev/Ops (infrastructure)</li>
-                </ul>
+                <div className="font-semibold mb-2">Creator Rewards</div>
+                <p className="text-zinc-400 text-sm">Trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.</p>
               </div>
             </div>
 
@@ -365,15 +359,15 @@ await client.submitFeedback(agentWallet, {
             </p>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
-                <div className="text-xl font-bold text-white mb-1">1-5 SOL/mo</div>
+                <div className="text-xl font-bold mb-1">1-5 SOL/mo</div>
                 <div className="text-zinc-500 text-sm">Typical Grant</div>
               </div>
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
-                <div className="text-xl font-bold text-white mb-1">3-6 months</div>
+                <div className="text-xl font-bold mb-1">3-6 months</div>
                 <div className="text-zinc-500 text-sm">Duration</div>
               </div>
               <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
-                <div className="text-xl font-bold text-white mb-1">Cancelable</div>
+                <div className="text-xl font-bold mb-1">Cancelable</div>
                 <div className="text-zinc-500 text-sm">If agent stops delivering</div>
               </div>
             </div>
@@ -388,7 +382,7 @@ await client.submitFeedback(agentWallet, {
           {/* SDK Reference */}
           <section id="sdk" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.sdk}</span>
+              <span className="">{Icons.sdk}</span>
               <h2 className="text-2xl font-bold">SDK Reference</h2>
             </div>
             <p className="text-zinc-400 mb-6">
@@ -445,7 +439,7 @@ const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
           {/* API Reference */}
           <section id="api" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.api}</span>
+              <span className="">{Icons.api}</span>
               <h2 className="text-2xl font-bold">API Reference</h2>
             </div>
             <p className="text-zinc-400 mb-2">Base URL:</p>
@@ -509,7 +503,7 @@ const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
           {/* Program */}
           <section id="contract" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
-              <span className="text-white">{Icons.contract}</span>
+              <span className="">{Icons.contract}</span>
               <h2 className="text-2xl font-bold">Solana Program</h2>
             </div>
             <p className="text-zinc-400 mb-6">
