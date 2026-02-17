@@ -173,7 +173,7 @@ export default function AgentsPage() {
 function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Link 
-      href={`/agents/${agent.wallet}`}
+      href={`/agent/${agent.wallet}`}
       className="block p-5 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition"
     >
       <div className="flex items-start justify-between mb-3">
