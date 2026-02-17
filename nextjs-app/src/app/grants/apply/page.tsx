@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function GrantsApplyPage() {
+  const { authenticated, login, ready } = usePrivy();
   const [formData, setFormData] = useState({
     agentName: '',
     walletAddress: '',
@@ -19,6 +21,13 @@ export default function GrantsApplyPage() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Require authentication to apply for grants
+  useEffect(() => {
+    if (ready && !authenticated) {
+      login();
+    }
+  }, [ready, authenticated, login]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
