@@ -36,13 +36,19 @@ export default function GrantsApplyPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    
-    // TODO: Submit to API
-    // For now, just simulate submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setSubmitted(true);
-    setLoading(false);
+    try {
+      const res = await fetch('https://api.saidprotocol.com/api/grants/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (!res.ok) throw new Error('Submission failed');
+      setSubmitted(true);
+    } catch (err) {
+      alert('Submission failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
