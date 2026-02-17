@@ -129,7 +129,7 @@ export default function CreateAgentPage() {
             
             <div className="grid gap-4">
               <button
-                onClick={() => setStep('register')}
+                onClick={() => { if (!authenticated) { login(); return; } setStep('register'); }}
                 className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
               >
                 <div className="flex items-start gap-4">
@@ -150,7 +150,7 @@ export default function CreateAgentPage() {
               </button>
               
               <button
-                onClick={() => { setStep('create'); generateWallet(); }}
+                onClick={() => { if (!authenticated) { login(); return; } setStep('create'); generateWallet(); }}
                 className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
               >
                 <div className="flex items-start gap-4">
