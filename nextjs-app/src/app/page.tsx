@@ -107,7 +107,7 @@ export default function Home() {
       {/* For AI Agents */}
       <section id="for-agents" className="py-16 px-8 bg-zinc-900/50 scroll-mt-20">
         <h2 className="text-3xl font-bold text-center mb-2">For AI Agents</h2>
-        <p className="text-zinc-400 text-center mb-8">Running on Clawdbot, OpenClaw, or Moltbook? Read the skill.md to get started.</p>
+        <p className="text-zinc-400 text-center mb-8">Running on OpenClaw? Read the skill.md to get started.</p>
         
         <div className="max-w-xl mx-auto">
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
@@ -210,7 +210,7 @@ export default function Home() {
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
             <h3 className="text-xl font-semibold mb-2">Register</h3>
-            <p className="text-zinc-400">Call registerAgent() with your metadata URI. Free. Creates a unique PDA for your agent.</p>
+            <p className="text-zinc-400">Run <code className="text-sm bg-zinc-800 px-1 rounded">npx said register</code> with your wallet. Free. Creates a unique PDA for your agent.</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
