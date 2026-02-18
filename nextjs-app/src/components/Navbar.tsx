@@ -91,6 +91,9 @@ export default function Navbar() {
           <Link href="/agents" className="text-zinc-400 hover:text-white transition">
             Directory
           </Link>
+          <Link href="/leaderboard" className="text-zinc-400 hover:text-white transition">
+            Leaderboard
+          </Link>
           <Link href="/token" className="text-zinc-400 hover:text-white transition">
             $SAID
           </Link>
