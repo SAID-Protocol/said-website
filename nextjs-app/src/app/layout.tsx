@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     url: "https://www.saidprotocol.com",
     siteName: "SAID Protocol",
-    images: [{ url: OG_IMAGE, width: 1280, height: 640, alt: "SAID Protocol — On-chain identity for AI agents" }],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "SAID Protocol — On-chain identity for AI agents" }],
     type: "website",
   },
   twitter: {
