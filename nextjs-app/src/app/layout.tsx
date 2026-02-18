@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 const TITLE = "SAID Protocol - Identity Infrastructure for AI Agents";
-const DESCRIPTION = "SAID Protocol is on-chain identity infrastructure for autonomous AI agents. Register, verify, and build reputation for your agent on Solana. Free to start.";
+const DESCRIPTION = "SAID Protocol is on-chain identity infrastructure for autonomous AI agents. Register, verify, and build reputation for your agent on Solana.";
 const OG_IMAGE = "https://www.saidprotocol.com/og-image.jpg";
 
 export const metadata: Metadata = {
