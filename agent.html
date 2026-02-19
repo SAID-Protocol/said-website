@@ -386,6 +386,92 @@
             color: var(--text-secondary);
         }
         
+        /* Passport section */
+        .passport-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .passport-card-img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            display: block;
+        }
+        .passport-minted {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .passport-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .passport-status.minted {
+            color: #a78bfa;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .passport-mint-addr, .passport-meta-link {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .passport-mint-addr a, .passport-meta-link a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .passport-unminted {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .passport-preview {
+            width: 100%;
+        }
+        .passport-preview-img {
+            opacity: 0.75;
+            filter: blur(0.5px);
+        }
+        .passport-cta {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .passport-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            max-width: 380px;
+            margin: 0;
+        }
+        .passport-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .passport-mint-btn {
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .passport-note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        @media (min-width: 600px) {
+            .passport-minted { flex-direction: row; align-items: flex-start; }
+            .passport-card-img { max-width: 280px; }
+            .passport-unminted { flex-direction: row; align-items: center; }
+            .passport-preview { max-width: 280px; }
+            .passport-cta { text-align: left; align-items: flex-start; }
+        }
+
         .feedback-score {
             font-weight: 700;
             padding: 0.25rem 0.75rem;
@@ -761,6 +847,37 @@
                 </div>
                 ` : ''}
                 
+                <!-- SAID Passport -->
+                ${isVerified ? `
+                <div class="passport-section">
+                    <h2 class="section-title">SAID Passport</h2>
+                    ${agent.passportMint ? `
+                    <div class="passport-minted">
+                        <img src="https://api.saidprotocol.com/api/passport/${agent.wallet}/image" alt="SAID Passport" class="passport-card-img" onerror="this.style.display='none'"/>
+                        <div class="passport-details">
+                            <div class="passport-status minted">◆ Passport Minted</div>
+                            <div class="passport-mint-addr">Mint: <a href="https://solscan.io/token/${agent.passportMint}" target="_blank">${agent.passportMint.slice(0,4)}...${agent.passportMint.slice(-4)} ↗</a></div>
+                            <div class="passport-meta-link"><a href="https://api.saidprotocol.com/api/passport/${agent.wallet}/metadata" target="_blank">View Metadata →</a></div>
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="passport-unminted">
+                        <div class="passport-preview">
+                            <img src="https://api.saidprotocol.com/api/passport/${agent.wallet}/image" alt="SAID Passport Preview" class="passport-card-img passport-preview-img" onerror="this.style.display='none'"/>
+                        </div>
+                        <div class="passport-cta">
+                            <p class="passport-desc">Mint your soulbound SAID Passport — a non-transferable NFT tied to this wallet. Permanent, portable, on-chain identity.</p>
+                            <div class="passport-price">0.05 SOL</div>
+                            <button class="btn btn-primary passport-mint-btn" onclick="mintPassport('${agent.wallet}')">
+                                Mint SAID Passport
+                            </button>
+                            <p class="passport-note">Requires Phantom or Solflare wallet</p>
+                        </div>
+                    </div>
+                    `}
+                </div>
+                ` : ''}
+
                 <!-- Feedback -->
                 <div class="feedback-section">
                     <h2 class="section-title">Recent Feedback</h2>
@@ -854,6 +971,89 @@
             setTimeout(() => { btn.textContent = original; }, 2000);
         }
         
+        // ============ PASSPORT MINT ============
+        async function mintPassport(wallet) {
+            const btn = document.querySelector('.passport-mint-btn');
+            if (!btn) return;
+
+            // Check wallet adapter
+            const provider = window.phantom?.solana || window.solflare;
+            if (!provider) {
+                alert('Please install Phantom or Solflare wallet to mint your passport.');
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Connecting wallet...';
+
+                if (!provider.isConnected) await provider.connect();
+
+                btn.textContent = 'Building transaction...';
+
+                const res = await fetch(`https://api.saidprotocol.com/api/passport/${wallet}/prepare`, { method: 'POST' });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to prepare transaction');
+
+                const txBytes = Uint8Array.from(atob(data.transaction), c => c.charCodeAt(0));
+
+                btn.textContent = 'Sign in wallet...';
+
+                const { Transaction } = window.solanaWeb3 || {};
+                let signedTx;
+                if (Transaction) {
+                    const tx = Transaction.from(txBytes);
+                    signedTx = await provider.signTransaction(tx);
+                } else {
+                    // Fallback: use signAndSendTransaction if signTransaction unavailable
+                    const result = await provider.signAndSendTransaction({ message: txBytes });
+                    // finalize with txHash directly
+                    btn.textContent = 'Confirming...';
+                    await finalizePassport(wallet, result.signature, data.mintAddress);
+                    return;
+                }
+
+                btn.textContent = 'Sending...';
+
+                const connection = new window.solanaWeb3.Connection('https://api.mainnet-beta.solana.com');
+                const txHash = await connection.sendRawTransaction(signedTx.serialize());
+
+                btn.textContent = 'Confirming...';
+                await connection.confirmTransaction(txHash, 'confirmed');
+
+                await finalizePassport(wallet, txHash, data.mintAddress);
+
+            } catch (err) {
+                console.error('Passport mint error:', err);
+                btn.disabled = false;
+                btn.textContent = 'Mint SAID Passport';
+                alert('Mint failed: ' + (err.message || 'Unknown error'));
+            }
+        }
+
+        async function finalizePassport(wallet, txHash, mintAddress) {
+            const btn = document.querySelector('.passport-mint-btn');
+            try {
+                const res = await fetch(`https://api.saidprotocol.com/api/passport/${wallet}/finalize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ txHash, mintAddress }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Finalize failed');
+
+                // Reload page to show minted state
+                window.location.reload();
+            } catch (err) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Mint SAID Passport';
+                }
+                alert('Passport minted but record failed to save. TX: ' + txHash);
+            }
+        }
+        // ============ END PASSPORT MINT ============
+
         // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;
