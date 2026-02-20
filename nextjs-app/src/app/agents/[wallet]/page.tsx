@@ -81,8 +81,6 @@ function Layer2Badge({ isL2Verified }: { isL2Verified: boolean }) {
     </div>
   );
 }
-  );
-}
 
 export default function AgentProfilePage() {
   const params = useParams();
