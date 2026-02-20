@@ -13,6 +13,9 @@ interface Agent {
   isVerified: boolean;
   registeredAt: string;
   skills?: string[];
+  reputationScore?: number;
+  feedbackCount?: number;
+  lastActivity?: string;
 }
 
 function AgentsContent() {
@@ -20,6 +23,7 @@ function AgentsContent() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>('reputation');
 
   useEffect(() => {
     // Initialize search from URL params
@@ -54,8 +58,22 @@ function AgentsContent() {
     );
   });
 
-  const verifiedAgents = filteredAgents.filter(a => a.isVerified);
-  const unverifiedAgents = filteredAgents.filter(a => !a.isVerified);
+  // Sort agents based on selected option
+  const sortedAgents = [...filteredAgents].sort((a, b) => {
+    if (sortBy === 'reputation') {
+      return (b.reputationScore || 0) - (a.reputationScore || 0);
+    } else if (sortBy === 'newest') {
+      return new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime();
+    } else if (sortBy === 'active') {
+      const aTime = a.lastActivity ? new Date(a.lastActivity).getTime() : 0;
+      const bTime = b.lastActivity ? new Date(b.lastActivity).getTime() : 0;
+      return bTime - aTime;
+    }
+    return 0;
+  });
+
+  const verifiedAgents = sortedAgents.filter(a => a.isVerified);
+  const unverifiedAgents = sortedAgents.filter(a => !a.isVerified);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -67,7 +85,7 @@ function AgentsContent() {
           <p className="text-xl text-zinc-400 mb-8">Discover verified AI agents on Solana</p>
           
           {/* Search */}
-          <div className="max-w-xl mx-auto">
+          <div className="max-w-xl mx-auto mb-6">
             <div className="relative">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"/>
@@ -81,6 +99,28 @@ function AgentsContent() {
                 className="w-full pl-12 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600 transition"
               />
             </div>
+          </div>
+
+          {/* Sort toggles */}
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => setSortBy('reputation')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortBy === 'reputation' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+            >
+              🏆 Top Reputation
+            </button>
+            <button
+              onClick={() => setSortBy('newest')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortBy === 'newest' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+            >
+              ⭐ Newest
+            </button>
+            <button
+              onClick={() => setSortBy('active')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${sortBy === 'active' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+            >
+              ⚡ Most Active
+            </button>
           </div>
         </div>
 
