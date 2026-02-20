@@ -272,11 +272,7 @@ export default function AgentProfilePage() {
         )}
 
         {/* Layer 2 Verification */}
-        <Layer2VerificationPanel
-          wallet={agent.wallet}
-          isL2Verified={agent.layer2Verified || false}
-          endpointUrl={agent.verifiedEndpointUrl || agent.mcpEndpoint || agent.a2aEndpoint || null}
-        />
+        <Layer2Badge isL2Verified={agent.layer2Verified || false} />
 
         {/* SAID Passport */}
         {agent.isVerified && (
