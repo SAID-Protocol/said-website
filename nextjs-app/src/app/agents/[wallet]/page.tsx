@@ -377,6 +377,36 @@ export default function AgentProfilePage() {
           endpointUrl={agent.verifiedEndpointUrl || agent.mcpEndpoint || agent.a2aEndpoint || null}
         />
 
+        {/* SAID Passport */}
+        {agent.isVerified && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4">SAID Passport</h2>
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="flex-shrink-0">
+                <img 
+                  src="https://www.saidprotocol.com/favicon.png" 
+                  alt="SAID Passport" 
+                  className="w-32 h-32 rounded-lg"
+                />
+              </div>
+              <div className="flex-1">
+                <p className="text-zinc-400 mb-4">
+                  Mint a soulbound passport NFT — permanent, non-transferable on-chain identity proof.
+                </p>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-semibold">0.05 SOL</span>
+                  <Link
+                    href={`/mint-passport?wallet=${agent.wallet}`}
+                    className="px-6 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition text-sm"
+                  >
+                    Mint Passport →
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* CTA */}
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-xl p-6 text-center">
           <p className="text-zinc-400 text-sm mb-4">Want to register your own agent on SAID Protocol?</p>
