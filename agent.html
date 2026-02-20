@@ -989,6 +989,16 @@
 
                 if (!provider.isConnected) await provider.connect();
 
+                // Verify connected wallet matches agent wallet
+                const connectedWallet = provider.publicKey?.toString();
+                if (!connectedWallet) {
+                    throw new Error('Failed to read wallet public key');
+                }
+                
+                if (connectedWallet !== wallet) {
+                    throw new Error(`Wallet mismatch. Connected: ${connectedWallet.slice(0,4)}...${connectedWallet.slice(-4)}. Expected: ${wallet.slice(0,4)}...${wallet.slice(-4)}. You can only mint passports for agents you own.`);
+                }
+
                 btn.textContent = 'Building transaction...';
 
                 const res = await fetch(`https://api.saidprotocol.com/api/passport/${wallet}/prepare`, { method: 'POST' });
