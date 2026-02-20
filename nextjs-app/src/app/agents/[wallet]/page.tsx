@@ -64,120 +64,23 @@ function ReputationRing({ score }: { score: number }) {
   );
 }
 
-type L2Step = 'idle' | 'entering' | 'challenging' | 'verifying' | 'done' | 'error';
-
-function Layer2VerificationPanel({ wallet, isL2Verified, endpointUrl }: { wallet: string; isL2Verified: boolean; endpointUrl: string | null }) {
-  const [step, setStep] = useState<L2Step>(isL2Verified ? 'done' : 'idle');
-  const [endpoint, setEndpoint] = useState(endpointUrl || '');
-  const [challenge, setChallenge] = useState('');
-  const [signature, setSignature] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const requestChallenge = async () => {
-    if (!endpoint) return;
-    setLoading(true); setError('');
-    try {
-      const res = await fetch(`https://api.saidprotocol.com/api/verify/layer2/challenge/${wallet}?endpoint=${encodeURIComponent(endpoint)}`);
-      const data = await res.json() as { nonce?: string; challenge?: string; error?: string };
-      if (!res.ok) throw new Error(data.error || 'Failed to get challenge');
-      setChallenge(data.nonce || data.challenge || '');
-      setStep('verifying');
-    } catch (e: unknown) { setError((e as Error).message); }
-    setLoading(false);
-  };
-
-  const submitVerification = async () => {
-    if (!signature) return;
-    setLoading(true); setError('');
-    try {
-      const res = await fetch('https://api.saidprotocol.com/api/verify/layer2/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ wallet, endpoint, signature, nonce: challenge }),
-      });
-      const data = await res.json() as { error?: string };
-      if (!res.ok) throw new Error(data.error || 'Verification failed');
-      setStep('done');
-    } catch (e: unknown) { setError((e as Error).message); }
-    setLoading(false);
-  };
-
-  if (step === 'done' || isL2Verified) return (
-    <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-6 mb-6 flex items-center gap-3">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+// L2 verification is framework-only - no manual UI
+// Show read-only badge if already L2 verified
+function Layer2Badge({ isL2Verified }: { isL2Verified: boolean }) {
+  if (!isL2Verified) return null;
+  
+  return (
+    <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6 flex items-center gap-3">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
       <div>
-        <div className="text-blue-400 font-semibold text-sm">Layer 2 Verified Agent</div>
-        <div className="text-zinc-400 text-xs mt-0.5">This agent has proven it is a live, running AI system via cryptographic challenge-response.</div>
+        <div className="text-blue-400 font-semibold text-sm">Framework-Verified Agent</div>
+        <div className="text-zinc-400 text-xs mt-0.5">This agent was attested by a trusted framework at initialization.</div>
       </div>
     </div>
   );
-
-  return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-500">Layer 2 Verification</h2>
-          <p className="text-xs text-zinc-500 mt-1">Prove this is a real running AI agent via challenge-response</p>
-        </div>
-        <span className="px-2 py-0.5 bg-zinc-800 text-zinc-400 text-xs rounded-full border border-zinc-700">Not Verified</span>
-      </div>
-
-      {step === 'idle' && (
-        <button onClick={() => setStep('entering')} className="px-4 py-2 bg-white text-black rounded-lg text-sm font-semibold hover:bg-zinc-200 transition">
-          Get Layer 2 Verified ⚡
-        </button>
-      )}
-
-      {step === 'entering' && (
-        <div className="space-y-3">
-          <p className="text-zinc-400 text-sm">Enter your agent&apos;s endpoint URL. We&apos;ll send a signed challenge — your agent must respond with a valid signature to prove it&apos;s running.</p>
-          <input
-            type="url"
-            placeholder="https://your-agent.example.com"
-            value={endpoint}
-            onChange={e => setEndpoint(e.target.value)}
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm focus:outline-none focus:border-zinc-500"
-          />
-          <div className="flex gap-2">
-            <button onClick={requestChallenge} disabled={loading || !endpoint} className="px-4 py-2 bg-white text-black rounded-lg text-sm font-semibold hover:bg-zinc-200 transition disabled:opacity-50">
-              {loading ? 'Sending challenge...' : 'Send Challenge'}
-            </button>
-            <button onClick={() => setStep('idle')} className="px-4 py-2 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">Cancel</button>
-          </div>
-          {error && <p className="text-red-400 text-xs">{error}</p>}
-        </div>
-      )}
-
-      {step === 'verifying' && (
-        <div className="space-y-3">
-          <p className="text-zinc-400 text-sm">Challenge sent to your endpoint. Your agent should sign the nonce below with its wallet private key and paste the signature here.</p>
-          <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-3">
-            <div className="text-xs text-zinc-500 mb-1">Nonce to sign</div>
-            <code className="text-xs text-zinc-300 font-mono break-all">{challenge}</code>
-            <CopyButton text={challenge} />
-          </div>
-          <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg p-3 text-xs text-zinc-500 font-mono">
-            <div className="mb-1 text-zinc-400">Sign this message with your wallet:</div>
-            <div className="break-all">{`SAID:layer2:${wallet}:${challenge}`}</div>
-          </div>
-          <input
-            type="text"
-            placeholder="Paste base58 signature here..."
-            value={signature}
-            onChange={e => setSignature(e.target.value)}
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm font-mono focus:outline-none focus:border-zinc-500"
-          />
-          <div className="flex gap-2">
-            <button onClick={submitVerification} disabled={loading || !signature} className="px-4 py-2 bg-white text-black rounded-lg text-sm font-semibold hover:bg-zinc-200 transition disabled:opacity-50">
-              {loading ? 'Verifying...' : 'Submit Signature'}
-            </button>
-            <button onClick={() => { setStep('entering'); setError(''); }} className="px-4 py-2 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">Back</button>
-          </div>
-          {error && <p className="text-red-400 text-xs">{error}</p>}
-        </div>
-      )}
-    </div>
+}
   );
 }
 
