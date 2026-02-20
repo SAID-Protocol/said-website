@@ -384,7 +384,7 @@ export default function AgentProfilePage() {
             <div className="flex flex-col md:flex-row gap-6 items-center">
               <div className="flex-shrink-0">
                 <img 
-                  src="https://www.saidprotocol.com/favicon.png" 
+                  src="https://www.saidprotocol.com/passport-logo.png" 
                   alt="SAID Passport" 
                   className="w-32 h-32 rounded-lg"
                 />
