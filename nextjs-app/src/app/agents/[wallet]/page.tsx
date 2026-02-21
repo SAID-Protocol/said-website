@@ -288,15 +288,23 @@ export default function AgentProfilePage() {
               </div>
               <div className="flex-1">
                 <p className="text-zinc-400 mb-4">
-                  Mint a soulbound passport NFT — permanent, non-transferable on-chain identity proof.
+                  {(agent as any).passportMint 
+                    ? 'Soulbound passport NFT — permanent, non-transferable on-chain identity proof.' 
+                    : 'Mint a soulbound passport NFT — permanent, non-transferable on-chain identity proof.'}
                 </p>
                 <div className="flex items-center gap-4">
-                  <span className="text-sm font-semibold">0.05 SOL</span>
+                  {!(agent as any).passportMint && (
+                    <span className="text-sm font-semibold">0.05 SOL</span>
+                  )}
                   <Link
-                    href={`/mint-passport?wallet=${agent.wallet}`}
+                    href={(agent as any).passportMint 
+                      ? `https://solscan.io/token/${(agent as any).passportMint}` 
+                      : `/mint-passport?wallet=${agent.wallet}`}
+                    target={(agent as any).passportMint ? "_blank" : undefined}
+                    rel={(agent as any).passportMint ? "noopener noreferrer" : undefined}
                     className="px-6 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition text-sm"
                   >
-                    Mint Passport →
+                    {(agent as any).passportMint ? 'View Passport →' : 'Mint Passport →'}
                   </Link>
                 </div>
               </div>
