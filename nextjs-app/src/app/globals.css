@@ -92,19 +92,29 @@ a,
 /* Override Tailwind colors based on theme */
 [data-theme="light"] {
   /* Backgrounds */
-  .bg-zinc-900 { background-color: var(--bg-secondary) !important; }
+  .bg-zinc-950 { background-color: #ffffff !important; }
+  .bg-zinc-900 { background-color: #f8f8f8 !important; }
   .bg-zinc-900\/50 { background-color: rgba(248, 248, 248, 0.5) !important; }
   .bg-zinc-950\/95 { background-color: rgba(255, 255, 255, 0.95) !important; }
   .bg-zinc-800 { background-color: #f0f0f0 !important; }
+  .bg-zinc-800\/50 { background-color: rgba(240, 240, 240, 0.5) !important; }
   
   /* Borders */
-  .border-zinc-800 { border-color: var(--border) !important; }
+  .border-zinc-800 { border-color: #e0e0e0 !important; }
   .border-zinc-700 { border-color: #ccc !important; }
   .border-zinc-600 { border-color: #999 !important; }
   
   /* Text */
-  .text-zinc-400 { color: var(--text-secondary) !important; }
+  .text-white { color: #000000 !important; }
+  .text-zinc-300 { color: #333 !important; }
+  .text-zinc-400 { color: #666 !important; }
   .text-zinc-500 { color: #888 !important; }
+  
+  /* Code */
+  .text-amber-400 { color: #c2410c !important; }
+  
+  /* Sidebar */
+  .text-zinc-400:hover { color: #000 !important; }
   
   /* Buttons */
   .bg-white { background-color: #000 !important; }
@@ -114,6 +124,7 @@ a,
   .hover\:border-zinc-600:hover { border-color: #555 !important; }
   .hover\:border-zinc-700:hover { border-color: #444 !important; }
   .hover\:text-white:hover { color: #000 !important; }
+  .hover\:bg-zinc-800\/50:hover { background-color: rgba(240, 240, 240, 0.5) !important; }
 }
 
 /* Custom scrollbar */

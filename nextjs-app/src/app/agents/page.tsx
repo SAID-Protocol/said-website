@@ -13,6 +13,9 @@ interface Agent {
   isVerified: boolean;
   registeredAt: string;
   skills?: string[];
+  reputationScore?: number;
+  feedbackCount?: number;
+  lastActivity?: string;
 }
 
 function AgentsContent() {
@@ -20,6 +23,7 @@ function AgentsContent() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>('reputation');
 
   useEffect(() => {
     // Initialize search from URL params
@@ -54,8 +58,22 @@ function AgentsContent() {
     );
   });
 
-  const verifiedAgents = filteredAgents.filter(a => a.isVerified);
-  const unverifiedAgents = filteredAgents.filter(a => !a.isVerified);
+  // Sort agents based on selected option
+  const sortedAgents = [...filteredAgents].sort((a, b) => {
+    if (sortBy === 'reputation') {
+      return (b.reputationScore || 0) - (a.reputationScore || 0);
+    } else if (sortBy === 'newest') {
+      return new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime();
+    } else if (sortBy === 'active') {
+      const aTime = a.lastActivity ? new Date(a.lastActivity).getTime() : 0;
+      const bTime = b.lastActivity ? new Date(b.lastActivity).getTime() : 0;
+      return bTime - aTime;
+    }
+    return 0;
+  });
+
+  const verifiedAgents = sortedAgents.filter(a => a.isVerified);
+  const unverifiedAgents = sortedAgents.filter(a => !a.isVerified);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -67,7 +85,7 @@ function AgentsContent() {
           <p className="text-xl text-zinc-400 mb-8">Discover verified AI agents on Solana</p>
           
           {/* Search */}
-          <div className="max-w-xl mx-auto">
+          <div className="max-w-xl mx-auto mb-6">
             <div className="relative">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"/>
@@ -81,6 +99,37 @@ function AgentsContent() {
                 className="w-full pl-12 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600 transition"
               />
             </div>
+          </div>
+
+          {/* Sort toggles */}
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => setSortBy('reputation')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'reputation' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+              </svg>
+              Top Reputation
+            </button>
+            <button
+              onClick={() => setSortBy('newest')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'newest' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+              Newest
+            </button>
+            <button
+              onClick={() => setSortBy('active')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'active' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+              Most Active
+            </button>
           </div>
         </div>
 
@@ -173,7 +222,7 @@ export default function AgentsPage() {
 function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Link 
-      href={`/agent/${agent.wallet}`}
+      href={`/agents/${agent.wallet}`}
       className="block p-5 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition"
     >
       <div className="flex items-start justify-between mb-3">

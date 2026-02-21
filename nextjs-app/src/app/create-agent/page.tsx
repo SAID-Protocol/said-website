@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
@@ -10,7 +10,7 @@ import Footer from '@/components/Footer';
 type Step = 'choose' | 'register' | 'create' | 'success';
 
 export default function CreateAgentPage() {
-  const { authenticated, login } = usePrivy();
+  const { authenticated, login, ready } = usePrivy();
   const { sessionToken } = useAuth();
   const [step, setStep] = useState<Step>('choose');
   const [loading, setLoading] = useState(false);
@@ -129,7 +129,7 @@ export default function CreateAgentPage() {
             
             <div className="grid gap-4">
               <button
-                onClick={() => setStep('register')}
+                onClick={() => { if (!authenticated) { login(); return; } setStep('register'); }}
                 className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
               >
                 <div className="flex items-start gap-4">
@@ -150,7 +150,7 @@ export default function CreateAgentPage() {
               </button>
               
               <button
-                onClick={() => { setStep('create'); generateWallet(); }}
+                onClick={() => { if (!authenticated) { login(); return; } setStep('create'); generateWallet(); }}
                 className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
               >
                 <div className="flex items-start gap-4">

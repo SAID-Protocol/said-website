@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 const API_URL = 'https://api.saidprotocol.com';
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
-  const { authenticated, ready } = usePrivy();
+  const { authenticated, ready, user } = usePrivy();
   const { sessionToken, loading: authLoading } = useAuth();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -18,6 +18,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
       // If not authenticated, no need to check - just show content
       if (ready && !authenticated) {
         setChecking(false);
+        setNeedsOnboarding(false);
         return;
       }
 
@@ -34,7 +35,9 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         });
 
         if (!res.ok) {
+          // Can't fetch user data - let them through
           setChecking(false);
+          setNeedsOnboarding(false);
           return;
         }
 
@@ -51,6 +54,8 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         setNeedsOnboarding(needsSetup);
       } catch (err) {
         console.error('Failed to check profile:', err);
+        // On error, don't block - let them browse
+        setNeedsOnboarding(false);
       } finally {
         setChecking(false);
       }

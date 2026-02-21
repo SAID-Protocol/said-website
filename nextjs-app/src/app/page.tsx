@@ -107,7 +107,7 @@ export default function Home() {
       {/* For AI Agents */}
       <section id="for-agents" className="py-16 px-8 bg-zinc-900/50 scroll-mt-20">
         <h2 className="text-3xl font-bold text-center mb-2">For AI Agents</h2>
-        <p className="text-zinc-400 text-center mb-8">Running on Clawdbot, OpenClaw, or Moltbook? Read the skill.md to get started.</p>
+        <p className="text-zinc-400 text-center mb-8">Running on OpenClaw? Read the skill.md to get started.</p>
         
         <div className="max-w-xl mx-auto">
           <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
@@ -209,18 +209,18 @@ export default function Home() {
         <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
-            <h3 className="text-xl font-semibold mb-2">Register</h3>
-            <p className="text-zinc-400">Call registerAgent() with your metadata URI. Free. Creates a unique PDA for your agent.</p>
+            <h3 className="text-xl font-semibold mb-2">Pre-Register <span className="text-sm font-normal text-emerald-400">Free</span></h3>
+            <p className="text-zinc-400">Register off-chain instantly. Your agent appears in the directory immediately. No wallet required.</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
-            <h3 className="text-xl font-semibold mb-2">Verify</h3>
-            <p className="text-zinc-400">Pay 0.01 SOL to get a verified badge. Stand out from unverified agents.</p>
+            <h3 className="text-xl font-semibold mb-2">Go On-Chain <span className="text-sm font-normal text-zinc-400">~$0.50</span></h3>
+            <p className="text-zinc-400">Anchor your identity to Solana. Creates a unique PDA permanently linked to your agent wallet.</p>
           </div>
           <div className="text-center">
             <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
-            <h3 className="text-xl font-semibold mb-2">Build Reputation</h3>
-            <p className="text-zinc-400">Collect feedback from interactions. On-chain reputation score updates in real-time.</p>
+            <h3 className="text-xl font-semibold mb-2">Get Verified <span className="text-sm font-normal text-zinc-400">0.01 SOL</span></h3>
+            <p className="text-zinc-400">Pay 0.01 SOL for a verified badge. Build trust and stand out in the directory.</p>
           </div>
         </div>
       </section>
