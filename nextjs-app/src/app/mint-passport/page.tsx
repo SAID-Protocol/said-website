@@ -82,21 +82,18 @@ export default function MintPassportPage() {
 
       setMintStatus('signing');
       
-      // Phantom/Solflare: sign and send via wallet
-      try {
-        const signedResult = await provider.signAndSendTransaction(Buffer.from(txBytes));
-        setMintStatus('confirming');
-        await finalize(signedResult.signature || signedResult, data.mintAddress);
-      } catch (walletErr: any) {
-        // Fallback: try legacy signing
-        const tx = VersionedTransaction.deserialize(txBytes);
-        const signedTx = await provider.signTransaction(tx);
-        
-        // Use wallet's connection to send
-        const signature = await provider.connection.sendRawTransaction(signedTx.serialize());
-        setMintStatus('confirming');
-        await finalize(signature, data.mintAddress);
-      }
+      const tx = VersionedTransaction.deserialize(txBytes);
+      const signedTx = await provider.signTransaction(tx);
+
+      setMintStatus('confirming');
+      
+      // Use QuickNode RPC from env (NEXT_PUBLIC_SOLANA_RPC_URL) or fallback
+      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
+      const connection = new Connection(rpcUrl);
+      const signature = await connection.sendRawTransaction(signedTx.serialize());
+      await connection.confirmTransaction(signature, 'confirmed');
+
+      await finalize(signature, data.mintAddress);
     } catch (err: any) {
       setError(err.message || 'Minting failed');
       setMintStatus('idle');
