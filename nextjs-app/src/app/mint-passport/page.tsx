@@ -99,6 +99,9 @@ export default function MintPassportPage() {
       const broadcastData = await broadcastRes.json();
       if (!broadcastRes.ok) throw new Error(broadcastData.error || 'Broadcast failed');
 
+      // Wait a moment for transaction to land on-chain before finalizing
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       await finalize(broadcastData.signature, data.mintAddress);
     } catch (err: any) {
       setError(err.message || 'Minting failed');
@@ -240,8 +243,22 @@ export default function MintPassportPage() {
               <div className="space-y-4">
                 <div>
                   <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Status</p>
-                  <p className="text-white font-medium">
-                    {step === 3 ? '✅ Minted' : '⏳ Not Minted'}
+                  <p className="text-white font-medium flex items-center gap-2">
+                    {step === 3 ? (
+                      <>
+                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Minted
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Not Minted
+                      </>
+                    )}
                   </p>
                 </div>
 
