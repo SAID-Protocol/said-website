@@ -12,6 +12,8 @@ export default function MintPassportPage() {
   const [agent, setAgent] = useState<any>(null);
   const [error, setError] = useState('');
   const [mintStatus, setMintStatus] = useState<'idle' | 'connecting' | 'building' | 'signing' | 'confirming' | 'complete'>('idle');
+  const [txSignature, setTxSignature] = useState('');
+  const [mintAddressState, setMintAddressState] = useState('');
 
   const lookupAgent = async () => {
     if (!agentWallet.trim()) {
@@ -103,6 +105,10 @@ export default function MintPassportPage() {
       // Wait a moment for transaction to land on-chain before finalizing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
+      // Store signature and mint address for display
+      setTxSignature(broadcastData.signature);
+      setMintAddressState(data.mintAddress);
+
       await finalize(broadcastData.signature, data.mintAddress);
     } catch (err: any) {
       setError(err.message || 'Minting failed');
@@ -270,22 +276,38 @@ export default function MintPassportPage() {
 
                 <div>
                   <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Agent Name</p>
-                  <p className="text-white">{agent.identity?.name || 'Unknown'}</p>
+                  <p className="text-white">{agent.identity?.name || agent.name || 'Unknown'}</p>
                 </div>
 
-                {step === 3 && agent.passportMint && (
+                {step === 3 && (
                   <>
-                    <div>
-                      <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Mint Address</p>
-                      <a
-                        href={`https://solscan.io/token/${agent.passportMint}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-400 hover:text-blue-300 text-sm font-mono"
-                      >
-                        {agent.passportMint.slice(0, 8)}...{agent.passportMint.slice(-8)} →
-                      </a>
-                    </div>
+                    {txSignature && (
+                      <div>
+                        <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Transaction Signature</p>
+                        <a
+                          href={`https://solscan.io/tx/${txSignature}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 text-sm font-mono break-all"
+                        >
+                          {txSignature.slice(0, 20)}...{txSignature.slice(-8)} ↗
+                        </a>
+                      </div>
+                    )}
+
+                    {(mintAddressState || agent.passportMint) && (
+                      <div>
+                        <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Mint Address</p>
+                        <a
+                          href={`https://solscan.io/token/${mintAddressState || agent.passportMint}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 text-sm font-mono"
+                        >
+                          {(mintAddressState || agent.passportMint).slice(0, 8)}...{(mintAddressState || agent.passportMint).slice(-8)} ↗
+                        </a>
+                      </div>
+                    )}
 
                     <div>
                       <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Metadata</p>
@@ -295,7 +317,19 @@ export default function MintPassportPage() {
                         rel="noopener noreferrer"
                         className="text-blue-400 hover:text-blue-300 text-sm"
                       >
-                        View Metadata →
+                        View Metadata ↗
+                      </a>
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Explorer</p>
+                      <a
+                        href={`https://explorer.solana.com/address/${mintAddressState || agent.passportMint}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 text-sm"
+                      >
+                        View on Solana Explorer ↗
                       </a>
                     </div>
                   </>
