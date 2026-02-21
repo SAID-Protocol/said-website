@@ -81,15 +81,14 @@ export default function MintPassportPage() {
       const txBytes = Uint8Array.from(atob(data.transaction), c => c.charCodeAt(0));
 
       setMintStatus('signing');
-      const tx = VersionedTransaction.deserialize(txBytes);
-      const signedTx = await provider.signTransaction(tx);
+      
+      // Let the wallet sign AND send the transaction
+      const result = await provider.signAndSendTransaction({
+        message: txBytes,
+      });
 
       setMintStatus('confirming');
-      const connection = new Connection('https://api.mainnet-beta.solana.com');
-      const txHash = await connection.sendRawTransaction(signedTx.serialize());
-      await connection.confirmTransaction(txHash, 'confirmed');
-
-      await finalize(txHash, data.mintAddress);
+      await finalize(result.signature, data.mintAddress);
     } catch (err: any) {
       setError(err.message || 'Minting failed');
       setMintStatus('idle');
