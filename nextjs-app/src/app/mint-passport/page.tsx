@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Connection, Transaction, VersionedTransaction } from '@solana/web3.js';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -80,20 +81,11 @@ export default function MintPassportPage() {
       const txBytes = Uint8Array.from(atob(data.transaction), c => c.charCodeAt(0));
 
       setMintStatus('signing');
-      const { Transaction } = (window as any).solanaWeb3 || {};
-      let signedTx;
-      if (Transaction) {
-        const tx = Transaction.from(txBytes);
-        signedTx = await provider.signTransaction(tx);
-      } else {
-        const result = await provider.signAndSendTransaction({ message: txBytes });
-        setMintStatus('confirming');
-        await finalize(result.signature, data.mintAddress);
-        return;
-      }
+      const tx = VersionedTransaction.deserialize(txBytes);
+      const signedTx = await provider.signTransaction(tx);
 
       setMintStatus('confirming');
-      const connection = new (window as any).solanaWeb3.Connection('https://api.mainnet-beta.solana.com');
+      const connection = new Connection('https://api.mainnet-beta.solana.com');
       const txHash = await connection.sendRawTransaction(signedTx.serialize());
       await connection.confirmTransaction(txHash, 'confirmed');
 
