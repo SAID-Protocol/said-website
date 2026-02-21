@@ -80,6 +80,16 @@ const Icons = {
       <path d="M9 9.5a3 3 0 1 1 0 5"/>
     </svg>
   ),
+  passport: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/>
+      <path d="M7 8h10"/>
+      <path d="M7 12h10"/>
+      <path d="M7 16h6"/>
+      <circle cx="18" cy="18" r="3"/>
+      <path d="m20.2 20.2 1.8 1.8"/>
+    </svg>
+  ),
 };
 
 const sections = [
@@ -87,6 +97,7 @@ const sections = [
   { id: 'identity', title: 'Agent Identity', icon: Icons.identity },
   { id: 'multi-wallet', title: 'Multi-Wallet', icon: Icons.wallet },
   { id: 'verification', title: 'Verification', icon: Icons.verified },
+  { id: 'passport', title: 'Passport API', icon: Icons.passport },
   { id: 'reputation', title: 'Reputation', icon: Icons.reputation },
   { id: 'token', title: '$SAID Token', icon: Icons.token },
   { id: 'sdk', title: 'SDK Reference', icon: Icons.sdk },
@@ -294,6 +305,115 @@ const verified = await isVerified("WALLET_ADDRESS");
                 <div className="text-2xl font-bold mb-1">Forever</div>
                 <div className="text-zinc-500 text-sm">On-chain Identity</div>
               </div>
+            </div>
+          </section>
+
+          {/* Passport API */}
+          <section id="passport" className="mb-16 pt-8 border-t border-zinc-800">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="">{Icons.passport}</span>
+              <h2 className="text-2xl font-bold">Passport API</h2>
+            </div>
+            <p className="text-zinc-400 mb-6">
+              Soulbound NFT passports for verified agents. Perfect for platform integrations — 
+              mint non-transferable Token-2022 passports for your users via API.
+            </p>
+
+            <h3 className="text-lg font-semibold mb-3">Integration Strategy</h3>
+            <p className="text-zinc-400 mb-4">
+              We recommend starting with <strong>off-chain registration</strong> (free, instant) for MVP, 
+              then upgrading to on-chain when ready.
+            </p>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">1. Register Agent (Off-Chain)</h3>
+            <p className="text-zinc-400 mb-4">Free, instant registration in SAID directory:</p>
+            <CodeBlock copyable>{`// POST https://api.saidprotocol.com/api/agents/register
+await fetch('https://api.saidprotocol.com/api/agents/register', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    wallet: agentWallet,
+    name: 'My Agent',
+    description: 'Agent description'
+  })
+});`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">2. Check Agent Status</h3>
+            <p className="text-zinc-400 mb-4">Verify agent registration and passport status:</p>
+            <CodeBlock copyable>{`// GET https://api.saidprotocol.com/api/verify/:wallet
+const res = await fetch(\`https://api.saidprotocol.com/api/verify/\${wallet}\`);
+const agent = await res.json();
+// { registered, verified, passportMint, name, ... }`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">3. Check Passport</h3>
+            <p className="text-zinc-400 mb-4">Get detailed passport information:</p>
+            <CodeBlock copyable>{`// GET https://api.saidprotocol.com/api/agents/:wallet/passport
+const res = await fetch(\`https://api.saidprotocol.com/api/agents/\${wallet}/passport\`);
+const passport = await res.json();
+// { hasPassport, mint, mintedAt, txHash, image }`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Passport Minting Flow</h3>
+            <p className="text-zinc-400 mb-4">
+              For verified agents, passport minting happens client-side with API support:
+            </p>
+            <ol className="list-decimal list-inside space-y-2 text-zinc-400 mb-4">
+              <li>Agent must be verified (0.01 SOL)</li>
+              <li>Prepare transaction: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">POST /api/passport/:wallet/prepare</code></li>
+              <li>User signs transaction in wallet</li>
+              <li>Broadcast: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">POST /api/passport/broadcast</code></li>
+              <li>Finalize: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">POST /api/passport/:wallet/finalize</code></li>
+            </ol>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-6">
+              <div className="font-medium mb-2">Cost Structure</div>
+              <ul className="text-zinc-400 text-sm space-y-2">
+                <li><strong>Off-chain registration:</strong> Free (database only)</li>
+                <li><strong>On-chain registration:</strong> ~0.003 SOL (~$0.45)</li>
+                <li><strong>Verification:</strong> 0.01 SOL (user pays)</li>
+                <li><strong>Passport minting:</strong> Requires verification first</li>
+              </ul>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Full API Reference</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs">POST</span>
+                <code>/api/agents/register</code>
+                <span className="text-zinc-600">— Register agent (off-chain)</span>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs">GET</span>
+                <code>/api/verify/:wallet</code>
+                <span className="text-zinc-600">— Check registration status</span>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs">GET</span>
+                <code>/api/agents/:wallet/passport</code>
+                <span className="text-zinc-600">— Get passport info</span>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs">POST</span>
+                <code>/api/passport/:wallet/prepare</code>
+                <span className="text-zinc-600">— Prepare mint transaction</span>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs">POST</span>
+                <code>/api/passport/broadcast</code>
+                <span className="text-zinc-600">— Broadcast signed transaction</span>
+              </div>
+              <div className="flex items-center gap-2 text-zinc-400">
+                <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs">POST</span>
+                <code>/api/passport/:wallet/finalize</code>
+                <span className="text-zinc-600">— Store passport in database</span>
+              </div>
+            </div>
+
+            <div className="bg-amber-900/20 border border-amber-700/50 rounded-lg p-4 mt-6">
+              <div className="font-medium mb-2 text-amber-400">For Platform Integrators</div>
+              <p className="text-zinc-300 text-sm">
+                Building a platform with AI agents? Contact us for integration support, 
+                bulk sponsorship options, and custom endpoints: <a href="https://twitter.com/saidinfra" className="text-amber-400 hover:underline">@saidinfra</a>
+              </p>
             </div>
           </section>
 
