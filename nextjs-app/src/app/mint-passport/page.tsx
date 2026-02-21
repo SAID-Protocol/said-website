@@ -87,12 +87,19 @@ export default function MintPassportPage() {
 
       setMintStatus('confirming');
       
-      // Use public Solana RPC for frontend
-      const connection = new Connection('https://api.mainnet-beta.solana.com');
-      const signature = await connection.sendRawTransaction(signedTx.serialize());
-      await connection.confirmTransaction(signature, 'confirmed');
+      // Broadcast via API proxy (uses server's private QuickNode RPC)
+      const broadcastRes = await fetch('https://api.saidprotocol.com/api/passport/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          signedTransaction: Buffer.from(signedTx.serialize()).toString('base64'),
+        }),
+      });
+      
+      const broadcastData = await broadcastRes.json();
+      if (!broadcastRes.ok) throw new Error(broadcastData.error || 'Broadcast failed');
 
-      await finalize(signature, data.mintAddress);
+      await finalize(broadcastData.signature, data.mintAddress);
     } catch (err: any) {
       setError(err.message || 'Minting failed');
       setMintStatus('idle');
