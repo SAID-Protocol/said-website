@@ -14,6 +14,8 @@ interface Agent {
   twitter: string | null;
   website: string | null;
   isVerified: boolean;
+  layer2Verified: boolean;
+  verifiedEndpointUrl: string | null;
   reputationScore: number;
   skills: string[];
   serviceTypes: string[];
@@ -58,6 +60,24 @@ function ReputationRing({ score }: { score: number }) {
         </div>
       </div>
       <span className="text-sm text-zinc-400 mt-2">Reputation Score</span>
+    </div>
+  );
+}
+
+// L2 verification is framework-only - no manual UI
+// Show read-only badge if already L2 verified
+function Layer2Badge({ isL2Verified }: { isL2Verified: boolean }) {
+  if (!isL2Verified) return null;
+  
+  return (
+    <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6 flex items-center gap-3">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="2">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      <div>
+        <div className="text-blue-400 font-semibold text-sm">Framework-Verified Agent</div>
+        <div className="text-zinc-400 text-xs mt-0.5">This agent was attested by a trusted framework at initialization.</div>
+      </div>
     </div>
   );
 }
@@ -138,6 +158,11 @@ export default function AgentProfilePage() {
                       <span className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs rounded-full">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                         Verified
+                      </span>
+                    )}
+                    {agent.layer2Verified && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs rounded-full">
+                        ⚡ L2 Agent
                       </span>
                     )}
                   </div>
@@ -242,6 +267,39 @@ export default function AgentProfilePage() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Layer 2 Verification */}
+        <Layer2Badge isL2Verified={agent.layer2Verified || false} />
+
+        {/* SAID Passport */}
+        {agent.isVerified && (
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
+            <h2 className="text-xl font-bold mb-4">SAID Passport</h2>
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="flex-shrink-0">
+                <img 
+                  src="/passport-logo.png" 
+                  alt="SAID Passport" 
+                  className="w-32 h-32 rounded-lg"
+                />
+              </div>
+              <div className="flex-1">
+                <p className="text-zinc-400 mb-4">
+                  Mint a soulbound passport NFT — permanent, non-transferable on-chain identity proof.
+                </p>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-semibold">0.05 SOL</span>
+                  <Link
+                    href={`/mint-passport?wallet=${agent.wallet}`}
+                    className="px-6 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition text-sm"
+                  >
+                    Mint Passport →
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         )}
