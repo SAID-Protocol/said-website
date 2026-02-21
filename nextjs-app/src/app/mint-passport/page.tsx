@@ -87,9 +87,8 @@ export default function MintPassportPage() {
 
       setMintStatus('confirming');
       
-      // Use QuickNode RPC from env (NEXT_PUBLIC_SOLANA_RPC_URL) or fallback
-      const rpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
-      const connection = new Connection(rpcUrl);
+      // Use public Solana RPC for frontend
+      const connection = new Connection('https://api.mainnet-beta.solana.com');
       const signature = await connection.sendRawTransaction(signedTx.serialize());
       await connection.confirmTransaction(signature, 'confirmed');
 
