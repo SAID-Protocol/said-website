@@ -38,13 +38,14 @@ export default function MintPassportPage() {
         return;
       }
 
+      setAgent(data);
+      
       if (data.passportMint) {
-        setError('This agent already has a passport minted.');
-        setAgent(null);
+        // Already minted - show completion state
+        setStep(3);
         return;
       }
 
-      setAgent(data);
       setStep(2);
     } catch (err) {
       setError('Failed to lookup agent. Please try again.');
@@ -272,11 +273,18 @@ export default function MintPassportPage() {
                   <p className="text-white">{agent.identity?.name || 'Unknown'}</p>
                 </div>
 
-                {step === 3 && (
+                {step === 3 && agent.passportMint && (
                   <>
                     <div>
                       <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">Mint Address</p>
-                      <p className="text-white font-mono text-xs break-all">View on Solscan</p>
+                      <a
+                        href={`https://solscan.io/token/${agent.passportMint}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 text-sm font-mono"
+                      >
+                        {agent.passportMint.slice(0, 8)}...{agent.passportMint.slice(-8)} →
+                      </a>
                     </div>
 
                     <div>
