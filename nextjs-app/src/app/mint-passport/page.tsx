@@ -82,13 +82,21 @@ export default function MintPassportPage() {
 
       setMintStatus('signing');
       
-      // Let the wallet sign AND send the transaction
-      const result = await provider.signAndSendTransaction({
-        message: txBytes,
-      });
-
-      setMintStatus('confirming');
-      await finalize(result.signature, data.mintAddress);
+      // Phantom/Solflare: sign and send via wallet
+      try {
+        const signedResult = await provider.signAndSendTransaction(Buffer.from(txBytes));
+        setMintStatus('confirming');
+        await finalize(signedResult.signature || signedResult, data.mintAddress);
+      } catch (walletErr: any) {
+        // Fallback: try legacy signing
+        const tx = VersionedTransaction.deserialize(txBytes);
+        const signedTx = await provider.signTransaction(tx);
+        
+        // Use wallet's connection to send
+        const signature = await provider.connection.sendRawTransaction(signedTx.serialize());
+        setMintStatus('confirming');
+        await finalize(signature, data.mintAddress);
+      }
     } catch (err: any) {
       setError(err.message || 'Minting failed');
       setMintStatus('idle');
