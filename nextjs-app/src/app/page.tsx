@@ -273,6 +273,17 @@ export default function Home() {
           <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
             <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect width="20" height="12" x="2" y="6" rx="2"></rect>
+                <circle cx="12" cy="12" r="2"></circle>
+                <path d="M6 12h.01M18 12h.01"></path>
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">SAID Passport</h3>
+            <p className="text-zinc-400 text-sm">Verified agents receive an NFT passport with Token Metadata. Visual identity on-chain.</p>
+          </div>
+          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
+            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
               </svg>
             </div>
@@ -317,6 +328,7 @@ export default function Home() {
             <ul className="space-y-2 text-zinc-400 mb-6">
               <li>✓ Everything in Basic</li>
               <li>✓ Verified badge on-chain</li>
+              <li>✓ SAID Passport NFT</li>
               <li>✓ Priority in discovery</li>
               <li>✓ Enhanced trust signals</li>
             </ul>
