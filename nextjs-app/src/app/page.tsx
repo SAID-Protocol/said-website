@@ -290,16 +290,6 @@ export default function Home() {
             <h3 className="text-lg font-semibold mb-2">Built on Solana</h3>
             <p className="text-zinc-400 text-sm">Fast, cheap, scalable. Sub-second finality. Pennies per transaction.</p>
           </div>
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Open Source</h3>
-            <p className="text-zinc-400 text-sm">Fully open source. Verify the code. Fork it. Build on it. MIT licensed.</p>
-          </div>
         </div>
       </section>
       
@@ -308,32 +298,44 @@ export default function Home() {
         <h2 className="text-3xl font-bold text-center mb-2">Simple pricing</h2>
         <p className="text-zinc-400 text-center mb-12">Free to start. Pay only for premium features.</p>
         
-        <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
           <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-xl">
             <h3 className="text-xl font-semibold mb-1">Basic</h3>
             <div className="text-4xl font-bold my-4">Free</div>
             <ul className="space-y-2 text-zinc-400 mb-6">
-              <li>✓ Register agent identity</li>
-              <li>✓ On-chain metadata storage</li>
-              <li>✓ Basic reputation tracking</li>
+              <li>✓ Off-chain registration</li>
+              <li>✓ Directory listing</li>
               <li>✓ Public AgentCard</li>
+              <li>✓ Reputation tracking</li>
             </ul>
             <a href="#quickstart" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
               Get Started
             </a>
           </div>
-          <div className="p-8 bg-zinc-900 border border-zinc-600 rounded-xl">
+          <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-xl">
             <h3 className="text-xl font-semibold mb-1">Verified</h3>
             <div className="text-4xl font-bold my-4">0.01 SOL <span className="text-base font-normal text-zinc-400">one-time</span></div>
             <ul className="space-y-2 text-zinc-400 mb-6">
               <li>✓ Everything in Basic</li>
-              <li>✓ Verified badge on-chain</li>
-              <li>✓ SAID Passport NFT</li>
+              <li>✓ On-chain PDA identity</li>
+              <li>✓ Verified badge</li>
               <li>✓ Priority in discovery</li>
+            </ul>
+            <a href="#quickstart" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
+              Get Verified
+            </a>
+          </div>
+          <div className="p-8 bg-zinc-900 border border-zinc-600 rounded-xl">
+            <h3 className="text-xl font-semibold mb-1">Passport</h3>
+            <div className="text-4xl font-bold my-4">0.05 SOL <span className="text-base font-normal text-zinc-400">one-time</span></div>
+            <ul className="space-y-2 text-zinc-400 mb-6">
+              <li>✓ Everything in Verified</li>
+              <li>✓ NFT passport with metadata</li>
+              <li>✓ Visual identity on-chain</li>
               <li>✓ Enhanced trust signals</li>
             </ul>
             <a href="#quickstart" className="block w-full py-3 bg-white text-black rounded-lg text-center font-semibold hover:bg-zinc-200 transition">
-              Get Verified
+              Mint Passport
             </a>
           </div>
         </div>
