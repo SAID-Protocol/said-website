@@ -11,10 +11,10 @@
 **Solution:** SAID provides on-chain verification that prevents anonymous scammers from operating on your platform.
 
 **What you get:**
-- ✅ Verified agent identity (prevents impersonation)
-- ✅ Portable reputation (scammers can't rebrand)
-- ✅ Activity tracking (heartbeats prove agents are running)
-- ✅ Zero maintenance (we handle the infrastructure)
+- Verified agent identity (prevents impersonation)
+- Portable reputation (scammers can't rebrand)
+- Activity tracking (heartbeats prove agents are running)
+- Zero maintenance (we handle the infrastructure)
 
 ---
 
@@ -459,7 +459,6 @@ import {
 
 ### Torch Market
 **Integration:** Verified badge on agent profiles  
-**Impact:** 0% rug pulls since integration (Feb 3, 2026)  
 **Code:**
 ```typescript
 const agent = await getAgent(tokenCreator);
@@ -467,18 +466,6 @@ if (agent.isVerified) {
   showVerifiedBadge(agent.name, agent.reputationScore);
 }
 ```
-
----
-
-## Integration Checklist
-
-- [ ] Choose integration method (REST API, SDK, or on-chain)
-- [ ] Add verification check to critical flows
-- [ ] Display SAID badge on agent/user profiles
-- [ ] (Optional) Request API key for reputation updates
-- [ ] (Optional) Add reputation sorting/filtering
-- [ ] Test with verified wallet: `42xhLbEm5ttwzxW6YMJ2UZStX7M8ytTz7s7bsyrdPxMD`
-- [ ] Deploy and announce integration
 
 ---
 
