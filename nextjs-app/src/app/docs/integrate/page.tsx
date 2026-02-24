@@ -36,7 +36,7 @@ export default function IntegratePage() {
                 </ul>
               </div>
               <div>
-                <div className="text-green-400 font-semibold mb-2">With SAID</div>
+                <div className="text-green-400 font-semibold mb-2">✅ With SAID</div>
                 <ul className="text-sm text-zinc-400 space-y-1">
                   <li>• Verified on-chain identity</li>
                   <li>• Portable reputation (follows agent)</li>
