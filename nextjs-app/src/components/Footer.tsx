@@ -9,6 +9,7 @@ export default function Footer() {
         </div>
         <div className="flex items-center gap-6">
           <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
+          <a href="/docs/integrate" className="text-zinc-400 hover:text-white transition">Integrate</a>
           <a href="/security" className="text-zinc-400 hover:text-white transition">Security</a>
           {/* X (Twitter) Icon */}
           <a href="https://x.com/saidinfra" target="_blank" className="text-zinc-400 hover:text-white transition" aria-label="X (Twitter)">
