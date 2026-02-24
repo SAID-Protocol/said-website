@@ -36,7 +36,7 @@ export default function IntegratePage() {
                 </ul>
               </div>
               <div>
-                <div className="text-green-400 font-semibold mb-2">✅ With SAID</div>
+                <div className="text-green-400 font-semibold mb-2">With SAID</div>
                 <ul className="text-sm text-zinc-400 space-y-1">
                   <li>• Verified on-chain identity</li>
                   <li>• Portable reputation (follows agent)</li>
@@ -145,7 +145,7 @@ await db.tokens.create({
                 </code>
               </pre>
               <div className="mt-4 text-sm text-green-400">
-                ✅ Result: Scammers can't rug pull and disappear (identity follows them)
+                Result: Scammers can't rug pull and disappear (identity follows them)
               </div>
             </div>
 
@@ -165,7 +165,7 @@ const topRated = verified
                 </code>
               </pre>
               <div className="mt-4 text-sm text-green-400">
-                ✅ Result: Users only see quality agents with proven track records
+                Result: Users only see quality agents with proven track records
               </div>
             </div>
 
@@ -191,7 +191,7 @@ await fetch('https://api.saidprotocol.com/api/feedback', {
                 </code>
               </pre>
               <div className="mt-4 text-sm text-green-400">
-                ✅ Result: Agent reputation increases, future users see proven success rate
+                Result: Agent reputation increases, future users see proven success rate
               </div>
             </div>
           </div>
@@ -282,40 +282,6 @@ await fetch('https://api.saidprotocol.com/api/feedback', {
           </div>
         </section>
 
-        {/* Integration Checklist */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">Integration Checklist</h2>
-          
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="space-y-3">
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" className="mt-1" />
-                <span className="text-sm">Choose integration method (REST API, SDK, or on-chain)</span>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" className="mt-1" />
-                <span className="text-sm">Add verification check to critical flows</span>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" className="mt-1" />
-                <span className="text-sm">Display SAID badge on agent/user profiles</span>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" className="mt-1" />
-                <span className="text-sm">(Optional) Request API key for reputation updates</span>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" className="mt-1" />
-                <span className="text-sm">Test with verified wallet: <code className="text-xs bg-black px-2 py-1 rounded">42xhLbEm...PxMD</code></span>
-              </label>
-              <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" className="mt-1" />
-                <span className="text-sm">Deploy and announce integration</span>
-              </label>
-            </div>
-          </div>
-        </section>
-
         {/* Live Example */}
         <section className="mb-12">
           <h2 className="text-2xl font-bold mb-4">Live Example: Torch Market</h2>
@@ -330,11 +296,7 @@ await fetch('https://api.saidprotocol.com/api/feedback', {
                 <p className="text-sm text-zinc-400 mb-3">Token launch platform with bonding curves, governance, and treasury</p>
                 <div className="flex flex-wrap gap-2 mb-3">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">✓ SAID Integrated</span>
-                  <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded">0% Rug Pulls</span>
                 </div>
-                <p className="text-sm text-zinc-400 italic">
-                  "Since integrating SAID on Feb 3, we've had zero rug pulls. Verified creators can't disappear - their reputation follows them."
-                </p>
               </div>
             </div>
             <a href="https://torch.market" target="_blank" className="text-sm text-blue-400 hover:text-blue-300 transition">
