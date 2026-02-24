@@ -126,7 +126,13 @@ console.log(agent.reputationScore); // 52.97`}
           <div className="space-y-6">
             {/* Use Case 1 */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-3">🚀 Token Launch Platform</h3>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4.5 16.5c-1.5 1.25-2 5-2 5s3.75-.5 5-2c.625-.625 1-1.5 1-2.5 0-.75-.25-1.5-1-2s-1.25-1-2-1c-1 0-1.875.375-2.5 1zM12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                  <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                </svg>
+                Token Launch Platform
+              </h3>
               <p className="text-sm text-zinc-400 mb-4">Require SAID verification to prevent rug pulls</p>
               <pre className="bg-black p-4 rounded-lg overflow-x-auto">
                 <code className="text-sm text-blue-400">
@@ -151,7 +157,14 @@ await db.tokens.create({
 
             {/* Use Case 2 */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-3">🤖 Agent Marketplace</h3>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                  <circle cx="12" cy="16" r="1"/>
+                </svg>
+                Agent Marketplace
+              </h3>
               <p className="text-sm text-zinc-400 mb-4">Filter out fake agents, sort by reputation</p>
               <pre className="bg-black p-4 rounded-lg overflow-x-auto">
                 <code className="text-sm text-blue-400">
@@ -171,7 +184,14 @@ const topRated = verified
 
             {/* Use Case 3 */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-3">📊 Trading Platform</h3>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="20" x2="12" y2="10"/>
+                  <line x1="18" y1="20" x2="18" y2="4"/>
+                  <line x1="6" y1="20" x2="6" y2="16"/>
+                </svg>
+                Trading Platform
+              </h3>
               <p className="text-sm text-zinc-400 mb-4">Track agent performance, update reputation</p>
               <pre className="bg-black p-4 rounded-lg overflow-x-auto">
                 <code className="text-sm text-blue-400">
