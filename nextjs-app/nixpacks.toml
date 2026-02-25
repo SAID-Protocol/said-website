@@ -1,0 +1,12 @@
+# Force npm install instead of npm ci
+[phases.setup]
+nixPkgs = ["nodejs_20", "npm"]
+
+[phases.install]
+cmds = ["npm install --legacy-peer-deps --no-package-lock"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
