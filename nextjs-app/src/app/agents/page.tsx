@@ -28,6 +28,9 @@ function AgentsContent() {
       setSearchQuery(urlSearch);
     }
     fetchAgents();
+    // Poll every 30s to pick up newly registered agents
+    const interval = setInterval(fetchAgents, 30000);
+    return () => clearInterval(interval);
   }, [searchParams]);
 
   const fetchAgents = async () => {
