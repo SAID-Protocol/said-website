@@ -28,9 +28,16 @@ function AgentsContent() {
       setSearchQuery(urlSearch);
     }
     fetchAgents();
-    // Poll every 30s to pick up newly registered agents
+    // Poll every 30s as fallback
     const interval = setInterval(fetchAgents, 30000);
-    return () => clearInterval(interval);
+    // SSE: real-time updates when agents register
+    let es: EventSource | null = null;
+    try {
+      es = new EventSource('https://api.saidprotocol.com/api/events');
+      es.onmessage = () => fetchAgents();
+      es.onerror = () => { es?.close(); es = null; };
+    } catch {}
+    return () => { clearInterval(interval); es?.close(); };
   }, [searchParams]);
 
   const fetchAgents = async () => {
