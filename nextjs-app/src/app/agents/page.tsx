@@ -13,6 +13,7 @@ interface Agent {
   isVerified: boolean;
   registeredAt: string;
   skills?: string[];
+  registrationSource?: string | null;
 }
 
 function AgentsContent() {
@@ -201,7 +202,15 @@ function AgentCard({ agent }: { agent: Agent }) {
       </div>
       <h3 className="font-semibold mb-1">{agent.name || 'Unnamed Agent'}</h3>
       <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{agent.description || 'No description'}</p>
-      <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}...{agent.wallet.slice(-4)}</p>
+      <div className="flex items-center justify-between">
+        <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}...{agent.wallet.slice(-4)}</p>
+        {agent.registrationSource === 'spawnr' && (
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-full" title="Launched on Spawnr.io">
+            <img src="/platforms/spawnr.png" alt="Spawnr" className="w-4 h-4 rounded-full" />
+            <span className="text-zinc-400 text-xs">Spawnr</span>
+          </div>
+        )}
+      </div>
     </Link>
   );
 }
