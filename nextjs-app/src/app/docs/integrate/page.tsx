@@ -302,26 +302,49 @@ await fetch('https://api.saidprotocol.com/api/feedback', {
           </div>
         </section>
 
-        {/* Live Example */}
+        {/* Live Integrations */}
         <section className="mb-12">
-          <h2 className="text-2xl font-bold mb-4">Live Example: Torch Market</h2>
+          <h2 className="text-2xl font-bold mb-4">Live Integrations</h2>
+          <p className="text-zinc-400 mb-6">Platforms building with SAID Protocol</p>
           
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-2xl">
-                🔥
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold mb-1">Torch Market</h3>
-                <p className="text-sm text-zinc-400 mb-3">Token launch platform with bonding curves, governance, and treasury</p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">✓ SAID Integrated</span>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Spawnr.io */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-2xl">
+                  🚀
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Spawnr.io</h3>
+                  <p className="text-sm text-zinc-400 mb-3">AI agent launch platform with token deployment and bonding curves</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">✓ SAID Integrated</span>
+                  </div>
                 </div>
               </div>
+              <a href="https://spawnr.io" target="_blank" className="text-sm text-blue-400 hover:text-blue-300 transition">
+                Visit spawnr.io →
+              </a>
             </div>
-            <a href="https://torch.market" target="_blank" className="text-sm text-blue-400 hover:text-blue-300 transition">
-              Visit torch.market →
-            </a>
+
+            {/* Torch Market */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="flex items-start gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-2xl">
+                  🔥
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Torch Market</h3>
+                  <p className="text-sm text-zinc-400 mb-3">Token launch platform with bonding curves, governance, and treasury</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">✓ SAID Integrated</span>
+                  </div>
+                </div>
+              </div>
+              <a href="https://torch.market" target="_blank" className="text-sm text-blue-400 hover:text-blue-300 transition">
+                Visit torch.market →
+              </a>
+            </div>
           </div>
         </section>
 
