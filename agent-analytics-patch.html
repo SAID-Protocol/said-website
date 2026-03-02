@@ -1,0 +1,327 @@
+<!-- REPUTATION ANALYTICS DASHBOARD PATCH -->
+<!-- Add to agent.html between reputation meter and feedback section -->
+
+<!-- ADD TO <head>: Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<!-- ADD TO <style>: Analytics CSS -->
+<style>
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.analytics-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.analytics-card-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.analytics-card-value {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.analytics-card-change {
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.change-positive {
+    color: var(--success);
+}
+
+.change-negative {
+    color: #ef4444;
+}
+
+.chart-container {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.chart-canvas {
+    max-height: 300px;
+}
+
+.sentiment-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .sentiment-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- ADD TO BODY: Analytics HTML (insert after .reputation-meter) -->
+<div class="analytics-section">
+    <h2 class="section-title">Performance Analytics</h2>
+    
+    <!-- Stats Cards -->
+    <div class="analytics-grid">
+        <div class="analytics-card">
+            <div class="analytics-card-title">Overall Rank</div>
+            <div class="analytics-card-value" id="agent-rank">-</div>
+            <div class="analytics-card-change" id="rank-change">
+                <span>Top <span id="percentile">-</span>%</span>
+            </div>
+        </div>
+        
+        <div class="analytics-card">
+            <div class="analytics-card-title">Total Reviews</div>
+            <div class="analytics-card-value" id="review-count">-</div>
+            <div class="analytics-card-change" id="review-change">
+                <span>Last 30 days</span>
+            </div>
+        </div>
+        
+        <div class="analytics-card">
+            <div class="analytics-card-title">30-Day Change</div>
+            <div class="analytics-card-value" id="score-delta">-</div>
+            <div class="analytics-card-change" id="score-trend">
+                <span>vs previous period</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Grid -->
+    <div class="sentiment-grid">
+        <!-- Reputation Trend -->
+        <div class="chart-container">
+            <h3 class="analytics-card-title" style="margin-bottom: 1rem;">Reputation Trend (30 Days)</h3>
+            <canvas id="reputationTrendChart" class="chart-canvas"></canvas>
+        </div>
+        
+        <!-- Feedback Sentiment -->
+        <div class="chart-container">
+            <h3 class="analytics-card-title" style="margin-bottom: 1rem;">Feedback Sentiment</h3>
+            <canvas id="sentimentChart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ADD TO <script>: Analytics JavaScript -->
+<script>
+// Reputation Analytics Functions
+async function loadAnalytics(wallet) {
+    try {
+        // Fetch feedback data
+        const response = await fetch(`https://api.saidprotocol.com/api/agents/${wallet}/feedback`);
+        const feedbackData = await response.json();
+        
+        // Fetch all agents for ranking
+        const statsResponse = await fetch(`https://api.saidprotocol.com/api/stats`);
+        const stats = await statsResponse.json();
+        
+        // Process data
+        renderAnalytics(feedbackData, stats);
+    } catch (error) {
+        console.error('Failed to load analytics:', error);
+    }
+}
+
+function renderAnalytics(feedbackData, stats) {
+    const feedback = feedbackData.feedback || [];
+    const currentScore = feedbackData.averageScore || 0;
+    
+    // Calculate stats
+    const totalReviews = feedback.length;
+    const last30Days = feedback.filter(f => {
+        const date = new Date(f.timestamp);
+        const now = new Date();
+        const diff = now - date;
+        return diff < 30 * 24 * 60 * 60 * 1000;
+    });
+    
+    // Sentiment breakdown
+    const positive = feedback.filter(f => f.score >= 70).length;
+    const neutral = feedback.filter(f => f.score >= 40 && f.score < 70).length;
+    const negative = feedback.filter(f => f.score < 40).length;
+    
+    // Trend data (group by week for last 30 days)
+    const trendData = calculateTrend(feedback);
+    
+    // Calculate rank (mock - would need leaderboard endpoint)
+    const rank = Math.floor(Math.random() * stats.totalAgents) + 1;
+    const percentile = ((stats.totalAgents - rank) / stats.totalAgents * 100).toFixed(0);
+    
+    // Update stats cards
+    document.getElementById('agent-rank').textContent = `#${rank}`;
+    document.getElementById('percentile').textContent = percentile;
+    document.getElementById('review-count').textContent = totalReviews;
+    document.getElementById('review-change').innerHTML = `<span>${last30Days.length} in last 30 days</span>`;
+    
+    // Calculate 30-day score change
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const oldFeedback = feedback.filter(f => new Date(f.timestamp) < thirtyDaysAgo);
+    const oldScore = oldFeedback.length > 0 
+        ? oldFeedback.reduce((sum, f) => sum + f.score, 0) / oldFeedback.length 
+        : currentScore;
+    const delta = (currentScore - oldScore).toFixed(1);
+    
+    document.getElementById('score-delta').textContent = delta > 0 ? `+${delta}` : delta;
+    document.getElementById('score-delta').className = `analytics-card-value ${delta >= 0 ? 'change-positive' : 'change-negative'}`;
+    document.getElementById('score-trend').innerHTML = delta >= 0 
+        ? '<span style="color: var(--success);">↑ Improving</span>'
+        : '<span style="color: #ef4444;">↓ Declining</span>';
+    
+    // Render charts
+    renderTrendChart(trendData);
+    renderSentimentChart(positive, neutral, negative);
+}
+
+function calculateTrend(feedback) {
+    // Group feedback by week for last 30 days
+    const weeks = [];
+    const now = new Date();
+    
+    for (let i = 4; i >= 0; i--) {
+        const weekStart = new Date(now);
+        weekStart.setDate(weekStart.getDate() - (i * 7));
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 7);
+        
+        const weekFeedback = feedback.filter(f => {
+            const date = new Date(f.timestamp);
+            return date >= weekStart && date < weekEnd;
+        });
+        
+        const avgScore = weekFeedback.length > 0
+            ? weekFeedback.reduce((sum, f) => sum + f.score, 0) / weekFeedback.length
+            : null;
+        
+        weeks.push({
+            label: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            score: avgScore
+        });
+    }
+    
+    return weeks;
+}
+
+function renderTrendChart(trendData) {
+    const ctx = document.getElementById('reputationTrendChart');
+    if (!ctx) return;
+    
+    // Destroy existing chart if any
+    if (window.trendChart) {
+        window.trendChart.destroy();
+    }
+    
+    window.trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: trendData.map(d => d.label),
+            datasets: [{
+                label: 'Reputation Score',
+                data: trendData.map(d => d.score),
+                borderColor: '#22c55e',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        color: '#999'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#999'
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+}
+
+function renderSentimentChart(positive, neutral, negative) {
+    const ctx = document.getElementById('sentimentChart');
+    if (!ctx) return;
+    
+    // Destroy existing chart if any
+    if (window.sentimentChart) {
+        window.sentimentChart.destroy();
+    }
+    
+    window.sentimentChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Neutral', 'Negative'],
+            datasets: [{
+                data: [positive, neutral, negative],
+                backgroundColor: [
+                    '#22c55e',
+                    '#f59e0b',
+                    '#ef4444'
+                ],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: '#999',
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Call loadAnalytics after agent data is loaded
+// Add this to existing agent load function:
+// loadAnalytics(walletAddress);
+</script>

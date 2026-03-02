@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ReputationAnalytics from '@/components/ReputationAnalytics';
 
 interface Agent {
   wallet: string;
@@ -167,6 +168,15 @@ export default function AgentPage() {
             <div className="text-zinc-400 text-sm">Registered</div>
           </div>
         </div>
+
+        {/* Reputation Analytics - only show if agent has feedback */}
+        {agent.feedbackCount > 0 && (
+          <ReputationAnalytics 
+            wallet={agent.wallet} 
+            currentScore={agent.reputationScore || 0}
+            feedbackCount={agent.feedbackCount || 0}
+          />
+        )}
 
         {/* Skills */}
         {agent.skills && agent.skills.length > 0 && (
