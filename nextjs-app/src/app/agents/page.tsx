@@ -47,7 +47,7 @@ function AgentsContent() {
 
   const fetchAgents = async () => {
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents');
+      const res = await fetch('https://api.saidprotocol.com/api/agents?limit=2000');
       if (res.ok) {
         const data = await res.json();
         setAgents(data.agents || []);
