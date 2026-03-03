@@ -20,11 +20,10 @@ export default function Home() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents');
+      const res = await fetch('https://api.saidprotocol.com/api/stats');
       const data = await res.json();
-      const agents = data.agents || [];
-      setAgentCount(agents.length.toString());
-      setVerifiedCount(agents.filter((a: any) => a.isVerified).length.toString());
+      setAgentCount(data.totalAgents?.toString() || '-');
+      setVerifiedCount(data.verifiedAgents?.toString() || '-');
     } catch {
       setAgentCount('50+');
       setVerifiedCount('10+');
