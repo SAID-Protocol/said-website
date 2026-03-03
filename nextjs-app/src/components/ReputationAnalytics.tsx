@@ -74,10 +74,10 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
     return null;
   }
 
-  // Calculate sentiment breakdown
-  const positive = feedback.filter(f => f.score >= 4).length;
-  const neutral = feedback.filter(f => f.score === 3).length;
-  const negative = feedback.filter(f => f.score <= 2).length;
+  // Calculate sentiment breakdown (0-100 scale)
+  const positive = feedback.filter(f => f.score >= 70).length;
+  const neutral = feedback.filter(f => f.score >= 40 && f.score < 70).length;
+  const negative = feedback.filter(f => f.score < 40).length;
 
   // Calculate 30-day trend (group by day, calculate average)
   const thirtyDaysAgo = new Date();
@@ -123,7 +123,7 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
   };
 
   const pieChartData = {
-    labels: ['Positive (4-5)', 'Neutral (3)', 'Negative (1-2)'],
+    labels: ['Positive (70-100)', 'Neutral (40-69)', 'Negative (0-39)'],
     datasets: [
       {
         data: [positive, neutral, negative],
@@ -160,7 +160,7 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
     scales: {
       y: {
         beginAtZero: true,
-        max: 5,
+        max: 100,
         grid: {
           color: 'rgba(255, 255, 255, 0.05)',
         },
@@ -223,7 +223,7 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
         <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
           <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-1">Current Score</div>
           <div className="text-3xl font-bold">{currentScore.toFixed(2)}</div>
-          <div className="text-sm text-zinc-500 mt-1">Out of 5.00</div>
+          <div className="text-sm text-zinc-500 mt-1">Out of 100</div>
         </div>
       </div>
 
