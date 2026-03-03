@@ -259,6 +259,12 @@ function AgentCard({ agent }: { agent: Agent }) {
             <span className="text-zinc-400 text-xs">Spawnr</span>
           </div>
         )}
+        {agent.registrationSource === 'clawpump' && (
+          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-full" title="Launched on Claw Pump">
+            <img src="/clawpump-logo.png" alt="Claw Pump" className="w-4 h-4 rounded-full" />
+            <span className="text-zinc-400 text-xs">Claw Pump</span>
+          </div>
+        )}
       </div>
     </Link>
   );
