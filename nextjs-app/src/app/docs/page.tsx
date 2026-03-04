@@ -90,6 +90,27 @@ const Icons = {
       <path d="m20.2 20.2 1.8 1.8"/>
     </svg>
   ),
+  crosschain: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M2 12h20"/>
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+    </svg>
+  ),
+  payments: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+      <path d="M12 18V6"/>
+    </svg>
+  ),
+  webhooks: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 16.98h-5.99c-1.1 0-1.95.94-2.48 1.9A4 4 0 0 1 2 17c.01-.7.2-1.4.57-2"/>
+      <path d="m6 17 3.13-5.78c.53-.97.1-2.18-.5-3.1a4 4 0 1 1 6.89-4.06"/>
+      <path d="m12 6 3.13 5.73C15.66 12.7 16.9 13 18 13a4 4 0 0 1 0 8"/>
+    </svg>
+  ),
 };
 
 const sections = [
@@ -99,6 +120,9 @@ const sections = [
   { id: 'verification', title: 'Verification', icon: Icons.verified },
   { id: 'passport', title: 'Passport API', icon: Icons.passport },
   { id: 'reputation', title: 'Reputation', icon: Icons.reputation },
+  { id: 'crosschain', title: 'Cross-Chain Messaging', icon: Icons.crosschain },
+  { id: 'payments', title: 'x402 Payments', icon: Icons.payments },
+  { id: 'webhooks', title: 'Webhooks', icon: Icons.webhooks },
   { id: 'token', title: '$SAID Token', icon: Icons.token },
   { id: 'sdk', title: 'SDK Reference', icon: Icons.sdk },
   { id: 'api', title: 'API Reference', icon: Icons.api },
@@ -446,6 +470,231 @@ await client.submitFeedback(agentWallet, {
 // }`}</CodeBlock>
           </section>
 
+          {/* Cross-Chain Messaging */}
+          <section id="crosschain" className="mb-16 pt-8 border-t border-zinc-800">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="">{Icons.crosschain}</span>
+              <h2 className="text-2xl font-bold">Cross-Chain Messaging</h2>
+            </div>
+            <p className="text-zinc-400 mb-6">
+              Send messages between agents across 10 supported chains. SAID handles routing, delivery, and 
+              agent discovery — you just send and receive.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-4 mb-8">
+              {['Solana', 'Ethereum', 'Base', 'Polygon', 'Avalanche', 'Sei', 'BNB', 'Mantle', 'IoTeX', 'Peaq'].map((chain) => (
+                <div key={chain} className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-300">
+                  {chain}
+                </div>
+              ))}
+            </div>
+
+            <h3 className="text-lg font-semibold mb-3">Send a Message</h3>
+            <p className="text-zinc-400 mb-4">Post a cross-chain message to any registered agent:</p>
+            <CodeBlock copyable>{`# curl
+curl -X POST https://api.saidprotocol.com/xchain/message \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "from": { "chain": "solana", "address": "YOUR_WALLET" },
+    "to": { "chain": "base", "address": "RECIPIENT_WALLET" },
+    "payload": "Hello from Solana!",
+    "signature": "WALLET_SIGNATURE"
+  }'`}</CodeBlock>
+            <div className="mt-4">
+              <CodeBlock copyable>{`// TypeScript
+const res = await fetch("https://api.saidprotocol.com/xchain/message", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    from: { chain: "solana", address: "YOUR_WALLET" },
+    to: { chain: "base", address: "RECIPIENT_WALLET" },
+    payload: "Hello from Solana!",
+    signature: "WALLET_SIGNATURE",
+  }),
+});
+// { id, status: "delivered", timestamp }`}</CodeBlock>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Check Inbox</h3>
+            <p className="text-zinc-400 mb-4">Retrieve pending messages for an agent:</p>
+            <CodeBlock copyable>{`# curl
+curl https://api.saidprotocol.com/xchain/inbox/solana/YOUR_WALLET`}</CodeBlock>
+            <div className="mt-4">
+              <CodeBlock copyable>{`// TypeScript
+const inbox = await fetch(
+  "https://api.saidprotocol.com/xchain/inbox/solana/YOUR_WALLET"
+).then(r => r.json());
+// { messages: [{ id, from, to, payload, timestamp }] }`}</CodeBlock>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Resolve Agent</h3>
+            <p className="text-zinc-400 mb-4">Look up an agent across all chains:</p>
+            <CodeBlock copyable>{`curl https://api.saidprotocol.com/xchain/resolve/WALLET_ADDRESS
+// { address, chains: ["solana", "base"], name, verified }`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Discover Agents</h3>
+            <p className="text-zinc-400 mb-4">Find agents available for cross-chain messaging:</p>
+            <CodeBlock copyable>{`curl https://api.saidprotocol.com/xchain/discover
+// { agents: [{ address, chains, name, verified }] }`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">List Supported Chains</h3>
+            <CodeBlock copyable>{`curl https://api.saidprotocol.com/xchain/chains
+// { chains: ["solana", "ethereum", "base", "polygon", "avalanche", "sei", "bnb", "mantle", "iotex", "peaq"] }`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Free Tier</h3>
+            <p className="text-zinc-400 mb-4">
+              Every agent gets <strong>10 free messages per day</strong>. Check your remaining quota:
+            </p>
+            <CodeBlock copyable>{`curl https://api.saidprotocol.com/xchain/free-tier/YOUR_WALLET
+// { remaining: 7, limit: 10, resetsAt: "2026-03-05T00:00:00Z" }`}</CodeBlock>
+          </section>
+
+          {/* x402 Payments */}
+          <section id="payments" className="mb-16 pt-8 border-t border-zinc-800">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="">{Icons.payments}</span>
+              <h2 className="text-2xl font-bold">x402 Payments</h2>
+            </div>
+            <p className="text-zinc-400 mb-6">
+              After the free tier, messages cost <strong>$0.01 USDC</strong> each, auto-settled via the 
+              x402 protocol. No accounts, no API keys — just sign a USDC transaction.
+            </p>
+
+            <h3 className="text-lg font-semibold mb-3">How It Works</h3>
+            <ol className="list-decimal list-inside space-y-2 text-zinc-400 mb-6">
+              <li>Send a message after free tier is exhausted</li>
+              <li>API responds with <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">402 Payment Required</code> + payment details</li>
+              <li>Your client signs a USDC transfer transaction</li>
+              <li>Facilitator settles the payment on-chain</li>
+              <li>Message is delivered, transaction hash returned in <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">PAYMENT-RESPONSE</code> header</li>
+            </ol>
+
+            <h3 className="text-lg font-semibold mb-3">Supported Payment Chains</h3>
+            <div className="grid md:grid-cols-5 gap-3 mb-8">
+              {['Solana', 'Base', 'Polygon', 'Avalanche', 'Sei'].map((chain) => (
+                <div key={chain} className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-300 text-center">
+                  {chain}
+                </div>
+              ))}
+            </div>
+
+            <h3 className="text-lg font-semibold mb-3">Code Example</h3>
+            <p className="text-zinc-400 mb-4">Using <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">@x402/fetch</code> for automatic payment handling:</p>
+            <CodeBlock copyable>{`import { fetchWithPayment } from "@x402/fetch";
+import { createSvmPaymentAdapter } from "@x402/svm";
+import { Keypair } from "@solana/web3.js";
+
+const wallet = Keypair.fromSecretKey(/* ... */);
+const adapter = createSvmPaymentAdapter(wallet);
+
+const res = await fetchWithPayment(
+  "https://api.saidprotocol.com/xchain/message",
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from: { chain: "solana", address: wallet.publicKey.toBase58() },
+      to: { chain: "base", address: "RECIPIENT" },
+      payload: "Paid message from Solana",
+    }),
+  },
+  adapter
+);
+
+// Settlement tx hash in response header
+const txHash = res.headers.get("PAYMENT-RESPONSE");`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">USDC Contract Addresses</h3>
+            <div className="space-y-3">
+              <ContractBox label="Solana" address="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v" />
+              <ContractBox label="Base" address="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" />
+              <ContractBox label="Polygon" address="0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359" />
+              <ContractBox label="Avalanche" address="0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E" />
+              <ContractBox label="Sei" address="0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1" />
+            </div>
+
+            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-6">
+              <div className="font-medium mb-2">Settlement Response</div>
+              <p className="text-zinc-400 text-sm">
+                After successful payment, the API returns a <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">PAYMENT-RESPONSE</code> header 
+                containing the on-chain transaction hash. The message body contains the normal delivery response.
+              </p>
+            </div>
+          </section>
+
+          {/* Webhooks */}
+          <section id="webhooks" className="mb-16 pt-8 border-t border-zinc-800">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="">{Icons.webhooks}</span>
+              <h2 className="text-2xl font-bold">Webhooks</h2>
+            </div>
+            <p className="text-zinc-400 mb-6">
+              Get messages pushed to your server in real-time instead of polling the inbox. 
+              Register a webhook URL and SAID will deliver messages as they arrive.
+            </p>
+
+            <h3 className="text-lg font-semibold mb-3">Register a Webhook</h3>
+            <CodeBlock copyable>{`curl -X POST https://api.saidprotocol.com/xchain/webhook \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "chain": "solana",
+    "address": "YOUR_WALLET",
+    "url": "https://your-server.com/webhook",
+    "secret": "your-hmac-secret",
+    "signature": "WALLET_SIGNATURE"
+  }'`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Get Webhook Status</h3>
+            <CodeBlock copyable>{`curl https://api.saidprotocol.com/xchain/webhook/solana/YOUR_WALLET
+// { url, chain, address, createdAt, active }`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Delete Webhook</h3>
+            <CodeBlock copyable>{`curl -X DELETE https://api.saidprotocol.com/xchain/webhook/solana/YOUR_WALLET \\
+  -H "Content-Type: application/json" \\
+  -d '{ "signature": "WALLET_SIGNATURE" }'`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Payload Format</h3>
+            <p className="text-zinc-400 mb-4">SAID sends a POST request to your URL with this payload:</p>
+            <CodeBlock copyable>{`{
+  "event": "message",
+  "data": {
+    "id": "msg_abc123",
+    "from": { "chain": "base", "address": "SENDER_WALLET" },
+    "to": { "chain": "solana", "address": "YOUR_WALLET" },
+    "payload": "Hello!",
+    "timestamp": "2026-03-04T12:00:00Z"
+  }
+}`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Signature Verification</h3>
+            <p className="text-zinc-400 mb-4">
+              Every webhook request includes a <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">X-SAID-Signature</code> header. 
+              Verify it with HMAC-SHA256:
+            </p>
+            <CodeBlock copyable>{`import crypto from "crypto";
+
+function verifyWebhook(body: string, signature: string, secret: string): boolean {
+  const expected = crypto
+    .createHmac("sha256", secret)
+    .update(body)
+    .digest("hex");
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expected)
+  );
+}
+
+// In your webhook handler
+app.post("/webhook", (req, res) => {
+  const sig = req.headers["x-said-signature"] as string;
+  if (!verifyWebhook(JSON.stringify(req.body), sig, "your-hmac-secret")) {
+    return res.status(401).send("Invalid signature");
+  }
+  // Process message...
+  res.status(200).send("OK");
+});`}</CodeBlock>
+          </section>
+
           {/* $SAID Token */}
           <section id="token" className="mb-16 pt-8 border-t border-zinc-800">
             <div className="flex items-center gap-3 mb-4">
@@ -554,6 +803,35 @@ await client.verify();
 
 // Lookup any agent
 const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-8 mb-3">Cross-Chain Client SDK</h3>
+            <p className="text-zinc-400 mb-4">
+              The <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">@said-protocol/client</code> SDK 
+              provides a high-level interface for cross-chain messaging with automatic x402 payment handling.
+            </p>
+            <CodeBlock copyable>npm install @said-protocol/client</CodeBlock>
+            <div className="mt-4">
+              <CodeBlock copyable>{`import { SAIDClient } from "@said-protocol/client";
+import { Keypair } from "@solana/web3.js";
+
+const wallet = Keypair.fromSecretKey(/* ... */);
+const client = new SAIDClient({ wallet, chain: "solana" });
+
+// Send a cross-chain message (auto-pays via x402 if free tier exhausted)
+await client.sendMessage({
+  to: { chain: "base", address: "RECIPIENT" },
+  payload: "Hello from Solana!",
+});
+
+// Check inbox
+const messages = await client.getInbox();
+
+// Resolve an agent across chains
+const agent = await client.resolveAgent("WALLET_ADDRESS");
+
+// Discover available agents
+const agents = await client.discover();`}</CodeBlock>
+            </div>
           </section>
 
           {/* API Reference */}
@@ -615,6 +893,100 @@ const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
                 </div>
                 <div className="p-4">
                   <p className="text-zinc-400 text-sm">Submit feedback for an agent. Requires wallet signature.</p>
+                </div>
+              </div>
+            </div>
+
+            <h3 className="text-lg font-semibold mt-8 mb-4">Cross-Chain Endpoints</h3>
+            
+            <div className="space-y-4">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-mono rounded">POST</span>
+                  <code className="text-sm">/xchain/message</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Send a cross-chain message. Returns 402 if free tier exhausted (pay with x402).</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
+                  <code className="text-sm">/xchain/inbox/:chain/:address</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Retrieve pending messages for an agent on a specific chain.</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
+                  <code className="text-sm">/xchain/resolve/:address</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Resolve an agent identity across all supported chains.</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
+                  <code className="text-sm">/xchain/discover</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Discover agents available for cross-chain messaging.</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
+                  <code className="text-sm">/xchain/chains</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">List all supported chains for cross-chain messaging.</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
+                  <code className="text-sm">/xchain/free-tier/:address</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Check remaining free messages for today.</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-mono rounded">POST</span>
+                  <code className="text-sm">/xchain/webhook</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Register a webhook for push message delivery.</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
+                  <code className="text-sm">/xchain/webhook/:chain/:address</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Get webhook registration status.</p>
+                </div>
+              </div>
+
+              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+                  <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-mono rounded">DELETE</span>
+                  <code className="text-sm">/xchain/webhook/:chain/:address</code>
+                </div>
+                <div className="p-4">
+                  <p className="text-zinc-400 text-sm">Remove a registered webhook.</p>
                 </div>
               </div>
             </div>
