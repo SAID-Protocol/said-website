@@ -120,7 +120,7 @@ const sections = [
   { id: 'verification', title: 'Verification', icon: Icons.verified },
   { id: 'passport', title: 'Passport API', icon: Icons.passport },
   { id: 'reputation', title: 'Reputation', icon: Icons.reputation },
-  { id: 'crosschain', title: 'Cross-Chain Messaging', icon: Icons.crosschain },
+  { id: 'crosschain', title: 'Cross-Chain', icon: Icons.crosschain },
   { id: 'payments', title: 'x402 Payments', icon: Icons.payments },
   { id: 'webhooks', title: 'Webhooks', icon: Icons.webhooks },
   { id: 'token', title: '$SAID Token', icon: Icons.token },
