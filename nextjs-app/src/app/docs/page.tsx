@@ -497,8 +497,7 @@ curl -X POST https://api.saidprotocol.com/xchain/message \\
   -d '{
     "from": { "chain": "solana", "address": "YOUR_WALLET" },
     "to": { "chain": "base", "address": "RECIPIENT_WALLET" },
-    "payload": "Hello from Solana!",
-    "signature": "WALLET_SIGNATURE"
+    "message": "Hello from Solana!"
   }'`}</CodeBlock>
             <div className="mt-4">
               <CodeBlock copyable>{`// TypeScript
@@ -508,8 +507,7 @@ const res = await fetch("https://api.saidprotocol.com/xchain/message", {
   body: JSON.stringify({
     from: { chain: "solana", address: "YOUR_WALLET" },
     to: { chain: "base", address: "RECIPIENT_WALLET" },
-    payload: "Hello from Solana!",
-    signature: "WALLET_SIGNATURE",
+    message: "Hello from Solana!",
   }),
 });
 // { id, status: "delivered", timestamp }`}</CodeBlock>
@@ -524,7 +522,7 @@ curl https://api.saidprotocol.com/xchain/inbox/solana/YOUR_WALLET`}</CodeBlock>
 const inbox = await fetch(
   "https://api.saidprotocol.com/xchain/inbox/solana/YOUR_WALLET"
 ).then(r => r.json());
-// { messages: [{ id, from, to, payload, timestamp }] }`}</CodeBlock>
+// { messages: [{ id, from, to, message, timestamp }] }`}</CodeBlock>
             </div>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Resolve Agent</h3>
@@ -595,7 +593,7 @@ const res = await fetchWithPayment(
     body: JSON.stringify({
       from: { chain: "solana", address: wallet.publicKey.toBase58() },
       to: { chain: "base", address: "RECIPIENT" },
-      payload: "Paid message from Solana",
+      message: "Paid message from Solana",
     }),
   },
   adapter
@@ -641,7 +639,7 @@ const txHash = res.headers.get("PAYMENT-RESPONSE");`}</CodeBlock>
     "address": "YOUR_WALLET",
     "url": "https://your-server.com/webhook",
     "secret": "your-hmac-secret",
-    "signature": "WALLET_SIGNATURE"
+    
   }'`}</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Get Webhook Status</h3>
@@ -649,9 +647,7 @@ const txHash = res.headers.get("PAYMENT-RESPONSE");`}</CodeBlock>
 // { url, chain, address, createdAt, active }`}</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Delete Webhook</h3>
-            <CodeBlock copyable>{`curl -X DELETE https://api.saidprotocol.com/xchain/webhook/solana/YOUR_WALLET \\
-  -H "Content-Type: application/json" \\
-  -d '{ "signature": "WALLET_SIGNATURE" }'`}</CodeBlock>
+            <CodeBlock copyable>{`curl -X DELETE https://api.saidprotocol.com/xchain/webhook/solana/YOUR_WALLET`}</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Payload Format</h3>
             <p className="text-zinc-400 mb-4">SAID sends a POST request to your URL with this payload:</p>
@@ -661,7 +657,7 @@ const txHash = res.headers.get("PAYMENT-RESPONSE");`}</CodeBlock>
     "id": "msg_abc123",
     "from": { "chain": "base", "address": "SENDER_WALLET" },
     "to": { "chain": "solana", "address": "YOUR_WALLET" },
-    "payload": "Hello!",
+    "message": "Hello!",
     "timestamp": "2026-03-04T12:00:00Z"
   }
 }`}</CodeBlock>
@@ -820,7 +816,7 @@ const client = new SAIDClient({ wallet, chain: "solana" });
 // Send a cross-chain message (auto-pays via x402 if free tier exhausted)
 await client.sendMessage({
   to: { chain: "base", address: "RECIPIENT" },
-  payload: "Hello from Solana!",
+  message: "Hello from Solana!",
 });
 
 // Check inbox
