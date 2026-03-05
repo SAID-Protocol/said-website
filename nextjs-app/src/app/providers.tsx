@@ -15,7 +15,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           logo: '/logo-dark.png',
         },
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          createOnLogin: 'off',
         },
       }}
     >
