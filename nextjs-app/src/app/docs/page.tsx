@@ -225,7 +225,7 @@ export default function DocsPage() {
           <main className="flex-1 min-w-0">
           
           {/* Introduction */}
-          <section id="introduction" className="mb-16">
+          <section id="introduction" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.introduction}</span>
               <h1 className="text-3xl font-bold">Introduction</h1>
@@ -238,7 +238,7 @@ export default function DocsPage() {
           </section>
 
           {/* Agent Identity */}
-          <section id="identity" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="identity" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.identity}</span>
               <h2 className="text-2xl font-bold">Agent Identity</h2>
@@ -272,7 +272,7 @@ export default function DocsPage() {
           </section>
 
           {/* Multi-Wallet */}
-          <section id="multi-wallet" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="multi-wallet" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.wallet}</span>
               <h2 className="text-2xl font-bold">Multi-Wallet Support</h2>
@@ -304,7 +304,7 @@ await agent.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
           </section>
 
           {/* Verification */}
-          <section id="verification" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="verification" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.verified}</span>
               <h2 className="text-2xl font-bold">Verification</h2>
@@ -339,7 +339,7 @@ const verified = await isVerified("WALLET_ADDRESS");
           </section>
 
           {/* Passport API */}
-          <section id="passport" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="passport" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.passport}</span>
               <h2 className="text-2xl font-bold">Passport API</h2>
@@ -448,7 +448,7 @@ const passport = await res.json();
           </section>
 
           {/* Reputation */}
-          <section id="reputation" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="reputation" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.reputation}</span>
               <h2 className="text-2xl font-bold">Reputation</h2>
@@ -477,7 +477,7 @@ await agent.submitFeedback(agentWallet, {
           </section>
 
           {/* Cross-Chain Messaging */}
-          <section id="crosschain" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="crosschain" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.crosschain}</span>
               <h2 className="text-2xl font-bold">Cross-Chain Messaging</h2>
@@ -556,7 +556,7 @@ const inbox = await fetch(
           </section>
 
           {/* x402 Payments */}
-          <section id="payments" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="payments" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.payments}</span>
               <h2 className="text-2xl font-bold">x402 Payments</h2>
@@ -629,7 +629,7 @@ const txHash = res.headers.get("PAYMENT-RESPONSE");`}</CodeBlock>
           </section>
 
           {/* Webhooks */}
-          <section id="webhooks" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="webhooks" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.webhooks}</span>
               <h2 className="text-2xl font-bold">Webhooks</h2>
@@ -702,7 +702,7 @@ app.post("/webhook", (req, res) => {
           </section>
 
           {/* $SAID Token */}
-          <section id="token" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="token" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.token}</span>
               <h2 className="text-2xl font-bold">$SAID Token</h2>
@@ -755,7 +755,7 @@ app.post("/webhook", (req, res) => {
           </section>
 
           {/* SDK Reference */}
-          <section id="sdk" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="sdk" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.sdk}</span>
               <h2 className="text-2xl font-bold">SDK Reference</h2>
@@ -843,7 +843,7 @@ const agents = await client.discover();`}</CodeBlock>
           </section>
 
           {/* API Reference */}
-          <section id="api" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="api" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.api}</span>
               <h2 className="text-2xl font-bold">API Reference</h2>
@@ -1001,7 +1001,7 @@ const agents = await client.discover();`}</CodeBlock>
           </section>
 
           {/* Program */}
-          <section id="contract" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="contract" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.contract}</span>
               <h2 className="text-2xl font-bold">Solana Program</h2>
