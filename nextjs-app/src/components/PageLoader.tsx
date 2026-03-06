@@ -7,25 +7,34 @@ interface PageLoaderProps {
 }
 
 export default function PageLoader({ ready }: PageLoaderProps) {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !sessionStorage.getItem('said-loaded');
+    }
+    return true;
+  });
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
+    if (!visible) return;
     if (ready) {
+      sessionStorage.setItem('said-loaded', '1');
       setFading(true);
       const timer = setTimeout(() => setVisible(false), 500);
       return () => clearTimeout(timer);
     }
-  }, [ready]);
+  }, [ready, visible]);
 
   // Safety timeout — never block longer than 3 seconds
   useEffect(() => {
+    if (!visible) return;
     const timer = setTimeout(() => {
+      sessionStorage.setItem('said-loaded', '1');
       setFading(true);
       setTimeout(() => setVisible(false), 500);
     }, 3000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [visible]);
 
   if (!visible) return null;
 
