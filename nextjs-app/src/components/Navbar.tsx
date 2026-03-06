@@ -150,49 +150,47 @@ export default function Navbar() {
               </a>
             </div>
 
-            {/* Divider */}
-            <div className="w-px h-5 bg-zinc-700/50 shrink-0" />
-
-            {/* Auth */}
-            {authenticated ? (
-              <div className="relative shrink-0">
-                <button
-                  onClick={() => setMenuOpen(!menuOpen)}
-                  className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden"
-                >
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
-                    </svg>
-                  )}
-                </button>
-                {menuOpen && (
-                  <div className="absolute right-0 top-12 w-48 bg-zinc-900 border border-zinc-800 rounded-lg shadow-lg overflow-hidden">
-                    <Link href="/profile" className="block px-4 py-3 hover:bg-zinc-800 transition text-sm" onClick={() => setMenuOpen(false)}>
-                      My Profile
-                    </Link>
-                    <Link href="/my-agents" className="block px-4 py-3 hover:bg-zinc-800 transition text-sm" onClick={() => setMenuOpen(false)}>
-                      My Agents
-                    </Link>
-                    <hr className="border-zinc-800" />
-                    <button onClick={() => { logout(); setMenuOpen(false); }} className="block w-full text-left px-4 py-3 text-red-400 hover:bg-zinc-800 transition text-sm">
-                      Log Out
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <button
-                onClick={login}
-                className="px-3 py-1.5 text-sm font-medium text-black bg-white rounded-full hover:bg-zinc-200 transition shrink-0 whitespace-nowrap"
-              >
-                Log In
-              </button>
-            )}
           </div>
+
+          {/* Auth — outside collapsible div so it's always visible and dropdown isn't clipped */}
+          {authenticated ? (
+            <div className="relative shrink-0 hidden md:block">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                className="w-7 h-7 rounded-full bg-zinc-700 flex items-center justify-center overflow-hidden"
+              >
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                )}
+              </button>
+              {menuOpen && (
+                <div className="absolute right-0 top-12 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-lg shadow-lg overflow-hidden z-[60]">
+                  <Link href="/profile" className="block px-4 py-3 hover:bg-zinc-800 transition text-sm" onClick={() => setMenuOpen(false)}>
+                    My Profile
+                  </Link>
+                  <Link href="/my-agents" className="block px-4 py-3 hover:bg-zinc-800 transition text-sm" onClick={() => setMenuOpen(false)}>
+                    My Agents
+                  </Link>
+                  <hr className="border-zinc-800" />
+                  <button onClick={() => { logout(); setMenuOpen(false); }} className="block w-full text-left px-4 py-3 text-red-400 hover:bg-zinc-800 transition text-sm">
+                    Log Out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={login}
+              className="hidden md:block px-3 py-1.5 text-sm font-medium text-black bg-white rounded-full hover:bg-zinc-200 transition shrink-0 whitespace-nowrap"
+            >
+              Log In
+            </button>
+          )}
 
           {/* Mobile hamburger menu — visible only on small screens */}
           <button
