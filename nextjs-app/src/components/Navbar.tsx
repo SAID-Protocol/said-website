@@ -169,15 +169,15 @@ export default function Navbar() {
                 )}
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-12 w-48 bg-zinc-900/95 backdrop-blur-xl border border-zinc-800 rounded-lg shadow-lg overflow-hidden z-[60]">
-                  <Link href="/profile" className="block px-4 py-3 hover:bg-zinc-800 transition text-sm" onClick={() => setMenuOpen(false)}>
+                <div className="absolute right-0 top-12 w-48 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl z-[60]">
+                  <Link href="/profile" className="block px-4 py-3 text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition text-sm" onClick={() => setMenuOpen(false)}>
                     My Profile
                   </Link>
-                  <Link href="/my-agents" className="block px-4 py-3 hover:bg-zinc-800 transition text-sm" onClick={() => setMenuOpen(false)}>
+                  <Link href="/my-agents" className="block px-4 py-3 text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition text-sm" onClick={() => setMenuOpen(false)}>
                     My Agents
                   </Link>
-                  <hr className="border-zinc-800" />
-                  <button onClick={() => { logout(); setMenuOpen(false); }} className="block w-full text-left px-4 py-3 text-red-400 hover:bg-zinc-800 transition text-sm">
+                  <div className="h-px bg-white/10 my-1"></div>
+                  <button onClick={() => { logout(); setMenuOpen(false); }} className="block w-full text-left px-4 py-3 text-red-400 hover:bg-white/5 rounded-lg transition text-sm">
                     Log Out
                   </button>
                 </div>
