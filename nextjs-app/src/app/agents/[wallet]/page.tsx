@@ -259,7 +259,7 @@ export default function AgentPage() {
               </div>
             </div>
           </div>
-        </section>
+        )}
       </main>
 
       <Footer />
