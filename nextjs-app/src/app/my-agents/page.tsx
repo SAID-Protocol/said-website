@@ -54,7 +54,7 @@ export default function MyAgentsPage() {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="max-w-xl mx-auto px-8 py-24 text-center">
+        <div className="max-w-xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 text-center">
           <h1 className="text-2xl font-bold mb-4">Please log in to view your agents</h1>
           <button
             onClick={login}
@@ -71,7 +71,7 @@ export default function MyAgentsPage() {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="max-w-4xl mx-auto px-8 py-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
           <div className="text-center py-16">
             <div className="text-zinc-400">Loading your agents...</div>
           </div>
@@ -84,7 +84,7 @@ export default function MyAgentsPage() {
     <div className="min-h-screen">
       <Navbar />
       
-      <div className="max-w-4xl mx-auto px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Agents</h1>
           <Link

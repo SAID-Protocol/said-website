@@ -44,7 +44,7 @@ export default function Home() {
       <Navbar />
       
       {/* Hero */}
-      <section className="pt-28 pb-24 md:pt-36 md:pb-32 px-8 text-center relative">
+      <section className="pt-28 pb-24 md:pt-36 md:pb-32 px-4 sm:px-8 text-center relative">
         {/* Backdrop for readability */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="w-full max-w-3xl h-[80%] bg-gradient-to-b from-zinc-950/80 via-zinc-950/70 to-transparent rounded-3xl blur-2xl" />
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
-            The <RotatingWord /> Layer<br />for AI Agents
+            <span className="md:hidden"><span className="whitespace-nowrap">The <RotatingWord /></span><br />Layer<br />for AI Agents</span><span className="hidden md:inline">The <RotatingWord /> Layer<br />for AI Agents</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
             Verifiable on-chain identity and reputation for AI agents on Solana. Cross-chain communication across 10+ networks. Powered by x402.
@@ -97,21 +97,21 @@ export default function Home() {
       </section>
       
       {/* Stats */}
-      <section className="py-8 px-8">
+      <section className="py-8 px-4 sm:px-8">
         <div className="max-w-2xl mx-auto">
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-0">
-            <div className="text-center px-6 sm:px-8 md:px-12">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{agentCount}</div>
+          <div className="flex flex-row justify-center items-center gap-0">
+            <div className="text-center px-4 sm:px-8 md:px-12">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{agentCount}</div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Agents</div>
             </div>
-            <div className="hidden sm:block w-px h-12 bg-white/10"></div>
-            <div className="text-center px-6 sm:px-8 md:px-12">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{verifiedCount}</div>
+            <div className="w-px h-10 bg-white/10"></div>
+            <div className="text-center px-4 sm:px-8 md:px-12">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{verifiedCount}</div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Verified</div>
             </div>
-            <div className="hidden sm:block w-px h-12 bg-white/10"></div>
-            <div className="text-center px-6 sm:px-8 md:px-12">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">10</div>
+            <div className="w-px h-10 bg-white/10"></div>
+            <div className="text-center px-4 sm:px-8 md:px-12">
+              <div className="text-2xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">10</div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Chains</div>
             </div>
           </div>
@@ -119,7 +119,7 @@ export default function Home() {
       </section>
 
       {/* Section 1: Identity & Reputation */}
-      <section className="py-20 px-8 ">
+      <section className="py-20 px-4 sm:px-8 ">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">Identity & Reputation</h2>
@@ -144,7 +144,7 @@ export default function Home() {
       </section>
 
       {/* Section 2: How It Works */}
-      <section className="py-20 px-8 ">
+      <section className="py-20 px-4 sm:px-8 ">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">How It Works</h2>
@@ -158,15 +158,15 @@ export default function Home() {
               { step: '3', title: 'Connect', desc: 'Discover and resolve agents across 10+ chains instantly.', badge: null, accent: 'text-cyan-400' },
               { step: '4', title: 'Communicate', desc: 'Send messages via WebSocket or REST. Pay $0.01 USDC via x402.', badge: '$0.01', accent: 'text-zinc-400' },
             ].map(item => (
-              <div key={item.step} className="text-center">
-                <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+              <div key={item.step} className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition text-center">
+                <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 mx-auto text-sm font-bold">
                   {item.step}
                 </div>
-                <h3 className="text-lg font-semibold mb-1">
+                <h3 className="font-semibold mb-1.5 text-sm">
                   {item.title}
                   {item.badge && <span className={`text-xs font-normal ${item.accent} ml-2`}>{item.badge}</span>}
                 </h3>
-                <p className="text-zinc-400 text-sm">{item.desc}</p>
+                <p className="text-zinc-400 text-xs leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -174,7 +174,7 @@ export default function Home() {
       </section>
 
       {/* Section 3: Cross-Chain Communication */}
-      <section className="py-20 px-8 ">
+      <section className="py-20 px-4 sm:px-8 ">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">Cross-Chain Communication</h2>
@@ -208,7 +208,7 @@ export default function Home() {
       </section>
 
       {/* Section 4: Pricing */}
-      <section className="py-20 px-8 ">
+      <section className="py-20 px-4 sm:px-8 ">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-3">Simple Pricing</h2>
         <p className="text-zinc-400 text-center mb-12">Free to start. Scale with micropayments.</p>
         
@@ -259,7 +259,7 @@ export default function Home() {
       </section>
 
       {/* Section 5: Developer Experience */}
-      <section id="quickstart" className="py-20 px-8 scroll-mt-20">
+      <section id="quickstart" className="py-20 px-4 sm:px-8 scroll-mt-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold mb-3">Developer Experience</h2>

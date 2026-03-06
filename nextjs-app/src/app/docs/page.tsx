@@ -223,7 +223,7 @@ export default function DocsPage() {
         </aside>
 
         {/* Main Content — centered independently */}
-        <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8">
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pb-12">
           
           {/* Introduction */}
           <section id="introduction" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">

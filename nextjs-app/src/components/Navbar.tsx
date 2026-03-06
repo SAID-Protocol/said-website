@@ -64,7 +64,7 @@ export default function Navbar() {
           className={`
             flex items-center gap-2 rounded-full
             border border-zinc-800/60
-            transition-all duration-500 ease-in-out w-full max-w-fit
+            transition-all duration-500 ease-in-out
             ${collapsed
               ? 'px-3 py-2 bg-zinc-950/95 backdrop-blur-xl shadow-lg shadow-black/30 scale-95'
               : 'px-3 py-2 bg-zinc-950/50 backdrop-blur-md'

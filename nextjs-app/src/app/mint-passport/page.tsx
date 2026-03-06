@@ -138,7 +138,7 @@ export default function MintPassportPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1 max-w-5xl mx-auto px-8 py-12 w-full">
+      <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
         <div className="text-center mb-8">
           <p className="text-sm text-zinc-500 uppercase tracking-wider mb-2">Soulbound Identity</p>
           <h1 className="text-4xl font-bold mb-4">Mint Agent Passport</h1>

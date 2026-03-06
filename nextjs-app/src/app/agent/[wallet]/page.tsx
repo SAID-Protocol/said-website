@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ReputationAnalytics from '@/components/ReputationAnalytics';
+import AsciiBackground from '@/components/AsciiBackground';
 
 interface Agent {
   wallet: string;
@@ -55,22 +56,27 @@ export default function AgentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
+      <div className="min-h-screen flex flex-col bg-black relative">
+        <AsciiBackground agentThemed />
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin"></div>
             <p className="mt-4 text-zinc-400">Loading agent...</p>
           </div>
         </main>
         <Footer />
+        </div>
       </div>
     );
   }
 
   if (error || !agent) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-black relative">
+        <AsciiBackground agentThemed />
+        <div className="relative z-10 flex flex-col min-h-screen">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -87,15 +93,18 @@ export default function AgentPage() {
           </div>
         </main>
         <Footer />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-1 max-w-4xl mx-auto px-8 py-12 w-full">
+    <div className="min-h-screen flex flex-col bg-black relative">
+      <AsciiBackground agentThemed />
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Navbar />
+        
+        <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
@@ -149,19 +158,19 @@ export default function AgentPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-center">
             <div className="text-2xl font-bold">{agent.reputationScore?.toFixed(1) || '0'}</div>
             <div className="text-zinc-400 text-sm">Reputation</div>
           </div>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-center">
             <div className="text-2xl font-bold">{agent.feedbackCount || 0}</div>
             <div className="text-zinc-400 text-sm">Feedback</div>
           </div>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-center">
             <div className="text-2xl font-bold">{agent.skills?.length || 0}</div>
             <div className="text-zinc-400 text-sm">Skills</div>
           </div>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-center">
             <div className="text-2xl font-bold">
               {agent.registeredAt ? new Date(agent.registeredAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '-'}
             </div>
@@ -195,7 +204,7 @@ export default function AgentPage() {
         {/* Wallet Info */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3">On-Chain Identity</h2>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-3">
+          <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-zinc-400 text-sm">Wallet</span>
               <code className="text-sm bg-zinc-800 px-2 py-1 rounded font-mono">{agent.wallet}</code>
@@ -222,7 +231,7 @@ export default function AgentPage() {
         {/* Badge */}
         <section>
           <h2 className="text-lg font-semibold mb-3">Embed Badge</h2>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
+          <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
             <div className="flex items-center gap-4 mb-4">
               <img 
                 src={`https://api.saidprotocol.com/api/badge/${agent.wallet}.svg`} 
@@ -238,9 +247,10 @@ export default function AgentPage() {
             </div>
           </div>
         </section>
-      </main>
+        </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }

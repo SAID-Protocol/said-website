@@ -4,6 +4,15 @@ import { useEffect, useState, useRef } from 'react';
 
 const CHAINS = ['Solana', 'Base', 'Polygon', 'Ethereum', 'Avalanche', 'Sei', 'Arbitrum', 'Optimism'];
 
+interface ApiMessage {
+  from: string;
+  to: string;
+  fromChain: string;
+  toChain: string;
+  timestamp: string;
+  paid: boolean;
+}
+
 function truncAddr(): string {
   const hex = '0123456789abcdef';
   const isEvm = Math.random() > 0.4;
@@ -29,24 +38,75 @@ function randomMsg(): { text: string; id: number } {
   };
 }
 
+function timeAgo(timestamp: string): string {
+  const now = Date.now();
+  const then = new Date(timestamp).getTime();
+  const diffSecs = Math.floor((now - then) / 1000);
+  
+  if (diffSecs < 60) return `${diffSecs}s ago`;
+  if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ago`;
+  if (diffSecs < 86400) return `${Math.floor(diffSecs / 3600)}h ago`;
+  return `${Math.floor(diffSecs / 86400)}d ago`;
+}
+
+function formatMessage(msg: ApiMessage): { text: string; id: string } {
+  const fromChain = msg.fromChain.charAt(0).toUpperCase() + msg.fromChain.slice(1);
+  const toChain = msg.toChain.charAt(0).toUpperCase() + msg.toChain.slice(1);
+  
+  return {
+    text: `${msg.from} (${fromChain}) → ${msg.to} (${toChain}) — ${timeAgo(msg.timestamp)}`,
+    id: msg.timestamp + msg.from + msg.to,
+  };
+}
+
 export default function MessageTicker() {
-  const [messages, setMessages] = useState<{ text: string; id: number }[]>([]);
+  const [messages, setMessages] = useState<{ text: string; id: string | number }[]>([]);
   const [visible, setVisible] = useState(true);
+  const [useRealMessages, setUseRealMessages] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Initial messages
-    setMessages([randomMsg(), randomMsg(), randomMsg()]);
+  const fetchRealMessages = async () => {
+    try {
+      const res = await fetch('https://api.saidprotocol.com/api/messages/recent');
+      if (!res.ok) throw new Error('API failed');
+      
+      const data: ApiMessage[] = await res.json();
+      
+      if (data && data.length > 0) {
+        setUseRealMessages(true);
+        const formatted = data.map(formatMessage);
+        setMessages(formatted);
+      } else {
+        // No messages yet, fall back to random
+        setUseRealMessages(false);
+        setMessages([randomMsg(), randomMsg(), randomMsg()]);
+      }
+    } catch (err) {
+      // API error, fall back to random
+      console.log('MessageTicker: Falling back to random messages');
+      setUseRealMessages(false);
+      setMessages([randomMsg(), randomMsg(), randomMsg()]);
+    }
+  };
 
+  useEffect(() => {
+    // Initial fetch
+    fetchRealMessages();
+
+    // Fetch real messages every 30s, or rotate random messages every 3s
     const interval = setInterval(() => {
-      setMessages(prev => {
-        const next = [randomMsg(), ...prev];
-        return next.slice(0, 5);
-      });
-    }, 3000);
+      if (useRealMessages) {
+        fetchRealMessages();
+      } else {
+        setMessages(prev => {
+          const next = [randomMsg(), ...prev];
+          return next.slice(0, 5);
+        });
+      }
+    }, useRealMessages ? 30000 : 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [useRealMessages]);
 
   useEffect(() => {
     function onScroll() {

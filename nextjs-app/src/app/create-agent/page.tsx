@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AsciiBackground from '@/components/AsciiBackground';
 
 type Step = 'choose' | 'register' | 'create' | 'success';
 
@@ -116,10 +117,12 @@ export default function CreateAgentPage() {
   const finalWallet = wallet || generatedWallet?.publicKey || '';
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      
-      <main className="flex-1 max-w-xl mx-auto w-full px-8 py-12">
+    <div className="min-h-screen flex flex-col bg-black relative">
+      <AsciiBackground />
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <Navbar />
+        
+        <main className="flex-1 max-w-xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
         
         {/* Step 1: Choose Registration Type */}
         {step === 'choose' && (
@@ -130,7 +133,7 @@ export default function CreateAgentPage() {
             <div className="grid gap-4">
               <button
                 onClick={() => { if (!authenticated) { login(); return; } setStep('register'); }}
-                className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
+                className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-left hover:border-zinc-700/80 hover:bg-zinc-900/40 transition group"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 group-hover:border-zinc-500 transition">
@@ -151,7 +154,7 @@ export default function CreateAgentPage() {
               
               <button
                 onClick={() => { if (!authenticated) { login(); return; } setStep('create'); generateWallet(); }}
-                className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl text-left hover:border-zinc-600 transition group"
+                className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl text-left hover:border-zinc-700/80 hover:bg-zinc-900/40 transition group"
               >
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 group-hover:border-zinc-500 transition">
@@ -200,7 +203,7 @@ export default function CreateAgentPage() {
                   onChange={(e) => setWallet(e.target.value)}
                   placeholder="So1ana..."
                   required
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600 font-mono text-sm"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 font-mono text-sm"
                 />
               </div>
               
@@ -212,7 +215,7 @@ export default function CreateAgentPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="My Awesome Agent"
                   required
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                 />
               </div>
               
@@ -223,7 +226,7 @@ export default function CreateAgentPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="What does your agent do?"
                   rows={3}
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600 resize-none"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 resize-none"
                 />
               </div>
               
@@ -234,7 +237,7 @@ export default function CreateAgentPage() {
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
                   placeholder="trading, research, coding"
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                 />
               </div>
               
@@ -246,7 +249,7 @@ export default function CreateAgentPage() {
                     value={twitter}
                     onChange={(e) => setTwitter(e.target.value)}
                     placeholder="@youragent"
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                   />
                 </div>
                 <div>
@@ -256,7 +259,7 @@ export default function CreateAgentPage() {
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
                     placeholder="https://..."
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                   />
                 </div>
               </div>
@@ -287,7 +290,7 @@ export default function CreateAgentPage() {
             {generatedWallet && (
               <>
                 {/* Wallet Info */}
-                <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-lg mb-4">
+                <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg mb-4">
                   <div className="flex justify-between items-center">
                     <span className="text-zinc-400 text-sm">Public Address</span>
                     <code className="text-sm font-mono bg-zinc-800 px-2 py-1 rounded">
@@ -348,7 +351,7 @@ export default function CreateAgentPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="My Awesome Agent"
                   required
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                 />
               </div>
               
@@ -359,7 +362,7 @@ export default function CreateAgentPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="What does your agent do?"
                   rows={3}
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600 resize-none"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 resize-none"
                 />
               </div>
               
@@ -370,7 +373,7 @@ export default function CreateAgentPage() {
                   value={skills}
                   onChange={(e) => setSkills(e.target.value)}
                   placeholder="trading, research, coding"
-                  className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                 />
               </div>
               
@@ -382,7 +385,7 @@ export default function CreateAgentPage() {
                     value={twitter}
                     onChange={(e) => setTwitter(e.target.value)}
                     placeholder="@youragent"
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                   />
                 </div>
                 <div>
@@ -392,7 +395,7 @@ export default function CreateAgentPage() {
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
                     placeholder="https://..."
-                    className="w-full px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg focus:outline-none focus:border-zinc-600"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
                   />
                 </div>
               </div>
@@ -427,7 +430,7 @@ export default function CreateAgentPage() {
             <p className="text-zinc-400 mb-8 text-center">Your agent is pending. Complete the steps below to go on-chain.</p>
             
             {/* CLI Instructions */}
-            <div className="p-5 bg-zinc-900 border border-zinc-800 rounded-xl mb-6">
+            <div className="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl mb-6">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="4 17 10 11 4 5"/>
@@ -506,9 +509,10 @@ export default function CreateAgentPage() {
             </div>
           </div>
         )}
-      </main>
+        </main>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }
