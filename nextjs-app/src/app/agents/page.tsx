@@ -237,41 +237,104 @@ export default function AgentsPage() {
   );
 }
 
+// Deterministic gradient from wallet address
+function walletGradient(wallet: string): string {
+  let hash = 0;
+  for (let i = 0; i < wallet.length; i++) hash = wallet.charCodeAt(i) + ((hash << 5) - hash);
+  const h1 = Math.abs(hash % 360);
+  const h2 = (h1 + 40 + (hash % 60)) % 360;
+  return `linear-gradient(135deg, hsl(${h1}, 60%, 45%), hsl(${h2}, 50%, 35%))`;
+}
+
+function timeAgoShort(dateStr: string): string {
+  if (!dateStr) return '';
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
+  return `${Math.floor(diff / 2592000)}mo ago`;
+}
+
 function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Link 
       href={`/agents/${agent.wallet}`}
-      className="block p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition"
+      className="group block relative overflow-hidden rounded-xl bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 hover:border-zinc-600/80 transition-all duration-300 hover:shadow-lg hover:shadow-white/[0.02] hover:-translate-y-0.5"
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold">
-          {agent.name?.[0]?.toUpperCase() || '?'}
+      {/* Top highlight line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <div className="p-5">
+        {/* Header: Avatar + Name + Verified */}
+        <div className="flex items-start gap-3 mb-3">
+          <div 
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-inner"
+            style={{ background: walletGradient(agent.wallet) }}
+          >
+            {agent.name?.[0]?.toUpperCase() || '?'}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm truncate">{agent.name || 'Unnamed Agent'}</h3>
+              {agent.isVerified && (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 text-green-400">
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+              )}
+            </div>
+            <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}…{agent.wallet.slice(-4)}</p>
+          </div>
         </div>
-        {agent.isVerified && (
-          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full flex items-center gap-1">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M20 6L9 17l-5-5"/>
-            </svg>
-            Verified
-          </span>
-        )}
-      </div>
-      <h3 className="font-semibold mb-1">{agent.name || 'Unnamed Agent'}</h3>
-      <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{agent.description || 'No description'}</p>
-      <div className="flex items-center justify-between">
-        <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}...{agent.wallet.slice(-4)}</p>
-        {agent.registrationSource === 'spawnr' && (
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-full" title="Launched on Spawnr.io">
-            <img src="/platforms/spawnr.png" alt="Spawnr" className="w-4 h-4 rounded-full" />
-            <span className="text-zinc-400 text-xs">Spawnr</span>
+
+        {/* Description */}
+        <p className="text-zinc-400 text-xs leading-relaxed mb-4 line-clamp-2">{agent.description || 'No description provided.'}</p>
+
+        {/* Skills / Tags */}
+        {agent.skills && agent.skills.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {agent.skills.slice(0, 3).map(skill => (
+              <span key={skill} className="px-2 py-0.5 text-[10px] font-medium text-zinc-400 bg-white/5 border border-white/10 rounded-full">
+                {skill}
+              </span>
+            ))}
+            {agent.skills.length > 3 && (
+              <span className="px-2 py-0.5 text-[10px] text-zinc-500">+{agent.skills.length - 3}</span>
+            )}
           </div>
         )}
-        {(agent.registrationSource === 'clawpump' || agent.description?.includes('clawpump.tech')) && (
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-full" title="Launched on Claw Pump">
-            <img src="/clawpump-logo.png" alt="Claw Pump" className="w-4 h-4 rounded-full" />
-            <span className="text-zinc-400 text-xs">Claw Pump</span>
+
+        {/* Footer: Platform + Meta */}
+        <div className="flex items-center justify-between pt-3 border-t border-white/5">
+          <div className="flex items-center gap-2">
+            {agent.registrationSource === 'spawnr' && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Spawnr.io">
+                <img src="/platforms/spawnr.png" alt="Spawnr" className="w-3.5 h-3.5 rounded-full" />
+                <span className="text-zinc-400 text-[10px] font-medium">Spawnr</span>
+              </div>
+            )}
+            {(agent.registrationSource === 'clawpump' || agent.description?.includes('clawpump.tech')) && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Claw Pump">
+                <img src="/clawpump-logo.png" alt="Claw Pump" className="w-3.5 h-3.5 rounded-full" />
+                <span className="text-zinc-400 text-[10px] font-medium">Claw Pump</span>
+              </div>
+            )}
           </div>
-        )}
+          <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+            {agent.reputationScore != null && agent.reputationScore > 0 && (
+              <div className="flex items-center gap-1" title="Reputation Score">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                {agent.reputationScore}
+              </div>
+            )}
+            {agent.registeredAt && (
+              <span title={new Date(agent.registeredAt).toLocaleDateString()}>
+                {timeAgoShort(agent.registeredAt)}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     </Link>
   );
