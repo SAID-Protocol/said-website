@@ -169,7 +169,7 @@ export default function Navbar() {
                 )}
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-12 w-48 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl z-[60]">
+                <div className="absolute left-0 top-12 w-48 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl z-[60]">
                   <Link href="/profile" className="block px-4 py-3 text-zinc-300 hover:text-white hover:bg-white/5 rounded-lg transition text-sm" onClick={() => setMenuOpen(false)}>
                     My Profile
                   </Link>
