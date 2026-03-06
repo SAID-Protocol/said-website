@@ -7,12 +7,14 @@ import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import MessageTicker from '@/components/MessageTicker';
 import RotatingWord from '@/components/RotatingWord';
+import PageLoader from '@/components/PageLoader';
 
 export default function Home() {
   const router = useRouter();
   const [agentCount, setAgentCount] = useState('-');
   const [verifiedCount, setVerifiedCount] = useState('-');
   const [searchQuery, setSearchQuery] = useState('');
+  const [bgReady, setBgReady] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -39,7 +41,8 @@ export default function Home() {
 
   return (
     <div className="min-h-screen relative">
-      <AsciiBackground agentThemed />
+      <PageLoader ready={bgReady} />
+      <AsciiBackground agentThemed onReady={() => setBgReady(true)} />
       <div className="relative z-10">
       <Navbar />
       

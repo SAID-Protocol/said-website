@@ -63,9 +63,10 @@ const ALL_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345678
 interface AsciiBackgroundProps {
   agentThemed?: boolean;
   className?: string;
+  onReady?: () => void;
 }
 
-export default function AsciiBackground({ agentThemed = true, className }: AsciiBackgroundProps) {
+export default function AsciiBackground({ agentThemed = true, className, onReady }: AsciiBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -171,6 +172,7 @@ export default function AsciiBackground({ agentThemed = true, className }: Ascii
 
     let lastFrame = 0;
     const interval = 1000 / targetFps;
+    let hasSignaledReady = false;
 
     function render(now: number) {
       animationId = requestAnimationFrame(render);
@@ -237,6 +239,11 @@ export default function AsciiBackground({ agentThemed = true, className }: Ascii
 
           ctx.fillText(char, px, py);
         }
+      }
+
+      if (!hasSignaledReady) {
+        hasSignaledReady = true;
+        onReady?.();
       }
     }
 
