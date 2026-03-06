@@ -4,15 +4,6 @@ import { useEffect, useState, useRef } from 'react';
 
 const CHAINS = ['Solana', 'Base', 'Polygon', 'Ethereum', 'Avalanche', 'Sei', 'Arbitrum', 'Optimism'];
 
-interface ApiMessage {
-  from: string;
-  to: string;
-  fromChain: string;
-  toChain: string;
-  timestamp: string;
-  paid: boolean;
-}
-
 function truncAddr(): string {
   const hex = '0123456789abcdef';
   const isEvm = Math.random() > 0.4;
@@ -27,7 +18,21 @@ function truncAddr(): string {
   return `${start}…${end}`;
 }
 
-function randomMsg(): { text: string; id: number } {
+function timeAgo(timestamp: string): string {
+  const diff = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+interface TickerMessage {
+  text: string;
+  id: number;
+  real?: boolean;
+}
+
+function randomMsg(): TickerMessage {
   const from = CHAINS[Math.floor(Math.random() * CHAINS.length)];
   let to = CHAINS[Math.floor(Math.random() * CHAINS.length)];
   while (to === from) to = CHAINS[Math.floor(Math.random() * CHAINS.length)];
@@ -35,78 +40,65 @@ function randomMsg(): { text: string; id: number } {
   return {
     text: `${truncAddr()} (${from}) → ${truncAddr()} (${to}) — ${secs}s ago`,
     id: Date.now() + Math.random(),
-  };
-}
-
-function timeAgo(timestamp: string): string {
-  const now = Date.now();
-  const then = new Date(timestamp).getTime();
-  const diffSecs = Math.floor((now - then) / 1000);
-  
-  if (diffSecs < 60) return `${diffSecs}s ago`;
-  if (diffSecs < 3600) return `${Math.floor(diffSecs / 60)}m ago`;
-  if (diffSecs < 86400) return `${Math.floor(diffSecs / 3600)}h ago`;
-  return `${Math.floor(diffSecs / 86400)}d ago`;
-}
-
-function formatMessage(msg: ApiMessage): { text: string; id: string } {
-  const fromChain = msg.fromChain.charAt(0).toUpperCase() + msg.fromChain.slice(1);
-  const toChain = msg.toChain.charAt(0).toUpperCase() + msg.toChain.slice(1);
-  
-  return {
-    text: `${msg.from} (${fromChain}) → ${msg.to} (${toChain}) — ${timeAgo(msg.timestamp)}`,
-    id: msg.timestamp + msg.from + msg.to,
+    real: false,
   };
 }
 
 export default function MessageTicker() {
-  const [messages, setMessages] = useState<{ text: string; id: string | number }[]>([]);
+  const [messages, setMessages] = useState<TickerMessage[]>([]);
   const [visible, setVisible] = useState(true);
-  const [useRealMessages, setUseRealMessages] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const realMessagesRef = useRef<TickerMessage[]>([]);
+  const realIndexRef = useRef(0);
 
-  const fetchRealMessages = async () => {
-    try {
-      const res = await fetch('https://api.saidprotocol.com/api/messages/recent');
-      if (!res.ok) throw new Error('API failed');
-      
-      const data: ApiMessage[] = await res.json();
-      
-      if (data && data.length > 0) {
-        setUseRealMessages(true);
-        const formatted = data.map(formatMessage);
-        setMessages(formatted);
-      } else {
-        // No messages yet, fall back to random
-        setUseRealMessages(false);
-        setMessages([randomMsg(), randomMsg(), randomMsg()]);
-      }
-    } catch (err) {
-      // API error, fall back to random
-      console.log('MessageTicker: Falling back to random messages');
-      setUseRealMessages(false);
-      setMessages([randomMsg(), randomMsg(), randomMsg()]);
-    }
-  };
-
+  // Fetch real messages from API
   useEffect(() => {
-    // Initial fetch
-    fetchRealMessages();
-
-    // Fetch real messages every 30s, or rotate random messages every 3s
-    const interval = setInterval(() => {
-      if (useRealMessages) {
-        fetchRealMessages();
-      } else {
-        setMessages(prev => {
-          const next = [randomMsg(), ...prev];
-          return next.slice(0, 5);
-        });
+    async function fetchReal() {
+      try {
+        const res = await fetch('https://api.saidprotocol.com/api/messages/recent');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          realMessagesRef.current = data.map((msg: any) => ({
+            text: `${msg.from} (${capitalize(msg.fromChain)}) → ${msg.to} (${capitalize(msg.toChain)}) — ${timeAgo(msg.timestamp)}`,
+            id: Date.now() + Math.random(),
+            real: true,
+          }));
+          realIndexRef.current = 0;
+        }
+      } catch {
+        // fallback to simulated
       }
-    }, useRealMessages ? 30000 : 3000);
+    }
+    fetchReal();
+    const interval = setInterval(fetchReal, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Rotate messages — mix real and simulated
+  useEffect(() => {
+    setMessages([nextMessage(), nextMessage(), nextMessage()]);
+
+    const interval = setInterval(() => {
+      setMessages(prev => {
+        const next = [nextMessage(), ...prev];
+        return next.slice(0, 5);
+      });
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, [useRealMessages]);
+  }, []);
+
+  function nextMessage(): TickerMessage {
+    const real = realMessagesRef.current;
+    // 60% chance to show a real message if available
+    if (real.length > 0 && Math.random() < 0.6) {
+      const msg = { ...real[realIndexRef.current % real.length], id: Date.now() + Math.random() };
+      realIndexRef.current++;
+      return msg;
+    }
+    return randomMsg();
+  }
 
   useEffect(() => {
     function onScroll() {
@@ -131,6 +123,7 @@ export default function MessageTicker() {
               key={msg.id}
               className="text-xs text-zinc-400 font-mono whitespace-nowrap animate-slide-in absolute inset-0 flex items-center"
             >
+              {msg.real && <span className="text-emerald-400 mr-1.5">●</span>}
               {msg.text}
             </div>
           ))}
@@ -150,4 +143,8 @@ export default function MessageTicker() {
       `}</style>
     </div>
   );
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
