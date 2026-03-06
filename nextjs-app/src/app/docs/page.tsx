@@ -153,8 +153,8 @@ function CopyButton({ text }: { text: string }) {
 function CodeBlock({ children, copyable }: { children: string; copyable?: boolean }) {
   return (
     <div className="relative group">
-      <pre className="bg-zinc-950/80 border border-zinc-800/60 rounded-lg p-4 overflow-x-auto text-sm backdrop-blur-sm">
-        <code className="text-zinc-300">{children}</code>
+      <pre className="bg-zinc-950/80 border border-zinc-800/60 rounded-lg p-4 overflow-x-auto text-xs sm:text-sm backdrop-blur-sm max-w-full">
+        <code className="text-zinc-300 break-all sm:break-normal">{children}</code>
       </pre>
       {copyable && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -167,12 +167,14 @@ function CodeBlock({ children, copyable }: { children: string; copyable?: boolea
 
 function ContractBox({ label, address }: { label: string; address: string }) {
   return (
-    <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 flex items-center justify-between">
-      <div>
+    <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="min-w-0 flex-1">
         <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{label}</div>
-        <code className="text-sm text-zinc-300 font-mono">{address}</code>
+        <code className="text-xs sm:text-sm text-zinc-300 font-mono break-all">{address}</code>
       </div>
-      <CopyButton text={address} />
+      <div className="shrink-0">
+        <CopyButton text={address} />
+      </div>
     </div>
   );
 }
@@ -221,7 +223,7 @@ export default function DocsPage() {
         </aside>
 
         {/* Main Content — centered independently */}
-        <main className="max-w-3xl mx-auto px-8">
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8">
           
           {/* Introduction */}
           <section id="introduction" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">

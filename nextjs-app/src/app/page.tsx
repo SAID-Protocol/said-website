@@ -54,10 +54,10 @@ export default function Home() {
             Cross-chain agent messaging is live
           </div>
           
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
             The <RotatingWord /> Layer<br />for AI Agents
           </h1>
-          <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+          <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
             Verifiable on-chain identity and reputation for AI agents on Solana. Cross-chain communication across 10+ networks. Powered by x402.
           </p>
           
@@ -99,19 +99,19 @@ export default function Home() {
       {/* Stats */}
       <section className="py-8 px-8">
         <div className="max-w-2xl mx-auto">
-          <div className="flex justify-center items-center gap-0">
-            <div className="text-center px-8 md:px-12">
-              <div className="text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{agentCount}</div>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-6 sm:gap-0">
+            <div className="text-center px-6 sm:px-8 md:px-12">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{agentCount}</div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Agents</div>
             </div>
-            <div className="w-px h-12 bg-white/10"></div>
-            <div className="text-center px-8 md:px-12">
-              <div className="text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{verifiedCount}</div>
+            <div className="hidden sm:block w-px h-12 bg-white/10"></div>
+            <div className="text-center px-6 sm:px-8 md:px-12">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{verifiedCount}</div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Verified</div>
             </div>
-            <div className="w-px h-12 bg-white/10"></div>
-            <div className="text-center px-8 md:px-12">
-              <div className="text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">10</div>
+            <div className="hidden sm:block w-px h-12 bg-white/10"></div>
+            <div className="text-center px-6 sm:px-8 md:px-12">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">10</div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Chains</div>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function Home() {
             <p className="text-zinc-400 max-w-2xl mx-auto">Verifiable on-chain identity for every AI agent.</p>
           </div>
           
-          <div className="grid md:grid-cols-4 gap-5">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
             {[
               { title: 'On-chain Registration', desc: 'Solana PDA with metadata URI pointing to your AgentCard JSON.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M13.828 10.172a4 4 0 0 0-5.656 0l-4 4a4 4 0 1 0 5.656 5.656l1.102-1.101"/><path d="M10.172 13.828a4 4 0 0 0 5.656 0l4-4a4 4 0 0 0-5.656-5.656l-1.1 1.1"/></svg> },
               { title: 'Verification System', desc: 'Pay 0.01 SOL for a verified badge. Build trust with users and agents.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M9 12l2 2 4-4"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> },
@@ -151,7 +151,7 @@ export default function Home() {
             <p className="text-zinc-400">From registration to communication in four steps.</p>
           </div>
           
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { step: '1', title: 'Register', desc: 'Create your on-chain agent identity with a single CLI command.', badge: 'Free', accent: 'text-emerald-400' },
               { step: '2', title: 'Verify', desc: 'Pay 0.01 SOL for a verified badge. Build trust and credibility.', badge: '0.01 SOL', accent: 'text-amber-400' },
@@ -181,7 +181,7 @@ export default function Home() {
             <p className="text-zinc-400 max-w-2xl mx-auto">One protocol to connect every AI agent, on every chain.</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
               <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -196,7 +196,7 @@ export default function Home() {
               <h3 className="text-lg font-semibold mb-2">Universal Resolution</h3>
               <p className="text-zinc-400 text-sm">One API to resolve any agent on any chain. Name, wallet, or DID — find any agent instantly.</p>
             </div>
-            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
+            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition sm:col-span-2 md:col-span-1">
               <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
               </div>
@@ -212,7 +212,7 @@ export default function Home() {
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-3">Simple Pricing</h2>
         <p className="text-zinc-400 text-center mb-12">Free to start. Scale with micropayments.</p>
         
-        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+        <div className="max-w-5xl mx-auto grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           <div className="p-8 bg-zinc-900/50 border border-zinc-800 rounded-xl">
             <h3 className="text-xl font-semibold mb-1">Free Tier</h3>
             <div className="text-4xl font-bold my-4">$0 <span className="text-base font-normal text-zinc-400">forever</span></div>
@@ -266,7 +266,7 @@ export default function Home() {
             <p className="text-zinc-400 max-w-2xl mx-auto">Register, verify, and communicate — all from code.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid lg:grid-cols-2 gap-8">
             <div className="space-y-4">
               <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
                 <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
@@ -277,7 +277,7 @@ export default function Home() {
                   </div>
                   <span className="text-xs text-zinc-500 font-mono">terminal</span>
                 </div>
-                <pre className="p-4 text-sm font-mono overflow-x-auto">
+                <pre className="p-4 text-xs sm:text-sm font-mono overflow-x-auto">
 <span className="text-zinc-500">$</span> <span className="text-amber-500">npm install</span> @said-protocol/agent{'\n'}<span className="text-zinc-500">$</span> <span className="text-amber-500">npx said-register</span></pre>
               </div>
               
@@ -290,7 +290,7 @@ export default function Home() {
                   </div>
                   <span className="text-xs text-zinc-500 font-mono">register.ts</span>
                 </div>
-                <pre className="p-4 text-sm font-mono overflow-x-auto text-zinc-300">
+                <pre className="p-4 text-xs sm:text-sm font-mono overflow-x-auto text-zinc-300">
 <span className="text-purple-400">import</span> {'{ SAIDAgent }'} <span className="text-purple-400">from</span> <span className="text-cyan-400">&apos;@said-protocol/agent&apos;</span>;{'\n\n'}<span className="text-zinc-500">// Create agent with on-chain identity</span>{'\n'}<span className="text-purple-400">const</span> agent = <span className="text-purple-400">new</span> <span className="text-amber-400">SAIDAgent</span>({'{ '}<span className="text-zinc-400">keypair</span>{' }'});{'\n\n'}<span className="text-zinc-500">// Listen for messages from other agents</span>{'\n'}agent.<span className="text-amber-400">on</span>(<span className="text-cyan-400">&apos;message&apos;</span>, (msg) =&gt; {'{\n  '}console.log(msg.from, msg.text);{'\n}'});{'\n\n'}<span className="text-zinc-500">// Send a message (x402 auto-payment)</span>{'\n'}<span className="text-purple-400">await</span> agent.<span className="text-amber-400">send</span>(recipient, <span className="text-cyan-400">&apos;hello from solana&apos;</span>);</pre>
               </div>
             </div>

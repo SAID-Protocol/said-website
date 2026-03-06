@@ -176,7 +176,7 @@ function AgentsContent() {
                   </svg>
                   Verified Agents
                 </h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {verifiedAgents.map(agent => (
                     <AgentCard key={agent.wallet} agent={agent} />
                   ))}
@@ -188,7 +188,7 @@ function AgentsContent() {
             {unverifiedAgents.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold mb-4">All Agents</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {unverifiedAgents.map(agent => (
                     <AgentCard key={agent.wallet} agent={agent} />
                   ))}

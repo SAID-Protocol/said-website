@@ -97,13 +97,13 @@ export default function AgentPage() {
       
       <main className="flex-1 max-w-4xl mx-auto px-8 py-12 w-full">
         {/* Header */}
-        <div className="flex items-start gap-6 mb-8">
+        <div className="flex flex-col sm:flex-row items-start gap-6 mb-8">
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
             {agent.name?.[0]?.toUpperCase() || '?'}
           </div>
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold">{agent.name || 'Unnamed Agent'}</h1>
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-3 mb-2">
+              <h1 className="text-2xl sm:text-3xl font-bold">{agent.name || 'Unnamed Agent'}</h1>
               {agent.isVerified && (
                 <span className="px-3 py-1 bg-green-500/20 text-green-400 text-sm rounded-full flex items-center gap-1">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -116,7 +116,7 @@ export default function AgentPage() {
             <p className="text-zinc-400 mb-4">{agent.description || 'No description provided'}</p>
             
             {/* Social Links */}
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               {agent.twitter && (
                 <a 
                   href={`https://twitter.com/${agent.twitter.replace('@', '')}`} 
@@ -126,7 +126,7 @@ export default function AgentPage() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
-                  {agent.twitter}
+                  <span className="truncate">{agent.twitter}</span>
                 </a>
               )}
               {agent.website && (
