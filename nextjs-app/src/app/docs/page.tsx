@@ -185,7 +185,7 @@ export default function DocsPage() {
     }
     const element = document.getElementById(id);
     if (element) {
-      const navbarHeight = 64;
+      const navbarHeight = 96;
       const y = element.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
@@ -197,29 +197,32 @@ export default function DocsPage() {
       <div className="relative z-10">
       <Navbar />
       
-      <div className="flex flex-1">
-        {/* Left Sidebar */}
-        <aside className="hidden lg:block w-64 p-6 fixed top-[64px] left-0 bg-zinc-950/80 backdrop-blur-md">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
-          <nav className="space-y-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  scrollToSection(section.id);
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
-              >
-                <span className="text-zinc-500">{section.icon}</span>
-                {section.title}
-              </button>
-            ))}
-          </nav>
-        </aside>
+      <div className="max-w-6xl mx-auto px-8 pt-28 pb-16">
+        <div className="flex gap-8">
+          {/* Sticky Sidebar */}
+          <aside className="hidden lg:block w-56 flex-shrink-0">
+            <div className="sticky top-24 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl p-4">
+              <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
+              <nav className="space-y-1">
+                {sections.map((section) => (
+                  <button
+                    key={section.id}
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                      scrollToSection(section.id);
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                  >
+                    <span className="text-zinc-500">{section.icon}</span>
+                    {section.title}
+                  </button>
+                ))}
+              </nav>
+            </div>
+          </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-4xl px-8 py-12 lg:ml-64">
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
           
           {/* Introduction */}
           <section id="introduction" className="mb-16">
@@ -255,7 +258,7 @@ export default function DocsPage() {
             <div className="space-y-4">
               <div>
                 <div className="text-sm text-zinc-500 mb-2">1. Install the CLI</div>
-                <CodeBlock copyable>npm install -g said-sdk</CodeBlock>
+                <CodeBlock copyable>npm install -g @said-protocol/agent</CodeBlock>
               </div>
               <div>
                 <div className="text-sm text-zinc-500 mb-2">2. Generate a wallet</div>
@@ -281,15 +284,15 @@ export default function DocsPage() {
 
             <h3 className="text-lg font-semibold mb-3">Link a Wallet</h3>
             <p className="text-zinc-400 mb-4">Both the current authority and the new wallet must sign:</p>
-            <CodeBlock copyable>{`import { SaidClient } from "said-sdk";
+            <CodeBlock copyable>{`import { SAIDAgent } from "@said-protocol/agent";
 
-const client = new SaidClient(connection, wallet);
-await client.linkWallet(newWalletKeypair);`}</CodeBlock>
+const agent = new SAIDAgent(connection, wallet);
+await agent.linkWallet(newWalletKeypair);`}</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Transfer Authority</h3>
             <p className="text-zinc-400 mb-4">Recovery mechanism — any linked wallet can become the new authority:</p>
             <CodeBlock copyable>{`// Called from the new authority (must be a linked wallet)
-await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
+await agent.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
 
             <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 mt-6">
               <div className="font-medium mb-2">Why This Matters</div>
@@ -314,7 +317,7 @@ await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
             <CodeBlock copyable>said verify -k ./wallet.json</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Check Verification Status</h3>
-            <CodeBlock copyable>{`import { isVerified } from "said-sdk";
+            <CodeBlock copyable>{`import { isVerified } from "@said-protocol/agent";
 
 const verified = await isVerified("WALLET_ADDRESS");
 // true or false`}</CodeBlock>
@@ -456,16 +459,16 @@ const passport = await res.json();
             </p>
 
             <h3 className="text-lg font-semibold mb-3">Submit Feedback</h3>
-            <CodeBlock copyable>{`import { SaidClient } from "said-sdk";
+            <CodeBlock copyable>{`import { SAIDAgent } from "@said-protocol/agent";
 
-const client = new SaidClient(connection, wallet);
-await client.submitFeedback(agentWallet, {
+const agent = new SAIDAgent(connection, wallet);
+await agent.submitFeedback(agentWallet, {
   positive: true,
   context: "Completed task successfully"
 });`}</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Get Reputation</h3>
-            <CodeBlock copyable>{`const reputation = await client.getReputation(agentWallet);
+            <CodeBlock copyable>{`const reputation = await agent.getReputation(agentWallet);
 // {
 //   totalInteractions: 150,
 //   positiveRatio: 0.94,
@@ -762,7 +765,8 @@ app.post("/webhook", (req, res) => {
             </p>
 
             <h3 className="text-lg font-semibold mb-3">Installation</h3>
-            <CodeBlock copyable>npm install said-sdk</CodeBlock>
+            <CodeBlock copyable>npm install @said-protocol/agent</CodeBlock>
+            <p className="text-zinc-500 text-sm mt-2">Legacy: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">npm install said-sdk</code></p>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">CLI Commands</h3>
             <div className="space-y-3">
@@ -785,16 +789,16 @@ app.post("/webhook", (req, res) => {
             </div>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Programmatic Usage</h3>
-            <CodeBlock copyable>{`import { SaidClient, lookup, isVerified } from "said-sdk";
+            <CodeBlock copyable>{`import { SAIDAgent, lookup, isVerified } from "@said-protocol/agent";
 import { Connection, Keypair } from "@solana/web3.js";
 
-// Initialize client
+// Initialize agent
 const connection = new Connection("https://api.mainnet-beta.solana.com");
 const wallet = Keypair.fromSecretKey(/* ... */);
-const client = new SaidClient(connection, wallet);
+const agent = new SAIDAgent(connection, wallet);
 
 // Register agent
-await client.register({
+await agent.register({
   name: "My Agent",
   description: "Does cool stuff",
   twitter: "@myagent",
@@ -802,14 +806,15 @@ await client.register({
 });
 
 // Verify
-await client.verify();
+await agent.verify();
 
 // Lookup any agent
-const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
+const info = await lookup("WALLET_ADDRESS");`}</CodeBlock>
+            <p className="text-zinc-500 text-sm mt-2">Legacy: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">{`import { SaidClient } from "said-sdk"`}</code> is still supported.</p>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Cross-Chain Client SDK</h3>
             <p className="text-zinc-400 mb-4">
-              The <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">@said-protocol/client</code> SDK 
+              The <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">@said-protocol/client</code> package 
               provides a high-level interface for cross-chain messaging with automatic x402 payment handling.
             </p>
             <CodeBlock copyable>npm install @said-protocol/client</CodeBlock>
@@ -1043,7 +1048,8 @@ const agents = await client.discover();`}</CodeBlock>
             </div>
           </section>
 
-        </main>
+          </main>
+        </div>
       </div>
 
       <Footer />
