@@ -113,25 +113,26 @@ export default function AsciiBackground({ agentThemed = true, className, onReady
       colorLUT[c] = `hsla(${hue},${sat}%,${l}%,${a})`;
     }
 
-    // Fragment system — fragments fade in, hold, then dissolve
+    // Fragment system — characters morph in from noise, hold, scramble back out
     interface Fragment {
       row: number;
       col: number;
       text: string;
-      born: number;    // time when created
-      lifespan: number; // total seconds to live
+      born: number;
+      lifespan: number;
+      resolveDelay: number; // stagger per character (seconds)
     }
     let fragments: Fragment[] = [];
     let fragmentTimer = 0;
-    const FRAGMENT_INTERVAL = 1.5; // spawn new batch every 1.5s
-    const FRAGMENT_FADE_IN = 0.6;  // seconds to fade in
-    const FRAGMENT_FADE_OUT = 0.8; // seconds to fade out
-    const FRAGMENT_LIFE_MIN = 2.5;
-    const FRAGMENT_LIFE_MAX = 5.0;
+    const FRAGMENT_INTERVAL = 1.5;
+    const RESOLVE_TIME = 0.15;    // time for each char to resolve (cycling random -> correct)
+    const SCRAMBLE_TIME = 0.12;   // time for each char to scramble back
+    const FRAGMENT_LIFE_MIN = 3.0;
+    const FRAGMENT_LIFE_MAX = 5.5;
 
-    // Build a lookup grid from active fragments for render
+    // Lookup grid: char to show, and brightness boost (0 = noise, 1 = resolved)
     let fragmentGrid: (string | null)[][] = [];
-    let fragmentAlpha: (number | null)[][] = [];
+    let fragmentBright: (number | null)[][] = [];
 
     function spawnFragments() {
       if (!agentThemed) return;
@@ -141,35 +142,69 @@ export default function AsciiBackground({ agentThemed = true, className, onReady
         const c = Math.floor(Math.random() * Math.max(1, cols - 6));
         const frag = AGENT_FRAGMENTS[Math.floor(Math.random() * AGENT_FRAGMENTS.length)];
         const lifespan = FRAGMENT_LIFE_MIN + Math.random() * (FRAGMENT_LIFE_MAX - FRAGMENT_LIFE_MIN);
-        fragments.push({ row: r, col: c, text: frag, born: time, lifespan });
+        const resolveDelay = 0.06 + Math.random() * 0.04; // stagger between chars
+        fragments.push({ row: r, col: c, text: frag, born: time, lifespan, resolveDelay });
       }
-      // Cap total fragments
       if (fragments.length > 60) fragments = fragments.slice(-60);
     }
 
     function updateFragmentGrids() {
       fragmentGrid = [];
-      fragmentAlpha = [];
+      fragmentBright = [];
       for (let r = 0; r < rows; r++) {
         fragmentGrid[r] = new Array(cols).fill(null);
-        fragmentAlpha[r] = new Array(cols).fill(null);
+        fragmentBright[r] = new Array(cols).fill(null);
       }
-      // Remove dead fragments
       fragments = fragments.filter(f => (time - f.born) < f.lifespan);
-      // Place active fragments with alpha
+
       for (const f of fragments) {
         const age = time - f.born;
-        let alpha = 1;
-        if (age < FRAGMENT_FADE_IN) {
-          alpha = age / FRAGMENT_FADE_IN; // fade in
-        } else if (age > f.lifespan - FRAGMENT_FADE_OUT) {
-          alpha = (f.lifespan - age) / FRAGMENT_FADE_OUT; // fade out
-        }
-        alpha = Math.max(0, Math.min(1, alpha));
+        const resolveEnd = f.text.length * f.resolveDelay + RESOLVE_TIME;
+        const scrambleStart = f.lifespan - (f.text.length * f.resolveDelay + SCRAMBLE_TIME);
+
         for (let j = 0; j < f.text.length && f.col + j < cols; j++) {
-          if (f.row < rows) {
+          if (f.row >= rows) continue;
+          const charResolveStart = j * f.resolveDelay;
+          const charScrambleStart = scrambleStart + j * f.resolveDelay;
+
+          let charState: 'noise' | 'resolving' | 'resolved' | 'scrambling';
+          let progress = 0;
+
+          if (age < charResolveStart) {
+            charState = 'noise';
+          } else if (age < charResolveStart + RESOLVE_TIME) {
+            charState = 'resolving';
+            progress = (age - charResolveStart) / RESOLVE_TIME;
+          } else if (age < charScrambleStart) {
+            charState = 'resolved';
+          } else if (age < charScrambleStart + SCRAMBLE_TIME) {
+            charState = 'scrambling';
+            progress = (age - charScrambleStart) / SCRAMBLE_TIME;
+          } else {
+            charState = 'noise';
+          }
+
+          if (charState === 'noise') {
+            // Don't override — let normal noise render
+            continue;
+          } else if (charState === 'resolved') {
             fragmentGrid[f.row][f.col + j] = f.text[j];
-            fragmentAlpha[f.row][f.col + j] = alpha;
+            fragmentBright[f.row][f.col + j] = 1;
+          } else if (charState === 'resolving') {
+            // Cycle through random chars, occasionally showing correct one
+            if (progress > 0.7 || (progress > 0.4 && Math.random() < progress)) {
+              fragmentGrid[f.row][f.col + j] = f.text[j];
+            } else {
+              fragmentGrid[f.row][f.col + j] = ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)];
+            }
+            fragmentBright[f.row][f.col + j] = progress * 0.7;
+          } else { // scrambling
+            if (progress < 0.3 || (progress < 0.6 && Math.random() < (1 - progress))) {
+              fragmentGrid[f.row][f.col + j] = f.text[j];
+            } else {
+              fragmentGrid[f.row][f.col + j] = ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)];
+            }
+            fragmentBright[f.row][f.col + j] = (1 - progress) * 0.7;
           }
         }
       }
@@ -273,11 +308,10 @@ export default function AsciiBackground({ agentThemed = true, className, onReady
 
           let char: string;
           const fragChar = agentThemed ? fragmentGrid[row]?.[col] : null;
-          const fragAlpha = agentThemed ? fragmentAlpha[row]?.[col] : null;
-          if (fragChar && fragAlpha != null && fragAlpha > 0) {
-            // Blend: use fragment char, interpolate brightness based on alpha
-            char = fragAlpha > 0.3 ? fragChar : ALL_CHARS[(normalized * (ALL_CHARS.length - 1)) | 0];
-            const brightIdx = Math.min(255, ci + Math.round(60 * fragAlpha));
+          const fragBright = agentThemed ? fragmentBright[row]?.[col] : null;
+          if (fragChar && fragBright != null) {
+            char = fragChar;
+            const brightIdx = Math.min(255, ci + Math.round(60 * fragBright));
             ctx.fillStyle = colorLUT[brightIdx];
           } else {
             const charIndex = (normalized * (ALL_CHARS.length - 1)) | 0;
