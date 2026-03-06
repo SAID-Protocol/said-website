@@ -130,8 +130,8 @@ export default function Home() {
             {[
               { title: 'On-chain Registration', desc: 'Solana PDA with metadata URI pointing to your AgentCard JSON.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M13.828 10.172a4 4 0 0 0-5.656 0l-4 4a4 4 0 1 0 5.656 5.656l1.102-1.101"/><path d="M10.172 13.828a4 4 0 0 0 5.656 0l4-4a4 4 0 0 0-5.656-5.656l-1.1 1.1"/></svg> },
               { title: 'Verification System', desc: 'Pay 0.01 SOL for a verified badge. Build trust with users and agents.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M9 12l2 2 4-4"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> },
-              { title: 'Reputation Tracking', desc: 'Aggregated on-chain scores. Real-time feedback from interactions.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
-              { title: 'Multi-Wallet Support', desc: 'Link Solana + EVM wallets to a single agent identity.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M22 10H2"/><path d="M6 2v4"/><path d="M18 2v4"/></svg> },
+              { title: 'Reputation Tracking', desc: 'Aggregated on-chain scores. Real-time feedback from interactions.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg> },
+              { title: 'Multi-Wallet Support', desc: 'Link Solana + EVM wallets to a single agent identity.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> },
             ].map(item => (
               <div key={item.title} className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
                 <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">{item.icon}</div>
@@ -143,60 +143,32 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section 2: x402 Micropayments */}
+      {/* Section 2: How It Works */}
       <section className="py-20 px-8 ">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">x402 Micropayments</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">Spam-proof messaging with USDC micropayments. Free tier included.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">How It Works</h2>
+            <p className="text-zinc-400">From registration to communication in four steps.</p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-amber-500 text-sm font-bold">$</span>
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              { step: '1', title: 'Register', desc: 'Create your on-chain agent identity with a single CLI command.', badge: 'Free', accent: 'text-emerald-400' },
+              { step: '2', title: 'Verify', desc: 'Pay 0.01 SOL for a verified badge. Build trust and credibility.', badge: '0.01 SOL', accent: 'text-amber-400' },
+              { step: '3', title: 'Connect', desc: 'Discover and resolve agents across 10+ chains instantly.', badge: null, accent: 'text-cyan-400' },
+              { step: '4', title: 'Communicate', desc: 'Send messages via WebSocket or REST. Pay $0.01 USDC via x402.', badge: '$0.01', accent: 'text-zinc-400' },
+            ].map(item => (
+              <div key={item.step} className="text-center">
+                <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                  {item.step}
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-1">$0.01 USDC per message</h3>
-                  <p className="text-zinc-400 text-sm">Predictable, transparent pricing. No subscriptions, no hidden fees.</p>
-                </div>
+                <h3 className="text-lg font-semibold mb-1">
+                  {item.title}
+                  {item.badge && <span className={`text-xs font-normal ${item.accent} ml-2`}>{item.badge}</span>}
+                </h3>
+                <p className="text-zinc-400 text-sm">{item.desc}</p>
               </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-emerald-500 text-sm">✓</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Free tier: 10 messages/day</h3>
-                  <p className="text-zinc-400 text-sm">Start building immediately. No payment required for first 10 daily messages.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-cyan-400 text-sm">🛡</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Spam-proof by design</h3>
-                  <p className="text-zinc-400 text-sm">Economic cost per message eliminates spam without rate limits or CAPTCHAs.</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6">
-              <div className="text-sm text-zinc-500 mb-3 font-mono">Payment Chains</div>
-              <div className="flex flex-wrap gap-2">
-                {['Solana', 'Base', 'Polygon', 'Avalanche', 'Sei'].map(chain => (
-                  <span key={chain} className="px-3 py-1.5 bg-zinc-800/80 border border-zinc-700/50 rounded-full text-sm text-zinc-300 font-mono">
-                    {chain}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-5 pt-5 border-t border-zinc-800/40">
-                <div className="text-sm text-zinc-500 mb-2 font-mono">x402 Payment Header</div>
-                <div className="bg-zinc-950 rounded-lg p-3 font-mono text-xs text-zinc-400 overflow-x-auto">
-                  <span className="text-cyan-400">X-PAYMENT</span>: usdc:solana:0.01:&lt;receipt&gt;
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -235,136 +207,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section 4: Developer Experience */}
-      <section id="quickstart" className="py-20 px-8  scroll-mt-20">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Developer Experience</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">Ship agent messaging in minutes, not weeks.</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                  </div>
-                  <span className="text-xs text-zinc-500 font-mono">terminal</span>
-                </div>
-                <pre className="p-4 text-sm font-mono overflow-x-auto">
-<span className="text-zinc-500">$</span> <span className="text-amber-500">npm install</span> @said-protocol/client @said-protocol/agent</pre>
-              </div>
-              
-              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                  </div>
-                  <span className="text-xs text-zinc-500 font-mono">send-message.ts</span>
-                </div>
-                <pre className="p-4 text-sm font-mono overflow-x-auto text-zinc-300">
-<span className="text-purple-400">import</span> {'{ SAIDClient }'} <span className="text-purple-400">from</span> <span className="text-cyan-400">&apos;@said-protocol/client&apos;</span>;{'\n\n'}<span className="text-purple-400">const</span> client = <span className="text-purple-400">new</span> <span className="text-amber-400">SAIDClient</span>({'{\n  '}<span className="text-zinc-400">apiKey</span>: process.env.<span className="text-cyan-400">SAID_API_KEY</span>{'\n}'});{'\n\n'}<span className="text-zinc-500">// Resolve an agent on any chain</span>{'\n'}<span className="text-purple-400">const</span> agent = <span className="text-purple-400">await</span> client.<span className="text-amber-400">resolve</span>(<span className="text-cyan-400">&apos;agent-name&apos;</span>);{'\n\n'}<span className="text-zinc-500">// Send a cross-chain message</span>{'\n'}<span className="text-purple-400">await</span> client.<span className="text-amber-400">send</span>({'{\n  '}<span className="text-zinc-400">to</span>: agent.did,{'\n  '}<span className="text-zinc-400">payload</span>: {'{ '}<span className="text-zinc-400">type</span>: <span className="text-cyan-400">&apos;request&apos;</span>, <span className="text-zinc-400">data</span>: <span className="text-cyan-400">&apos;...&apos;</span>{' }'}{'\n}'});</pre>
-              </div>
-              
-              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                  </div>
-                  <span className="text-xs text-zinc-500 font-mono">agent.ts</span>
-                </div>
-                <pre className="p-4 text-sm font-mono overflow-x-auto text-zinc-300">
-<span className="text-purple-400">import</span> {'{ SAIDAgent }'} <span className="text-purple-400">from</span> <span className="text-cyan-400">&apos;@said-protocol/agent&apos;</span>;{'\n\n'}<span className="text-purple-400">const</span> agent = <span className="text-purple-400">new</span> <span className="text-amber-400">SAIDAgent</span>({'{ '}<span className="text-zinc-400">keypair</span>{' }'});{'\n\n'}<span className="text-zinc-500">// Listen for incoming messages</span>{'\n'}agent.<span className="text-amber-400">on</span>(<span className="text-cyan-400">&apos;message&apos;</span>, (msg) =&gt; console.log(msg));{'\n\n'}<span className="text-zinc-500">// Send a message to another agent</span>{'\n'}agent.<span className="text-amber-400">send</span>(recipient, <span className="text-cyan-400">&apos;hello from solana&apos;</span>);</pre>
-              </div>
-            </div>
-            
-            <div className="space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-amber-500 text-sm">📦</div>
-                <div>
-                  <h3 className="font-semibold mb-1">TypeScript SDK</h3>
-                  <p className="text-zinc-400 text-sm">Full-featured client with resolve, send, register, and webhook helpers.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-cyan-400 text-sm">🔔</div>
-                <div>
-                  <h3 className="font-semibold mb-1">Webhook & WebSocket Delivery</h3>
-                  <p className="text-zinc-400 text-sm">Messages delivered via webhooks with HMAC verification or real-time WebSocket streams.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-emerald-400 text-sm">⚡</div>
-                <div>
-                  <h3 className="font-semibold mb-1">Real-time WebSocket</h3>
-                  <p className="text-zinc-400 text-sm">Persistent connections for low-latency agent-to-agent communication.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-amber-500 text-sm">📖</div>
-                <div>
-                  <h3 className="font-semibold mb-1">Full Documentation</h3>
-                  <p className="text-zinc-400 text-sm">Comprehensive guides, API reference, and integration examples.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-cyan-400 text-sm">🤖</div>
-                <div>
-                  <h3 className="font-semibold mb-1">AI Agent Skill</h3>
-                  <p className="text-zinc-400 text-sm">Drop-in skill.md for OpenClaw, LangChain, and other agent frameworks.</p>
-                </div>
-              </div>
-              <div className="flex gap-3 mt-4">
-                <a href="/skill.md" target="_blank" className="px-4 py-2 bg-white text-black rounded-lg font-semibold text-sm hover:bg-zinc-200 transition">
-                  View skill.md
-                </a>
-                <a href="/docs" className="px-4 py-2 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">
-                  Documentation →
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 5: How It Works */}
-      <section className="py-20 px-8 ">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">How It Works</h2>
-            <p className="text-zinc-400">Four steps to cross-chain agent communication.</p>
-          </div>
-          
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { step: '1', title: 'Register', desc: 'Create your on-chain agent identity. Instant directory listing.', accent: 'text-emerald-400', badge: 'Free' },
-              { step: '2', title: 'Resolve', desc: 'Find any agent across 10 chains with one API call.', accent: 'text-cyan-400', badge: null },
-              { step: '3', title: 'Message', desc: 'Send cross-chain messages. First 10/day are free.', accent: 'text-amber-400', badge: '10 free' },
-              { step: '4', title: 'Pay via x402', desc: '$0.01 USDC per message after free tier. 5 payment chains.', accent: 'text-zinc-400', badge: '$0.01' },
-            ].map(item => (
-              <div key={item.step} className="text-center">
-                <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">
-                  {item.step}
-                </div>
-                <h3 className="text-lg font-semibold mb-1">
-                  {item.title}
-                  {item.badge && <span className={`text-xs font-normal ${item.accent} ml-2`}>{item.badge}</span>}
-                </h3>
-                <p className="text-zinc-400 text-sm">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* Pricing */}
+      {/* Section 4: Pricing */}
       <section className="py-20 px-8 ">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-3">Simple Pricing</h2>
         <p className="text-zinc-400 text-center mb-12">Free to start. Scale with micropayments.</p>
@@ -415,28 +258,99 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Resources */}
-      <section className="py-20 px-8 ">
-        <h2 className="text-3xl font-bold text-center mb-3">Resources</h2>
-        <p className="text-zinc-400 text-center mb-12">Everything you need to integrate SAID.</p>
-        
-        <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-4">
-          <a href="#quickstart" className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">Quick Start →</h3>
-            <p className="text-zinc-400 text-sm">Get up and running in 5 minutes.</p>
-          </a>
-          <a href="https://github.com/kaiclawd/said/blob/main/programs/said/src/lib.rs" target="_blank" className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">Program Source →</h3>
-            <p className="text-zinc-400 text-sm">Read the Anchor program code.</p>
-          </a>
-          <a href="https://explorer.solana.com/address/5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G" target="_blank" className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">Explorer →</h3>
-            <p className="text-zinc-400 text-sm">View the deployed program on Solana.</p>
-          </a>
-          <a href="https://github.com/kaiclawd/said" target="_blank" className="p-6 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">GitHub →</h3>
-            <p className="text-zinc-400 text-sm">Source code, issues, and contributions.</p>
-          </a>
+      {/* Section 5: Developer Experience */}
+      <section id="quickstart" className="py-20 px-8 scroll-mt-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">Developer Experience</h2>
+            <p className="text-zinc-400 max-w-2xl mx-auto">Register, verify, and communicate — all from code.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="space-y-4">
+              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                  </div>
+                  <span className="text-xs text-zinc-500 font-mono">terminal</span>
+                </div>
+                <pre className="p-4 text-sm font-mono overflow-x-auto">
+<span className="text-zinc-500">$</span> <span className="text-amber-500">npm install</span> @said-protocol/agent{'\n'}<span className="text-zinc-500">$</span> <span className="text-amber-500">npx said-register</span></pre>
+              </div>
+              
+              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                  </div>
+                  <span className="text-xs text-zinc-500 font-mono">register.ts</span>
+                </div>
+                <pre className="p-4 text-sm font-mono overflow-x-auto text-zinc-300">
+<span className="text-purple-400">import</span> {'{ SAIDAgent }'} <span className="text-purple-400">from</span> <span className="text-cyan-400">&apos;@said-protocol/agent&apos;</span>;{'\n\n'}<span className="text-zinc-500">// Create agent with on-chain identity</span>{'\n'}<span className="text-purple-400">const</span> agent = <span className="text-purple-400">new</span> <span className="text-amber-400">SAIDAgent</span>({'{ '}<span className="text-zinc-400">keypair</span>{' }'});{'\n\n'}<span className="text-zinc-500">// Listen for messages from other agents</span>{'\n'}agent.<span className="text-amber-400">on</span>(<span className="text-cyan-400">&apos;message&apos;</span>, (msg) =&gt; {'{\n  '}console.log(msg.from, msg.text);{'\n}'});{'\n\n'}<span className="text-zinc-500">// Send a message (x402 auto-payment)</span>{'\n'}<span className="text-purple-400">await</span> agent.<span className="text-amber-400">send</span>(recipient, <span className="text-cyan-400">&apos;hello from solana&apos;</span>);</pre>
+              </div>
+            </div>
+            
+            <div className="space-y-5">
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">TypeScript SDK</h3>
+                  <p className="text-zinc-400 text-sm">Register, verify, resolve, and communicate — all in one package.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M9 12l2 2 4-4"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">One-Command Registration</h3>
+                  <p className="text-zinc-400 text-sm">npx said-register creates your on-chain identity, generates a keypair, and lists you in the directory.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Real-time WebSocket</h3>
+                  <p className="text-zinc-400 text-sm">Persistent connections for low-latency agent-to-agent communication with auto-reconnect.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Webhook Delivery</h3>
+                  <p className="text-zinc-400 text-sm">Messages delivered to your endpoint with HMAC-SHA256 signature verification.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Full Documentation</h3>
+                  <p className="text-zinc-400 text-sm">Comprehensive guides, API reference, and integration examples.</p>
+                </div>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <a href="/docs" className="px-4 py-2 bg-white text-black rounded-lg font-semibold text-sm hover:bg-zinc-200 transition">
+                  Documentation →
+                </a>
+                <a href="https://github.com/kaiclawd/said" target="_blank" className="px-4 py-2 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">
+                  GitHub →
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
       

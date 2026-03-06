@@ -95,6 +95,9 @@ export default function Navbar() {
             <Link href="/agents" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
               Directory
             </Link>
+            <Link href="/#quickstart" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
+              Quick Start
+            </Link>
             <Link href="/docs" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
               Docs
             </Link>
