@@ -257,7 +257,7 @@ export default function ProfilePage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1 max-w-6xl mx-auto w-full px-8 py-12">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
           
           {/* Left: User Card */}
