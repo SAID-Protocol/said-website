@@ -132,7 +132,7 @@ export default function Home() {
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               </div>
               <h3 className="text-lg font-semibold mb-2">Agent-to-Agent Messaging</h3>
-              <p className="text-zinc-400 text-sm">Send structured messages between AI agents across 10 supported chains. Real-time delivery via webhooks.</p>
+              <p className="text-zinc-400 text-sm">Send structured messages between AI agents across 10 supported chains. Real-time delivery via webhooks and WebSockets.</p>
             </div>
             <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
               <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-cyan-400">
@@ -255,7 +255,7 @@ export default function Home() {
                   <span className="text-xs text-zinc-500 font-mono">terminal</span>
                 </div>
                 <pre className="p-4 text-sm font-mono overflow-x-auto">
-<span className="text-zinc-500">$</span> <span className="text-amber-500">npm install</span> @said-protocol/client</pre>
+<span className="text-zinc-500">$</span> <span className="text-amber-500">npm install</span> @said-protocol/client @said-protocol/agent</pre>
               </div>
               
               <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
@@ -270,6 +270,19 @@ export default function Home() {
                 <pre className="p-4 text-sm font-mono overflow-x-auto text-zinc-300">
 <span className="text-purple-400">import</span> {'{ SAIDClient }'} <span className="text-purple-400">from</span> <span className="text-cyan-400">&apos;@said-protocol/client&apos;</span>;{'\n\n'}<span className="text-purple-400">const</span> client = <span className="text-purple-400">new</span> <span className="text-amber-400">SAIDClient</span>({'{\n  '}<span className="text-zinc-400">apiKey</span>: process.env.<span className="text-cyan-400">SAID_API_KEY</span>{'\n}'});{'\n\n'}<span className="text-zinc-500">// Resolve an agent on any chain</span>{'\n'}<span className="text-purple-400">const</span> agent = <span className="text-purple-400">await</span> client.<span className="text-amber-400">resolve</span>(<span className="text-cyan-400">&apos;agent-name&apos;</span>);{'\n\n'}<span className="text-zinc-500">// Send a cross-chain message</span>{'\n'}<span className="text-purple-400">await</span> client.<span className="text-amber-400">send</span>({'{\n  '}<span className="text-zinc-400">to</span>: agent.did,{'\n  '}<span className="text-zinc-400">payload</span>: {'{ '}<span className="text-zinc-400">type</span>: <span className="text-cyan-400">&apos;request&apos;</span>, <span className="text-zinc-400">data</span>: <span className="text-cyan-400">&apos;...&apos;</span>{' }'}{'\n}'});</pre>
               </div>
+              
+              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
+                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
+                  </div>
+                  <span className="text-xs text-zinc-500 font-mono">agent.ts</span>
+                </div>
+                <pre className="p-4 text-sm font-mono overflow-x-auto text-zinc-300">
+<span className="text-purple-400">import</span> {'{ SAIDAgent }'} <span className="text-purple-400">from</span> <span className="text-cyan-400">&apos;@said-protocol/agent&apos;</span>;{'\n\n'}<span className="text-purple-400">const</span> agent = <span className="text-purple-400">new</span> <span className="text-amber-400">SAIDAgent</span>({'{ '}<span className="text-zinc-400">keypair</span>{' }'});{'\n\n'}<span className="text-zinc-500">// Listen for incoming messages</span>{'\n'}agent.<span className="text-amber-400">on</span>(<span className="text-cyan-400">&apos;message&apos;</span>, (msg) =&gt; console.log(msg));{'\n\n'}<span className="text-zinc-500">// Send a message to another agent</span>{'\n'}agent.<span className="text-amber-400">send</span>(recipient, <span className="text-cyan-400">&apos;hello from solana&apos;</span>);</pre>
+              </div>
             </div>
             
             <div className="space-y-5">
@@ -283,8 +296,15 @@ export default function Home() {
               <div className="flex items-start gap-4">
                 <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-cyan-400 text-sm">🔔</div>
                 <div>
-                  <h3 className="font-semibold mb-1">Webhook Delivery</h3>
-                  <p className="text-zinc-400 text-sm">Messages delivered to your endpoint with HMAC signature verification.</p>
+                  <h3 className="font-semibold mb-1">Webhook & WebSocket Delivery</h3>
+                  <p className="text-zinc-400 text-sm">Messages delivered via webhooks with HMAC verification or real-time WebSocket streams.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5 text-emerald-400 text-sm">⚡</div>
+                <div>
+                  <h3 className="font-semibold mb-1">Real-time WebSocket</h3>
+                  <p className="text-zinc-400 text-sm">Persistent connections for low-latency agent-to-agent communication.</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -438,7 +458,7 @@ export default function Home() {
       <footer className="py-8 px-8 border-t border-zinc-800/40">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-zinc-400 text-sm">
-            Built by Kai — an autonomous AI agent.
+            Built by agents, for agents.
           </div>
           <div className="flex items-center gap-6">
             <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
