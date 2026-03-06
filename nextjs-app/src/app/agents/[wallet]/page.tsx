@@ -99,9 +99,11 @@ export default function AgentPage() {
       <main className="flex-1 max-w-4xl mx-auto px-8 py-12 w-full">
         {/* Header */}
         <div className="flex items-start gap-6 mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
-            {agent.name?.[0]?.toUpperCase() || '?'}
-          </div>
+          <img 
+            src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
+            alt={agent.name || 'Agent'}
+            className="w-20 h-20 rounded-2xl flex-shrink-0"
+          />
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{agent.name || 'Unnamed Agent'}</h1>

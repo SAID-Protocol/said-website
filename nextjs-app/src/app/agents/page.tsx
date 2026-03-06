@@ -237,15 +237,6 @@ export default function AgentsPage() {
   );
 }
 
-// Deterministic gradient from wallet address
-function walletGradient(wallet: string): string {
-  let hash = 0;
-  for (let i = 0; i < wallet.length; i++) hash = wallet.charCodeAt(i) + ((hash << 5) - hash);
-  const h1 = Math.abs(hash % 360);
-  const h2 = (h1 + 40 + (hash % 60)) % 360;
-  return `linear-gradient(135deg, hsl(${h1}, 60%, 45%), hsl(${h2}, 50%, 35%))`;
-}
-
 function timeAgoShort(dateStr: string): string {
   if (!dateStr) return '';
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
@@ -268,12 +259,11 @@ function AgentCard({ agent }: { agent: Agent }) {
       <div className="p-5">
         {/* Header: Avatar + Name + Verified */}
         <div className="flex items-start gap-3 mb-3">
-          <div 
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-inner"
-            style={{ background: walletGradient(agent.wallet) }}
-          >
-            {agent.name?.[0]?.toUpperCase() || '?'}
-          </div>
+          <img 
+            src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
+            alt={agent.name || 'Agent'}
+            className="w-10 h-10 rounded-lg flex-shrink-0"
+          />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-semibold text-sm truncate">{agent.name || 'Unnamed Agent'}</h3>
