@@ -220,9 +220,6 @@ export default function AgentPage() {
           </div>
         </section>
 
-        {/* Layer 2 Verification */}
-        <Layer2Badge isL2Verified={agent.layer2Verified || false} />
-
         {/* SAID Passport */}
         {agent.isVerified && (
           <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl mb-6">
