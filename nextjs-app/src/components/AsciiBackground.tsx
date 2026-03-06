@@ -113,26 +113,70 @@ export default function AsciiBackground({ agentThemed = true, className, onReady
       colorLUT[c] = `hsla(${hue},${sat}%,${l}%,${a})`;
     }
 
-    // Fragment grid for agent-themed content
-    let fragmentGrid: (string | null)[][] = [];
+    // Fragment system — fragments fade in, hold, then dissolve
+    interface Fragment {
+      row: number;
+      col: number;
+      text: string;
+      born: number;    // time when created
+      lifespan: number; // total seconds to live
+    }
+    let fragments: Fragment[] = [];
     let fragmentTimer = 0;
-    const FRAGMENT_INTERVAL = 3;
+    const FRAGMENT_INTERVAL = 1.5; // spawn new batch every 1.5s
+    const FRAGMENT_FADE_IN = 0.6;  // seconds to fade in
+    const FRAGMENT_FADE_OUT = 0.8; // seconds to fade out
+    const FRAGMENT_LIFE_MIN = 2.5;
+    const FRAGMENT_LIFE_MAX = 5.0;
 
-    function generateFragmentGrid() {
+    // Build a lookup grid from active fragments for render
+    let fragmentGrid: (string | null)[][] = [];
+    let fragmentAlpha: (number | null)[][] = [];
+
+    function spawnFragments() {
       if (!agentThemed) return;
-      fragmentGrid = [];
-      for (let r = 0; r < rows; r++) {
-        fragmentGrid[r] = new Array(cols).fill(null);
-      }
-      const count = Math.min(25, Math.floor((rows * cols) * 0.003));
+      const count = Math.min(8, Math.floor((rows * cols) * 0.001));
       for (let i = 0; i < count; i++) {
         const r = Math.floor(Math.random() * rows);
-        const c = Math.floor(Math.random() * (cols - 6));
+        const c = Math.floor(Math.random() * Math.max(1, cols - 6));
         const frag = AGENT_FRAGMENTS[Math.floor(Math.random() * AGENT_FRAGMENTS.length)];
-        for (let j = 0; j < frag.length && c + j < cols; j++) {
-          fragmentGrid[r][c + j] = frag[j];
+        const lifespan = FRAGMENT_LIFE_MIN + Math.random() * (FRAGMENT_LIFE_MAX - FRAGMENT_LIFE_MIN);
+        fragments.push({ row: r, col: c, text: frag, born: time, lifespan });
+      }
+      // Cap total fragments
+      if (fragments.length > 60) fragments = fragments.slice(-60);
+    }
+
+    function updateFragmentGrids() {
+      fragmentGrid = [];
+      fragmentAlpha = [];
+      for (let r = 0; r < rows; r++) {
+        fragmentGrid[r] = new Array(cols).fill(null);
+        fragmentAlpha[r] = new Array(cols).fill(null);
+      }
+      // Remove dead fragments
+      fragments = fragments.filter(f => (time - f.born) < f.lifespan);
+      // Place active fragments with alpha
+      for (const f of fragments) {
+        const age = time - f.born;
+        let alpha = 1;
+        if (age < FRAGMENT_FADE_IN) {
+          alpha = age / FRAGMENT_FADE_IN; // fade in
+        } else if (age > f.lifespan - FRAGMENT_FADE_OUT) {
+          alpha = (f.lifespan - age) / FRAGMENT_FADE_OUT; // fade out
+        }
+        alpha = Math.max(0, Math.min(1, alpha));
+        for (let j = 0; j < f.text.length && f.col + j < cols; j++) {
+          if (f.row < rows) {
+            fragmentGrid[f.row][f.col + j] = f.text[j];
+            fragmentAlpha[f.row][f.col + j] = alpha;
+          }
         }
       }
+    }
+
+    function generateFragmentGrid() {
+      spawnFragments();
     }
 
     function resize() {
@@ -185,8 +229,9 @@ export default function AsciiBackground({ agentThemed = true, className, onReady
 
       if (agentThemed && fragmentTimer > FRAGMENT_INTERVAL) {
         fragmentTimer = 0;
-        generateFragmentGrid();
+        spawnFragments();
       }
+      if (agentThemed) updateFragmentGrids();
 
       ctx.fillStyle = '#09090b';
       ctx.fillRect(0, 0, width, height);
@@ -227,9 +272,12 @@ export default function AsciiBackground({ agentThemed = true, className, onReady
           const ci = (normalized * 255) | 0;
 
           let char: string;
-          if (agentThemed && fragmentGrid[row]?.[col]) {
-            char = fragmentGrid[row][col]!;
-            const brightIdx = Math.min(255, ci + 60);
+          const fragChar = agentThemed ? fragmentGrid[row]?.[col] : null;
+          const fragAlpha = agentThemed ? fragmentAlpha[row]?.[col] : null;
+          if (fragChar && fragAlpha != null && fragAlpha > 0) {
+            // Blend: use fragment char, interpolate brightness based on alpha
+            char = fragAlpha > 0.3 ? fragChar : ALL_CHARS[(normalized * (ALL_CHARS.length - 1)) | 0];
+            const brightIdx = Math.min(255, ci + Math.round(60 * fragAlpha));
             ctx.fillStyle = colorLUT[brightIdx];
           } else {
             const charIndex = (normalized * (ALL_CHARS.length - 1)) | 0;
