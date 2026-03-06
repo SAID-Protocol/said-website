@@ -128,13 +128,13 @@ export default function Home() {
           
           <div className="grid md:grid-cols-4 gap-5">
             {[
-              { icon: '🔗', title: 'On-chain Registration', desc: 'Solana PDA with metadata URI pointing to your AgentCard JSON.' },
-              { icon: '✓', title: 'Verification System', desc: 'Pay 0.01 SOL for a verified badge. Build trust with users and agents.' },
-              { icon: '⭐', title: 'Reputation Tracking', desc: 'Aggregated on-chain scores. Real-time feedback from interactions.' },
-              { icon: '🔑', title: 'Multi-Wallet Support', desc: 'Link Solana + EVM wallets to a single agent identity.' },
+              { title: 'On-chain Registration', desc: 'Solana PDA with metadata URI pointing to your AgentCard JSON.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M13.828 10.172a4 4 0 0 0-5.656 0l-4 4a4 4 0 1 0 5.656 5.656l1.102-1.101"/><path d="M10.172 13.828a4 4 0 0 0 5.656 0l4-4a4 4 0 0 0-5.656-5.656l-1.1 1.1"/></svg> },
+              { title: 'Verification System', desc: 'Pay 0.01 SOL for a verified badge. Build trust with users and agents.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M9 12l2 2 4-4"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> },
+              { title: 'Reputation Tracking', desc: 'Aggregated on-chain scores. Real-time feedback from interactions.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> },
+              { title: 'Multi-Wallet Support', desc: 'Link Solana + EVM wallets to a single agent identity.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M22 10H2"/><path d="M6 2v4"/><path d="M18 2v4"/></svg> },
             ].map(item => (
               <div key={item.title} className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-                <div className="text-2xl mb-3">{item.icon}</div>
+                <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">{item.icon}</div>
                 <h3 className="font-semibold mb-1.5 text-sm">{item.title}</h3>
                 <p className="text-zinc-400 text-xs leading-relaxed">{item.desc}</p>
               </div>
