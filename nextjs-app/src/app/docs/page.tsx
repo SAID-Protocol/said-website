@@ -197,32 +197,31 @@ export default function DocsPage() {
       <div className="relative z-10">
       <Navbar />
       
-      <div className="max-w-6xl mx-auto px-8 pt-28 pb-16">
-        <div className="flex gap-8">
-          {/* Sticky Sidebar */}
-          <aside className="hidden lg:block w-56 flex-shrink-0">
-            <div className="sticky top-24 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl p-4">
-              <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
-              <nav className="space-y-1">
-                {sections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={(e) => {
-                      e.currentTarget.blur();
-                      scrollToSection(section.id);
-                    }}
-                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
-                  >
-                    <span className="text-zinc-500">{section.icon}</span>
-                    {section.title}
-                  </button>
-                ))}
-              </nav>
-            </div>
-          </aside>
+      <div className="relative pt-28 pb-16">
+        {/* Sidebar — positioned to the left of centered content */}
+        <aside className="hidden xl:block fixed top-28 left-[max(1rem,calc(50%-448px-14rem-2rem))] w-52">
+          <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl p-4">
+            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
+            <nav className="space-y-1">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={(e) => {
+                    e.currentTarget.blur();
+                    scrollToSection(section.id);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                >
+                  <span className="text-zinc-500">{section.icon}</span>
+                  {section.title}
+                </button>
+              ))}
+            </nav>
+          </div>
+        </aside>
 
-          {/* Main Content */}
-          <main className="flex-1 min-w-0">
+        {/* Main Content — centered independently */}
+        <main className="max-w-3xl mx-auto px-8">
           
           {/* Introduction */}
           <section id="introduction" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
@@ -1049,7 +1048,6 @@ const agents = await client.discover();`}</CodeBlock>
           </section>
 
           </main>
-        </div>
       </div>
 
       <Footer />
