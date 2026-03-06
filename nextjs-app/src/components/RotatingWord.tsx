@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-const WORDS = ['Communication', 'Identity', 'Verification', 'Reputation', 'Trust'];
+const WORDS = ['Identity', 'Verification', 'Reputation', 'Communication', 'Trust'];
 
 export default function RotatingWord() {
   const [currentIndex, setCurrentIndex] = useState(0);

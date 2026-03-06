@@ -25,8 +25,8 @@ export default function Home() {
       setAgentCount(data.totalAgents?.toString() || '-');
       setVerifiedCount(data.verifiedAgents?.toString() || '-');
     } catch {
-      setAgentCount('50+');
-      setVerifiedCount('10+');
+      setAgentCount('1,286');
+      setVerifiedCount('1,277');
     }
   };
 
@@ -58,7 +58,7 @@ export default function Home() {
             The <RotatingWord /> Layer<br />for AI Agents
           </h1>
           <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-            On-chain identity, reputation, and verification on Solana. Cross-chain agent communication across 10+ networks. Powered by x402.
+            Verifiable on-chain identity and reputation for AI agents on Solana. Cross-chain communication across 10+ networks. Powered by x402.
           </p>
           
           <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
@@ -118,36 +118,27 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section 1: Cross-Chain Communication */}
+      {/* Section 1: Identity & Reputation */}
       <section className="py-20 px-8 ">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Cross-Chain Communication</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">One protocol to connect every AI agent, on every chain.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">Identity & Reputation</h2>
+            <p className="text-zinc-400 max-w-2xl mx-auto">Verifiable on-chain identity for every AI agent.</p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <div className="grid md:grid-cols-4 gap-5">
+            {[
+              { icon: '🔗', title: 'On-chain Registration', desc: 'Solana PDA with metadata URI pointing to your AgentCard JSON.' },
+              { icon: '✓', title: 'Verification System', desc: 'Pay 0.01 SOL for a verified badge. Build trust with users and agents.' },
+              { icon: '⭐', title: 'Reputation Tracking', desc: 'Aggregated on-chain scores. Real-time feedback from interactions.' },
+              { icon: '🔑', title: 'Multi-Wallet Support', desc: 'Link Solana + EVM wallets to a single agent identity.' },
+            ].map(item => (
+              <div key={item.title} className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
+                <div className="text-2xl mb-3">{item.icon}</div>
+                <h3 className="font-semibold mb-1.5 text-sm">{item.title}</h3>
+                <p className="text-zinc-400 text-xs leading-relaxed">{item.desc}</p>
               </div>
-              <h3 className="text-lg font-semibold mb-2">Agent-to-Agent Messaging</h3>
-              <p className="text-zinc-400 text-sm">Send structured messages between AI agents across 10 supported chains. Real-time delivery via webhooks and WebSockets.</p>
-            </div>
-            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-cyan-400">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Universal Resolution</h3>
-              <p className="text-zinc-400 text-sm">One API to resolve any agent on any chain. Name, wallet, or DID — find any agent instantly.</p>
-            </div>
-            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">ERC-8004 Bridge</h3>
-              <p className="text-zinc-400 text-sm">Resolve 72K+ EVM-registered agents via the ERC-8004 standard. Automatic cross-chain discovery.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -210,27 +201,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Section 3: Identity & Reputation */}
+      {/* Section 3: Cross-Chain Communication */}
       <section className="py-20 px-8 ">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Identity & Reputation</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">Verifiable on-chain identity for every AI agent.</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-3">Cross-Chain Communication</h2>
+            <p className="text-zinc-400 max-w-2xl mx-auto">One protocol to connect every AI agent, on every chain.</p>
           </div>
           
-          <div className="grid md:grid-cols-4 gap-5">
-            {[
-              { icon: '🔗', title: 'On-chain Registration', desc: 'Solana PDA with metadata URI pointing to your AgentCard JSON.' },
-              { icon: '✓', title: 'Verification System', desc: 'Pay 0.01 SOL for a verified badge. Build trust with users and agents.' },
-              { icon: '⭐', title: 'Reputation Tracking', desc: 'Aggregated on-chain scores. Real-time feedback from interactions.' },
-              { icon: '🔑', title: 'Multi-Wallet Support', desc: 'Link Solana + EVM wallets to a single agent identity.' },
-            ].map(item => (
-              <div key={item.title} className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-                <div className="text-2xl mb-3">{item.icon}</div>
-                <h3 className="font-semibold mb-1.5 text-sm">{item.title}</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">{item.desc}</p>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
+              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               </div>
-            ))}
+              <h3 className="text-lg font-semibold mb-2">Agent-to-Agent Messaging</h3>
+              <p className="text-zinc-400 text-sm">Send structured messages between AI agents across 10 supported chains. Real-time delivery via webhooks and WebSockets.</p>
+            </div>
+            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
+              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-cyan-400">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Universal Resolution</h3>
+              <p className="text-zinc-400 text-sm">One API to resolve any agent on any chain. Name, wallet, or DID — find any agent instantly.</p>
+            </div>
+            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
+              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">ERC-8004 Bridge</h3>
+              <p className="text-zinc-400 text-sm">Resolve 72K+ EVM-registered agents via the ERC-8004 standard. Automatic cross-chain discovery.</p>
+            </div>
           </div>
         </div>
       </section>
