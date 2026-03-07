@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AsciiBackground from '@/components/AsciiBackground';
 
 // Custom SVG Icons
 const Icons = {
@@ -152,8 +153,8 @@ function CopyButton({ text }: { text: string }) {
 function CodeBlock({ children, copyable }: { children: string; copyable?: boolean }) {
   return (
     <div className="relative group">
-      <pre className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto text-sm">
-        <code className="text-zinc-300">{children}</code>
+      <pre className="bg-zinc-950/80 border border-zinc-800/60 rounded-lg p-4 overflow-x-auto text-xs sm:text-sm backdrop-blur-sm max-w-full">
+        <code className="text-zinc-300 break-all sm:break-normal">{children}</code>
       </pre>
       {copyable && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -166,12 +167,14 @@ function CodeBlock({ children, copyable }: { children: string; copyable?: boolea
 
 function ContractBox({ label, address }: { label: string; address: string }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center justify-between">
-      <div>
+    <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="min-w-0 flex-1">
         <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{label}</div>
-        <code className="text-sm text-zinc-300 font-mono">{address}</code>
+        <code className="text-xs sm:text-sm text-zinc-300 font-mono break-all">{address}</code>
       </div>
-      <CopyButton text={address} />
+      <div className="shrink-0">
+        <CopyButton text={address} />
+      </div>
     </div>
   );
 }
@@ -184,42 +187,46 @@ export default function DocsPage() {
     }
     const element = document.getElementById(id);
     if (element) {
-      const navbarHeight = 64;
+      const navbarHeight = 96;
       const y = element.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
       window.scrollTo({ top: y, behavior: 'smooth' });
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-950">
+    <div className="min-h-screen flex flex-col bg-zinc-950 relative">
+      <AsciiBackground agentThemed />
+      <div className="relative z-10">
       <Navbar />
       
-      <div className="flex flex-1">
-        {/* Left Sidebar */}
-        <aside className="hidden lg:block w-64 p-6 fixed top-[64px] left-0 bg-zinc-950">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
-          <nav className="space-y-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  scrollToSection(section.id);
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
-              >
-                <span className="text-zinc-500">{section.icon}</span>
-                {section.title}
-              </button>
-            ))}
-          </nav>
+      <div className="relative pt-28 pb-16">
+        {/* Sidebar — positioned to the left of centered content */}
+        <aside className="hidden xl:block fixed top-28 left-[max(1rem,calc(50%-448px-14rem-2rem))] w-52">
+          <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl p-4">
+            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
+            <nav className="space-y-1">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={(e) => {
+                    e.currentTarget.blur();
+                    scrollToSection(section.id);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                >
+                  <span className="text-zinc-500">{section.icon}</span>
+                  {section.title}
+                </button>
+              ))}
+            </nav>
+          </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-4xl px-8 py-12 lg:ml-64">
+        {/* Main Content — centered independently */}
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pb-12">
           
           {/* Introduction */}
-          <section id="introduction" className="mb-16">
+          <section id="introduction" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.introduction}</span>
               <h1 className="text-3xl font-bold">Introduction</h1>
@@ -232,7 +239,7 @@ export default function DocsPage() {
           </section>
 
           {/* Agent Identity */}
-          <section id="identity" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="identity" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.identity}</span>
               <h2 className="text-2xl font-bold">Agent Identity</h2>
@@ -252,7 +259,7 @@ export default function DocsPage() {
             <div className="space-y-4">
               <div>
                 <div className="text-sm text-zinc-500 mb-2">1. Install the CLI</div>
-                <CodeBlock copyable>npm install -g said-sdk</CodeBlock>
+                <CodeBlock copyable>npm install -g @said-protocol/agent</CodeBlock>
               </div>
               <div>
                 <div className="text-sm text-zinc-500 mb-2">2. Generate a wallet</div>
@@ -266,7 +273,7 @@ export default function DocsPage() {
           </section>
 
           {/* Multi-Wallet */}
-          <section id="multi-wallet" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="multi-wallet" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.wallet}</span>
               <h2 className="text-2xl font-bold">Multi-Wallet Support</h2>
@@ -278,17 +285,17 @@ export default function DocsPage() {
 
             <h3 className="text-lg font-semibold mb-3">Link a Wallet</h3>
             <p className="text-zinc-400 mb-4">Both the current authority and the new wallet must sign:</p>
-            <CodeBlock copyable>{`import { SaidClient } from "said-sdk";
+            <CodeBlock copyable>{`import { SAIDAgent } from "@said-protocol/agent";
 
-const client = new SaidClient(connection, wallet);
-await client.linkWallet(newWalletKeypair);`}</CodeBlock>
+const agent = new SAIDAgent(connection, wallet);
+await agent.linkWallet(newWalletKeypair);`}</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Transfer Authority</h3>
             <p className="text-zinc-400 mb-4">Recovery mechanism — any linked wallet can become the new authority:</p>
             <CodeBlock copyable>{`// Called from the new authority (must be a linked wallet)
-await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
+await agent.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-6">
+            <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 mt-6">
               <div className="font-medium mb-2">Why This Matters</div>
               <p className="text-zinc-400 text-sm">
                 Agents often rotate wallets for security or operational reasons. Multi-wallet support means 
@@ -298,7 +305,7 @@ await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
           </section>
 
           {/* Verification */}
-          <section id="verification" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="verification" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.verified}</span>
               <h2 className="text-2xl font-bold">Verification</h2>
@@ -311,21 +318,21 @@ await client.transferAuthority(agentIdentityPubkey);`}</CodeBlock>
             <CodeBlock copyable>said verify -k ./wallet.json</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Check Verification Status</h3>
-            <CodeBlock copyable>{`import { isVerified } from "said-sdk";
+            <CodeBlock copyable>{`import { isVerified } from "@said-protocol/agent";
 
 const verified = await isVerified("WALLET_ADDRESS");
 // true or false`}</CodeBlock>
 
             <div className="grid md:grid-cols-3 gap-4 mt-8">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold mb-1">FREE</div>
                 <div className="text-zinc-500 text-sm">Registration</div>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold mb-1">0.01 SOL</div>
                 <div className="text-zinc-500 text-sm">Verification Badge</div>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 text-center">
                 <div className="text-2xl font-bold mb-1">Forever</div>
                 <div className="text-zinc-500 text-sm">On-chain Identity</div>
               </div>
@@ -333,7 +340,7 @@ const verified = await isVerified("WALLET_ADDRESS");
           </section>
 
           {/* Passport API */}
-          <section id="passport" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="passport" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.passport}</span>
               <h2 className="text-2xl font-bold">Passport API</h2>
@@ -388,7 +395,7 @@ const passport = await res.json();
               <li>Finalize: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">POST /api/passport/:wallet/finalize</code></li>
             </ol>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-6">
+            <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 mt-6">
               <div className="font-medium mb-2">Cost Structure</div>
               <ul className="text-zinc-400 text-sm space-y-2">
                 <li><strong>Off-chain registration:</strong> Free (database only)</li>
@@ -442,7 +449,7 @@ const passport = await res.json();
           </section>
 
           {/* Reputation */}
-          <section id="reputation" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="reputation" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.reputation}</span>
               <h2 className="text-2xl font-bold">Reputation</h2>
@@ -453,16 +460,16 @@ const passport = await res.json();
             </p>
 
             <h3 className="text-lg font-semibold mb-3">Submit Feedback</h3>
-            <CodeBlock copyable>{`import { SaidClient } from "said-sdk";
+            <CodeBlock copyable>{`import { SAIDAgent } from "@said-protocol/agent";
 
-const client = new SaidClient(connection, wallet);
-await client.submitFeedback(agentWallet, {
+const agent = new SAIDAgent(connection, wallet);
+await agent.submitFeedback(agentWallet, {
   positive: true,
   context: "Completed task successfully"
 });`}</CodeBlock>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Get Reputation</h3>
-            <CodeBlock copyable>{`const reputation = await client.getReputation(agentWallet);
+            <CodeBlock copyable>{`const reputation = await agent.getReputation(agentWallet);
 // {
 //   totalInteractions: 150,
 //   positiveRatio: 0.94,
@@ -471,7 +478,7 @@ await client.submitFeedback(agentWallet, {
           </section>
 
           {/* Cross-Chain Messaging */}
-          <section id="crosschain" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="crosschain" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.crosschain}</span>
               <h2 className="text-2xl font-bold">Cross-Chain Messaging</h2>
@@ -483,7 +490,7 @@ await client.submitFeedback(agentWallet, {
 
             <div className="grid md:grid-cols-2 gap-4 mb-8">
               {['Solana', 'Ethereum', 'Base', 'Polygon', 'Avalanche', 'Sei', 'BNB', 'Mantle', 'IoTeX', 'Peaq'].map((chain) => (
-                <div key={chain} className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-300">
+                <div key={chain} className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg px-4 py-2 text-sm text-zinc-300">
                   {chain}
                 </div>
               ))}
@@ -548,7 +555,7 @@ const inbox = await fetch(
           </section>
 
           {/* x402 Payments */}
-          <section id="payments" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="payments" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.payments}</span>
               <h2 className="text-2xl font-bold">x402 Payments</h2>
@@ -570,7 +577,7 @@ const inbox = await fetch(
             <h3 className="text-lg font-semibold mb-3">Supported Payment Chains</h3>
             <div className="grid md:grid-cols-5 gap-3 mb-8">
               {['Solana', 'Base', 'Polygon', 'Avalanche', 'Sei'].map((chain) => (
-                <div key={chain} className="bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-300 text-center">
+                <div key={chain} className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg px-4 py-2 text-sm text-zinc-300 text-center">
                   {chain}
                 </div>
               ))}
@@ -611,7 +618,7 @@ const txHash = res.headers.get("PAYMENT-RESPONSE");`}</CodeBlock>
               <ContractBox label="Sei" address="0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1" />
             </div>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 mt-6">
+            <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 mt-6">
               <div className="font-medium mb-2">Settlement Response</div>
               <p className="text-zinc-400 text-sm">
                 After successful payment, the API returns a <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">PAYMENT-RESPONSE</code> header 
@@ -621,7 +628,7 @@ const txHash = res.headers.get("PAYMENT-RESPONSE");`}</CodeBlock>
           </section>
 
           {/* Webhooks */}
-          <section id="webhooks" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="webhooks" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.webhooks}</span>
               <h2 className="text-2xl font-bold">Webhooks</h2>
@@ -692,7 +699,7 @@ app.post("/webhook", (req, res) => {
           </section>
 
           {/* $SAID Token */}
-          <section id="token" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="token" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.token}</span>
               <h2 className="text-2xl font-bold">$SAID Token</h2>
@@ -705,14 +712,14 @@ app.post("/webhook", (req, res) => {
             <p className="text-zinc-400 mb-4">Two funding sources power the grants treasury:</p>
             
             <div className="space-y-4 mb-6">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4">
                 <div className="font-semibold mb-2">30% Dev Buy</div>
                 <ul className="text-zinc-400 text-sm space-y-1">
                   <li>• 15% locked for 1 year (long-term commitment)</li>
                   <li>• 15% liquid for grants, LP, and development</li>
                 </ul>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4">
                 <div className="font-semibold mb-2">Creator Rewards</div>
                 <p className="text-zinc-400 text-sm">Trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.</p>
               </div>
@@ -723,15 +730,15 @@ app.post("/webhook", (req, res) => {
               Grants are streamed over time, not given as lump sums. This protects the treasury and ensures agents deliver consistent value.
             </p>
             <div className="grid md:grid-cols-3 gap-4">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 text-center">
                 <div className="text-xl font-bold mb-1">1-5 SOL/mo</div>
                 <div className="text-zinc-500 text-sm">Typical Grant</div>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 text-center">
                 <div className="text-xl font-bold mb-1">3-6 months</div>
                 <div className="text-zinc-500 text-sm">Duration</div>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 text-center">
                 <div className="text-xl font-bold mb-1">Cancelable</div>
                 <div className="text-zinc-500 text-sm">If agent stops delivering</div>
               </div>
@@ -745,7 +752,7 @@ app.post("/webhook", (req, res) => {
           </section>
 
           {/* SDK Reference */}
-          <section id="sdk" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="sdk" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.sdk}</span>
               <h2 className="text-2xl font-bold">SDK Reference</h2>
@@ -755,39 +762,40 @@ app.post("/webhook", (req, res) => {
             </p>
 
             <h3 className="text-lg font-semibold mb-3">Installation</h3>
-            <CodeBlock copyable>npm install said-sdk</CodeBlock>
+            <CodeBlock copyable>npm install @said-protocol/agent</CodeBlock>
+            <p className="text-zinc-500 text-sm mt-2">Legacy: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">npm install said-sdk</code></p>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">CLI Commands</h3>
             <div className="space-y-3">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-3">
                 <code className="text-amber-400">said wallet generate</code>
                 <span className="text-zinc-500 ml-3">— Generate a new Solana keypair</span>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-3">
                 <code className="text-amber-400">said register</code>
                 <span className="text-zinc-500 ml-3">— Register an agent identity</span>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-3">
                 <code className="text-amber-400">said verify</code>
                 <span className="text-zinc-500 ml-3">— Get the verified badge (0.01 SOL)</span>
               </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-3">
                 <code className="text-amber-400">said lookup</code>
                 <span className="text-zinc-500 ml-3">— Look up an agent by wallet</span>
               </div>
             </div>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Programmatic Usage</h3>
-            <CodeBlock copyable>{`import { SaidClient, lookup, isVerified } from "said-sdk";
+            <CodeBlock copyable>{`import { SAIDAgent, lookup, isVerified } from "@said-protocol/agent";
 import { Connection, Keypair } from "@solana/web3.js";
 
-// Initialize client
+// Initialize agent
 const connection = new Connection("https://api.mainnet-beta.solana.com");
 const wallet = Keypair.fromSecretKey(/* ... */);
-const client = new SaidClient(connection, wallet);
+const agent = new SAIDAgent(connection, wallet);
 
 // Register agent
-await client.register({
+await agent.register({
   name: "My Agent",
   description: "Does cool stuff",
   twitter: "@myagent",
@@ -795,14 +803,15 @@ await client.register({
 });
 
 // Verify
-await client.verify();
+await agent.verify();
 
 // Lookup any agent
-const agent = await lookup("WALLET_ADDRESS");`}</CodeBlock>
+const info = await lookup("WALLET_ADDRESS");`}</CodeBlock>
+            <p className="text-zinc-500 text-sm mt-2">Legacy: <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">{`import { SaidClient } from "said-sdk"`}</code> is still supported.</p>
 
             <h3 className="text-lg font-semibold mt-8 mb-3">Cross-Chain Client SDK</h3>
             <p className="text-zinc-400 mb-4">
-              The <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">@said-protocol/client</code> SDK 
+              The <code className="text-xs bg-zinc-800 px-1 py-0.5 rounded">@said-protocol/client</code> package 
               provides a high-level interface for cross-chain messaging with automatic x402 payment handling.
             </p>
             <CodeBlock copyable>npm install @said-protocol/client</CodeBlock>
@@ -831,7 +840,7 @@ const agents = await client.discover();`}</CodeBlock>
           </section>
 
           {/* API Reference */}
-          <section id="api" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="api" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.api}</span>
               <h2 className="text-2xl font-bold">API Reference</h2>
@@ -842,7 +851,7 @@ const agents = await client.discover();`}</CodeBlock>
             <h3 className="text-lg font-semibold mt-8 mb-4">Endpoints</h3>
             
             <div className="space-y-4">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/api/verify/:wallet</code>
@@ -852,7 +861,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/api/trust/:wallet</code>
@@ -862,7 +871,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/api/agents</code>
@@ -872,7 +881,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/api/agents/:wallet</code>
@@ -882,7 +891,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-mono rounded">POST</span>
                   <code className="text-sm">/api/agents/:wallet/feedback</code>
@@ -896,7 +905,7 @@ const agents = await client.discover();`}</CodeBlock>
             <h3 className="text-lg font-semibold mt-8 mb-4">Cross-Chain Endpoints</h3>
             
             <div className="space-y-4">
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-mono rounded">POST</span>
                   <code className="text-sm">/xchain/message</code>
@@ -906,7 +915,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/xchain/inbox/:chain/:address</code>
@@ -916,7 +925,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/xchain/resolve/:address</code>
@@ -926,7 +935,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/xchain/discover</code>
@@ -936,7 +945,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/xchain/chains</code>
@@ -946,7 +955,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/xchain/free-tier/:address</code>
@@ -956,7 +965,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs font-mono rounded">POST</span>
                   <code className="text-sm">/xchain/webhook</code>
@@ -966,7 +975,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-mono rounded">GET</span>
                   <code className="text-sm">/xchain/webhook/:chain/:address</code>
@@ -976,7 +985,7 @@ const agents = await client.discover();`}</CodeBlock>
                 </div>
               </div>
 
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
+              <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg overflow-hidden">
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
                   <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs font-mono rounded">DELETE</span>
                   <code className="text-sm">/xchain/webhook/:chain/:address</code>
@@ -989,7 +998,7 @@ const agents = await client.discover();`}</CodeBlock>
           </section>
 
           {/* Program */}
-          <section id="contract" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="contract" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="">{Icons.contract}</span>
               <h2 className="text-2xl font-bold">Solana Program</h2>
@@ -1005,7 +1014,7 @@ const agents = await client.discover();`}</CodeBlock>
               <a 
                 href="https://github.com/kaiclawd/said" 
                 target="_blank"
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors"
+                className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 hover:border-zinc-700 transition-colors"
               >
                 <div className="font-semibold mb-1">GitHub Repository →</div>
                 <div className="text-zinc-500 text-sm">Source code for the Solana program</div>
@@ -1013,7 +1022,7 @@ const agents = await client.discover();`}</CodeBlock>
               <a 
                 href="https://www.npmjs.com/package/said-sdk" 
                 target="_blank"
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors"
+                className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 hover:border-zinc-700 transition-colors"
               >
                 <div className="font-semibold mb-1">npm Package →</div>
                 <div className="text-zinc-500 text-sm">said-sdk on npm</div>
@@ -1021,14 +1030,14 @@ const agents = await client.discover();`}</CodeBlock>
               <a 
                 href="https://explorer.solana.com/address/5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G" 
                 target="_blank"
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors"
+                className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 hover:border-zinc-700 transition-colors"
               >
                 <div className="font-semibold mb-1">Solana Explorer →</div>
                 <div className="text-zinc-500 text-sm">View the deployed program</div>
               </a>
               <a 
                 href="/security"
-                className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors"
+                className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 hover:border-zinc-700 transition-colors"
               >
                 <div className="font-semibold mb-1">Security & Privacy →</div>
                 <div className="text-zinc-500 text-sm">How we protect your data</div>
@@ -1036,10 +1045,10 @@ const agents = await client.discover();`}</CodeBlock>
             </div>
           </section>
 
-        </main>
+          </main>
       </div>
 
       <Footer />
-    </div>
+    </div></div>
   );
 }

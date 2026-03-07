@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AsciiBackground from '@/components/AsciiBackground';
 
 interface Agent {
   wallet: string;
@@ -87,12 +88,14 @@ function AgentsContent() {
   const unverifiedAgents = sortedAgents.filter(a => !a.isVerified);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      <AsciiBackground agentThemed />
+      <div className="relative z-10">
       <Navbar />
       
-      <main className="flex-1 max-w-6xl mx-auto px-8 py-12 w-full">
+      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Agent Directory</h1>
+          <h1 className="text-4xl font-bold mb-4 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">Agent Directory</h1>
           <p className="text-xl text-zinc-400 mb-8">Discover verified AI agents on Solana</p>
           
           {/* Search */}
@@ -107,7 +110,7 @@ function AgentsContent() {
                 placeholder="Search agents by name, description, or wallet..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600 transition"
+                className="w-full pl-12 pr-4 py-3 bg-zinc-900/50 border border-zinc-700/50 rounded-xl focus:outline-none focus:border-zinc-500 transition backdrop-blur-sm text-white placeholder-zinc-500"
               />
             </div>
           </div>
@@ -116,7 +119,7 @@ function AgentsContent() {
           <div className="flex gap-2 justify-center">
             <button
               onClick={() => setSortBy('reputation')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'reputation' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'reputation' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white border border-zinc-700/50 backdrop-blur-sm'}`}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
@@ -125,7 +128,7 @@ function AgentsContent() {
             </button>
             <button
               onClick={() => setSortBy('newest')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'newest' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'newest' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white border border-zinc-700/50 backdrop-blur-sm'}`}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
@@ -134,7 +137,7 @@ function AgentsContent() {
             </button>
             <button
               onClick={() => setSortBy('active')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'active' ? 'bg-white text-black' : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'active' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white border border-zinc-700/50 backdrop-blur-sm'}`}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
@@ -173,7 +176,7 @@ function AgentsContent() {
                   </svg>
                   Verified Agents
                 </h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {verifiedAgents.map(agent => (
                     <AgentCard key={agent.wallet} agent={agent} />
                   ))}
@@ -185,7 +188,7 @@ function AgentsContent() {
             {unverifiedAgents.length > 0 && (
               <section>
                 <h2 className="text-xl font-semibold mb-4">All Agents</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {unverifiedAgents.map(agent => (
                     <AgentCard key={agent.wallet} agent={agent} />
                   ))}
@@ -207,6 +210,7 @@ function AgentsContent() {
       </main>
 
       <Footer />
+      </div>
     </div>
   );
 }
@@ -214,7 +218,9 @@ function AgentsContent() {
 export default function AgentsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col relative">
+        <AsciiBackground agentThemed />
+        <div className="relative z-10">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -223,6 +229,7 @@ export default function AgentsPage() {
           </div>
         </main>
         <Footer />
+        </div>
       </div>
     }>
       <AgentsContent />
@@ -230,41 +237,94 @@ export default function AgentsPage() {
   );
 }
 
+function timeAgoShort(dateStr: string): string {
+  if (!dateStr) return '';
+  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
+  return `${Math.floor(diff / 2592000)}mo ago`;
+}
+
 function AgentCard({ agent }: { agent: Agent }) {
   return (
     <Link 
       href={`/agents/${agent.wallet}`}
-      className="block p-5 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition"
+      className="group block relative overflow-hidden rounded-xl bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 hover:border-zinc-600/80 transition-all duration-300 hover:shadow-lg hover:shadow-white/[0.02] hover:-translate-y-0.5"
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white font-bold">
-          {agent.name?.[0]?.toUpperCase() || '?'}
+      {/* Top highlight line */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      
+      <div className="p-5">
+        {/* Header: Avatar + Name + Verified */}
+        <div className="flex items-start gap-3 mb-3">
+          <img 
+            src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
+            alt={agent.name || 'Agent'}
+            className="w-10 h-10 rounded-lg flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-sm truncate">{agent.name || 'Unnamed Agent'}</h3>
+              {agent.isVerified && (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 text-green-400">
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+              )}
+            </div>
+            <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}…{agent.wallet.slice(-4)}</p>
+          </div>
         </div>
-        {agent.isVerified && (
-          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full flex items-center gap-1">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M20 6L9 17l-5-5"/>
-            </svg>
-            Verified
-          </span>
-        )}
-      </div>
-      <h3 className="font-semibold mb-1">{agent.name || 'Unnamed Agent'}</h3>
-      <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{agent.description || 'No description'}</p>
-      <div className="flex items-center justify-between">
-        <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}...{agent.wallet.slice(-4)}</p>
-        {agent.registrationSource === 'spawnr' && (
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-full" title="Launched on Spawnr.io">
-            <img src="/platforms/spawnr.png" alt="Spawnr" className="w-4 h-4 rounded-full" />
-            <span className="text-zinc-400 text-xs">Spawnr</span>
+
+        {/* Description */}
+        <p className="text-zinc-400 text-xs leading-relaxed mb-4 line-clamp-2">{agent.description || 'No description provided.'}</p>
+
+        {/* Skills / Tags */}
+        {agent.skills && agent.skills.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {agent.skills.slice(0, 3).map(skill => (
+              <span key={skill} className="px-2 py-0.5 text-[10px] font-medium text-zinc-400 bg-white/5 border border-white/10 rounded-full">
+                {skill}
+              </span>
+            ))}
+            {agent.skills.length > 3 && (
+              <span className="px-2 py-0.5 text-[10px] text-zinc-500">+{agent.skills.length - 3}</span>
+            )}
           </div>
         )}
-        {(agent.registrationSource === 'clawpump' || agent.description?.includes('clawpump.tech')) && (
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-zinc-800 rounded-full" title="Launched on Claw Pump">
-            <img src="/clawpump-logo.png" alt="Claw Pump" className="w-4 h-4 rounded-full" />
-            <span className="text-zinc-400 text-xs">Claw Pump</span>
+
+        {/* Footer: Platform + Meta */}
+        <div className="flex items-center justify-between pt-3 border-t border-white/5">
+          <div className="flex items-center gap-2">
+            {agent.registrationSource === 'spawnr' && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Spawnr.io">
+                <img src="/platforms/spawnr.png" alt="Spawnr" className="w-3.5 h-3.5 rounded-full" />
+                <span className="text-zinc-400 text-[10px] font-medium">Spawnr</span>
+              </div>
+            )}
+            {(agent.registrationSource === 'clawpump' || agent.description?.includes('clawpump.tech')) && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Claw Pump">
+                <img src="/clawpump-logo.png" alt="Claw Pump" className="w-3.5 h-3.5 rounded-full" />
+                <span className="text-zinc-400 text-[10px] font-medium">Claw Pump</span>
+              </div>
+            )}
           </div>
-        )}
+          <div className="flex items-center gap-3 text-[10px] text-zinc-500">
+            {agent.reputationScore != null && agent.reputationScore > 0 && (
+              <div className="flex items-center gap-1" title="Reputation Score">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                {agent.reputationScore}
+              </div>
+            )}
+            {agent.registeredAt && (
+              <span title={new Date(agent.registeredAt).toLocaleDateString()}>
+                {timeAgoShort(agent.registeredAt)}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
     </Link>
   );

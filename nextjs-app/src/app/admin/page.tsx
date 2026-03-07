@@ -119,7 +119,7 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-10">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Grant Applications</h1>

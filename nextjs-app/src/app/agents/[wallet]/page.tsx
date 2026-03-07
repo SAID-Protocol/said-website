@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import AsciiBackground from '@/components/AsciiBackground';
 import ReputationAnalytics from '@/components/ReputationAnalytics';
 
 interface Agent {
@@ -55,7 +56,7 @@ export default function AgentPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col relative"><AsciiBackground agentThemed /><div className="relative z-10">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -64,13 +65,13 @@ export default function AgentPage() {
           </div>
         </main>
         <Footer />
-      </div>
+      </div></div>
     );
   }
 
   if (error || !agent) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col relative"><AsciiBackground agentThemed /><div className="relative z-10">
         <Navbar />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -87,20 +88,22 @@ export default function AgentPage() {
           </div>
         </main>
         <Footer />
-      </div>
+      </div></div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col relative"><AsciiBackground agentThemed /><div className="relative z-10">
       <Navbar />
       
       <main className="flex-1 max-w-4xl mx-auto px-8 py-12 w-full">
         {/* Header */}
         <div className="flex items-start gap-6 mb-8">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-3xl font-bold flex-shrink-0">
-            {agent.name?.[0]?.toUpperCase() || '?'}
-          </div>
+          <img 
+            src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
+            alt={agent.name || 'Agent'}
+            className="w-20 h-20 rounded-2xl flex-shrink-0"
+          />
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h1 className="text-3xl font-bold">{agent.name || 'Unnamed Agent'}</h1>
@@ -149,19 +152,19 @@ export default function AgentPage() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl text-center">
             <div className="text-2xl font-bold">{agent.reputationScore?.toFixed(1) || '0'}</div>
             <div className="text-zinc-400 text-sm">Reputation</div>
           </div>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl text-center">
             <div className="text-2xl font-bold">{agent.feedbackCount || 0}</div>
             <div className="text-zinc-400 text-sm">Feedback</div>
           </div>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl text-center">
             <div className="text-2xl font-bold">{agent.skills?.length || 0}</div>
             <div className="text-zinc-400 text-sm">Skills</div>
           </div>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl text-center">
+          <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl text-center">
             <div className="text-2xl font-bold">
               {agent.registeredAt ? new Date(agent.registeredAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : '-'}
             </div>
@@ -195,7 +198,7 @@ export default function AgentPage() {
         {/* Wallet Info */}
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-3">On-Chain Identity</h2>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-3">
+          <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-zinc-400 text-sm">Wallet</span>
               <code className="text-sm bg-zinc-800 px-2 py-1 rounded font-mono">{agent.wallet}</code>
@@ -219,28 +222,46 @@ export default function AgentPage() {
           </div>
         </section>
 
-        {/* Badge */}
-        <section>
-          <h2 className="text-lg font-semibold mb-3">Embed Badge</h2>
-          <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <div className="flex items-center gap-4 mb-4">
-              <img 
-                src={`https://api.saidprotocol.com/api/badge/${agent.wallet}.svg`} 
-                alt="SAID Badge"
-                className="h-8"
-              />
-            </div>
-            <div className="text-sm">
-              <p className="text-zinc-400 mb-2">Markdown:</p>
-              <code className="block bg-zinc-800 p-2 rounded text-xs overflow-x-auto">
-                {`[![SAID ${agent.isVerified ? 'Verified' : 'Registered'}](https://api.saidprotocol.com/api/badge/${agent.wallet}.svg)](https://www.saidprotocol.com/agent/${agent.wallet})`}
-              </code>
+        {/* SAID Passport */}
+        {agent.isVerified && (
+          <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl mb-6">
+            <h2 className="text-xl font-bold mb-4">SAID Passport</h2>
+            <div className="flex flex-col md:flex-row gap-6 items-center">
+              <div className="flex-shrink-0">
+                <img 
+                  src="/passport-logo.png" 
+                  alt="SAID Passport" 
+                  className="w-32 h-32 rounded-lg"
+                />
+              </div>
+              <div className="flex-1">
+                <p className="text-zinc-400 mb-4">
+                  {(agent as any).passportMint 
+                    ? 'Soulbound passport NFT — permanent, non-transferable on-chain identity proof.' 
+                    : 'Mint a soulbound passport NFT — permanent, non-transferable on-chain identity proof.'}
+                </p>
+                <div className="flex items-center gap-4">
+                  {!(agent as any).passportMint && (
+                    <span className="text-sm font-semibold">0.05 SOL</span>
+                  )}
+                  <Link
+                    href={(agent as any).passportMint 
+                      ? `https://solscan.io/token/${(agent as any).passportMint}` 
+                      : `/mint-passport?wallet=${agent.wallet}`}
+                    target={(agent as any).passportMint ? "_blank" : undefined}
+                    rel={(agent as any).passportMint ? "noopener noreferrer" : undefined}
+                    className="px-6 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition text-sm"
+                  >
+                    {(agent as any).passportMint ? 'View Passport →' : 'Mint Passport →'}
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
-        </section>
+        )}
       </main>
 
       <Footer />
-    </div>
+    </div></div>
   );
 }
