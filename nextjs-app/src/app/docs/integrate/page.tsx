@@ -9,7 +9,7 @@ export default function IntegratePage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       
-      <main className="flex-1 max-w-4xl mx-auto px-8 py-12 w-full">
+      <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
         <div className="mb-8">
           <Link href="/docs" className="text-zinc-400 hover:text-white transition flex items-center gap-2 mb-4">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
