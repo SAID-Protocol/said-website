@@ -1,7 +1,9 @@
 'use client';
 
+import { ReactNode } from 'react';
+
 interface TemplateCardProps {
-  icon: string;
+  icon: ReactNode;
   name: string;
   description: string;
   selected: boolean;
@@ -20,7 +22,7 @@ export default function TemplateCard({ icon, name, description, selected, onClic
     >
       <div className="flex items-start gap-4">
         <div className={`
-          w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 text-2xl transition
+          w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 transition
           ${selected ? 'bg-white/10 border-white/20' : 'bg-zinc-800 border-zinc-700'}
           border
         `}>

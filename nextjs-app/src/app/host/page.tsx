@@ -11,62 +11,84 @@ import PersonalitySlider from '@/components/host/PersonalitySlider';
 import SkillToggleCard from '@/components/host/SkillToggleCard';
 import AutonomyCard from '@/components/host/AutonomyCard';
 import PlanCard from '@/components/host/PlanCard';
+import {
+  SearchIcon,
+  PencilIcon,
+  MessageCircleIcon,
+  BarChartIcon,
+  CogIcon,
+  TrendingUpIcon,
+  ShieldIcon,
+  TargetIcon,
+  BookIcon,
+  ShareIcon,
+  PieChartIcon,
+  LinkIcon,
+  EyeIcon,
+  EditIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  UsersIcon,
+  ZapIcon,
+  CpuIcon,
+  RocketIcon,
+} from '@/components/host/icons';
 
 type Step = 1 | 2 | 3 | 4;
 type AutonomyLevel = 'observer' | 'assistant' | 'autonomous';
 
 const TEMPLATES = [
-  { id: 'research', icon: '🔍', name: 'Research Assistant', description: 'Finds information, summarizes content, answers questions' },
-  { id: 'content', icon: '📝', name: 'Content Creator', description: 'Drafts posts, writes copy, manages social presence' },
-  { id: 'support', icon: '💬', name: 'Customer Support', description: 'Answers questions, handles requests, routes issues' },
-  { id: 'analyst', icon: '📊', name: 'On-Chain Analyst', description: 'Tracks metrics, sends alerts, monitors on-chain data' },
-  { id: 'automator', icon: '🤖', name: 'Task Automator', description: 'Runs recurring workflows, schedules actions' },
-  { id: 'defi', icon: '💹', name: 'DeFi Monitor', description: 'Tracks LP positions, yield, wallet balances, token prices' },
-  { id: 'guardian', icon: '🛡️', name: 'Wallet Guardian', description: 'Monitors for suspicious transactions, alerts on anomalies' },
-  { id: 'custom', icon: '🎯', name: 'Custom', description: 'Start from scratch — full control' },
+  { id: 'research', icon: <SearchIcon />, name: 'Research Assistant', description: 'Finds information, summarizes content, answers questions' },
+  { id: 'content', icon: <PencilIcon />, name: 'Content Creator', description: 'Drafts posts, writes copy, manages social presence' },
+  { id: 'support', icon: <MessageCircleIcon />, name: 'Customer Support', description: 'Answers questions, handles requests, routes issues' },
+  { id: 'analyst', icon: <BarChartIcon />, name: 'On-Chain Analyst', description: 'Tracks metrics, sends alerts, monitors on-chain data' },
+  { id: 'automator', icon: <CogIcon />, name: 'Task Automator', description: 'Runs recurring workflows, schedules actions' },
+  { id: 'defi', icon: <TrendingUpIcon />, name: 'DeFi Monitor', description: 'Tracks LP positions, yield, wallet balances, token prices' },
+  { id: 'guardian', icon: <ShieldIcon />, name: 'Wallet Guardian', description: 'Monitors for suspicious transactions, alerts on anomalies' },
+  { id: 'custom', icon: <TargetIcon />, name: 'Custom', description: 'Start from scratch — full control' },
 ];
 
 const SKILLS = {
   knowledge: [
-    { id: 'web-search', icon: '🔍', name: 'Web search', description: 'Find information online', risk: 'green' as const },
-    { id: 'doc-analysis', icon: '📄', name: 'Document analysis', description: 'Read and analyze files', risk: 'green' as const },
-    { id: 'news', icon: '📰', name: 'News monitoring', description: 'Track news and updates', risk: 'green' as const },
+    { id: 'web-search', icon: <SearchIcon size={20} />, name: 'Web search', description: 'Find information online', risk: 'green' as const },
+    { id: 'doc-analysis', icon: <BookIcon size={20} />, name: 'Document analysis', description: 'Read and analyze files', risk: 'green' as const },
+    { id: 'news', icon: <BookIcon size={20} />, name: 'News monitoring', description: 'Track news and updates', risk: 'green' as const },
   ],
   communication: [
-    { id: 'messaging', icon: '💬', name: 'Messaging', description: 'Send messages to users', risk: 'green' as const },
-    { id: 'email', icon: '📧', name: 'Email drafts', description: 'Compose email messages', risk: 'green' as const },
-    { id: 'telegram', icon: '✈️', name: 'Telegram alerts', description: 'Send Telegram notifications', risk: 'green' as const },
+    { id: 'messaging', icon: <MessageCircleIcon size={20} />, name: 'Messaging', description: 'Send messages to users', risk: 'green' as const },
+    { id: 'email', icon: <MessageCircleIcon size={20} />, name: 'Email drafts', description: 'Compose email messages', risk: 'green' as const },
+    { id: 'telegram', icon: <MessageCircleIcon size={20} />, name: 'Telegram alerts', description: 'Send Telegram notifications', risk: 'green' as const },
   ],
   social: [
-    { id: 'twitter-post', icon: '🐦', name: 'X/Twitter posting', description: 'Publish tweets', risk: 'yellow' as const },
-    { id: 'engagement', icon: '👥', name: 'Engagement', description: 'Like, reply, retweet', risk: 'yellow' as const },
-    { id: 'scheduling', icon: '📅', name: 'Content scheduling', description: 'Schedule posts', risk: 'yellow' as const },
+    { id: 'twitter-post', icon: <ShareIcon size={20} />, name: 'X/Twitter posting', description: 'Publish tweets', risk: 'yellow' as const },
+    { id: 'engagement', icon: <UsersIcon size={20} />, name: 'Engagement', description: 'Like, reply, retweet', risk: 'yellow' as const },
+    { id: 'scheduling', icon: <ShareIcon size={20} />, name: 'Content scheduling', description: 'Schedule posts', risk: 'yellow' as const },
   ],
   analysis: [
-    { id: 'data-tracking', icon: '📊', name: 'Data tracking', description: 'Monitor metrics over time', risk: 'green' as const },
-    { id: 'reports', icon: '📈', name: 'Report generation', description: 'Create data reports', risk: 'green' as const },
-    { id: 'trends', icon: '📉', name: 'Trend detection', description: 'Identify patterns', risk: 'green' as const },
+    { id: 'data-tracking', icon: <BarChartIcon size={20} />, name: 'Data tracking', description: 'Monitor metrics over time', risk: 'green' as const },
+    { id: 'reports', icon: <TrendingUpIcon size={20} />, name: 'Report generation', description: 'Create data reports', risk: 'green' as const },
+    { id: 'trends', icon: <PieChartIcon size={20} />, name: 'Trend detection', description: 'Identify patterns', risk: 'green' as const },
   ],
   integrations: [
-    { id: 'webhooks', icon: '🔗', name: 'Webhooks', description: 'Send webhook requests', risk: 'yellow' as const },
-    { id: 'api', icon: '🌐', name: 'API calls', description: 'External API integration', risk: 'yellow' as const },
-    { id: 'custom', icon: '⚙️', name: 'Custom connections', description: 'Build custom integrations', risk: 'yellow' as const },
+    { id: 'webhooks', icon: <LinkIcon size={20} />, name: 'Webhooks', description: 'Send webhook requests', risk: 'yellow' as const },
+    { id: 'api', icon: <LinkIcon size={20} />, name: 'API calls', description: 'External API integration', risk: 'yellow' as const },
+    { id: 'custom', icon: <CogIcon size={20} />, name: 'Custom connections', description: 'Build custom integrations', risk: 'yellow' as const },
   ],
   'onchain-read': [
-    { id: 'wallet-monitor', icon: '👁️', name: 'Wallet monitoring', description: 'Watch wallet activity', risk: 'green' as const },
-    { id: 'tx-tracking', icon: '🔄', name: 'Transaction tracking', description: 'Monitor transactions', risk: 'green' as const },
-    { id: 'token-data', icon: '🪙', name: 'Token data', description: 'Fetch token prices & info', risk: 'green' as const },
+    { id: 'wallet-monitor', icon: <EyeIcon size={20} />, name: 'Wallet monitoring', description: 'Watch wallet activity', risk: 'green' as const },
+    { id: 'tx-tracking', icon: <EyeIcon size={20} />, name: 'Transaction tracking', description: 'Monitor transactions', risk: 'green' as const },
+    { id: 'token-data', icon: <EyeIcon size={20} />, name: 'Token data', description: 'Fetch token prices & info', risk: 'green' as const },
   ],
   'onchain-write': [
-    { id: 'swaps', icon: '🔄', name: 'Token swaps', description: 'Execute DEX trades', risk: 'red' as const },
-    { id: 'transfers', icon: '💸', name: 'Transfers', description: 'Send tokens', risk: 'red' as const },
-    { id: 'lp', icon: '🌊', name: 'LP interactions', description: 'Add/remove liquidity', risk: 'red' as const },
+    { id: 'swaps', icon: <EditIcon size={20} />, name: 'Token swaps', description: 'Execute DEX trades', risk: 'red' as const },
+    { id: 'transfers', icon: <EditIcon size={20} />, name: 'Transfers', description: 'Send tokens', risk: 'red' as const },
+    { id: 'lp', icon: <EditIcon size={20} />, name: 'LP interactions', description: 'Add/remove liquidity', risk: 'red' as const },
   ],
   'payments-receive': [
-    { id: 'x402-receive', icon: '💰', name: 'x402 micropayments receive', description: 'Accept USDC payments', risk: 'green' as const },
+    { id: 'x402-receive', icon: <ArrowDownIcon size={20} />, name: 'x402 micropayments receive', description: 'Accept USDC payments', risk: 'green' as const },
   ],
   'payments-send': [
-    { id: 'x402-send', icon: '💳', name: 'x402 micropayments send', description: 'Send USDC payments', risk: 'red' as const },
+    { id: 'x402-send', icon: <ArrowUpIcon size={20} />, name: 'x402 micropayments send', description: 'Send USDC payments', risk: 'red' as const },
   ],
 };
 
@@ -316,16 +338,16 @@ export default function HostAgentPage() {
                 <div className="space-y-6">
                   {Object.entries(SKILLS).map(([category, skills]) => (
                     <div key={category}>
-                      <h4 className="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wide">
-                        {category === 'knowledge' && '📚 Knowledge'}
-                        {category === 'communication' && '💬 Communication'}
-                        {category === 'social' && '📱 Social Media'}
-                        {category === 'analysis' && '📊 Analysis'}
-                        {category === 'integrations' && '🔗 Integrations'}
-                        {category === 'onchain-read' && '⛓️ On-chain Read'}
-                        {category === 'onchain-write' && '⛓️ On-chain Write'}
-                        {category === 'payments-receive' && '💰 Payments Receive'}
-                        {category === 'payments-send' && '💰 Payments Send'}
+                      <h4 className="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wide flex items-center gap-2">
+                        {category === 'knowledge' && <><BookIcon size={16} /> Knowledge</>}
+                        {category === 'communication' && <><MessageCircleIcon size={16} /> Communication</>}
+                        {category === 'social' && <><ShareIcon size={16} /> Social Media</>}
+                        {category === 'analysis' && <><PieChartIcon size={16} /> Analysis</>}
+                        {category === 'integrations' && <><LinkIcon size={16} /> Integrations</>}
+                        {category === 'onchain-read' && <><EyeIcon size={16} /> On-chain Read</>}
+                        {category === 'onchain-write' && <><EditIcon size={16} /> On-chain Write</>}
+                        {category === 'payments-receive' && <><ArrowDownIcon size={16} /> Payments Receive</>}
+                        {category === 'payments-send' && <><ArrowUpIcon size={16} /> Payments Send</>}
                       </h4>
                       <div className="grid sm:grid-cols-2 gap-3">
                         {skills.map(skill => (
@@ -350,7 +372,7 @@ export default function HostAgentPage() {
                 <h3 className="text-lg font-semibold mb-4">Autonomy Level</h3>
                 <div className="space-y-3">
                   <AutonomyCard
-                    icon="👀"
+                    icon={<EyeIcon />}
                     title="Observer"
                     description="Monitors and responds when asked. Never takes action on its own."
                     value="observer"
@@ -358,7 +380,7 @@ export default function HostAgentPage() {
                     onSelect={() => setAutonomyLevel('observer')}
                   />
                   <AutonomyCard
-                    icon="🤝"
+                    icon={<UsersIcon />}
                     title="Assistant"
                     description="Researches, drafts, and suggests. Asks before external actions."
                     value="assistant"
@@ -366,7 +388,7 @@ export default function HostAgentPage() {
                     onSelect={() => setAutonomyLevel('assistant')}
                   />
                   <AutonomyCard
-                    icon="⚡"
+                    icon={<ZapIcon />}
                     title="Autonomous"
                     description="Acts independently within budget limits."
                     value="autonomous"
@@ -428,7 +450,7 @@ export default function HostAgentPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold flex items-center gap-2">
-                          ⚡ Fast
+                          <ZapIcon size={18} /> Fast
                           <span className="text-xs text-zinc-500">1x credits</span>
                         </h4>
                         <p className="text-sm text-zinc-400">Quick responses, lower cost</p>
@@ -452,7 +474,7 @@ export default function HostAgentPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold flex items-center gap-2">
-                          🧠 Balanced
+                          <CpuIcon size={18} /> Balanced
                           <span className="text-xs text-zinc-500">2x credits</span>
                         </h4>
                         <p className="text-sm text-zinc-400">Good reasoning, moderate cost</p>
@@ -476,7 +498,7 @@ export default function HostAgentPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-semibold flex items-center gap-2">
-                          🚀 Premium
+                          <RocketIcon size={18} /> Premium
                           <span className="text-xs text-zinc-500">5x credits</span>
                         </h4>
                         <p className="text-sm text-zinc-400">Best intelligence, highest cost</p>
@@ -593,7 +615,7 @@ export default function HostAgentPage() {
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 </div>
-                <h2 className="text-3xl font-bold mb-2">Your Agent is Live! 🎉</h2>
+                <h2 className="text-3xl font-bold mb-2">Your Agent is Live!</h2>
                 <p className="text-zinc-400">
                   {agentName} is now running on SAID infrastructure.
                 </p>
@@ -601,8 +623,8 @@ export default function HostAgentPage() {
               
               <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl mb-6">
                 <div className="flex items-start gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center text-2xl flex-shrink-0">
-                    {TEMPLATES.find(t => t.id === selectedTemplate)?.icon || '🤖'}
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center flex-shrink-0">
+                    {TEMPLATES.find(t => t.id === selectedTemplate)?.icon || <CogIcon size={32} />}
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-semibold mb-1">{agentName}</h3>
@@ -624,7 +646,7 @@ export default function HostAgentPage() {
                 <div className="space-y-3 mb-4">
                   <div className="p-3 bg-zinc-900/50 rounded-lg">
                     <p className="text-sm text-zinc-300">
-                      👋 Hi! I'm {agentName}. {agentTagline}
+                      Hi! I'm {agentName}. {agentTagline}
                     </p>
                   </div>
                 </div>

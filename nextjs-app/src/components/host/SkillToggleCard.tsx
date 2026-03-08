@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
+import { CircleIcon } from './icons';
 
 type RiskLevel = 'green' | 'yellow' | 'red';
 
 interface SkillToggleCardProps {
-  icon: string;
+  icon: ReactNode;
   name: string;
   description: string;
   risk: RiskLevel;
@@ -17,15 +18,9 @@ export default function SkillToggleCard({ icon, name, description, risk, enabled
   const [showConfirm, setShowConfirm] = useState(false);
 
   const riskColors = {
-    green: 'text-green-400 border-green-500/30',
-    yellow: 'text-yellow-400 border-yellow-500/30',
-    red: 'text-red-400 border-red-500/30'
-  };
-
-  const riskBadge = {
-    green: '🟢',
-    yellow: '🟡',
-    red: '🔴'
+    green: '#4ade80',
+    yellow: '#facc15',
+    red: '#f87171'
   };
 
   const handleToggle = () => {
@@ -48,11 +43,11 @@ export default function SkillToggleCard({ icon, name, description, risk, enabled
         ${enabled ? 'border-white/20 bg-zinc-800/40' : 'border-white/10'}
       `}>
         <div className="flex items-start gap-3">
-          <div className="text-xl flex-shrink-0 mt-0.5">{icon}</div>
+          <div className="flex-shrink-0 mt-0.5">{icon}</div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <h4 className="font-medium text-sm">{name}</h4>
-              <span className="text-xs">{riskBadge[risk]}</span>
+              <CircleIcon size={12} color={riskColors[risk]} />
             </div>
             <p className="text-zinc-400 text-xs">{description}</p>
           </div>

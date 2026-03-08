@@ -1,7 +1,9 @@
 'use client';
 
+import { ReactNode } from 'react';
+
 interface AutonomyCardProps {
-  icon: string;
+  icon: ReactNode;
   title: string;
   description: string;
   value: string;
@@ -21,7 +23,7 @@ export default function AutonomyCard({ icon, title, description, value, selected
     >
       <div className="flex items-start gap-3">
         <div className={`
-          w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-xl transition
+          w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 transition
           ${selected ? 'bg-white/10 border-white/20' : 'bg-zinc-800 border-zinc-700'}
           border
         `}>
