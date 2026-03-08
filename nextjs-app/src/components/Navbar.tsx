@@ -111,6 +111,14 @@ export default function Navbar() {
             {/* Divider */}
             <div className="w-px h-5 bg-zinc-700/50 shrink-0" />
 
+            {/* Host Agent CTA */}
+            <Link href="/host" className="px-4 py-1.5 text-sm font-medium text-black bg-white rounded-full hover:bg-zinc-200 transition shrink-0 whitespace-nowrap">
+              Host an Agent
+            </Link>
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-zinc-700/50 shrink-0" />
+
             {/* Social Icons */}
             <div className="flex items-center gap-1 shrink-0">
               <a
@@ -243,6 +251,16 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 $SAID
+              </Link>
+              
+              <div className="h-px bg-white/10 my-2"></div>
+              
+              <Link
+                href="/host"
+                className="px-4 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Host an Agent
               </Link>
               
               <div className="h-px bg-white/10 my-2"></div>
