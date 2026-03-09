@@ -1,120 +1,91 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { TerminalIcon } from '@/components/host/icons';
 
 export default function TerminalPanel() {
-  const terminalRef = useRef<HTMLDivElement | null>(null);
-  const [connected] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const termInstanceRef = useRef<any>(null);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    let term: import('xterm').Terminal | null = null;
-    let resizeObserver: ResizeObserver | null = null;
-    let mounted = true;
+    if (!containerRef.current || termInstanceRef.current) return;
+    let disposed = false;
 
-    const boot = async () => {
-      const [{ Terminal }, { FitAddon }, { WebLinksAddon }] = await Promise.all([
-        import('xterm'),
-        import('@xterm/addon-fit'),
-        import('@xterm/addon-web-links'),
-      ]);
-      await import('xterm/css/xterm.css');
+    (async () => {
+      const { Terminal } = await import('xterm');
+      const { FitAddon } = await import('@xterm/addon-fit');
 
-      if (!mounted || !terminalRef.current) return;
+      if (disposed || !containerRef.current) return;
 
-      const fitAddon = new FitAddon();
-      const webLinksAddon = new WebLinksAddon();
-
-      term = new Terminal({
-        cursorBlink: true,
-        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+      const term = new Terminal({
+        theme: { background: '#000000', foreground: '#d4d4d8', cursor: '#f59e0b', selectionBackground: '#f59e0b33' },
+        fontFamily: 'JetBrains Mono, Menlo, monospace',
         fontSize: 13,
-        lineHeight: 1.35,
-        theme: {
-          background: '#000000',
-          foreground: '#4ADE80',
-          cursor: '#F59E0B',
-          selectionBackground: 'rgba(245, 158, 11, 0.25)',
-          black: '#000000',
-          green: '#4ADE80',
-          brightGreen: '#86EFAC',
-          white: '#E4E4E7',
-          brightWhite: '#FFFFFF',
-        },
+        cursorBlink: true,
+        convertEol: true,
       });
 
+      const fitAddon = new FitAddon();
       term.loadAddon(fitAddon);
-      term.loadAddon(webLinksAddon);
-      term.open(terminalRef.current);
+      term.open(containerRef.current);
       fitAddon.fit();
 
-      term.writeln('SAID Agent Terminal v1.0');
-      term.writeln('Agent: Demo Agent');
-      term.writeln('Status: Running');
+      term.writeln('\x1b[38;2;245;158;11m  SAID Agent Terminal v1.0\x1b[0m');
+      term.writeln('');
+      term.writeln('  Agent:  \x1b[1mDemo Agent\x1b[0m');
+      term.writeln('  Status: \x1b[32mRunning\x1b[0m');
       term.writeln('');
       term.write('$ ');
 
       let currentLine = '';
-      term.onData((data) => {
+      term.onData((data: string) => {
         if (data === '\r') {
-          term.write('\r\n');
-          if (currentLine.trim()) {
-            term.writeln(`echo: ${currentLine}`);
+          term.writeln('');
+          const cmd = currentLine.trim();
+          if (cmd === 'help') {
+            term.writeln('  \x1b[38;2;245;158;11mCommands:\x1b[0m status, logs, config, restart, help');
+          } else if (cmd === 'status') {
+            term.writeln('  \x1b[32mRunning\x1b[0m | Uptime: 3d 14h | Credits: 3.2/5.0');
+          } else if (cmd) {
+            term.writeln(`  \x1b[90mUnknown: ${cmd}\x1b[0m`);
           }
           currentLine = '';
           term.write('$ ');
-          return;
-        }
-
-        if (data === '\u007F') {
-          if (currentLine.length > 0) {
-            currentLine = currentLine.slice(0, -1);
-            term.write('\b \b');
-          }
-          return;
-        }
-
-        if (data >= ' ') {
+        } else if (data === '\x7f') {
+          if (currentLine.length > 0) { currentLine = currentLine.slice(0, -1); term.write('\b \b'); }
+        } else if (data >= ' ') {
           currentLine += data;
           term.write(data);
         }
       });
 
-      resizeObserver = new ResizeObserver(() => {
-        fitAddon.fit();
-      });
-      resizeObserver.observe(terminalRef.current);
-    };
+      const ro = new ResizeObserver(() => { try { fitAddon.fit(); } catch {} });
+      if (containerRef.current) ro.observe(containerRef.current);
 
-    boot();
+      termInstanceRef.current = { term, ro };
+      setConnected(true);
+    })();
 
     return () => {
-      mounted = false;
-      resizeObserver?.disconnect();
-      term?.dispose();
+      disposed = true;
+      if (termInstanceRef.current) {
+        termInstanceRef.current.ro.disconnect();
+        termInstanceRef.current.term.dispose();
+        termInstanceRef.current = null;
+      }
     };
   }, []);
 
   return (
-    <section className="flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5">
-        <div>
-          <div className="flex items-center gap-2 text-white">
-            <TerminalIcon size={16} className="text-amber-500" />
-            <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Terminal</h2>
-          </div>
-          <p className="mt-1 text-sm text-zinc-400">
-            Interactive runtime shell preview for your hosted agent.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 text-xs text-zinc-300">
-          <span className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-400' : 'bg-red-400'}`} />
-          {connected ? 'Connected' : 'Disconnected'}
-        </div>
+    <div className="flex h-full min-h-[400px] flex-col rounded-xl border border-white/10 bg-black overflow-hidden">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-2">
+        <span className="text-xs font-medium text-zinc-400">Terminal</span>
+        <span className="flex items-center gap-1.5 text-[10px] text-zinc-500">
+          <span className={`h-1.5 w-1.5 rounded-full ${connected ? 'bg-emerald-500' : 'bg-zinc-600'}`} />
+          {connected ? 'Connected' : 'Connecting...'}
+        </span>
       </div>
-      <div className="flex-1 bg-black p-3 sm:p-4">
-        <div ref={terminalRef} className="h-full min-h-[240px] w-full rounded-lg border border-white/10 bg-black p-2" />
-      </div>
-    </section>
+      <div ref={containerRef} className="flex-1 p-1" />
+    </div>
   );
 }
