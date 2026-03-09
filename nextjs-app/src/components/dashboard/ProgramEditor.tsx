@@ -1,11 +1,11 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { Agent, api } from '@/lib/api';
 import { EditIcon, ShieldIcon, ArrowDownIcon } from '@/components/host/icons';
 
 interface ProgramEditorProps {
-  initialContent?: string;
-  onSave?: (content: string) => Promise<void>;
+  agent: Agent;
 }
 
 const DEFAULT_TEMPLATE = `# Agent Instructions
@@ -30,12 +30,11 @@ You are a helpful SAID agent built to support users with focused, reliable assis
 - Prefer safe, reversible actions when possible
 `;
 
-export default function ProgramEditor({
-  initialContent = DEFAULT_TEMPLATE,
-  onSave,
-}: ProgramEditorProps) {
+export default function ProgramEditor({ agent }: ProgramEditorProps) {
+  const initialContent = agent.programMd || DEFAULT_TEMPLATE;
   const [content, setContent] = useState(initialContent);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showResetModal, setShowResetModal] = useState(false);
   const [hasSaved, setHasSaved] = useState(false);
 
@@ -53,15 +52,16 @@ export default function ProgramEditor({
 
   const handleSave = async () => {
     setIsSaving(true);
+    setSaveError(null);
 
     try {
-      if (onSave) {
-        await onSave(content);
-      } else {
-        await new Promise((resolve) => setTimeout(resolve, 900));
-      }
-
+      await api.updateAgent(agent.id, { program_md: content });
       setHasSaved(true);
+      
+      // Reset the saved state after a few seconds
+      setTimeout(() => setHasSaved(false), 3000);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Failed to save');
     } finally {
       setIsSaving(false);
     }
@@ -117,7 +117,7 @@ export default function ProgramEditor({
               <button
                 type="button"
                 onClick={handleSave}
-                disabled={isSaving}
+                disabled={isSaving || !isDirty}
                 className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-black transition hover:bg-zinc-200 disabled:cursor-not-allowed disabled:bg-zinc-600 disabled:text-zinc-300"
               >
                 {isSaving ? 'Saving...' : 'Save'}
@@ -125,6 +125,12 @@ export default function ProgramEditor({
             </div>
           </div>
         </div>
+
+        {saveError && (
+          <div className="border-b border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+            Error: {saveError}
+          </div>
+        )}
 
         <div className="px-4 pt-4 sm:px-5">
           <label
@@ -153,8 +159,8 @@ export default function ProgramEditor({
           <div className="flex flex-wrap items-center gap-3">
             <span>{counts.characters.toLocaleString()} characters</span>
             <span>{counts.words.toLocaleString()} words</span>
-            <span className={isDirty ? 'text-amber-400' : 'text-emerald-400'}>
-              {isDirty ? 'Unsaved changes' : hasSaved ? 'Saved just now' : 'No changes yet'}
+            <span className={isDirty ? 'text-amber-400' : hasSaved ? 'text-emerald-400' : 'text-zinc-500'}>
+              {isDirty ? 'Unsaved changes' : hasSaved ? 'Saved successfully' : 'No changes'}
             </span>
           </div>
           <p className="text-zinc-500">Every save creates a new version automatically.</p>

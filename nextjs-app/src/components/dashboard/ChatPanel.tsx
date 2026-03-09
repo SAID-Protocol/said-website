@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { api } from '@/lib/api';
 import { MessageCircleIcon } from '@/components/host/icons';
 
 export interface Message {
@@ -10,45 +11,9 @@ export interface Message {
   timestamp: Date;
 }
 
-const INITIAL_MESSAGES: Message[] = [
-  {
-    id: 'm1',
-    role: 'agent',
-    content:
-      'Demo Agent is online. I can monitor wallet activity, summarize market moves, and execute pre-approved workflows.',
-    timestamp: new Date('2026-03-08T20:12:00'),
-  },
-  {
-    id: 'm2',
-    role: 'user',
-    content:
-      'Give me a quick update on today’s activity and flag anything that needs manual review.',
-    timestamp: new Date('2026-03-08T20:12:36'),
-  },
-  {
-    id: 'm3',
-    role: 'agent',
-    content:
-      'Since 09:00, I processed 18 inbound messages, opened 4 research tasks, and completed 2 simulated trades. One task needs manual review: a wallet transfer request exceeded the configured risk threshold.',
-    timestamp: new Date('2026-03-08T20:13:10'),
-  },
-  {
-    id: 'm4',
-    role: 'user',
-    content: 'What caused the transfer request to be blocked?',
-    timestamp: new Date('2026-03-08T20:13:44'),
-  },
-  {
-    id: 'm5',
-    role: 'agent',
-    content:
-      'The destination address was new, the amount was 2.3x higher than the daily baseline, and no allowlist match was found. I paused execution and logged the event in the activity feed.',
-    timestamp: new Date('2026-03-08T20:14:12'),
-  },
-];
-
-const AGENT_REPLY =
-  'Risk profile remains unchanged. The latest simulated trade closed with a 1.8% gain, slippage stayed within tolerance, and no additional approval gates were triggered.';
+interface ChatPanelProps {
+  agentId: string;
+}
 
 const formatTimestamp = (date: Date) =>
   date.toLocaleTimeString('en-US', {
@@ -70,12 +35,18 @@ function TypingDots() {
   );
 }
 
-export default function ChatPanel() {
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
-  const [draft, setDraft] = useState(
-    'Summarize the latest trade and tell me whether the risk profile changed.'
-  );
+export default function ChatPanel({ agentId }: ChatPanelProps) {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 'welcome',
+      role: 'agent',
+      content: 'Hello! I\'m ready to chat. Ask me anything or test my capabilities.',
+      timestamp: new Date(),
+    },
+  ]);
+  const [draft, setDraft] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -84,7 +55,7 @@ export default function ChatPanel() {
     node.scrollTo({ top: node.scrollHeight, behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = draft.trim();
     if (!trimmed || isTyping) return;
 
@@ -98,19 +69,50 @@ export default function ChatPanel() {
     setMessages((current) => [...current, userMessage]);
     setDraft('');
     setIsTyping(true);
+    setError(null);
 
-    window.setTimeout(() => {
+    try {
+      const response = await api.chatWithAgent(agentId, trimmed);
+      
+      // Extract response text - handle different response formats
+      let responseText = 'No response received';
+      if (response.data && typeof response.data === 'object') {
+        if ('response' in response.data) {
+          responseText = String(response.data.response);
+        } else if ('message' in response.data) {
+          responseText = String(response.data.message);
+        } else {
+          responseText = JSON.stringify(response.data);
+        }
+      } else if (response.data) {
+        responseText = String(response.data);
+      }
+
       setMessages((current) => [
         ...current,
         {
           id: `m-${Date.now()}-agent`,
           role: 'agent',
-          content: AGENT_REPLY,
+          content: responseText,
           timestamp: new Date(),
         },
       ]);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
+      setError(errorMsg);
+      
+      setMessages((current) => [
+        ...current,
+        {
+          id: `m-${Date.now()}-error`,
+          role: 'agent',
+          content: `Error: ${errorMsg}`,
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
       setIsTyping(false);
-    }, 1100);
+    }
   };
 
   return (
@@ -131,6 +133,12 @@ export default function ChatPanel() {
         </div>
       </div>
 
+      {error && (
+        <div className="border-b border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+          {error}
+        </div>
+      )}
+
       <div ref={scrollerRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-5">
         {messages.map((message) => {
           const isUser = message.role === 'user';
@@ -144,7 +152,7 @@ export default function ChatPanel() {
                     : 'border-white/10 bg-zinc-900 text-white'
                 }`}
               >
-                <p className="text-sm leading-6">{message.content}</p>
+                <p className="text-sm leading-6 whitespace-pre-wrap">{message.content}</p>
                 <p className={`mt-2 text-[11px] ${isUser ? 'text-black/70' : 'text-zinc-500'}`}>
                   {formatTimestamp(message.timestamp)}
                 </p>
