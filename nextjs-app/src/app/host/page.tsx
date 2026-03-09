@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AsciiBackground from '@/components/AsciiBackground';
 import StepIndicator from '@/components/host/StepIndicator';
+import { api, Agent } from '@/lib/api';
 import TemplateCard from '@/components/host/TemplateCard';
 import PersonalitySlider from '@/components/host/PersonalitySlider';
 import SkillToggleCard from '@/components/host/SkillToggleCard';
@@ -119,6 +121,12 @@ export default function HostAgentPage() {
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro' | 'power' | null>(null);
   const [annualBilling, setAnnualBilling] = useState(false);
   
+  // Launch state
+  const [isLaunching, setIsLaunching] = useState(false);
+  const [launchError, setLaunchError] = useState<string | null>(null);
+  const [createdAgent, setCreatedAgent] = useState<Agent | null>(null);
+  const router = useRouter();
+  
   const canContinueStep1 = selectedTemplate !== null;
   const canContinueStep2 = agentName.trim().length > 0;
 
@@ -170,10 +178,67 @@ export default function HostAgentPage() {
     }
   };
 
-  const handlePlanSelect = (plan: 'starter' | 'pro' | 'power') => {
+  const handlePlanSelect = async (plan: 'starter' | 'pro' | 'power') => {
+    if (!authenticated) {
+      login();
+      return;
+    }
+    
     setSelectedPlan(plan);
-    // Auto-advance to success page
-    setTimeout(() => setCurrentStep(4), 300);
+    setIsLaunching(true);
+    setLaunchError(null);
+    setCurrentStep(4);
+    
+    try {
+      // Build program.md from wizard config
+      const programMd = buildProgramMd();
+      
+      const agent = await api.createAgent({
+        name: agentName.trim(),
+        tier: plan,
+        program_md: programMd,
+      });
+      
+      setCreatedAgent(agent);
+    } catch (err) {
+      setLaunchError(err instanceof Error ? err.message : 'Failed to create agent');
+    } finally {
+      setIsLaunching(false);
+    }
+  };
+  
+  const buildProgramMd = (): string => {
+    const template = TEMPLATES.find(t => t.id === selectedTemplate);
+    const skillNames = Array.from(enabledSkills).map(id => {
+      for (const skills of Object.values(SKILLS)) {
+        const found = skills.find(s => s.id === id);
+        if (found) return found.name;
+      }
+      return id;
+    });
+    
+    const lines = [
+      `# ${agentName}`,
+      '',
+      agentTagline ? `> ${agentTagline}` : '',
+      '',
+      template ? `## Template: ${template.name}` : '',
+      customDescription ? `## Goal\n${customDescription}` : '',
+      '',
+      '## Personality',
+      `- Communication: ${commStyle < 33 ? 'Casual' : commStyle > 66 ? 'Professional' : 'Balanced'}`,
+      `- Initiative: ${initiative < 33 ? 'Waits for instructions' : initiative > 66 ? 'Proactively suggests' : 'Balanced'}`,
+      `- Detail: ${detailLevel < 33 ? 'Brief & concise' : detailLevel > 66 ? 'Thorough & detailed' : 'Balanced'}`,
+      '',
+      systemPrompt ? `## Custom Instructions\n${systemPrompt}` : '',
+      '',
+      `## Autonomy: ${autonomyLevel}`,
+      autonomyLevel === 'autonomous' ? `- Per-action limit: $${perActionLimit}\n- Daily limit: $${dailyLimit}` : '',
+      '',
+      skillNames.length > 0 ? `## Enabled Skills\n${skillNames.map(s => `- ${s}`).join('\n')}` : '',
+    ];
+    
+    return lines.filter(Boolean).join('\n');
   };
 
   const toggleSkill = (skillId: string, enabled: boolean) => {
@@ -559,7 +624,7 @@ export default function HostAgentPage() {
                   period="mo"
                   features={[
                     'Fast model only',
-                    '$5 USDC credits/mo',
+                    '$5 API credits + $2 USDC/mo',
                     'SAID identity',
                     'Web chat interface',
                     'Email support',
@@ -573,7 +638,7 @@ export default function HostAgentPage() {
                   highlighted
                   features={[
                     'All models',
-                    '$25 USDC credits/mo',
+                    '$15 API credits + $5 USDC/mo',
                     'SAID + ERC-8004',
                     'Web + Telegram',
                     'Priority support',
@@ -586,7 +651,7 @@ export default function HostAgentPage() {
                   period="mo"
                   features={[
                     'Premium priority',
-                    '$100 USDC credits/mo',
+                    '$50 API credits + $15 USDC/mo',
                     'Full identity suite',
                     'All channels + API',
                     'Dedicated support',
@@ -606,73 +671,119 @@ export default function HostAgentPage() {
             </div>
           )}
           
-          {/* Step 4: Success */}
+          {/* Step 4: Launching / Success */}
           {currentStep === 4 && (
             <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                </div>
-                <h2 className="text-3xl font-bold mb-2">Your Agent is Live!</h2>
-                <p className="text-zinc-400">
-                  {agentName} is now running on SAID infrastructure.
-                </p>
-              </div>
-              
-              <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl mb-6">
-                <div className="flex items-start gap-4 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center flex-shrink-0">
-                    {TEMPLATES.find(t => t.id === selectedTemplate)?.icon || <CogIcon size={32} />}
+              {isLaunching && (
+                <div className="text-center py-20">
+                  <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6 animate-pulse">
+                    <RocketIcon size={40} />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="text-xl font-semibold mb-1">{agentName}</h3>
-                    <p className="text-zinc-400 text-sm mb-3">{agentTagline}</p>
-                    <div className="flex flex-wrap gap-2">
-                      <div className="px-3 py-1 bg-zinc-800 rounded-full text-xs">
-                        <span className="text-zinc-500">Wallet:</span> <code className="font-mono">So1ana...abc123</code>
+                  <h2 className="text-3xl font-bold mb-2">Launching {agentName}...</h2>
+                  <p className="text-zinc-400 mb-6">
+                    Creating OpenRouter key → Spinning up infrastructure → Booting agent
+                  </p>
+                  <div className="w-64 h-1 bg-white/10 rounded-full mx-auto overflow-hidden">
+                    <div className="h-full bg-white/60 rounded-full animate-[loading_2s_ease-in-out_infinite]" style={{ width: '60%' }} />
+                  </div>
+                </div>
+              )}
+              
+              {launchError && (
+                <div className="text-center py-12">
+                  <div className="w-20 h-20 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-6">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-400">
+                      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                  </div>
+                  <h2 className="text-3xl font-bold mb-2">Launch Failed</h2>
+                  <p className="text-zinc-400 mb-6">{launchError}</p>
+                  <button
+                    onClick={() => { setLaunchError(null); setCurrentStep(3); }}
+                    className="px-8 py-3 border border-zinc-700 rounded-lg font-semibold hover:border-zinc-500 transition"
+                  >
+                    ← Try Again
+                  </button>
+                </div>
+              )}
+              
+              {createdAgent && !isLaunching && !launchError && (
+                <>
+                  <div className="text-center mb-8">
+                    <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    </div>
+                    <h2 className="text-3xl font-bold mb-2">Your Agent is Live!</h2>
+                    <p className="text-zinc-400">
+                      {agentName} is now running on SAID infrastructure.
+                    </p>
+                  </div>
+                  
+                  <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl mb-6">
+                    <div className="flex items-start gap-4 mb-6">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-800 flex items-center justify-center flex-shrink-0">
+                        {TEMPLATES.find(t => t.id === selectedTemplate)?.icon || <CogIcon size={32} />}
                       </div>
-                      <div className="px-3 py-1 bg-green-500/20 border border-green-500/30 rounded-full text-xs text-green-400">
-                        ✓ Verified
+                      <div className="flex-1">
+                        <h3 className="text-xl font-semibold mb-1">{createdAgent.name}</h3>
+                        <p className="text-zinc-400 text-sm mb-3">{agentTagline}</p>
+                        <div className="flex flex-wrap gap-2">
+                          <div className="px-3 py-1 bg-zinc-800 rounded-full text-xs">
+                            <span className="text-zinc-500">ID:</span> <code className="font-mono">{createdAgent.id.slice(0, 8)}...</code>
+                          </div>
+                          <div className="px-3 py-1 bg-zinc-800 rounded-full text-xs">
+                            <span className="text-zinc-500">Tier:</span> {createdAgent.tier}
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-xs ${
+                            createdAgent.status === 'running' 
+                              ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                              : 'bg-yellow-500/20 border border-yellow-500/30 text-yellow-400'
+                          }`}>
+                            {createdAgent.status === 'running' ? '● Running' : `● ${createdAgent.status}`}
+                          </div>
+                          {createdAgent.flyAppName && (
+                            <div className="px-3 py-1 bg-zinc-800 rounded-full text-xs">
+                              <span className="text-zinc-500">Fly:</span> <code className="font-mono">{createdAgent.flyAppName}</code>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">${createdAgent.aiCreditsLimit}</div>
+                        <div className="text-xs text-zinc-500">API Credits</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold">${createdAgent.aiCreditsUsed?.toFixed(2) || '0.00'}</div>
+                        <div className="text-xs text-zinc-500">Used</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-2xl font-bold text-green-400">{createdAgent.status}</div>
+                        <div className="text-xs text-zinc-500">Status</div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-              
-              <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl mb-6">
-                <h3 className="font-semibold mb-4">Chat with your agent</h3>
-                <div className="space-y-3 mb-4">
-                  <div className="p-3 bg-zinc-900/50 rounded-lg">
-                    <p className="text-sm text-zinc-300">
-                      Hi! I'm {agentName}. {agentTagline}
-                    </p>
+                  
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <button 
+                      onClick={() => router.push(`/dashboard?agent=${createdAgent.id}`)}
+                      className="px-4 py-3 bg-white text-black rounded-lg text-sm font-semibold hover:bg-zinc-200 transition"
+                    >
+                      Open Dashboard →
+                    </button>
+                    <button 
+                      onClick={() => router.push('/my-agents')}
+                      className="px-4 py-3 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition"
+                    >
+                      View All Agents
+                    </button>
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
-                  />
-                  <button className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition">
-                    Send
-                  </button>
-                </div>
-              </div>
-              
-              <div className="grid sm:grid-cols-3 gap-3">
-                <button className="px-4 py-3 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">
-                  Connect Telegram
-                </button>
-                <button className="px-4 py-3 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">
-                  Customize Further
-                </button>
-                <button className="px-4 py-3 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">
-                  View in Directory
-                </button>
-              </div>
+                </>
+              )}
             </div>
           )}
         </main>

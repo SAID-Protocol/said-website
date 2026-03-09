@@ -1,22 +1,23 @@
-const API_BASE = process.env.NEXT_PUBLIC_SAID_API_URL || 'https://said-platform-api.fly.dev';
+const API_BASE = process.env.NEXT_PUBLIC_SAID_API_URL || 'https://app.saidprotocol.com';
 const API_KEY = process.env.NEXT_PUBLIC_SAID_API_KEY || '';
 
 export interface Agent {
   id: string;
-  user_id: string;
+  userId: string;
   name: string;
-  fly_machine_id: string | null;
-  fly_app_name: string | null;
+  flyMachineId: string | null;
+  flyAppName: string | null;
   status: 'creating' | 'running' | 'paused' | 'stopped' | 'error';
   tier: 'starter' | 'pro' | 'power';
-  said_identity: string | null;
-  program_md: string | null;
+  saidIdentity: string | null;
+  programMd: string | null;
   config: string | null;
-  gateway_token: string | null;
-  ai_credits_used: number;
-  ai_credits_limit: number;
-  created_at: string;
-  updated_at: string;
+  gatewayTokenHash: string | null;
+  aiCreditsUsed: number;
+  aiCreditsLimit: number;
+  openrouterKeyHash: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ActivityItem {
@@ -67,4 +68,7 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ message }),
     }),
+  
+  getAgentUsage: (id: string) =>
+    apiFetch<{ llm: { provider: string; limit: number; used: number; remaining: number; disabled: boolean } | null; tier: string }>(`/api/agents/${id}/usage`),
 };
