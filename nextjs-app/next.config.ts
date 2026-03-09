@@ -1,6 +1,9 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    root: __dirname,
+  },
   generateBuildId: async () => {
     // Use timestamp to force fresh build ID
     return `build-${Date.now()}`;

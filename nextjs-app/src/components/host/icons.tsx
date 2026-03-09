@@ -175,6 +175,13 @@ export const RocketIcon = ({ className = "", size = 20 }: IconProps) => (
   </svg>
 );
 
+export const TerminalIcon = ({ className = "", size = 20 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="M4 17 10 11 4 5"/>
+    <path d="M12 19h8"/>
+  </svg>
+);
+
 // Risk Badge Icons (16x16)
 export const CircleIcon = ({ className = "", size = 16, color = "currentColor" }: IconProps & { color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="none" className={className}>
@@ -190,5 +197,13 @@ export const SparklesIcon = ({ className = "", size = 24 }: IconProps) => (
     <path d="M19 17v4"/>
     <path d="M3 5h4"/>
     <path d="M17 19h4"/>
+  </svg>
+);
+
+export const AlertTriangleIcon = ({ className = "", size = 24 }: IconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/>
+    <path d="M12 9v4"/>
+    <path d="M12 17h.01"/>
   </svg>
 );
