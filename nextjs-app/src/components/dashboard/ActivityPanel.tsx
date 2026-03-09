@@ -1,139 +1,124 @@
 'use client';
 
 import {
-  AlertTriangleIcon,
   BarChartIcon,
   CogIcon,
   MessageCircleIcon,
+  ShieldIcon,
   SparklesIcon,
   TrendingUpIcon,
 } from '@/components/host/icons';
 
-export interface ActivityItem {
+type ActivityType = 'message' | 'trade' | 'system' | 'error' | 'skill';
+
+interface ActivityItem {
   id: string;
-  type: 'message' | 'trade' | 'system' | 'error' | 'skill';
+  type: ActivityType;
   title: string;
-  description?: string;
-  timestamp: Date;
+  description: string;
+  timestamp: string;
 }
 
-const ACTIVITY_ITEMS: ActivityItem[] = [
+const activityItems: ActivityItem[] = [
   {
-    id: '1',
-    type: 'system',
-    title: 'Agent runtime healthy',
-    description: 'Container heartbeat received and process supervisor reports all services online.',
-    timestamp: new Date(Date.now() - 2 * 60 * 1000),
-  },
-  {
-    id: '2',
+    id: 'a1',
     type: 'message',
-    title: 'Responded to portfolio summary request',
-    description: 'Generated a concise overview with current positions, recent fills, and next actions.',
-    timestamp: new Date(Date.now() - 11 * 60 * 1000),
+    title: 'User requested portfolio summary',
+    description: 'Generated a concise wallet overview and highlighted the largest 24h position change.',
+    timestamp: '2m ago',
   },
   {
-    id: '3',
-    type: 'skill',
-    title: 'Research skill executed',
-    description: 'Collected three external sources and prepared a structured brief for review.',
-    timestamp: new Date(Date.now() - 28 * 60 * 1000),
-  },
-  {
-    id: '4',
+    id: 'a2',
     type: 'trade',
-    title: 'Trade opportunity evaluated',
-    description: 'Risk filter passed, but execution was skipped because confidence remained below threshold.',
-    timestamp: new Date(Date.now() - 54 * 60 * 1000),
+    title: 'Simulated SOL rebalance completed',
+    description: 'Executed demo rebalance workflow with 0.4% slippage and logged post-trade metrics.',
+    timestamp: '9m ago',
   },
   {
-    id: '5',
+    id: 'a3',
+    type: 'skill',
+    title: 'Web research skill invoked',
+    description: 'Collected the latest protocol mentions and summarized sentiment across monitored sources.',
+    timestamp: '18m ago',
+  },
+  {
+    id: 'a4',
+    type: 'system',
+    title: 'Instruction version deployed',
+    description: 'Loaded program.md v12 and scheduled it for the next task execution window.',
+    timestamp: '31m ago',
+  },
+  {
+    id: 'a5',
     type: 'error',
-    title: 'Retry handled for market data fetch',
-    description: 'Primary provider timed out once. Secondary fetch completed successfully on retry.',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    title: 'Transfer request blocked',
+    description: 'Amount exceeded baseline threshold and destination address was not allowlisted.',
+    timestamp: '44m ago',
+  },
+  {
+    id: 'a6',
+    type: 'system',
+    title: 'Runtime health check passed',
+    description: 'Memory, queue depth, and outbound task latency remained within expected limits.',
+    timestamp: '1h ago',
   },
 ];
 
-function formatRelativeTime(timestamp: Date) {
-  const diffMs = Date.now() - timestamp.getTime();
-  const diffMinutes = Math.floor(diffMs / 60000);
-  if (diffMinutes < 1) return 'Just now';
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays}d ago`;
-}
-
-const typeStyles = {
+const typeStyles: Record<ActivityType, { icon: React.ReactNode; badge: string }> = {
   message: {
-    icon: MessageCircleIcon,
-    accent: 'text-blue-300',
-    badge: 'border-blue-500/20 bg-blue-500/10 text-blue-200',
+    icon: <MessageCircleIcon size={16} />,
+    badge: 'border-blue-500/20 bg-blue-500/10 text-blue-300',
   },
   trade: {
-    icon: TrendingUpIcon,
-    accent: 'text-amber-300',
-    badge: 'border-amber-500/20 bg-amber-500/10 text-amber-200',
+    icon: <TrendingUpIcon size={16} />,
+    badge: 'border-amber-500/20 bg-amber-500/10 text-amber-300',
   },
   system: {
-    icon: CogIcon,
-    accent: 'text-emerald-300',
-    badge: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-200',
+    icon: <CogIcon size={16} />,
+    badge: 'border-white/10 bg-zinc-900 text-zinc-300',
   },
   error: {
-    icon: AlertTriangleIcon,
-    accent: 'text-red-300',
-    badge: 'border-red-500/20 bg-red-500/10 text-red-200',
+    icon: <ShieldIcon size={16} />,
+    badge: 'border-red-500/20 bg-red-500/10 text-red-300',
   },
   skill: {
-    icon: SparklesIcon,
-    accent: 'text-violet-300',
-    badge: 'border-violet-500/20 bg-violet-500/10 text-violet-200',
+    icon: <SparklesIcon size={16} />,
+    badge: 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300',
   },
-} as const;
+};
 
 export default function ActivityPanel() {
   return (
-    <section className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <div className="border-b border-white/10 px-4 py-4 sm:px-5">
+    <section className="flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+      <div className="border-b border-white/10 px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2 text-white">
           <BarChartIcon size={16} className="text-amber-500" />
-          <h2 className="text-base font-semibold">Activity Feed</h2>
+          <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Activity Feed</h2>
         </div>
-        <p className="mt-2 text-sm leading-6 text-zinc-400">
-          A live stream of recent agent actions, system events, skills, and execution outcomes.
-        </p>
+        <p className="mt-1 text-sm text-zinc-400">Recent agent actions, tools, and runtime events.</p>
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-5">
-        {ACTIVITY_ITEMS.map((item) => {
-          const style = typeStyles[item.type];
-          const Icon = style.icon;
+      <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+        <div className="space-y-3">
+          {activityItems.map((item) => {
+            const styles = typeStyles[item.type];
 
-          return (
-            <div key={item.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
-              <div className="flex items-start gap-3">
-                <div className={`rounded-lg border border-white/10 bg-black/30 p-2 ${style.accent}`}>
-                  <Icon size={16} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.18em] ${style.badge}`}>
-                      {item.type}
-                    </span>
-                    <span className="text-xs text-zinc-500">{formatRelativeTime(item.timestamp)}</span>
+            return (
+              <div key={item.id} className="rounded-xl border border-white/10 bg-black/20 p-4">
+                <div className="flex items-start gap-3">
+                  <div className={`rounded-lg border p-2 ${styles.badge}`}>{styles.icon}</div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-sm font-medium text-white">{item.title}</h3>
+                      <span className="shrink-0 text-xs text-zinc-500">{item.timestamp}</span>
+                    </div>
+                    <p className="mt-1 text-sm leading-6 text-zinc-400">{item.description}</p>
                   </div>
-                  <h3 className="mt-3 text-sm font-medium text-white">{item.title}</h3>
-                  {item.description && (
-                    <p className="mt-2 text-sm leading-6 text-zinc-400">{item.description}</p>
-                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </section>
   );

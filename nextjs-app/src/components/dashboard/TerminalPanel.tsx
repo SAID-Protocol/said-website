@@ -1,105 +1,119 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { FitAddon } from '@xterm/addon-fit';
-import { WebLinksAddon } from '@xterm/addon-web-links';
-import { Terminal } from 'xterm';
-import 'xterm/css/xterm.css';
-import { CircleIcon, CpuIcon } from '@/components/host/icons';
+import { TerminalIcon } from '@/components/host/icons';
 
-interface TerminalPanelProps {
-  agentName?: string;
-}
-
-export default function TerminalPanel({ agentName = 'Atlas-01' }: TerminalPanelProps) {
+export default function TerminalPanel() {
   const terminalRef = useRef<HTMLDivElement | null>(null);
-  const xtermRef = useRef<Terminal | null>(null);
   const [connected] = useState(true);
 
   useEffect(() => {
-    if (!terminalRef.current || xtermRef.current) return;
+    let term: import('xterm').Terminal | null = null;
+    let resizeObserver: ResizeObserver | null = null;
+    let mounted = true;
 
-    const terminal = new Terminal({
-      cursorBlink: true,
-      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-      fontSize: 13,
-      lineHeight: 1.45,
-      convertEol: true,
-      theme: {
-        background: '#000000',
-        foreground: '#F4F4F5',
-        cursor: '#F59E0B',
-        cursorAccent: '#000000',
-        selectionBackground: 'rgba(245, 158, 11, 0.25)',
-        black: '#09090B',
-        brightBlack: '#52525B',
-        red: '#EF4444',
-        brightRed: '#F87171',
-        green: '#22C55E',
-        brightGreen: '#4ADE80',
-        yellow: '#F59E0B',
-        brightYellow: '#FBBF24',
-        blue: '#3B82F6',
-        brightBlue: '#60A5FA',
-        magenta: '#A855F7',
-        brightMagenta: '#C084FC',
-        cyan: '#06B6D4',
-        brightCyan: '#22D3EE',
-        white: '#E4E4E7',
-        brightWhite: '#FFFFFF',
-      },
-    });
+    const boot = async () => {
+      const [{ Terminal }, { FitAddon }, { WebLinksAddon }] = await Promise.all([
+        import('xterm'),
+        import('@xterm/addon-fit'),
+        import('@xterm/addon-web-links'),
+      ]);
+      await import('xterm/css/xterm.css');
 
-    const fitAddon = new FitAddon();
-    terminal.loadAddon(fitAddon);
-    terminal.loadAddon(new WebLinksAddon());
-    terminal.open(terminalRef.current);
-    fitAddon.fit();
+      if (!mounted || !terminalRef.current) return;
 
-    terminal.writeln('\u001b[1;33mWelcome to your SAID agent terminal\u001b[0m');
-    terminal.writeln(`Agent: ${agentName}`);
-    terminal.writeln('\u001b[32mStatus: Running\u001b[0m');
-    terminal.writeln("Type 'help' for available commands");
-    terminal.writeln('');
-    terminal.write('$ ');
+      const fitAddon = new FitAddon();
+      const webLinksAddon = new WebLinksAddon();
 
-    xtermRef.current = terminal;
+      term = new Terminal({
+        cursorBlink: true,
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        fontSize: 13,
+        lineHeight: 1.35,
+        theme: {
+          background: '#000000',
+          foreground: '#4ADE80',
+          cursor: '#F59E0B',
+          selectionBackground: 'rgba(245, 158, 11, 0.25)',
+          black: '#000000',
+          green: '#4ADE80',
+          brightGreen: '#86EFAC',
+          white: '#E4E4E7',
+          brightWhite: '#FFFFFF',
+        },
+      });
 
-    const resizeObserver = new ResizeObserver(() => {
+      term.loadAddon(fitAddon);
+      term.loadAddon(webLinksAddon);
+      term.open(terminalRef.current);
       fitAddon.fit();
-    });
 
-    resizeObserver.observe(terminalRef.current);
+      term.writeln('SAID Agent Terminal v1.0');
+      term.writeln('Agent: Demo Agent');
+      term.writeln('Status: Running');
+      term.writeln('');
+      term.write('$ ');
+
+      let currentLine = '';
+      term.onData((data) => {
+        if (data === '\r') {
+          term.write('\r\n');
+          if (currentLine.trim()) {
+            term.writeln(`echo: ${currentLine}`);
+          }
+          currentLine = '';
+          term.write('$ ');
+          return;
+        }
+
+        if (data === '\u007F') {
+          if (currentLine.length > 0) {
+            currentLine = currentLine.slice(0, -1);
+            term.write('\b \b');
+          }
+          return;
+        }
+
+        if (data >= ' ') {
+          currentLine += data;
+          term.write(data);
+        }
+      });
+
+      resizeObserver = new ResizeObserver(() => {
+        fitAddon.fit();
+      });
+      resizeObserver.observe(terminalRef.current);
+    };
+
+    boot();
 
     return () => {
-      resizeObserver.disconnect();
-      xtermRef.current?.dispose();
-      xtermRef.current = null;
+      mounted = false;
+      resizeObserver?.disconnect();
+      term?.dispose();
     };
-  }, [agentName]);
+  }, []);
 
   return (
-    <section className="flex h-full min-h-[420px] flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <div className="flex items-center justify-between gap-4 border-b border-white/10 px-4 py-4 sm:px-5">
+    <section className="flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5">
         <div>
           <div className="flex items-center gap-2 text-white">
-            <CpuIcon size={16} className="text-amber-500" />
-            <h2 className="text-base font-semibold">Terminal</h2>
+            <TerminalIcon size={16} className="text-amber-500" />
+            <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Terminal</h2>
           </div>
-          <p className="mt-2 text-sm leading-6 text-zinc-400">
-            Embedded CLI access for your running agent container. WebSocket connectivity will be wired in next.
+          <p className="mt-1 text-sm text-zinc-400">
+            Interactive runtime shell preview for your hosted agent.
           </p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-3 py-2 text-xs font-medium text-zinc-300">
-          <CircleIcon size={10} color={connected ? '#22C55E' : '#EF4444'} />
+        <div className="flex items-center gap-2 text-xs text-zinc-300">
+          <span className={`h-2.5 w-2.5 rounded-full ${connected ? 'bg-emerald-400' : 'bg-red-400'}`} />
           {connected ? 'Connected' : 'Disconnected'}
         </div>
       </div>
-
       <div className="flex-1 bg-black p-3 sm:p-4">
-        <div className="h-full min-h-[320px] rounded-lg border border-white/10 bg-black p-2">
-          <div ref={terminalRef} className="h-full w-full" />
-        </div>
+        <div ref={terminalRef} className="h-full min-h-[240px] w-full rounded-lg border border-white/10 bg-black p-2" />
       </div>
     </section>
   );

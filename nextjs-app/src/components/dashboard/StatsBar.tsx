@@ -1,75 +1,41 @@
 'use client';
 
-import { CircleIcon, MessageCircleIcon, TrendingUpIcon } from '@/components/host/icons';
-
-const stats = {
-  status: 'Running',
-  uptime: '3d 14h',
-  messages: '1,247',
-  trades: '34',
-  creditsUsed: 3.2,
-  creditsTotal: 5.0,
-  revenue: '$12.40',
-};
-
-const creditPercent = Math.min((stats.creditsUsed / stats.creditsTotal) * 100, 100);
-
-function StatCard({ label, value, detail }: { label: string; value: string; detail?: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-md">
-      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-zinc-500">{label}</p>
-      <p className="mt-2 text-lg font-semibold text-white">{value}</p>
-      {detail && <div className="mt-2">{detail}</div>}
-    </div>
-  );
-}
+const stats = [
+  { label: 'Status', value: 'Running', accent: 'status' },
+  { label: 'Uptime', value: '3d 14h' },
+  { label: 'Messages', value: '1,247' },
+  { label: 'Trades', value: '34' },
+  { label: 'Revenue', value: '$12.40' },
+] as const;
 
 export default function StatsBar() {
+  const creditsUsed = 3.2;
+  const creditsTotal = 5.0;
+  const creditsPercent = (creditsUsed / creditsTotal) * 100;
+
   return (
-    <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
-      <StatCard
-        label="Status"
-        value={stats.status}
-        detail={
-          <div className="inline-flex items-center gap-2 text-xs text-emerald-300">
-            <CircleIcon size={10} color="#22C55E" />
-            Agent online
-          </div>
-        }
-      />
-      <StatCard label="Uptime" value={stats.uptime} />
-      <StatCard
-        label="Messages"
-        value={stats.messages}
-        detail={
-          <div className="inline-flex items-center gap-2 text-xs text-zinc-400">
-            <MessageCircleIcon size={12} />
-            Session traffic
-          </div>
-        }
-      />
-      <StatCard
-        label="Trades"
-        value={stats.trades}
-        detail={
-          <div className="inline-flex items-center gap-2 text-xs text-amber-300">
-            <TrendingUpIcon size={12} />
-            Executed workflows
-          </div>
-        }
-      />
-      <StatCard
-        label="AI Credits"
-        value={`${stats.creditsUsed.toFixed(1)} / ${stats.creditsTotal.toFixed(1)}`}
-        detail={
-          <div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-amber-500" style={{ width: `${creditPercent}%` }} />
+    <section className="mb-6 rounded-xl border border-white/10 bg-white/5 p-3 backdrop-blur-md sm:p-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-6">
+        {stats.map((stat) => (
+          <div key={stat.label} className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">{stat.label}</p>
+            <div className="mt-2 flex items-center gap-2">
+              {stat.accent === 'status' && <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />}
+              <p className="text-sm font-semibold text-white sm:text-base">{stat.value}</p>
             </div>
           </div>
-        }
-      />
-      <StatCard label="Revenue" value={stats.revenue} />
-    </div>
+        ))}
+
+        <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-zinc-500">AI Credits</p>
+            <span className="text-xs text-zinc-400">3.2/5.0</span>
+          </div>
+          <div className="mt-3 h-2 rounded-full bg-white/10">
+            <div className="h-2 rounded-full bg-amber-500" style={{ width: `${creditsPercent}%` }} />
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
