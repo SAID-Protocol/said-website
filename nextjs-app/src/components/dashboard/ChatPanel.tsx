@@ -74,15 +74,21 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
     try {
       const response = await api.chatWithAgent(agentId, trimmed);
       
-      // Extract response text - handle different response formats
+      // Extract response text - handle OpenAI chat completions format
       let responseText = 'No response received';
-      if (response.data && typeof response.data === 'object') {
-        if ('response' in response.data) {
-          responseText = String(response.data.response);
-        } else if ('message' in response.data) {
-          responseText = String(response.data.message);
+      const d = response.data as Record<string, unknown>;
+      if (d && typeof d === 'object') {
+        // OpenAI chat completions format
+        if ('choices' in d && Array.isArray(d.choices) && d.choices.length > 0) {
+          const choice = d.choices[0] as Record<string, unknown>;
+          const msg = choice.message as Record<string, unknown> | undefined;
+          responseText = String(msg?.content ?? 'No content');
+        } else if ('response' in d) {
+          responseText = String(d.response);
+        } else if ('message' in d) {
+          responseText = String(d.message);
         } else {
-          responseText = JSON.stringify(response.data);
+          responseText = JSON.stringify(d);
         }
       } else if (response.data) {
         responseText = String(response.data);
