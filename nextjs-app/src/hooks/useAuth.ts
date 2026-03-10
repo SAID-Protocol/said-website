@@ -4,7 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 const API_URL = 'https://api.saidprotocol.com';
 
 export function useAuth() {
-  const { user, authenticated, ready } = usePrivy();
+  const { user, authenticated, ready, getAccessToken } = usePrivy();
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,18 +22,25 @@ export function useAuth() {
     
     setLoading(true);
     try {
-      const privyId = user.id;
       const email = user.email?.address;
       const walletAddress = user.wallet?.address;
       const displayName = email?.split('@')[0] || 'User';
 
-      console.log('Logging into backend with:', { privyId, email, walletAddress, displayName });
+      // Get Privy access token for server-side verification
+      const accessToken = await getAccessToken();
+      
+      if (!accessToken) {
+        console.error('Failed to get Privy access token');
+        throw new Error('Authentication failed - no access token');
+      }
+
+      console.log('Logging into backend with verified Privy token');
 
       const res = await fetch(`${API_URL}/auth/login-privy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          privyId,
+          accessToken,
           email,
           walletAddress,
           displayName,
@@ -57,7 +64,7 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, getAccessToken]);
 
   // Auto-login when Privy is ready and user is authenticated
   useEffect(() => {
