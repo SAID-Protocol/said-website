@@ -73,27 +73,26 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
 
     try {
       const response = await api.chatWithAgent(agentId, trimmed);
-      
-      // Extract response text - handle OpenAI chat completions format
+
       let responseText = 'No response received';
-      
-      // response = { ok, data } where data is the chat completions object
-      // Handle case where data might be nested or a string
+
       let d = response.data as Record<string, unknown>;
-      
-      // If data is a string, try to parse it
+
       if (typeof d === 'string') {
-        try { d = JSON.parse(d); } catch { responseText = String(d); d = null as unknown as Record<string, unknown>; }
+        try {
+          d = JSON.parse(d);
+        } catch {
+          responseText = String(d);
+          d = null as unknown as Record<string, unknown>;
+        }
       }
-      
-      // If data itself has a nested data field (double-wrapped), unwrap it
+
       if (d && typeof d === 'object' && 'data' in d && typeof d.data === 'object' && d.data !== null) {
         const inner = d.data as Record<string, unknown>;
         if ('choices' in inner) d = inner;
       }
-      
+
       if (d && typeof d === 'object') {
-        // OpenAI chat completions format
         if ('choices' in d && Array.isArray(d.choices) && d.choices.length > 0) {
           const choice = d.choices[0] as Record<string, unknown>;
           const msg = choice.message as Record<string, unknown> | undefined;
@@ -123,7 +122,7 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
       setError(errorMsg);
-      
+
       setMessages((current) => [
         ...current,
         {
@@ -139,8 +138,8 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
   };
 
   return (
-    <section className="flex h-full min-h-[520px] flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
+      <div className="flex flex-none items-center justify-between border-b border-white/10 px-4 py-3 sm:px-5">
         <div>
           <div className="flex items-center gap-2 text-white">
             <MessageCircleIcon size={16} className="text-amber-500" />
@@ -157,12 +156,12 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
       </div>
 
       {error && (
-        <div className="border-b border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+        <div className="flex-none border-b border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
           {error}
         </div>
       )}
 
-      <div ref={scrollerRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-5">
+      <div ref={scrollerRef} className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-5">
         {messages.map((message) => {
           const isUser = message.role === 'user';
 
@@ -193,7 +192,7 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
         )}
       </div>
 
-      <div className="border-t border-white/10 p-4 sm:p-5">
+      <div className="flex-none border-t border-white/10 p-4 sm:p-5">
         <div className="flex items-end gap-3">
           <div className="flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-3 focus-within:border-white/20">
             <textarea

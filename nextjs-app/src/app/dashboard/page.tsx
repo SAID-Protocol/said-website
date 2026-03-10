@@ -40,13 +40,15 @@ function TabBar<T extends string>({
   tabs,
   activeTab,
   onChange,
+  className = '',
 }: {
   tabs: Array<{ id: T; label: string; icon: React.ReactNode }>;
   activeTab: T;
   onChange: (tab: T) => void;
+  className?: string;
 }) {
   return (
-    <div className="mb-4 overflow-x-auto">
+    <div className={`overflow-x-auto ${className}`.trim()}>
       <div className="inline-flex min-w-full gap-1 rounded-xl border border-white/10 bg-white/5 p-1.5 backdrop-blur-md sm:min-w-0">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
@@ -74,10 +76,10 @@ function TabBar<T extends string>({
 export default function DashboardPage() {
   const searchParams = useSearchParams();
   const agentId = searchParams.get('agent');
-  
+
   const [sideTab, setSideTab] = useState<SideTab>('instructions');
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
-  
+
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -87,7 +89,7 @@ export default function DashboardPage() {
     async function loadData() {
       setLoading(true);
       setError(null);
-      
+
       try {
         if (agentId) {
           const { agent } = await api.getAgent(agentId);
@@ -130,7 +132,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Show agent list if no agent selected
   if (!agentId || !selectedAgent) {
     return (
       <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6 lg:px-8">
@@ -148,7 +149,6 @@ export default function DashboardPage() {
     );
   }
 
-  // Render side panel content
   const renderSideContent = (tab: SideTab | MobileTab) => {
     switch (tab) {
       case 'instructions':
@@ -165,59 +165,61 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        {/* Header — compact */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <a
-              href="/dashboard"
-              className="text-zinc-500 transition hover:text-white"
-              title="Back to agents"
-            >
-              ←
-            </a>
-            <div>
-              <h1 className="text-2xl font-semibold text-white">{selectedAgent.name}</h1>
-              <p className="text-sm text-zinc-500">
-                {selectedAgent.tier.charAt(0).toUpperCase() + selectedAgent.tier.slice(1)} tier · Created {new Date(selectedAgent.createdAt).toLocaleDateString()}
-              </p>
+    <div className="h-screen overflow-hidden bg-black px-4 pt-24 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-full max-w-7xl min-h-0 flex-col overflow-hidden pb-6">
+        <div className="flex-none pb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <a
+                href="/dashboard"
+                className="text-zinc-500 transition hover:text-white"
+                title="Back to agents"
+              >
+                ←
+              </a>
+              <div>
+                <h1 className="text-2xl font-semibold text-white">{selectedAgent.name}</h1>
+                <p className="text-sm text-zinc-500">
+                  {selectedAgent.tier.charAt(0).toUpperCase() + selectedAgent.tier.slice(1)} tier · Created {new Date(selectedAgent.createdAt).toLocaleDateString()}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className={`h-2.5 w-2.5 rounded-full ${selectedAgent.status === 'running' ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
-            <span className="text-sm text-zinc-400">{selectedAgent.status === 'running' ? 'Online' : 'Offline'}</span>
+            <div className="flex items-center gap-3">
+              <div className={`h-2.5 w-2.5 rounded-full ${selectedAgent.status === 'running' ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+              <span className="text-sm text-zinc-400">{selectedAgent.status === 'running' ? 'Online' : 'Offline'}</span>
+            </div>
           </div>
         </div>
 
-        {/* Stats Bar */}
-        <div className="mb-6">
+        <div className="flex-none pb-6">
           <StatsBar agent={selectedAgent} />
         </div>
 
-        {/* Mobile: single tab view */}
-        <div className="lg:hidden">
-          <TabBar tabs={mobileTabs} activeTab={mobileTab} onChange={setMobileTab} />
-          <div>
-            {mobileTab === 'chat' ? (
+        <div className="min-h-0 flex-1 overflow-hidden">
+          <div className="flex h-full min-h-0 flex-col overflow-hidden lg:hidden">
+            <TabBar tabs={mobileTabs} activeTab={mobileTab} onChange={setMobileTab} className="mb-4 flex-none" />
+            <div className="min-h-0 flex-1 overflow-hidden">
+              {mobileTab === 'chat' ? (
+                <ChatPanel agentId={selectedAgent.id} />
+              ) : (
+                <div className="h-full overflow-y-auto">
+                  {renderSideContent(mobileTab)}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="hidden h-full min-h-0 gap-6 overflow-hidden lg:grid lg:grid-cols-5">
+            <div className="min-h-0 lg:col-span-3">
               <ChatPanel agentId={selectedAgent.id} />
-            ) : (
-              renderSideContent(mobileTab)
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Desktop: Chat (main) + Side panel */}
-        <div className="hidden gap-6 lg:grid lg:grid-cols-5">
-          {/* Chat — takes 3/5 of the width */}
-          <div className="lg:col-span-3">
-            <ChatPanel agentId={selectedAgent.id} />
-          </div>
-
-          {/* Side panel — takes 2/5 */}
-          <div className="lg:col-span-2">
-            <TabBar tabs={sideTabs} activeTab={sideTab} onChange={setSideTab} />
-            {renderSideContent(sideTab)}
+            <div className="flex min-h-0 flex-col overflow-hidden lg:col-span-2">
+              <TabBar tabs={sideTabs} activeTab={sideTab} onChange={setSideTab} className="mb-4 flex-none" />
+              <div className="min-h-0 flex-1 overflow-hidden">
+                {renderSideContent(sideTab)}
+              </div>
+            </div>
           </div>
         </div>
       </div>

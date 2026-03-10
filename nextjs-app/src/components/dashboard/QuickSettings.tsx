@@ -30,8 +30,8 @@ export default function QuickSettings({ onUpdate }: QuickSettingsProps) {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto max-w-3xl rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
         <div className="flex items-start gap-3">
           <div className="rounded-lg border border-white/10 bg-black/20 p-2 text-zinc-300">
             <CogIcon size={18} />
