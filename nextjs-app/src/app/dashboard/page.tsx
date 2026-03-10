@@ -10,7 +10,6 @@ import ProgramEditor from '@/components/dashboard/ProgramEditor';
 import QuickSettings from '@/components/dashboard/QuickSettings';
 import StatsBar from '@/components/dashboard/StatsBar';
 import TerminalPanel from '@/components/dashboard/TerminalPanel';
-import VersionSidebar from '@/components/dashboard/VersionSidebar';
 import {
   BarChartIcon,
   CogIcon,
@@ -19,8 +18,7 @@ import {
   TerminalIcon,
 } from '@/components/host/icons';
 
-type CenterTab = 'instructions' | 'settings';
-type RightTab = 'terminal' | 'activity';
+type SideTab = 'instructions' | 'settings' | 'terminal' | 'activity';
 type MobileTab = 'chat' | 'instructions' | 'settings' | 'terminal' | 'activity';
 
 const mobileTabs: Array<{ id: MobileTab; label: string; icon: React.ReactNode }> = [
@@ -31,14 +29,11 @@ const mobileTabs: Array<{ id: MobileTab; label: string; icon: React.ReactNode }>
   { id: 'activity', label: 'Activity', icon: <BarChartIcon size={16} /> },
 ];
 
-const centerTabs: Array<{ id: CenterTab; label: string; icon: React.ReactNode }> = [
+const sideTabs: Array<{ id: SideTab; label: string; icon: React.ReactNode }> = [
   { id: 'instructions', label: 'Instructions', icon: <EditIcon size={16} /> },
-  { id: 'settings', label: 'Settings', icon: <CogIcon size={16} /> },
-];
-
-const rightTabs: Array<{ id: RightTab; label: string; icon: React.ReactNode }> = [
   { id: 'terminal', label: 'Terminal', icon: <TerminalIcon size={16} /> },
   { id: 'activity', label: 'Activity', icon: <BarChartIcon size={16} /> },
+  { id: 'settings', label: 'Settings', icon: <CogIcon size={16} /> },
 ];
 
 function TabBar<T extends string>({
@@ -52,16 +47,15 @@ function TabBar<T extends string>({
 }) {
   return (
     <div className="mb-4 overflow-x-auto">
-      <div className="inline-flex min-w-full gap-2 rounded-xl border border-white/10 bg-white/5 p-2 backdrop-blur-md sm:min-w-0">
+      <div className="inline-flex min-w-full gap-1 rounded-xl border border-white/10 bg-white/5 p-1.5 backdrop-blur-md sm:min-w-0">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
-
           return (
             <button
               key={tab.id}
               type="button"
               onClick={() => onChange(tab.id)}
-              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium whitespace-nowrap transition ${
+              className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition ${
                 isActive
                   ? 'bg-amber-500 text-black'
                   : 'text-zinc-400 hover:bg-white/10 hover:text-white'
@@ -81,8 +75,7 @@ export default function DashboardPage() {
   const searchParams = useSearchParams();
   const agentId = searchParams.get('agent');
   
-  const [centerTab, setCenterTab] = useState<CenterTab>('instructions');
-  const [rightTab, setRightTab] = useState<RightTab>('terminal');
+  const [sideTab, setSideTab] = useState<SideTab>('instructions');
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
   
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -97,11 +90,9 @@ export default function DashboardPage() {
       
       try {
         if (agentId) {
-          // Fetch single agent
           const { agent } = await api.getAgent(agentId);
           setSelectedAgent(agent);
         } else {
-          // Fetch all agents
           const allAgents = await api.listAgents();
           setAgents(allAgents);
         }
@@ -157,69 +148,76 @@ export default function DashboardPage() {
     );
   }
 
-  // Show agent dashboard
+  // Render side panel content
+  const renderSideContent = (tab: SideTab | MobileTab) => {
+    switch (tab) {
+      case 'instructions':
+        return <ProgramEditor agent={selectedAgent} />;
+      case 'settings':
+        return <QuickSettings />;
+      case 'terminal':
+        return <TerminalPanel />;
+      case 'activity':
+        return <ActivityPanel agentId={selectedAgent.id} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">Dashboard</p>
-            <h1 className="mt-2 text-3xl font-semibold text-white sm:text-4xl">{selectedAgent.name}</h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-400 sm:text-base">
-              Edit instructions, tune personality, monitor runtime activity, and test how your SAID agent responds in real time.
-            </p>
+        {/* Header — compact */}
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <a
+              href="/dashboard"
+              className="text-zinc-500 transition hover:text-white"
+              title="Back to agents"
+            >
+              ←
+            </a>
+            <div>
+              <h1 className="text-2xl font-semibold text-white">{selectedAgent.name}</h1>
+              <p className="text-sm text-zinc-500">
+                {selectedAgent.tier.charAt(0).toUpperCase() + selectedAgent.tier.slice(1)} tier · Created {new Date(selectedAgent.createdAt).toLocaleDateString()}
+              </p>
+            </div>
           </div>
-
-          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300 backdrop-blur-md">
-            Changes to instructions apply on the agent&apos;s next task.
+          <div className="flex items-center gap-3">
+            <div className={`h-2.5 w-2.5 rounded-full ${selectedAgent.status === 'running' ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+            <span className="text-sm text-zinc-400">{selectedAgent.status === 'running' ? 'Online' : 'Offline'}</span>
           </div>
         </div>
 
+        {/* Stats Bar */}
         <div className="mb-6">
           <StatsBar agent={selectedAgent} />
         </div>
 
+        {/* Mobile: single tab view */}
         <div className="lg:hidden">
           <TabBar tabs={mobileTabs} activeTab={mobileTab} onChange={setMobileTab} />
-
-          <div className="space-y-6">
-            {mobileTab === 'chat' && <ChatPanel agentId={selectedAgent.id} />}
-            {mobileTab === 'instructions' && (
-              <div className="space-y-6">
-                <ProgramEditor agent={selectedAgent} />
-                <div className="min-h-[320px]">
-                  <VersionSidebar />
-                </div>
-              </div>
+          <div>
+            {mobileTab === 'chat' ? (
+              <ChatPanel agentId={selectedAgent.id} />
+            ) : (
+              renderSideContent(mobileTab)
             )}
-            {mobileTab === 'settings' && <QuickSettings />}
-            {mobileTab === 'terminal' && <TerminalPanel />}
-            {mobileTab === 'activity' && <ActivityPanel agentId={selectedAgent.id} />}
           </div>
         </div>
 
-        <div className="hidden gap-6 lg:grid lg:grid-cols-12">
-          <div className="lg:col-span-4">
+        {/* Desktop: Chat (main) + Side panel */}
+        <div className="hidden gap-6 lg:grid lg:grid-cols-5">
+          {/* Chat — takes 3/5 of the width */}
+          <div className="lg:col-span-3">
             <ChatPanel agentId={selectedAgent.id} />
           </div>
 
-          <div className="lg:col-span-4">
-            <TabBar tabs={centerTabs} activeTab={centerTab} onChange={setCenterTab} />
-            {centerTab === 'instructions' ? (
-              <div className="space-y-6">
-                <ProgramEditor agent={selectedAgent} />
-                <div className="min-h-[320px]">
-                  <VersionSidebar />
-                </div>
-              </div>
-            ) : (
-              <QuickSettings />
-            )}
-          </div>
-
-          <div className="lg:col-span-4">
-            <TabBar tabs={rightTabs} activeTab={rightTab} onChange={setRightTab} />
-            {rightTab === 'terminal' ? <TerminalPanel /> : <ActivityPanel agentId={selectedAgent.id} />}
+          {/* Side panel — takes 2/5 */}
+          <div className="lg:col-span-2">
+            <TabBar tabs={sideTabs} activeTab={sideTab} onChange={setSideTab} />
+            {renderSideContent(sideTab)}
           </div>
         </div>
       </div>
