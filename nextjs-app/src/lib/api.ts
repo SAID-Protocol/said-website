@@ -13,11 +13,47 @@ export interface Agent {
   programMd: string | null;
   config: string | null;
   gatewayTokenHash: string | null;
+  gatewayToken?: string; // Only present on creation response
   aiCreditsUsed: number;
   aiCreditsLimit: number;
   openrouterKeyHash: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+// Gateway token storage (localStorage)
+const GATEWAY_TOKENS_KEY = 'said_gateway_tokens';
+
+function getGatewayToken(agentId: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const tokens = JSON.parse(localStorage.getItem(GATEWAY_TOKENS_KEY) || '{}');
+    return tokens[agentId] || null;
+  } catch {
+    return null;
+  }
+}
+
+function setGatewayToken(agentId: string, token: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const tokens = JSON.parse(localStorage.getItem(GATEWAY_TOKENS_KEY) || '{}');
+    tokens[agentId] = token;
+    localStorage.setItem(GATEWAY_TOKENS_KEY, JSON.stringify(tokens));
+  } catch (err) {
+    console.error('Failed to store gateway token:', err);
+  }
+}
+
+function removeGatewayToken(agentId: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const tokens = JSON.parse(localStorage.getItem(GATEWAY_TOKENS_KEY) || '{}');
+    delete tokens[agentId];
+    localStorage.setItem(GATEWAY_TOKENS_KEY, JSON.stringify(tokens));
+  } catch (err) {
+    console.error('Failed to remove gateway token:', err);
+  }
 }
 
 export interface ActivityItem {
@@ -75,8 +111,16 @@ export const api = {
   
   getAgent: (id: string) => apiFetch<{ agent: Agent; fly: unknown }>(`/api/agents/${id}`),
   
-  createAgent: (data: { name: string; tier?: string; program_md?: string; config?: Record<string, unknown> }) =>
-    apiFetch<Agent>('/api/agents', { method: 'POST', body: JSON.stringify(data) }),
+  createAgent: async (data: { name: string; tier?: string; program_md?: string; config?: Record<string, unknown> }) => {
+    const agent = await apiFetch<Agent>('/api/agents', { method: 'POST', body: JSON.stringify(data) });
+    
+    // Save gateway token to localStorage if present in response
+    if (agent.gatewayToken) {
+      setGatewayToken(agent.id, agent.gatewayToken);
+    }
+    
+    return agent;
+  },
   
   updateAgent: (id: string, data: { program_md?: string; config?: Record<string, unknown> }) =>
     apiFetch<Agent>(`/api/agents/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
@@ -85,15 +129,29 @@ export const api = {
   
   stopAgent: (id: string) => apiFetch<Agent>(`/api/agents/${id}/stop`, { method: 'POST' }),
   
-  deleteAgent: (id: string) => apiFetch<void>(`/api/agents/${id}`, { method: 'DELETE' }),
+  deleteAgent: async (id: string) => {
+    await apiFetch<void>(`/api/agents/${id}`, { method: 'DELETE' });
+    // Clean up stored gateway token
+    removeGatewayToken(id);
+  },
   
   getAgentLogs: (id: string) => apiFetch<ActivityItem[]>(`/api/agents/${id}/logs`),
   
-  chatWithAgent: (id: string, message: string) =>
-    apiFetch<{ ok: boolean; data: unknown }>(`/api/agents/${id}/chat`, {
+  chatWithAgent: async (id: string, message: string) => {
+    const gatewayToken = getGatewayToken(id);
+    
+    if (!gatewayToken) {
+      throw new Error('Gateway token not found. Please recreate this agent.');
+    }
+    
+    return apiFetch<{ ok: boolean; data: unknown }>(`/api/agents/${id}/chat`, {
       method: 'POST',
+      headers: {
+        'x-gateway-token': gatewayToken,
+      },
       body: JSON.stringify({ message }),
-    }),
+    });
+  },
   
   getAgentUsage: (id: string) =>
     apiFetch<{ llm: { provider: string; limit: number; used: number; remaining: number; disabled: boolean } | null; tier: string }>(`/api/agents/${id}/usage`),
