@@ -28,15 +28,41 @@ export interface ActivityItem {
   created_at: string;
 }
 
+// Store the access token getter globally
+let getAccessTokenFn: (() => Promise<string | null>) | null = null;
+
+export function setAccessTokenGetter(fn: () => Promise<string | null>) {
+  getAccessTokenFn = fn;
+}
+
 async function apiFetch<T>(path: string, opts: RequestInit = {}): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...opts.headers as Record<string, string>,
+  };
+  
+  // Try to get Privy access token first
+  if (getAccessTokenFn) {
+    try {
+      const token = await getAccessTokenFn();
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    } catch (err) {
+      console.warn('Failed to get access token:', err);
+    }
+  }
+  
+  // Fallback to x-api-key if no token (for backwards compatibility)
+  if (!headers['Authorization'] && API_KEY) {
+    headers['x-api-key'] = API_KEY;
+  }
+  
   const res = await fetch(`${API_BASE}${path}`, {
     ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
-      ...opts.headers,
-    },
+    headers,
   });
+  
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`API error ${res.status}: ${body}`);
