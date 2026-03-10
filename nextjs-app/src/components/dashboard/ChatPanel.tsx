@@ -76,7 +76,22 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
       
       // Extract response text - handle OpenAI chat completions format
       let responseText = 'No response received';
-      const d = response.data as Record<string, unknown>;
+      
+      // response = { ok, data } where data is the chat completions object
+      // Handle case where data might be nested or a string
+      let d = response.data as Record<string, unknown>;
+      
+      // If data is a string, try to parse it
+      if (typeof d === 'string') {
+        try { d = JSON.parse(d); } catch { responseText = d; d = null as unknown as Record<string, unknown>; }
+      }
+      
+      // If data itself has a nested data field (double-wrapped), unwrap it
+      if (d && typeof d === 'object' && 'data' in d && typeof d.data === 'object' && d.data !== null) {
+        const inner = d.data as Record<string, unknown>;
+        if ('choices' in inner) d = inner;
+      }
+      
       if (d && typeof d === 'object') {
         // OpenAI chat completions format
         if ('choices' in d && Array.isArray(d.choices) && d.choices.length > 0) {
@@ -85,13 +100,15 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
           responseText = String(msg?.content ?? 'No content');
         } else if ('response' in d) {
           responseText = String(d.response);
-        } else if ('message' in d) {
-          responseText = String(d.message);
+        } else if ('content' in d) {
+          responseText = String(d.content);
+        } else if ('message' in d && typeof d.message === 'string') {
+          responseText = d.message;
+        } else if ('error' in d) {
+          responseText = `Error: ${typeof d.error === 'string' ? d.error : JSON.stringify(d.error)}`;
         } else {
           responseText = JSON.stringify(d);
         }
-      } else if (response.data) {
-        responseText = String(response.data);
       }
 
       setMessages((current) => [
