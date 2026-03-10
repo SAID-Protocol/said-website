@@ -193,10 +193,36 @@ export default function HostAgentPage() {
       // Build program.md from wizard config
       const programMd = buildProgramMd();
       
+      // Build config object for the API
+      const config: Record<string, unknown> = {
+        name: agentName.trim(),
+        template: selectedTemplate || 'custom',
+        personality: {
+          style: commStyle,
+          initiative: initiative,
+          detail: detailLevel,
+        },
+        skills: Array.from(enabledSkills),
+        autonomy: autonomyLevel,
+        tier: plan,
+      };
+      
+      if (autonomyLevel === 'autonomous') {
+        config.spendingLimits = {
+          perAction: parseFloat(perActionLimit) || 1,
+          daily: parseFloat(dailyLimit) || 10,
+        };
+      }
+      
+      if (systemPrompt.trim()) {
+        config.customInstructions = systemPrompt.trim();
+      }
+      
       const agent = await api.createAgent({
         name: agentName.trim(),
         tier: plan,
         program_md: programMd,
+        config,
       });
       
       setCreatedAgent(agent);

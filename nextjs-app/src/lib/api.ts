@@ -75,7 +75,7 @@ export const api = {
   
   getAgent: (id: string) => apiFetch<{ agent: Agent; fly: unknown }>(`/api/agents/${id}`),
   
-  createAgent: (data: { name: string; tier?: string; program_md?: string }) =>
+  createAgent: (data: { name: string; tier?: string; program_md?: string; config?: Record<string, unknown> }) =>
     apiFetch<Agent>('/api/agents', { method: 'POST', body: JSON.stringify(data) }),
   
   updateAgent: (id: string, data: { program_md?: string; config?: Record<string, unknown> }) =>
