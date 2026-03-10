@@ -83,7 +83,7 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
       
       // If data is a string, try to parse it
       if (typeof d === 'string') {
-        try { d = JSON.parse(d); } catch { responseText = d; d = null as unknown as Record<string, unknown>; }
+        try { d = JSON.parse(d); } catch { responseText = String(d); d = null as unknown as Record<string, unknown>; }
       }
       
       // If data itself has a nested data field (double-wrapped), unwrap it
