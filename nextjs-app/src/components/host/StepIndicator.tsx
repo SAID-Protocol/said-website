@@ -29,7 +29,7 @@ export default function StepIndicator({ currentStep, steps }: StepIndicatorProps
                     stepNumber
                   )}
                 </div>
-                <span className={`mt-2 text-xs md:text-sm font-medium transition ${isActive ? 'text-white' : 'text-zinc-500'}`}>
+                <span className={`mt-2 text-xs md:text-sm font-medium transition whitespace-nowrap ${isActive ? 'text-white' : 'text-zinc-500'}`}>
                   {step}
                 </span>
               </div>
