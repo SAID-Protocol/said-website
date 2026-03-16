@@ -298,7 +298,8 @@ export default function HostAgentPage() {
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
-                <label className="block font-medium mb-3">Describe what you want your agent to do</label>
+                <label className="block font-medium mb-1">Describe what you want your agent to do</label>
+                <p className="text-sm text-zinc-400 mb-3">This becomes your agent&apos;s core mission — it&apos;ll guide every decision it makes. You can always change this later.</p>
                 <textarea
                   value={customDescription}
                   onChange={(e) => setCustomDescription(e.target.value)}
