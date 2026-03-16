@@ -12,9 +12,10 @@ interface SkillToggleCardProps {
   risk: RiskLevel;
   enabled: boolean;
   onToggle: (enabled: boolean) => void;
+  disabled?: boolean;
 }
 
-export default function SkillToggleCard({ icon, name, description, risk, enabled, onToggle }: SkillToggleCardProps) {
+export default function SkillToggleCard({ icon, name, description, risk, enabled, onToggle, disabled }: SkillToggleCardProps) {
   const [showConfirm, setShowConfirm] = useState(false);
 
   const riskColors = {
@@ -24,6 +25,7 @@ export default function SkillToggleCard({ icon, name, description, risk, enabled
   };
 
   const handleToggle = () => {
+    if (disabled) return;
     if (risk === 'red' && !enabled) {
       setShowConfirm(true);
     } else {
@@ -40,6 +42,7 @@ export default function SkillToggleCard({ icon, name, description, risk, enabled
     <>
       <div className={`
         p-4 bg-white/5 backdrop-blur-md border rounded-lg transition
+        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         ${enabled ? 'border-white/20 bg-zinc-800/40' : 'border-white/10'}
       `}>
         <div className="flex items-start gap-3">
