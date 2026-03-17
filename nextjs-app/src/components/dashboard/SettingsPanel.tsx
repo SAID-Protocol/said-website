@@ -88,7 +88,7 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
     <div className="h-full overflow-y-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
       <div className="border-b border-white/10 px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2 text-white">
-          <ShieldIcon size={16} className="text-amber-500" />
+          <span className="text-amber-500"><ShieldIcon size={16} /></span>
           <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Settings</h2>
         </div>
         <p className="mt-1 text-sm text-zinc-400">
@@ -193,7 +193,7 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
               className="flex w-full items-center justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-left transition hover:bg-amber-500/20"
             >
               <div className="flex items-center gap-3">
-                <PauseIcon size={16} className="text-amber-400" />
+                <span className="text-amber-400"><PauseIcon size={16} /></span>
                 <div>
                   <div className="text-sm font-medium text-amber-300">Pause Agent</div>
                   <div className="text-xs text-amber-200/70">Stop responding until manually restarted</div>
@@ -207,7 +207,7 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
               className="flex w-full items-center justify-between rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-left transition hover:bg-red-500/20"
             >
               <div className="flex items-center gap-3">
-                <TrashIcon size={16} className="text-red-400" />
+                <span className="text-red-400"><TrashIcon size={16} /></span>
                 <div>
                   <div className="text-sm font-medium text-red-300">Delete Agent</div>
                   <div className="text-xs text-red-200/70">Permanently remove this agent and all data</div>

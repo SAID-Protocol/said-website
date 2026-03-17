@@ -67,7 +67,7 @@ export default function ConfigurePanel({ agent }: ConfigurePanelProps) {
     <div className="h-full overflow-y-auto rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
       <div className="border-b border-white/10 px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2 text-white">
-          <CogIcon size={16} className="text-amber-500" />
+          <span className="text-amber-500"><CogIcon size={16} /></span>
           <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Configure</h2>
         </div>
         <p className="mt-1 text-sm text-zinc-400">
