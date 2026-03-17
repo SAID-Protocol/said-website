@@ -111,7 +111,7 @@ export const api = {
   
   getAgent: (id: string) => apiFetch<{ agent: Agent; fly: unknown }>(`/api/agents/${id}`),
   
-  createAgent: async (data: { name: string; tier?: string; program_md?: string; config?: Record<string, unknown> }) => {
+  createAgent: async (data: { name: string; tier?: string; program_md?: string; config?: Record<string, unknown>; telegram_token?: string }) => {
     const agent = await apiFetch<Agent>('/api/agents', { method: 'POST', body: JSON.stringify(data) });
     
     // Save gateway token to localStorage if present in response
