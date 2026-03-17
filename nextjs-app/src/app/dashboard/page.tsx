@@ -6,34 +6,24 @@ import { api, Agent } from '@/lib/api';
 import ActivityPanel from '@/components/dashboard/ActivityPanel';
 import AgentList from '@/components/dashboard/AgentList';
 import ChatPanel from '@/components/dashboard/ChatPanel';
-import ProgramEditor from '@/components/dashboard/ProgramEditor';
-import QuickSettings from '@/components/dashboard/QuickSettings';
-import StatsBar from '@/components/dashboard/StatsBar';
-import TerminalPanel from '@/components/dashboard/TerminalPanel';
-import {
-  BarChartIcon,
-  CogIcon,
-  EditIcon,
-  MessageCircleIcon,
-  TerminalIcon,
-} from '@/components/host/icons';
+import ConfigurePanel from '@/components/dashboard/ConfigurePanel';
+import SettingsPanel from '@/components/dashboard/SettingsPanel';
+import { CogIcon, BarChartIcon, ShieldIcon } from '@/components/host/icons';
 
-type SideTab = 'instructions' | 'settings' | 'terminal' | 'activity';
-type MobileTab = 'chat' | 'instructions' | 'settings' | 'terminal' | 'activity';
+type RightTab = 'configure' | 'analytics' | 'settings';
+type MobileTab = 'chat' | 'configure' | 'analytics' | 'settings';
 
 const mobileTabs: Array<{ id: MobileTab; label: string; icon: React.ReactNode }> = [
-  { id: 'chat', label: 'Chat', icon: <MessageCircleIcon size={16} /> },
-  { id: 'instructions', label: 'Instructions', icon: <EditIcon size={16} /> },
-  { id: 'settings', label: 'Settings', icon: <CogIcon size={16} /> },
-  { id: 'terminal', label: 'Terminal', icon: <TerminalIcon size={16} /> },
-  { id: 'activity', label: 'Activity', icon: <BarChartIcon size={16} /> },
+  { id: 'chat', label: 'Chat', icon: null },
+  { id: 'configure', label: 'Configure', icon: <CogIcon size={14} /> },
+  { id: 'analytics', label: 'Analytics', icon: <BarChartIcon size={14} /> },
+  { id: 'settings', label: 'Settings', icon: <ShieldIcon size={14} /> },
 ];
 
-const sideTabs: Array<{ id: SideTab; label: string; icon: React.ReactNode }> = [
-  { id: 'instructions', label: 'Instructions', icon: <EditIcon size={16} /> },
-  { id: 'terminal', label: 'Terminal', icon: <TerminalIcon size={16} /> },
-  { id: 'activity', label: 'Activity', icon: <BarChartIcon size={16} /> },
-  { id: 'settings', label: 'Settings', icon: <CogIcon size={16} /> },
+const rightTabs: Array<{ id: RightTab; label: string; icon: React.ReactNode }> = [
+  { id: 'configure', label: 'Configure', icon: <CogIcon size={14} /> },
+  { id: 'analytics', label: 'Analytics', icon: <BarChartIcon size={14} /> },
+  { id: 'settings', label: 'Settings', icon: <ShieldIcon size={14} /> },
 ];
 
 function TabBar<T extends string>({
@@ -49,7 +39,7 @@ function TabBar<T extends string>({
 }) {
   return (
     <div className={`overflow-x-auto ${className}`.trim()}>
-      <div className="inline-flex min-w-full gap-1 rounded-xl border border-white/10 bg-white/5 p-1.5 backdrop-blur-md sm:min-w-0">
+      <div className="inline-flex min-w-full gap-1 rounded-xl border border-white/10 bg-white/5 p-1.5 backdrop-blur-sm sm:min-w-0">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
           return (
@@ -73,17 +63,57 @@ function TabBar<T extends string>({
   );
 }
 
+function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 backdrop-blur-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h3 className="text-base font-semibold text-emerald-300">Your agent is live</h3>
+          </div>
+          
+          <div className="mt-4 flex items-center gap-2">
+            <div className="flex items-center gap-2 text-sm text-emerald-200">
+              <span className="text-emerald-400">✓</span>
+              <span>Agent deployed</span>
+            </div>
+            <span className="text-emerald-500/50">→</span>
+            <div className="text-sm text-emerald-300 font-medium">Test it out (chat below)</div>
+            <span className="text-emerald-500/50">→</span>
+            <div className="text-sm text-emerald-200/70">Customize (optional)</div>
+          </div>
+        </div>
+        
+        <button
+          type="button"
+          onClick={onDismiss}
+          className="text-xs text-emerald-400 hover:text-emerald-300 transition"
+        >
+          Dismiss
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const searchParams = useSearchParams();
   const agentId = searchParams.get('agent');
 
-  const [sideTab, setSideTab] = useState<SideTab>('instructions');
+  const [rightTab, setRightTab] = useState<RightTab>('configure');
   const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
 
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [usage, setUsage] = useState<{ llm: { used: number; limit: number } | null } | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -94,6 +124,14 @@ export default function DashboardPage() {
         if (agentId) {
           const { agent } = await api.getAgent(agentId);
           setSelectedAgent(agent);
+          
+          // Load usage data
+          try {
+            const usageData = await api.getAgentUsage(agentId);
+            setUsage(usageData);
+          } catch (err) {
+            console.error('Failed to fetch usage:', err);
+          }
         } else {
           const allAgents = await api.listAgents();
           setAgents(allAgents);
@@ -108,13 +146,27 @@ export default function DashboardPage() {
     loadData();
   }, [agentId]);
 
+  // Auto-refresh usage
+  useEffect(() => {
+    if (!agentId) return;
+    
+    const interval = setInterval(async () => {
+      try {
+        const usageData = await api.getAgentUsage(agentId);
+        setUsage(usageData);
+      } catch (err) {
+        console.error('Failed to refresh usage:', err);
+      }
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [agentId]);
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-zinc-400">Loading...</div>
-          </div>
+      <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6">
+        <div className="flex items-center justify-center py-12">
+          <div className="text-zinc-400">Loading...</div>
         </div>
       </div>
     );
@@ -122,11 +174,9 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
-            <p className="text-red-400">Error: {error}</p>
-          </div>
+      <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6">
+        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
+          <p className="text-red-400">Error: {error}</p>
         </div>
       </div>
     );
@@ -134,7 +184,7 @@ export default function DashboardPage() {
 
   if (!agentId || !selectedAgent) {
     return (
-      <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8">
             <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">Dashboard</p>
@@ -149,26 +199,30 @@ export default function DashboardPage() {
     );
   }
 
-  const renderSideContent = (tab: SideTab | MobileTab) => {
+  const creditsUsed = usage?.llm?.used ?? selectedAgent.aiCreditsUsed;
+  const creditsLimit = usage?.llm?.limit ?? selectedAgent.aiCreditsLimit;
+  const creditsPct = creditsLimit > 0 ? (creditsUsed / creditsLimit) * 100 : 0;
+
+  const renderRightContent = (tab: RightTab | MobileTab) => {
     switch (tab) {
-      case 'instructions':
-        return <ProgramEditor agent={selectedAgent} />;
-      case 'settings':
-        return <QuickSettings />;
-      case 'terminal':
-        return <TerminalPanel />;
-      case 'activity':
+      case 'configure':
+        return <ConfigurePanel agent={selectedAgent} />;
+      case 'analytics':
         return <ActivityPanel agentId={selectedAgent.id} />;
+      case 'settings':
+        return <SettingsPanel agent={selectedAgent} />;
       default:
         return null;
     }
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-black px-4 pt-24 sm:px-6 lg:px-8">
-      <div className="mx-auto flex h-full max-w-7xl min-h-0 flex-col overflow-hidden pb-6">
+    <div className="h-screen overflow-hidden bg-black px-4 pt-24 sm:px-6">
+      <div className="flex h-full min-h-0 flex-col overflow-hidden pb-6">
+        {/* Top Bar */}
         <div className="flex-none pb-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left: Back arrow + Agent name + Status */}
             <div className="flex items-center gap-4">
               <a
                 href="/dashboard"
@@ -177,25 +231,53 @@ export default function DashboardPage() {
               >
                 ←
               </a>
-              <div>
+              <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-semibold text-white">{selectedAgent.name}</h1>
-                <p className="text-sm text-zinc-500">
-                  {selectedAgent.tier.charAt(0).toUpperCase() + selectedAgent.tier.slice(1)} tier · Created {new Date(selectedAgent.createdAt).toLocaleDateString()}
-                </p>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-2 rounded-full ${selectedAgent.status === 'running' ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+                  <span className="text-sm text-zinc-400">
+                    {selectedAgent.status === 'running' ? 'Online' : 'Offline'}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <div className={`h-2.5 w-2.5 rounded-full ${selectedAgent.status === 'running' ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
-              <span className="text-sm text-zinc-400">{selectedAgent.status === 'running' ? 'Online' : 'Offline'}</span>
+
+            {/* Right: Tier badge + AI Credits */}
+            <div className="flex items-center gap-4">
+              {/* Tier Badge */}
+              <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300">
+                {selectedAgent.tier.charAt(0).toUpperCase() + selectedAgent.tier.slice(1)}
+              </div>
+
+              {/* AI Credits */}
+              <div className="min-w-[140px]">
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-mono text-sm text-white">{creditsUsed.toFixed(1)}</span>
+                  <span className="text-xs text-zinc-500">/</span>
+                  <span className="font-mono text-sm text-zinc-400">{creditsLimit.toFixed(1)}</span>
+                  <span className="text-xs text-zinc-500">credits</span>
+                </div>
+                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                  <div 
+                    className="h-full rounded-full bg-amber-500 transition-all" 
+                    style={{ width: `${Math.min(creditsPct, 100)}%` }} 
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex-none pb-6">
-          <StatsBar agent={selectedAgent} />
-        </div>
+        {/* Onboarding Card (dismissible, shows on first visit) */}
+        {showOnboarding && (
+          <div className="flex-none pb-6">
+            <OnboardingCard onDismiss={() => setShowOnboarding(false)} />
+          </div>
+        )}
 
+        {/* Main Area */}
         <div className="min-h-0 flex-1 overflow-hidden">
+          {/* Mobile: Full-width tabs */}
           <div className="flex h-full min-h-0 flex-col overflow-hidden lg:hidden">
             <TabBar tabs={mobileTabs} activeTab={mobileTab} onChange={setMobileTab} className="mb-4 flex-none" />
             <div className="min-h-0 flex-1 overflow-hidden">
@@ -203,21 +285,22 @@ export default function DashboardPage() {
                 <ChatPanel agentId={selectedAgent.id} />
               ) : (
                 <div className="h-full overflow-y-auto">
-                  {renderSideContent(mobileTab)}
+                  {renderRightContent(mobileTab)}
                 </div>
               )}
             </div>
           </div>
 
-          <div className="hidden h-full min-h-0 gap-6 overflow-hidden lg:grid lg:grid-cols-5">
-            <div className="min-h-0 lg:col-span-3">
+          {/* Desktop: Chat 65% + Right panel 35% */}
+          <div className="hidden h-full min-h-0 gap-6 overflow-hidden lg:grid" style={{ gridTemplateColumns: '65fr 35fr' }}>
+            <div className="min-h-0">
               <ChatPanel agentId={selectedAgent.id} />
             </div>
 
-            <div className="flex min-h-0 flex-col overflow-hidden lg:col-span-2">
-              <TabBar tabs={sideTabs} activeTab={sideTab} onChange={setSideTab} className="mb-4 flex-none" />
+            <div className="flex min-h-0 flex-col overflow-hidden">
+              <TabBar tabs={rightTabs} activeTab={rightTab} onChange={setRightTab} className="mb-4 flex-none" />
               <div className="min-h-0 flex-1 overflow-hidden">
-                {renderSideContent(sideTab)}
+                {renderRightContent(rightTab)}
               </div>
             </div>
           </div>

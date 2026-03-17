@@ -119,8 +119,14 @@ export default function ActivityPanel({ agentId }: ActivityPanelProps) {
         )}
 
         {!loading && !error && logs.length === 0 && (
-          <div className="flex items-center justify-center py-8">
-            <p className="text-sm text-zinc-400">No activity yet</p>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="rounded-full border border-white/10 bg-white/5 p-4">
+              <BarChartIcon size={24} className="text-zinc-500" />
+            </div>
+            <p className="mt-4 text-sm font-medium text-white">No activity yet</p>
+            <p className="mt-1 max-w-sm text-xs text-zinc-500">
+              Start chatting to see analytics here.
+            </p>
           </div>
         )}
 
