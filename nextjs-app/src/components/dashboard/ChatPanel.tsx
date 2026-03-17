@@ -35,19 +35,81 @@ function TypingDots() {
   );
 }
 
+const WELCOME_MESSAGE: Message = {
+  id: 'welcome',
+  role: 'agent',
+  content: 'Hello! I\'m ready to chat. Ask me anything or test my capabilities.',
+  timestamp: new Date(),
+};
+
+const MAX_MESSAGES = 50;
+
+// localStorage helpers
+const getStorageKey = (agentId: string) => `said-chat-${agentId}`;
+
+const loadMessagesFromStorage = (agentId: string): Message[] | null => {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const stored = localStorage.getItem(getStorageKey(agentId));
+    if (!stored) return null;
+    
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return null;
+    
+    // Convert timestamp strings back to Date objects
+    return parsed.map((msg: Message) => ({
+      ...msg,
+      timestamp: new Date(msg.timestamp),
+    }));
+  } catch (err) {
+    console.error('Failed to load messages from localStorage:', err);
+    return null;
+  }
+};
+
+const saveMessagesToStorage = (agentId: string, messages: Message[]): void => {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    // Keep only the last MAX_MESSAGES, but always keep the welcome message
+    let toSave = messages;
+    if (messages.length > MAX_MESSAGES) {
+      const welcomeMsg = messages.find(m => m.id === 'welcome');
+      const otherMsgs = messages.filter(m => m.id !== 'welcome').slice(-MAX_MESSAGES + 1);
+      toSave = welcomeMsg ? [welcomeMsg, ...otherMsgs] : otherMsgs.slice(-MAX_MESSAGES);
+    }
+    
+    localStorage.setItem(getStorageKey(agentId), JSON.stringify(toSave));
+  } catch (err) {
+    console.error('Failed to save messages to localStorage:', err);
+  }
+};
+
 export default function ChatPanel({ agentId }: ChatPanelProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome',
-      role: 'agent',
-      content: 'Hello! I\'m ready to chat. Ask me anything or test my capabilities.',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([WELCOME_MESSAGE]);
   const [draft, setDraft] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showHistoryNote, setShowHistoryNote] = useState(false);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+
+  // Load messages from localStorage on mount
+  useEffect(() => {
+    const stored = loadMessagesFromStorage(agentId);
+    if (stored && stored.length > 0) {
+      setMessages(stored);
+      setShowHistoryNote(stored.length >= MAX_MESSAGES);
+    }
+  }, [agentId]);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 1) { // Don't save if only welcome message
+      saveMessagesToStorage(agentId, messages);
+      setShowHistoryNote(messages.length >= MAX_MESSAGES);
+    }
+  }, [messages, agentId]);
 
   useEffect(() => {
     const node = scrollerRef.current;
@@ -66,13 +128,20 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
       timestamp: new Date(),
     };
 
-    setMessages((current) => [...current, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setDraft('');
     setIsTyping(true);
     setError(null);
 
     try {
-      const response = await api.chatWithAgent(agentId, trimmed);
+      // Convert messages to API format (map 'agent' to 'assistant')
+      const apiMessages = updatedMessages.map(msg => ({
+        role: msg.role === 'agent' ? 'assistant' : msg.role,
+        content: msg.content,
+      }));
+
+      const response = await api.chatWithAgent(agentId, apiMessages);
 
       let responseText = 'No response received';
 
@@ -216,6 +285,24 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
             className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-medium text-black transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:bg-zinc-700 disabled:text-zinc-400"
           >
             Send
+          </button>
+        </div>
+        <div className="mt-2 flex items-center justify-between">
+          {showHistoryNote && (
+            <p className="text-xs text-zinc-500">Showing last {MAX_MESSAGES} messages</p>
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setMessages([WELCOME_MESSAGE]);
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem(getStorageKey(agentId));
+              }
+              setShowHistoryNote(false);
+            }}
+            className="ml-auto text-xs text-zinc-500 transition hover:text-zinc-300"
+          >
+            Clear chat history
           </button>
         </div>
       </div>

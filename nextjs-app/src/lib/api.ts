@@ -137,19 +137,24 @@ export const api = {
   
   getAgentLogs: (id: string) => apiFetch<ActivityItem[]>(`/api/agents/${id}/logs`),
   
-  chatWithAgent: async (id: string, message: string) => {
+  chatWithAgent: async (id: string, messagesOrString: Array<{ role: string; content: string }> | string) => {
     const gatewayToken = getGatewayToken(id);
     
     if (!gatewayToken) {
       throw new Error('Gateway token not found. Please recreate this agent.');
     }
     
+    // Support both message array (new) and single message string (backwards compat)
+    const body = Array.isArray(messagesOrString)
+      ? { messages: messagesOrString }
+      : { message: messagesOrString };
+    
     return apiFetch<{ ok: boolean; data: unknown }>(`/api/agents/${id}/chat`, {
       method: 'POST',
       headers: {
         'x-gateway-token': gatewayToken,
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify(body),
     });
   },
   
