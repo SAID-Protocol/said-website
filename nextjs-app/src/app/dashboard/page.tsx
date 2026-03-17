@@ -9,6 +9,7 @@ import ChatPanel from '@/components/dashboard/ChatPanel';
 import ConfigurePanel from '@/components/dashboard/ConfigurePanel';
 import SettingsPanel from '@/components/dashboard/SettingsPanel';
 import Navbar from '@/components/Navbar';
+import AsciiBackground from '@/components/AsciiBackground';
 import { CogIcon, BarChartIcon, ShieldIcon } from '@/components/host/icons';
 
 type RightTab = 'configure' | 'analytics' | 'settings';
@@ -167,7 +168,8 @@ export default function DashboardPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6">
+        <AsciiBackground />
+        <div className="relative z-10 min-h-screen px-4 pb-12 pt-24 sm:px-6">
           <div className="flex items-center justify-center py-12">
             <div className="text-zinc-400">Loading...</div>
           </div>
@@ -180,7 +182,8 @@ export default function DashboardPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6">
+        <AsciiBackground />
+        <div className="relative z-10 min-h-screen px-4 pb-12 pt-24 sm:px-6">
           <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
             <p className="text-red-400">Error: {error}</p>
           </div>
@@ -193,7 +196,8 @@ export default function DashboardPage() {
     return (
       <>
         <Navbar />
-        <div className="min-h-screen bg-black px-4 pb-12 pt-24 sm:px-6">
+        <AsciiBackground />
+        <div className="relative z-10 min-h-screen px-4 pb-12 pt-24 sm:px-6">
           <div className="mx-auto max-w-7xl">
             <div className="mb-8">
               <p className="text-xs font-medium uppercase tracking-[0.24em] text-zinc-500">Dashboard</p>
@@ -229,7 +233,8 @@ export default function DashboardPage() {
   return (
     <>
     <Navbar />
-    <div className="h-screen overflow-hidden bg-black px-4 pt-24 sm:px-6">
+    <AsciiBackground />
+    <div className="relative z-10 h-screen overflow-hidden px-4 pt-24 sm:px-6">
       <div className="flex h-full min-h-0 flex-col overflow-hidden pb-6">
         {/* Top Bar */}
         <div className="flex-none pb-6">
