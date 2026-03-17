@@ -181,6 +181,7 @@ export default function HostAgentPage() {
         tier: plan,
         program_md: programMd,
         config,
+        telegram_token: telegramBotToken.trim() || undefined,
       });
       
       setCreatedAgent(agent);
