@@ -99,7 +99,7 @@ export default function ActivityPanel({ agentId }: ActivityPanelProps) {
     <section className="flex h-full min-h-[320px] flex-col overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-md">
       <div className="border-b border-white/10 px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2 text-white">
-          <BarChartIcon size={16} className="text-amber-500" />
+          <span className="text-amber-500"><BarChartIcon size={16} /></span>
           <h2 className="text-sm font-semibold uppercase tracking-[0.16em]">Activity Feed</h2>
         </div>
         <p className="mt-1 text-sm text-zinc-400">Recent agent actions, tools, and runtime events.</p>
@@ -121,7 +121,7 @@ export default function ActivityPanel({ agentId }: ActivityPanelProps) {
         {!loading && !error && logs.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="rounded-full border border-white/10 bg-white/5 p-4">
-              <BarChartIcon size={24} className="text-zinc-500" />
+              <span className="text-zinc-500"><BarChartIcon size={24} /></span>
             </div>
             <p className="mt-4 text-sm font-medium text-white">No activity yet</p>
             <p className="mt-1 max-w-sm text-xs text-zinc-500">

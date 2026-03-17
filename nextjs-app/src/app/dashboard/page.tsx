@@ -250,12 +250,15 @@ export default function DashboardPage() {
               </div>
 
               {/* AI Credits */}
-              <div className="min-w-[140px]">
+              <div className="group relative min-w-[140px]">
                 <div className="flex items-baseline gap-1.5">
                   <span className="font-mono text-sm text-white">{creditsUsed.toFixed(1)}</span>
                   <span className="text-xs text-zinc-500">/</span>
                   <span className="font-mono text-sm text-zinc-400">{creditsLimit.toFixed(1)}</span>
                   <span className="text-xs text-zinc-500">credits</span>
+                </div>
+                <div className="pointer-events-none absolute -bottom-10 left-1/2 z-50 -translate-x-1/2 whitespace-nowrap rounded-lg border border-white/10 bg-zinc-900 px-3 py-1.5 text-xs text-zinc-300 opacity-0 shadow-lg transition group-hover:opacity-100">
+                  AI credits refill monthly with your plan
                 </div>
                 <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
                   <div 
