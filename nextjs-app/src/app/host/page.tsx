@@ -504,8 +504,10 @@ export default function HostAgentPage() {
                     '1 agent',
                     '100 LLM calls/month',
                     '1GB storage',
+                    'SAID identity',
+                    'Solana wallet',
+                    'A2A messaging',
                     'Basic dashboard',
-                    'Community support',
                   ]}
                   onSelect={() => handlePlanSelect('free')}
                 />
