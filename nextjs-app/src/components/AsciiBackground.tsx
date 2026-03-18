@@ -81,11 +81,11 @@ export default function AsciiBackground() {
   const vignetteRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const vignette = vignetteRef.current;
+    const canvas = canvasRef.current!;
+    const vignette = vignetteRef.current!;
     if (!canvas || !vignette) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d')!;
     if (!ctx) return;
 
     const fontSize = 17;
