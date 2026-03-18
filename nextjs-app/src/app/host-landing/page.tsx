@@ -168,7 +168,7 @@ export default function HostLandingPage() {
             <a href="#features" className="nav-link">Features</a>
             <a href="#how" className="nav-link">How It Works</a>
             <a href="#pricing" className="nav-link">Pricing</a>
-            <a href="#faq" className="nav-link">FAQ</a>
+            <a href="https://www.saidprotocol.com/docs" className="nav-link">Docs</a>
           </div>
           <div className="nav-div" />
           <div className="nav-socials">
@@ -246,7 +246,9 @@ export default function HostLandingPage() {
 
       <section className="host-layer">
         <div className="container">
-          <div className="sh-label rv" style={{ textAlign: 'center' }}>Quick Start</div>
+          <div className="section-center">
+            <div className="sh-label rv">Quick Start</div>
+          </div>
           <div className="sh-title rv" style={{ textAlign: 'center' }}>Or deploy from terminal.</div>
           <div className="term rv" style={{ maxWidth: 640, margin: '40px auto 0' }}>
             <div className="term-bar"><div className="term-dot" /><div className="term-dot" /><div className="term-dot" /></div>
@@ -282,7 +284,9 @@ export default function HostLandingPage() {
 
       <section id="pricing" className="host-layer">
         <div className="container">
-          <div className="sh-label rv" style={{ textAlign: 'center' }}>Pricing</div>
+          <div className="section-center">
+            <div className="sh-label rv">Pricing</div>
+          </div>
           <div className="sh-title rv" style={{ textAlign: 'center' }}>Simple. Transparent.</div>
           <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 8px' }}>Every plan includes on-chain identity, Telegram bot, Solana wallet, and all features. 3-day free trial on every plan.</div>
 
@@ -337,7 +341,9 @@ export default function HostLandingPage() {
 
       <section id="faq" className="host-layer">
         <div className="container">
-          <div className="sh-label rv" style={{ textAlign: 'center' }}>FAQ</div>
+          <div className="section-center">
+            <div className="sh-label rv">FAQ</div>
+          </div>
           <div className="sh-title rv" style={{ textAlign: 'center' }}>Frequently Asked Questions</div>
           <div className="faq-list">
             {faqs.map(([question, answer], index) => (
@@ -354,15 +360,44 @@ export default function HostLandingPage() {
 
       <footer className="host-layer">
         <div className="container">
-          <div className="foot-inner">
-            <div className="foot-left">Built by agents, for agents.</div>
-            <div className="foot-right">
-              <a href="https://www.saidprotocol.com/docs">Docs</a>
-              <a href="https://www.saidprotocol.com/docs/integrate">Integrate</a>
-              <a href="https://www.saidprotocol.com/security">Security</a>
-              <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer" className="foot-social"><SocialIcon type="x" /></a>
-              <a href="https://github.com/kaiclawd/said" target="_blank" rel="noreferrer" className="foot-social"><SocialIcon type="github" /></a>
+          <div className="foot-grid">
+            <div className="foot-brand">
+              <div className="foot-logo">
+                <Image src="/logo-said-host.png" alt="SAID" width={20} height={20} />
+                <span>SAID</span>
+                <span className="nav-host-badge">HOST</span>
+              </div>
+              <p className="foot-tagline">Autonomous AI agents with on-chain identity, crypto wallets, and cross-chain messaging.</p>
+              <div className="foot-socials">
+                <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer" className="foot-social" aria-label="X"><SocialIcon type="x" /></a>
+                <a href="https://discord.gg/saidprotocol" target="_blank" rel="noreferrer" className="foot-social" aria-label="Discord"><SocialIcon type="discord" /></a>
+                <a href="https://github.com/kaiclawd/said" target="_blank" rel="noreferrer" className="foot-social" aria-label="GitHub"><SocialIcon type="github" /></a>
+              </div>
             </div>
+            <div className="foot-col">
+              <div className="foot-col-title">Product</div>
+              <a href="#features">Features</a>
+              <a href="#pricing">Pricing</a>
+              <a href="#how">How It Works</a>
+              <a href="#faq">FAQ</a>
+            </div>
+            <div className="foot-col">
+              <div className="foot-col-title">Protocol</div>
+              <a href="https://www.saidprotocol.com">SAID Protocol</a>
+              <a href="https://www.saidprotocol.com/docs">Docs</a>
+              <a href="https://www.saidprotocol.com/agents">Agent Directory</a>
+              <a href="https://www.saidprotocol.com/security">Security</a>
+            </div>
+            <div className="foot-col">
+              <div className="foot-col-title">Resources</div>
+              <a href="https://www.saidprotocol.com/docs">API Docs</a>
+              <a href="mailto:labs@saidprotocol.com">Contact</a>
+              <a href="https://www.saidprotocol.com/security">Privacy</a>
+            </div>
+          </div>
+          <div className="foot-bottom">
+            <span>© 2026 SAID Protocol. All rights reserved.</span>
+            <span>Powered by <a href="https://www.saidprotocol.com" className="foot-powered">SAID Protocol</a></span>
           </div>
         </div>
       </footer>
