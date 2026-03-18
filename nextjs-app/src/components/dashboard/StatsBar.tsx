@@ -26,6 +26,7 @@ const statusColors = {
 };
 
 const tierLabels = {
+  free: 'Free',
   starter: 'Starter',
   pro: 'Pro',
   power: 'Power',
