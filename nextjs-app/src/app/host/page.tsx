@@ -359,6 +359,7 @@ export default function HostAgentPage() {
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 font-mono text-sm"
                   />
                 </div>
+
               </div>
               
               {/* Autonomy */}

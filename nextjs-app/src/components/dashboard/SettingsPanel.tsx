@@ -27,6 +27,7 @@ interface SettingsPanelProps {
 export default function SettingsPanel({ agent }: SettingsPanelProps) {
   const [agentName, setAgentName] = useState(agent.name);
   const [telegramToken, setTelegramToken] = useState('');
+  const [customApiKey, setCustomApiKey] = useState('');
   const [showDeveloperTools, setShowDeveloperTools] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -40,8 +41,9 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
       // Note: This assumes the API supports updating name via PATCH
       // You may need to adjust based on actual API capabilities
       await api.updateAgent(agent.id, { 
-        // @ts-ignore - API may not support these fields yet
+        // @ts-ignore - API may not support all fields yet
         name: agentName,
+        ...(customApiKey.trim() ? { custom_api_key: customApiKey.trim() } : {}),
       });
       setHasSaved(true);
       
@@ -139,6 +141,31 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
           />
           <p className="mt-1.5 text-xs text-zinc-500">
             Optional: Connect your agent to Telegram for messaging.
+          </p>
+        </div>
+
+        {/* Custom API Key */}
+        <div>
+          <label htmlFor="custom-api-key" className="mb-2 block text-sm font-medium text-white">
+            OpenRouter API Key
+          </label>
+          <input
+            id="custom-api-key"
+            type="password"
+            value={customApiKey}
+            onChange={(e) => {
+              setCustomApiKey(e.target.value);
+              setHasSaved(false);
+            }}
+            className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
+            placeholder="sk-or-v1-..."
+          />
+          <p className="mt-1.5 text-xs text-zinc-500">
+            Bring your own key from{' '}
+            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">
+              openrouter.ai/keys
+            </a>{' '}
+            for unlimited usage. Leave blank to use included credits.
           </p>
         </div>
 
