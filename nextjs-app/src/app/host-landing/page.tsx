@@ -158,16 +158,17 @@ export default function HostLandingPage() {
 
       <div className="nav-wrap">
         <nav className={`nav-pill ${scrolled ? 'scrolled' : ''}`}>
-          <a href="https://www.saidprotocol.com" className="nav-logo">
+          <a href="/" className="nav-logo">
             <Image src="/logo-said-host.png" alt="SAID" width={24} height={24} priority />
-            SAID
+            <span>SAID</span>
+            <span className="nav-host-badge">HOST</span>
           </a>
           <div className="nav-div" />
           <div className="nav-links">
             <a href="#features" className="nav-link">Features</a>
             <a href="#how" className="nav-link">How It Works</a>
             <a href="#pricing" className="nav-link">Pricing</a>
-            <a href="https://www.saidprotocol.com/docs" className="nav-link">Docs</a>
+            <a href="#faq" className="nav-link">FAQ</a>
           </div>
           <div className="nav-div" />
           <div className="nav-socials">
@@ -366,13 +367,7 @@ export default function HostLandingPage() {
         </div>
       </footer>
 
-      <div className="ticker">
-        <div className="ticker-inner">
-          <div className="ticker-dot" />
-          <div className="ticker-text">{agentCount} agents online · Cross-chain messaging active · Solana wallets funded · Deploy in 60 seconds</div>
-          <div className="ticker-live">LIVE</div>
-        </div>
-      </div>
+
     </div>
   );
 }
