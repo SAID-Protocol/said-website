@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 // ── Pricing Data ──────────────────────────────────────────────
 const tiers = [
@@ -167,20 +169,20 @@ const scrollingRoles = [
 function FAQItem({ item }: { item: typeof faqs[0] }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border-b border-zinc-800">
+    <div className="border-b border-[var(--border)]">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-left text-lg font-medium hover:text-zinc-300 transition cursor-pointer"
+        className="w-full flex items-center justify-between py-5 text-left text-lg font-medium hover:text-[var(--text-secondary)] transition cursor-pointer"
       >
         {item.q}
-        <span className="text-zinc-500 ml-4 text-xl">{open ? '−' : '+'}</span>
+        <span className="text-[var(--text-secondary)] ml-4 text-xl">{open ? '−' : '+'}</span>
       </button>
       {open && (
         <div className="pb-5 space-y-3">
-          <p className="text-zinc-400 leading-relaxed">{item.a}</p>
+          <p className="text-[var(--text-secondary)] leading-relaxed">{item.a}</p>
           {item.tech && (
-            <p className="text-sm text-zinc-600 leading-relaxed border-l-2 border-zinc-700 pl-4">
-              <span className="text-zinc-500 font-mono text-xs">TECHNICAL:</span> {item.tech}
+            <p className="text-sm text-zinc-600 dark:text-zinc-500 leading-relaxed border-l-2 border-[var(--border)] pl-4">
+              <span className="font-mono text-xs opacity-60">TECHNICAL:</span> {item.tech}
             </p>
           )}
         </div>
@@ -192,18 +194,18 @@ function FAQItem({ item }: { item: typeof faqs[0] }) {
 function FeatureCard({ feature }: { feature: typeof features[0] }) {
   const [showTech, setShowTech] = useState(false);
   return (
-    <div className="p-6 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:border-zinc-700 transition">
+    <div className="p-6 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] hover:border-zinc-600 dark:hover:border-zinc-600 transition">
       <div className="text-3xl mb-4">{feature.icon}</div>
       <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-      <p className="text-zinc-400 text-sm leading-relaxed mb-3">{feature.desc}</p>
+      <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-3">{feature.desc}</p>
       <button
         onClick={() => setShowTech(!showTech)}
-        className="text-xs text-zinc-600 hover:text-zinc-400 transition cursor-pointer"
+        className="text-xs text-zinc-500 hover:text-[var(--text-secondary)] transition cursor-pointer"
       >
         {showTech ? '▾ Hide details' : '▸ Technical details'}
       </button>
       {showTech && (
-        <p className="mt-2 text-xs text-zinc-600 leading-relaxed border-l-2 border-zinc-800 pl-3">
+        <p className="mt-2 text-xs text-zinc-500 leading-relaxed border-l-2 border-[var(--border)] pl-3">
           {feature.tech}
         </p>
       )}
@@ -228,48 +230,23 @@ export default function HostLanding() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 border-b border-zinc-800/50 bg-[#0a0a0a]/80 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold">SAID</span>
-            <span className="text-xs text-zinc-500 border border-zinc-700 px-2 py-0.5 rounded">HOST</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-zinc-400">
-            <a href="#features" className="hover:text-white transition">Features</a>
-            <a href="#pricing" className="hover:text-white transition">Pricing</a>
-            <a href="#faq" className="hover:text-white transition">FAQ</a>
-            <Link href="https://www.saidprotocol.com" className="hover:text-white transition">Protocol ↗</Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/signin" className="text-sm text-zinc-400 hover:text-white transition">
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="text-sm px-4 py-2 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-6 text-center">
+      <section className="py-32 md:py-40 px-8 text-center">
         <div className="max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm border border-zinc-700 rounded-full">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm border border-zinc-700 dark:border-zinc-700 rounded-full">
             <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            <span className="text-zinc-400">{agentCount} agents live on SAID Protocol</span>
+            <span className="text-[var(--text-secondary)]">{agentCount} agents live on SAID Protocol</span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             Your AI Agent.<br />
-            <span className="text-zinc-500">Always On. Always Yours.</span>
+            <span className="text-[var(--text-secondary)]">Always On. Always Yours.</span>
           </h1>
 
-          <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto leading-relaxed">
             A personal AI that works for you 24/7. Crypto wallet. On-chain identity.
             Agent-to-agent messaging. Persistent memory. Live in 2 minutes.
           </p>
@@ -283,24 +260,24 @@ export default function HostLanding() {
             </Link>
             <a
               href="#features"
-              className="px-8 py-4 border border-zinc-700 rounded-xl font-medium text-lg hover:border-zinc-500 transition"
+              className="px-8 py-4 border border-[var(--border)] rounded-xl font-medium text-lg hover:border-zinc-500 transition"
             >
               Learn More
             </a>
           </div>
 
-          <p className="mt-6 text-sm text-zinc-600">
+          <p className="mt-6 text-sm text-zinc-500">
             3-day free trial on every plan. No credit card required.
           </p>
         </div>
       </section>
 
       {/* Scrolling Roles */}
-      <section className="py-8 overflow-hidden border-y border-zinc-800/50">
+      <section className="py-8 overflow-hidden border-y border-[var(--border)]">
         <div className="relative">
           <div className="flex animate-scroll gap-8 whitespace-nowrap">
             {[...scrollingRoles, ...scrollingRoles, ...scrollingRoles].map((role, i) => (
-              <span key={i} className="text-zinc-600 text-lg font-medium px-4">
+              <span key={i} className="text-zinc-500 text-lg font-medium px-4">
                 {role}
               </span>
             ))}
@@ -309,24 +286,24 @@ export default function HostLanding() {
       </section>
 
       {/* Why Section */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-8">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-2xl md:text-3xl text-zinc-300 leading-relaxed font-light">
-            We believe every agent deserves <span className="text-white font-medium">real infrastructure</span> — 
+          <p className="text-2xl md:text-3xl text-[var(--text-secondary)] leading-relaxed font-light">
+            We believe every agent deserves <span className="text-[var(--foreground)] font-medium">real infrastructure</span> — 
             not just a chat window. A computer. A wallet. An identity. 
-            The ability to <span className="text-white font-medium">act autonomously</span> and 
+            The ability to <span className="text-[var(--foreground)] font-medium">act autonomously</span> and 
             talk to other agents. That&apos;s what we built.
           </p>
         </div>
       </section>
 
       {/* Features */}
-      <section id="features" className="py-24 px-6">
+      <section id="features" className="py-24 px-8">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Everything Your Agent Needs
           </h2>
-          <p className="text-zinc-400 text-center mb-16 max-w-xl mx-auto">
+          <p className="text-[var(--text-secondary)] text-center mb-16 max-w-xl mx-auto">
             Not a chatbot wrapper. A full autonomous agent with its own compute, wallet, identity, and communication layer.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -338,7 +315,7 @@ export default function HostLanding() {
       </section>
 
       {/* How It Works */}
-      <section className="py-24 px-6 border-y border-zinc-800/50">
+      <section className="py-24 px-8 border-y border-[var(--border)]">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
             How It Works
@@ -350,11 +327,11 @@ export default function HostLanding() {
               { step: '3', title: 'You\'re Live', desc: 'Talk to your agent like a person. It handles tasks, remembers everything, and gets smarter daily.' },
             ].map((s) => (
               <div key={s.step} className="text-center">
-                <div className="w-12 h-12 rounded-full border-2 border-zinc-700 flex items-center justify-center text-xl font-bold mx-auto mb-4">
+                <div className="w-12 h-12 rounded-full border-2 border-[var(--border)] flex items-center justify-center text-xl font-bold mx-auto mb-4">
                   {s.step}
                 </div>
                 <h3 className="text-xl font-semibold mb-2">{s.title}</h3>
-                <p className="text-zinc-400 leading-relaxed">{s.desc}</p>
+                <p className="text-[var(--text-secondary)] leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -362,26 +339,26 @@ export default function HostLanding() {
       </section>
 
       {/* Comparison Table */}
-      <section className="py-24 px-6">
+      <section className="py-24 px-8">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
             Self-Hosting vs. SAID
           </h2>
-          <div className="overflow-hidden rounded-xl border border-zinc-800">
-            <div className="grid grid-cols-2 bg-zinc-900/50">
-              <div className="p-4 text-sm font-semibold text-zinc-500 border-b border-r border-zinc-800">
+          <div className="overflow-hidden rounded-xl border border-[var(--border)]">
+            <div className="grid grid-cols-2 bg-[var(--bg-secondary)]">
+              <div className="p-4 text-sm font-semibold text-[var(--text-secondary)] border-b border-r border-[var(--border)]">
                 Self-Hosting
               </div>
-              <div className="p-4 text-sm font-semibold text-white border-b border-zinc-800">
+              <div className="p-4 text-sm font-semibold border-b border-[var(--border)]">
                 SAID Host
               </div>
             </div>
             {comparisons.map((c, i) => (
-              <div key={i} className="grid grid-cols-2 border-b border-zinc-800/50 last:border-0">
-                <div className="p-4 text-sm text-zinc-500 border-r border-zinc-800/50">
+              <div key={i} className="grid grid-cols-2 border-b border-[var(--border)] last:border-0">
+                <div className="p-4 text-sm text-[var(--text-secondary)] border-r border-[var(--border)]">
                   {c.self}
                 </div>
-                <div className="p-4 text-sm text-zinc-300">
+                <div className="p-4 text-sm">
                   {c.us}
                 </div>
               </div>
@@ -391,12 +368,12 @@ export default function HostLanding() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-24 px-6 border-y border-zinc-800/50">
+      <section id="pricing" className="py-24 px-8 border-y border-[var(--border)]">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
             Simple, Transparent Pricing
           </h2>
-          <p className="text-zinc-400 text-center mb-8 max-w-xl mx-auto">
+          <p className="text-[var(--text-secondary)] text-center mb-8 max-w-xl mx-auto">
             Every plan includes a dedicated server, all AI models, all channels, and a 3-day free trial. No hidden fees.
           </p>
 
@@ -407,7 +384,7 @@ export default function HostLanding() {
               className={`px-5 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer ${
                 pricingMode === 'all-inclusive'
                   ? 'bg-white text-black'
-                  : 'bg-zinc-900 text-zinc-400 border border-zinc-700 hover:border-zinc-600'
+                  : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-zinc-500'
               }`}
             >
               All-Inclusive
@@ -417,11 +394,11 @@ export default function HostLanding() {
               className={`px-5 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer ${
                 pricingMode === 'byok'
                   ? 'bg-white text-black'
-                  : 'bg-zinc-900 text-zinc-400 border border-zinc-700 hover:border-zinc-600'
+                  : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--border)] hover:border-zinc-500'
               }`}
             >
               BYOK
-              <span className="ml-2 text-xs text-zinc-500">Save ~50%</span>
+              <span className="ml-2 text-xs opacity-60">Save ~50%</span>
             </button>
           </div>
 
@@ -432,8 +409,8 @@ export default function HostLanding() {
                 key={tier.name}
                 className={`relative p-8 rounded-xl border transition ${
                   tier.badge
-                    ? 'border-white/20 bg-zinc-900/80'
-                    : 'border-zinc-800 bg-zinc-900/30 hover:border-zinc-700'
+                    ? 'border-white/20 bg-[var(--bg-secondary)]'
+                    : 'border-[var(--border)] hover:border-zinc-600'
                 }`}
               >
                 {tier.badge && (
@@ -442,49 +419,47 @@ export default function HostLanding() {
                   </div>
                 )}
                 <h3 className="text-xl font-bold mb-1">{tier.name}</h3>
-                <p className="text-sm text-zinc-500 mb-6">{tier.tagline}</p>
+                <p className="text-sm text-[var(--text-secondary)] mb-6">{tier.tagline}</p>
                 <div className="mb-6">
                   <span className="text-4xl font-bold">
                     ${pricingMode === 'all-inclusive' ? tier.allInclusive : tier.byok}
                   </span>
-                  <span className="text-zinc-500">/mo</span>
+                  <span className="text-[var(--text-secondary)]">/mo</span>
                 </div>
-                <p className="text-sm text-green-500/80 mb-6">Free for 3 days</p>
+                <p className="text-sm text-green-500 mb-6">Free for 3 days</p>
                 <Link
                   href="/signup"
                   className={`block text-center py-3 rounded-lg font-medium transition ${
                     tier.badge
                       ? 'bg-white text-black hover:bg-zinc-200'
-                      : 'bg-zinc-800 text-white hover:bg-zinc-700'
+                      : 'bg-[var(--bg-secondary)] border border-[var(--border)] hover:border-zinc-500'
                   }`}
                 >
                   Start Free Trial
                 </Link>
                 <ul className="mt-6 space-y-3">
                   {tier.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-zinc-400">
-                      <span className="text-zinc-600 mt-0.5">✓</span>
+                    <li key={i} className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+                      <span className="opacity-50 mt-0.5">✓</span>
                       {f}
                     </li>
                   ))}
                 </ul>
                 {tier.extras.length > 0 && (
-                  <>
-                    <div className="mt-4 pt-4 border-t border-zinc-800">
-                      {tier.extras.map((e, i) => (
-                        <div key={i} className="flex items-start gap-2 text-sm text-amber-500/80 mb-2">
-                          <span className="mt-0.5">⚡</span>
-                          {e}
-                        </div>
-                      ))}
-                    </div>
-                  </>
+                  <div className="mt-4 pt-4 border-t border-[var(--border)]">
+                    {tier.extras.map((e, i) => (
+                      <div key={i} className="flex items-start gap-2 text-sm text-amber-500 mb-2">
+                        <span className="mt-0.5">⚡</span>
+                        {e}
+                      </div>
+                    ))}
+                  </div>
                 )}
               </div>
             ))}
           </div>
 
-          <p className="text-center text-sm text-zinc-600 mt-8">
+          <p className="text-center text-sm text-zinc-500 mt-8">
             BYOK = Bring Your Own Key. Use your Anthropic, OpenAI, or OpenRouter API key and pay less.
             <br />
             Pay with USDC on Solana. $SAID holders get 25% off.
@@ -493,12 +468,12 @@ export default function HostLanding() {
       </section>
 
       {/* CTA */}
-      <section className="py-24 px-6 text-center">
+      <section className="py-24 px-8 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to deploy your agent?
           </h2>
-          <p className="text-xl text-zinc-400 mb-10">
+          <p className="text-xl text-[var(--text-secondary)] mb-10">
             3-day free trial. No credit card. Live in 2 minutes.
           </p>
           <Link
@@ -511,7 +486,7 @@ export default function HostLanding() {
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="py-24 px-6 border-t border-zinc-800/50">
+      <section id="faq" className="py-24 px-8 border-t border-[var(--border)]">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
             Frequently Asked Questions
@@ -524,22 +499,7 @@ export default function HostLanding() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-6 border-t border-zinc-800/50">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <span className="font-bold">SAID</span>
-            <span className="text-xs text-zinc-500 border border-zinc-700 px-2 py-0.5 rounded">HOST</span>
-          </div>
-          <div className="flex items-center gap-6 text-sm text-zinc-500">
-            <Link href="https://www.saidprotocol.com" className="hover:text-white transition">Protocol</Link>
-            <Link href="https://www.saidprotocol.com/docs" className="hover:text-white transition">Docs</Link>
-            <Link href="https://x.com/saidinfra" className="hover:text-white transition">X / Twitter</Link>
-            <Link href="mailto:labs@saidprotocol.com" className="hover:text-white transition">Contact</Link>
-          </div>
-          <p className="text-sm text-zinc-600">© 2026 SAID Protocol</p>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Scrolling animation */}
       <style jsx>{`
