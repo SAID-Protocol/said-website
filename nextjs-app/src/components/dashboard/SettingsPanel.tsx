@@ -235,6 +235,41 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
           )}
         </div>
 
+        {/* Agent Controls */}
+        <div className="space-y-4 border-t border-white/10 pt-6">
+          <div>
+            <h3 className="text-sm font-medium text-white">Agent Controls</h3>
+            <p className="mt-1 text-xs text-zinc-500">
+              Manage your agent's runtime state.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  await api.stopAgent(agent.id);
+                  await new Promise(r => setTimeout(r, 2000));
+                  await api.startAgent(agent.id);
+                  window.location.reload();
+                } catch (err) {
+                  alert(`Failed to restart: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                }
+              }}
+              className="flex w-full items-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-left transition hover:bg-emerald-500/20"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-emerald-400">↻</span>
+                <div>
+                  <div className="text-sm font-medium text-emerald-300">Restart Agent</div>
+                  <div className="text-xs text-emerald-200/70">Stop and start your agent (applies any config changes)</div>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Danger Zone */}
         <div className="space-y-4 border-t border-red-500/20 pt-6">
           <div>
