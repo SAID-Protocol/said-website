@@ -27,7 +27,9 @@ interface SettingsPanelProps {
 export default function SettingsPanel({ agent }: SettingsPanelProps) {
   const [agentName, setAgentName] = useState(agent.name);
   const [telegramToken, setTelegramToken] = useState('');
-  const [customApiKey, setCustomApiKey] = useState('');
+  const [anthropicKey, setAnthropicKey] = useState('');
+  const [openaiKey, setOpenaiKey] = useState('');
+  const [openrouterKey, setOpenrouterKey] = useState('');
   const [showDeveloperTools, setShowDeveloperTools] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -43,7 +45,9 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
       await api.updateAgent(agent.id, { 
         // @ts-ignore - API may not support all fields yet
         name: agentName,
-        ...(customApiKey.trim() ? { custom_api_key: customApiKey.trim() } : {}),
+        ...(anthropicKey.trim() ? { anthropic_key: anthropicKey.trim() } : {}),
+        ...(openaiKey.trim() ? { openai_key: openaiKey.trim() } : {}),
+        ...(openrouterKey.trim() ? { openrouter_key: openrouterKey.trim() } : {}),
       });
       setHasSaved(true);
       
@@ -144,29 +148,56 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
           </p>
         </div>
 
-        {/* Custom API Key */}
-        <div>
-          <label htmlFor="custom-api-key" className="mb-2 block text-sm font-medium text-white">
-            OpenRouter API Key
-          </label>
-          <input
-            id="custom-api-key"
-            type="password"
-            value={customApiKey}
-            onChange={(e) => {
-              setCustomApiKey(e.target.value);
-              setHasSaved(false);
-            }}
-            className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
-            placeholder="sk-or-v1-..."
-          />
-          <p className="mt-1.5 text-xs text-zinc-500">
-            Bring your own key from{' '}
-            <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:underline">
-              openrouter.ai/keys
-            </a>{' '}
-            for unlimited usage. Leave blank to use included credits.
-          </p>
+        {/* API Keys */}
+        <div className="space-y-4">
+          <div>
+            <h3 className="mb-1 text-sm font-medium text-white">API Keys</h3>
+            <p className="mb-4 text-xs text-zinc-500">
+              Bring your own keys for unlimited usage. Leave blank to use included credits.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="anthropic-key" className="mb-2 block text-sm font-medium text-zinc-300">
+              Anthropic
+            </label>
+            <input
+              id="anthropic-key"
+              type="password"
+              value={anthropicKey}
+              onChange={(e) => { setAnthropicKey(e.target.value); setHasSaved(false); }}
+              className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
+              placeholder="sk-ant-..."
+            />
+          </div>
+
+          <div>
+            <label htmlFor="openai-key" className="mb-2 block text-sm font-medium text-zinc-300">
+              OpenAI
+            </label>
+            <input
+              id="openai-key"
+              type="password"
+              value={openaiKey}
+              onChange={(e) => { setOpenaiKey(e.target.value); setHasSaved(false); }}
+              className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
+              placeholder="sk-..."
+            />
+          </div>
+
+          <div>
+            <label htmlFor="openrouter-key" className="mb-2 block text-sm font-medium text-zinc-300">
+              OpenRouter
+            </label>
+            <input
+              id="openrouter-key"
+              type="password"
+              value={openrouterKey}
+              onChange={(e) => { setOpenrouterKey(e.target.value); setHasSaved(false); }}
+              className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
+              placeholder="sk-or-v1-..."
+            />
+          </div>
         </div>
 
         {/* Save Button */}
