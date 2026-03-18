@@ -8,7 +8,7 @@ export interface Agent {
   flyMachineId: string | null;
   flyAppName: string | null;
   status: 'creating' | 'running' | 'paused' | 'stopped' | 'error';
-  tier: 'starter' | 'pro' | 'power';
+  tier: 'free' | 'starter' | 'pro' | 'power';
   saidIdentity: string | null;
   programMd: string | null;
   config: string | null;

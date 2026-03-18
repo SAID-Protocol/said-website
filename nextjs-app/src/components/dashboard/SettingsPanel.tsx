@@ -35,6 +35,8 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [hasSaved, setHasSaved] = useState(false);
 
+  const isFreeTier = agent.tier === 'free';
+
   const handleSave = async () => {
     setIsSaving(true);
     setSaveError(null);
@@ -152,51 +154,71 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
         <div className="space-y-4">
           <div>
             <h3 className="mb-1 text-sm font-medium text-white">API Keys</h3>
-            <p className="mb-4 text-xs text-zinc-500">
-              Bring your own keys for unlimited usage. Leave blank to use included credits.
-            </p>
-          </div>
+            {isFreeTier ? (
+              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-4 py-3">
+                <p className="text-sm font-medium text-amber-400">
+                  Upgrade to unlock custom API keys
+                </p>
+                <p className="mt-1 text-xs text-zinc-400">
+                  Free tier agents use included credits only. Upgrade to Starter ($39/mo) to bring your own API keys for unlimited usage.
+                </p>
+                <button
+                  type="button"
+                  className="mt-3 rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-black transition hover:bg-amber-400"
+                  onClick={() => window.open('/host#pricing', '_blank')}
+                >
+                  Upgrade Plan
+                </button>
+              </div>
+            ) : (
+              <>
+                <p className="mb-4 text-xs text-zinc-500">
+                  Bring your own keys for unlimited usage. Leave blank to use included credits.
+                </p>
 
-          <div>
-            <label htmlFor="anthropic-key" className="mb-2 block text-sm font-medium text-zinc-300">
-              Anthropic
-            </label>
-            <input
-              id="anthropic-key"
-              type="password"
-              value={anthropicKey}
-              onChange={(e) => { setAnthropicKey(e.target.value); setHasSaved(false); }}
-              className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
-              placeholder="sk-ant-..."
-            />
-          </div>
+                <div>
+                  <label htmlFor="anthropic-key" className="mb-2 block text-sm font-medium text-zinc-300">
+                    Anthropic
+                  </label>
+                  <input
+                    id="anthropic-key"
+                    type="password"
+                    value={anthropicKey}
+                    onChange={(e) => { setAnthropicKey(e.target.value); setHasSaved(false); }}
+                    className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
+                    placeholder="sk-ant-..."
+                  />
+                </div>
 
-          <div>
-            <label htmlFor="openai-key" className="mb-2 block text-sm font-medium text-zinc-300">
-              OpenAI
-            </label>
-            <input
-              id="openai-key"
-              type="password"
-              value={openaiKey}
-              onChange={(e) => { setOpenaiKey(e.target.value); setHasSaved(false); }}
-              className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
-              placeholder="sk-..."
-            />
-          </div>
+                <div>
+                  <label htmlFor="openai-key" className="mb-2 block text-sm font-medium text-zinc-300">
+                    OpenAI
+                  </label>
+                  <input
+                    id="openai-key"
+                    type="password"
+                    value={openaiKey}
+                    onChange={(e) => { setOpenaiKey(e.target.value); setHasSaved(false); }}
+                    className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
+                    placeholder="sk-..."
+                  />
+                </div>
 
-          <div>
-            <label htmlFor="openrouter-key" className="mb-2 block text-sm font-medium text-zinc-300">
-              OpenRouter
-            </label>
-            <input
-              id="openrouter-key"
-              type="password"
-              value={openrouterKey}
-              onChange={(e) => { setOpenrouterKey(e.target.value); setHasSaved(false); }}
-              className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
-              placeholder="sk-or-v1-..."
-            />
+                <div>
+                  <label htmlFor="openrouter-key" className="mb-2 block text-sm font-medium text-zinc-300">
+                    OpenRouter
+                  </label>
+                  <input
+                    id="openrouter-key"
+                    type="password"
+                    value={openrouterKey}
+                    onChange={(e) => { setOpenrouterKey(e.target.value); setHasSaved(false); }}
+                    className="w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 font-mono text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-white/20 focus:bg-black/40"
+                    placeholder="sk-or-v1-..."
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
