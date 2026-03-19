@@ -376,15 +376,15 @@ export default function ProfilePage() {
           </div>
 
           {/* Right: Content */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             
             {/* Activity Stats */}
-            <section className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-6">
-              <h2 className="text-lg font-semibold mb-5">Activity Stats</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <section className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-5">
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 mb-4">Activity Stats</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.05] flex items-center justify-center">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
@@ -397,7 +397,7 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.05] flex items-center justify-center">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg>
@@ -409,7 +409,7 @@ export default function ProfilePage() {
                 </div>
                 
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-lg border border-white/10 bg-white/[0.05] flex items-center justify-center">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                       <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -430,9 +430,9 @@ export default function ProfilePage() {
               const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
               if (!embeddedWallet?.address) return null;
               return (
-                <section className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold">Deposit Wallet</h2>
+                <section className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">Deposit Wallet</h2>
                     <button
                       onClick={async () => {
                         try {
@@ -451,7 +451,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Balances */}
-                  <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="grid grid-cols-2 gap-3 mb-3">
                     <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
                       <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">USDC Balance</p>
                       <p className="text-xl font-bold text-white">${usdcBalance ?? '—'}</p>
