@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useFundWallet } from '@privy-io/react-auth/solana';
 import { api, BillingInfo } from '@/lib/api';
 
 const tierLabels: Record<string, string> = {
@@ -19,6 +20,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 };
 
 export default function BillingPanel() {
+  const { fundWallet } = useFundWallet();
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -82,9 +84,21 @@ export default function BillingPanel() {
             </p>
           </div>
           <button
-            onClick={() => {
-              // TODO: Trigger Privy funding modal
-              alert('Add Funds flow coming soon — use Privy funding modal');
+            onClick={async () => {
+              if (!billing?.privyWalletAddress) {
+                alert('No wallet found. Please log out and log back in.');
+                return;
+              }
+              try {
+                await fundWallet(billing.privyWalletAddress, {
+                  cluster: { name: 'mainnet-beta' },
+                  defaultFundingMethod: 'card',
+                });
+                // Refresh billing after funding
+                setTimeout(loadBilling, 5000);
+              } catch (err) {
+                console.error('Funding failed:', err);
+              }
             }}
             className="rounded-lg bg-amber-500 px-5 py-2.5 text-sm font-medium text-black transition-colors hover:bg-amber-400"
           >
