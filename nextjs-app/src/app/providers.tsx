@@ -2,6 +2,7 @@
 
 import { PrivyProvider } from '@privy-io/react-auth';
 import OnboardingGuard from '@/components/OnboardingGuard';
+import ApiAuthProvider from '@/components/ApiAuthProvider';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -19,9 +20,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         },
       }}
     >
-      <OnboardingGuard>
-        {children}
-      </OnboardingGuard>
+      <ApiAuthProvider>
+        <OnboardingGuard>
+          {children}
+        </OnboardingGuard>
+      </ApiAuthProvider>
     </PrivyProvider>
   );
 }
