@@ -56,6 +56,36 @@ function removeGatewayToken(agentId: string): void {
   }
 }
 
+export interface BillingInfo {
+  tier: string;
+  billingStatus: string;
+  billingMode: string;
+  trialEndsAt: string | null;
+  nextBillingDate: string | null;
+  lastPaymentAt: string | null;
+  monthlyAmountUsd: number | null;
+  privyWalletAddress: string | null;
+  paymentToken: string;
+  walletBalance: number;
+  recentPayments: PaymentRecord[];
+}
+
+export interface PaymentRecord {
+  id: string;
+  amountUsd: number;
+  token: string;
+  tokenAmount: number;
+  txSignature: string | null;
+  status: string;
+  type: string;
+  createdAt: string;
+}
+
+export interface PricingData {
+  all_inclusive: { starter: number; pro: number; power: number };
+  byok: { starter: number; pro: number; power: number };
+}
+
 export interface ActivityItem {
   id: number;
   agent_id: string;
@@ -160,4 +190,32 @@ export const api = {
   
   getAgentUsage: (id: string) =>
     apiFetch<{ llm: { provider: string; limit: number; used: number; remaining: number; disabled: boolean } | null; tier: string }>(`/api/agents/${id}/usage`),
+  
+  // Billing
+  getBilling: () => apiFetch<BillingInfo>('/api/billing'),
+  
+  getWalletBalance: () => apiFetch<{ balance: number; walletAddress: string | null }>('/api/billing/balance'),
+  
+  startTrial: (tier: string, billingMode: string = 'all_inclusive') =>
+    apiFetch<{ billingStatus: string; tier: string; trialEndsAt: string; monthlyAmount: number }>('/api/billing/start-trial', {
+      method: 'POST',
+      body: JSON.stringify({ tier, billingMode }),
+    }),
+  
+  updateTier: (tier: string, billingMode: string) =>
+    apiFetch<{ tier: string; billingMode: string; monthlyAmount: number }>('/api/billing/update-tier', {
+      method: 'POST',
+      body: JSON.stringify({ tier, billingMode }),
+    }),
+  
+  setWallet: (walletAddress: string) =>
+    apiFetch<{ success: boolean; walletAddress: string }>('/api/billing/set-wallet', {
+      method: 'POST',
+      body: JSON.stringify({ walletAddress }),
+    }),
+  
+  getPayments: (limit: number = 20) =>
+    apiFetch<PaymentRecord[]>(`/api/billing/payments?limit=${limit}`),
+  
+  getPricing: () => apiFetch<PricingData>('/api/billing/pricing'),
 };
