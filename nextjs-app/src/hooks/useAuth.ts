@@ -4,7 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 const API_URL = 'https://api.saidprotocol.com';
 
 export function useAuth() {
-  const { user, authenticated, ready } = usePrivy();
+  const { user, authenticated, ready, getAccessToken } = usePrivy();
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,12 +22,13 @@ export function useAuth() {
     
     setLoading(true);
     try {
+      const accessToken = await getAccessToken();
       const privyId = user.id;
       const email = user.email?.address;
       const walletAddress = user.wallet?.address;
       const displayName = email?.split('@')[0] || 'User';
 
-      console.log('Logging into backend with:', { privyId, email, walletAddress, displayName });
+      console.log('Logging into backend with:', { privyId, email, walletAddress, displayName, hasToken: !!accessToken });
 
       const res = await fetch(`${API_URL}/auth/login-privy`, {
         method: 'POST',
@@ -37,6 +38,7 @@ export function useAuth() {
           email,
           walletAddress,
           displayName,
+          accessToken,
         }),
       });
 
