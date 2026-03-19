@@ -18,3 +18,11 @@
 .nav-collapsible.hidden-col{max-width:0;opacity:0;gap:0}
 .nav-pill.collapsed{background:rgba(9,9,11,.95);box-shadow:0 8px 32px rgba(0,0,0,.3);transform:scale(.97)}
 .nav-cta{padding:6px 12px;font-size:14px;font-weight:600;background:#fff;color:#0a0a0a;border-radius:9999px;transition:opacity .2s;white-space:nowrap;border:none;cursor:pointer}
+.nav-avatar-wrap{position:relative}
+.nav-avatar{width:32px;height:32px;border-radius:50%;background:var(--zinc-800);border:1px solid var(--zinc-700);color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.nav-avatar:hover{border-color:var(--zinc-500);background:var(--zinc-700)}
+.nav-dropdown{position:absolute;top:calc(100% + 8px);right:0;min-width:160px;background:var(--zinc-950);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:4px;backdrop-filter:blur(16px);box-shadow:0 12px 40px rgba(0,0,0,.5);z-index:100}
+.nav-dd-item{display:block;width:100%;padding:10px 14px;font-size:13px;font-weight:500;color:var(--zinc-300);border-radius:6px;transition:all .15s;text-align:left;background:none;border:none;cursor:pointer}
+.nav-dd-item:hover{background:rgba(255,255,255,.05);color:#fff}
+.nav-dd-logout{color:#ef4444}
+.nav-dd-logout:hover{background:rgba(239,68,68,.08);color:#ef4444}

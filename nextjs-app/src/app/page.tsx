@@ -116,8 +116,10 @@ export default function HostLandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [openTech, setOpenTech] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
   const lastScrollY = useRef(0);
-  const { login, authenticated } = usePrivy();
+  const avatarRef = useRef<HTMLDivElement>(null);
+  const { login, logout, authenticated, user } = usePrivy();
 
   const doubledRowA = useMemo(() => [...marqueeRowA, ...marqueeRowA], []);
   const doubledRowB = useMemo(() => [...marqueeRowB, ...marqueeRowB], []);
@@ -135,6 +137,17 @@ export default function HostLandingPage() {
 
     elements.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
+  }, []);
+
+  // Close avatar dropdown on click outside
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false);
+      }
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
   }, []);
 
   useEffect(() => {
@@ -180,7 +193,6 @@ export default function HostLandingPage() {
             <div className="nav-links">
               <a href="#features" className="nav-link">Features</a>
               <a href="#pricing" className="nav-link">Pricing</a>
-              <a href="/dashboard" className="nav-link">Dashboard</a>
               <a href="https://www.saidprotocol.com/docs" className="nav-link">Docs</a>
             </div>
             <div className="nav-div" />
@@ -191,7 +203,18 @@ export default function HostLandingPage() {
             </div>
             <div className="nav-div" />
             {authenticated ? (
-              <a href="/dashboard" className="nav-cta">Dashboard</a>
+              <div className="nav-avatar-wrap" ref={avatarRef}>
+                <button className="nav-avatar" onClick={() => setAvatarOpen(!avatarOpen)}>
+                  {user?.email?.address?.[0]?.toUpperCase() || user?.wallet?.address?.slice(0, 2) || '?'}
+                </button>
+                {avatarOpen && (
+                  <div className="nav-dropdown">
+                    <a href="/dashboard" className="nav-dd-item">Dashboard</a>
+                    <a href="/dashboard?tab=settings" className="nav-dd-item">Settings</a>
+                    <button onClick={() => { logout(); setAvatarOpen(false); }} className="nav-dd-item nav-dd-logout">Log Out</button>
+                  </div>
+                )}
+              </div>
             ) : (
               <button onClick={() => login()} className="nav-cta">Log In</button>
             )}
