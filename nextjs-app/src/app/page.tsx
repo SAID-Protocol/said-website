@@ -231,7 +231,7 @@ export default function HostLandingPage() {
             ) : (
               <>
                 <button onClick={() => login()} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Log In</button>
-                <a href="/host" className="nav-cta">Start Free Trial</a>
+                <a href="#pricing" className="nav-cta">Start Free Trial</a>
               </>
             )}
           </div>
@@ -248,7 +248,7 @@ export default function HostLandingPage() {
           <h1>Host your AI agent<br /><span className="dim">on SAID Protocol.</span></h1>
           <p className="hero-sub">We build, host, and run your AI agent with on-chain identity, a Solana wallet, and cross-chain messaging. Deploy in 60 seconds.</p>
           <div className="hero-btns">
-            <a href="/host" className="btn-w">Start Free Trial</a>
+            <a href="#pricing" className="btn-w">Start Free Trial</a>
             <a href="#how" className="btn-o">See How It Works</a>
           </div>
         </div>
@@ -394,7 +394,7 @@ export default function HostLandingPage() {
         <div className="container">
           <h2 className="rv">Ready to launch?</h2>
           <p className="rv">3-day free trial. No credit card. Live in 60 seconds.</p>
-          <a href="/host" className="btn-w rv">Start Free Trial</a>
+          <a href="#pricing" className="btn-w rv">Start Free Trial</a>
         </div>
       </section>
 
