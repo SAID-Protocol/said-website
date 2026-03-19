@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
-import Footer from '@/components/Footer';
+import HostFooter from '@/components/HostFooter';
 import { useAuth } from '@/hooks/useAuth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import { useFundWallet } from '@privy-io/react-auth/solana';
@@ -290,7 +290,7 @@ export default function ProfilePage() {
             </button>
           </div>
         </div>
-        <Footer />
+        <HostFooter />
       </div>
     );
   }
@@ -305,7 +305,7 @@ export default function ProfilePage() {
             <p className="text-zinc-400">Loading profile...</p>
           </div>
         </div>
-        <Footer />
+        <HostFooter />
       </div>
     );
   }
@@ -558,7 +558,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <Footer />
+      <HostFooter />
       </div>
     </>
   );

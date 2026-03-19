@@ -3,6 +3,7 @@
 import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import BillingPanel from '@/components/dashboard/BillingPanel';
+import HostFooter from '@/components/HostFooter';
 
 export default function BillingPage() {
   return (
@@ -29,6 +30,7 @@ export default function BillingPage() {
           <BillingPanel />
         </div>
       </div>
+      <HostFooter />
     </>
   );
 }

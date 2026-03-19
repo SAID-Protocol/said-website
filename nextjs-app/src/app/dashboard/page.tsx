@@ -10,6 +10,7 @@ import ConfigurePanel from '@/components/dashboard/ConfigurePanel';
 import SettingsPanel from '@/components/dashboard/SettingsPanel';
 import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
+import HostFooter from '@/components/HostFooter';
 import { CogIcon, BarChartIcon, ShieldIcon } from '@/components/host/icons';
 
 type RightTab = 'configure' | 'analytics' | 'settings';
@@ -327,6 +328,7 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
+    <HostFooter />
     </>
   );
 }
