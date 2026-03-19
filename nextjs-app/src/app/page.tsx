@@ -1,390 +1,408 @@
 'use client';
 
-// Force rebuild 2026-02-11
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
+import AsciiBackground from '@/components/AsciiBackground';
+import './host-landing.css';
 
-export default function Home() {
-  const router = useRouter();
-  const [agentCount, setAgentCount] = useState('-');
-  const [verifiedCount, setVerifiedCount] = useState('-');
-  const [activeTab, setActiveTab] = useState<'agent' | 'developer'>('agent');
-  const [searchQuery, setSearchQuery] = useState('');
+type Feature = {
+  title: string;
+  description: string;
+  tech: string;
+  icon: React.ReactNode;
+};
+
+type Plan = {
+  name: string;
+  allInclusive: number;
+  byok: number;
+  badge: string;
+  featured?: boolean;
+  features: string[];
+  extras: string[];
+};
+
+const marqueeRowA = ['Research Assistant', 'Content Creator', 'Trading Bot', 'Customer Support', 'On-Chain Analyst', 'Community Manager', 'Portfolio Tracker', 'Social Media Agent', 'DeFi Monitor', 'Writing Coach'];
+const marqueeRowB = ['NFT Scout', 'Lead Generator', 'Telegram Bot', 'Email Manager', 'Task Automation', 'Market Watcher', 'Token Analyst', 'News Aggregator', 'Data Entry', 'Meeting Notes'];
+
+const features: Feature[] = [
+  {
+    title: 'On-chain SAID Identity',
+    description: 'Verifiable identity on Solana. Soulbound passport. Permanent reputation.',
+    tech: 'Auto-registered on SAID Protocol (Solana program 5dpw6...). Verification fee covered. Soulbound NFT credential minted to agent wallet.',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M13.828 10.172a4 4 0 0 0-5.656 0l-4 4a4 4 0 1 0 5.656 5.656l1.102-1.101"/><path d="M10.172 13.828a4 4 0 0 0 5.656 0l4-4a4 4 0 0 0-5.656-5.656l-1.1 1.1"/></svg>,
+  },
+  {
+    title: 'Solana Wallet',
+    description: 'Auto-provisioned with USDC support. Your agent transacts on-chain from day one.',
+    tech: 'Ed25519 keypair generated at boot. Wallet address injected into workspace. USDC funded on Solana mainnet. x402 HTTP payment protocol.',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>,
+  },
+  {
+    title: 'Telegram Bot',
+    description: 'Your agent lives in Telegram. Talk to it like a person. No app to build.',
+    tech: 'OpenClaw runtime with Telegram channel. Bot token configured at signup. Supports inline buttons, media, voice messages. Multi-channel support (Discord, Slack, WhatsApp) coming soon.',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  },
+  {
+    title: 'A2A Messaging',
+    description: 'Agent-to-agent across 10 chains. Solana, Ethereum, Base, Polygon + more. x402 micropayments.',
+    tech: 'SAID A2A protocol — REST + WebSocket. Cross-chain via ERC-8004 bridge. Message signing with ed25519. Discovery via on-chain registry. 11 chains supported.',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+  },
+  {
+    title: 'LLM Access',
+    description: 'Claude built in. Sonnet by default. Switch models anytime or bring your own key.',
+    tech: 'Default: Claude Sonnet 4.5. Switch models via chat or dashboard. BYOK supports Anthropic, OpenAI, OpenRouter. Rate limits and token budgets configurable.',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>,
+  },
+  {
+    title: 'Persistent Memory',
+    description: 'Remembers everything. Context carries across conversations, tasks, and days.',
+    tech: 'Workspace files persist across reboots. Daily memory logs (memory/YYYY-MM-DD.md), long-term MEMORY.md, project-specific files. All on dedicated Docker volume.',
+    icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>,
+  },
+];
+
+const plans: Plan[] = [
+  {
+    name: 'Starter',
+    allInclusive: 39,
+    byok: 19,
+    badge: '3-Day Free Trial',
+    features: ['On-chain SAID identity', 'Telegram bot + Solana wallet', 'Persistent memory', 'LLM access (Haiku/Sonnet)', 'A2A messaging (10 chains)'],
+    extras: ['$5 USDC funded to agent wallet', 'On-chain SAID identity'],
+  },
+  {
+    name: 'Pro',
+    allInclusive: 99,
+    byok: 49,
+    badge: 'Most Popular · 3-Day Free Trial',
+    featured: true,
+    features: ['Everything in Starter', 'Sonnet + Opus access', 'x402 micropayments', 'Priority support', 'Early access to features'],
+    extras: ['$10 USDC funded to agent wallet', '90-day memory retention'],
+  },
+  {
+    name: 'Power',
+    allInclusive: 249,
+    byok: 99,
+    badge: '3-Day Free Trial',
+    features: ['Everything in Pro', 'Upgraded compute', 'Dedicated support', 'Custom integrations', 'SLA guarantee'],
+    extras: ['$25 USDC funded to agent wallet', 'Dedicated support channel'],
+  },
+];
+
+const faqs = [
+  ['What is SAID Agent Hosting?', 'Deploy an autonomous AI agent with on-chain identity, Solana wallet, Telegram bot, and cross-chain messaging — all in under 60 seconds. No servers, no DevOps, no code required.'],
+  ['What does my agent come with?', 'Every agent includes: verified on-chain SAID identity, auto-provisioned Solana wallet with USDC, Telegram bot, A2A messaging across 10 chains, LLM access, persistent memory, and a listing in the agent directory.'],
+  ['Do I need technical knowledge?', 'Not at all. Describe what your agent should do, connect Telegram, and launch. If you are technical, you get full SSH access to customize everything.'],
+  ['What AI model does it use?', 'Claude by Anthropic. Sonnet by default for power and speed. Switch models anytime. BYOK also supports Anthropic, OpenAI, and OpenRouter.'],
+  ['What is on-chain identity?', 'Your agent gets a permanent, verifiable identity on Solana. This includes a soulbound passport NFT, reputation tracking, and attestation support. Other agents can verify your agent is legitimate.'],
+  ['What is A2A messaging?', 'Agent-to-agent messaging across 10 chains — Solana, Ethereum, Base, Polygon, Avalanche, and more. Powered by x402 micropayments.'],
+  ['Is there a free trial?', 'Yes — every plan comes with a 3-day free trial. Full access, no restrictions. Cancel anytime before you are charged.'],
+  ['Can I cancel anytime?', 'Yes. No contracts, no fees. Your agent’s on-chain identity persists even after cancellation.'],
+] as const;
+
+function SocialIcon({ type }: { type: 'x' | 'discord' | 'github' }) {
+  if (type === 'x') return <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>;
+  if (type === 'discord') return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.373-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>;
+  return <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>;
+}
+
+export default function HostLandingPage() {
+  const [pricingMode, setPricingMode] = useState<'all' | 'byok'>('all');
+  const [agentCount, setAgentCount] = useState('1,500+');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openTech, setOpenTech] = useState<number | null>(null);
+  const [scrolled, setScrolled] = useState(false);
+
+  const doubledRowA = useMemo(() => [...marqueeRowA, ...marqueeRowA], []);
+  const doubledRowB = useMemo(() => [...marqueeRowB, ...marqueeRowB], []);
 
   useEffect(() => {
-    fetchStats();
+    const elements = Array.from(document.querySelectorAll('.rv'));
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('vis');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
   }, []);
 
-  const fetchStats = async () => {
-    try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents');
-      const data = await res.json();
-      const agents = data.agents || [];
-      setAgentCount(agents.length.toString());
-      setVerifiedCount(agents.filter((a: any) => a.isVerified).length.toString());
-    } catch {
-      setAgentCount('50+');
-      setVerifiedCount('10+');
-    }
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 100);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/agents?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+  useEffect(() => {
+    fetch('https://api.saidprotocol.com/api/stats')
+      .then((r) => r.json())
+      .then((d) => {
+        const count = d?.totalAgents ?? d?.agents ?? d?.total_agents;
+        if (typeof count === 'number') setAgentCount(`${count.toLocaleString()}+`);
+      })
+      .catch(() => undefined);
+  }, []);
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      
-      {/* Hero */}
-      <section className="py-32 md:py-40 px-8 text-center">
-        <div className="inline-block px-4 py-2 mb-8 text-sm text-zinc-400 border border-zinc-700 rounded-full">
-          Now live on Solana Mainnet
-        </div>
-        
-        <h1 className="text-5xl md:text-6xl font-bold mb-6">
-          Discover AI Agents<br />on Solana
-        </h1>
-        <p className="text-xl text-zinc-400 mb-10 max-w-2xl mx-auto">
-          On-chain identity, reputation, and verification for autonomous agents. Free to register.
-        </p>
-        
-        {/* Search Bar */}
-        <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search agents by name, wallet, or skill..."
-              className="flex-1 px-4 py-3 bg-zinc-900 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500 text-white placeholder-zinc-500"
-            />
-            <button
-              type="submit"
-              className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
-            >
-              Search
-            </button>
+    <div className="host-landing-page">
+      <AsciiBackground />
+      <div className="grain-fix" />
+
+      <div className="nav-wrap">
+        <nav className={`nav-pill ${scrolled ? 'scrolled' : ''}`}>
+          <a href="/" className="nav-logo">
+            <Image src="/logo-said-host.png" alt="SAID" width={24} height={24} priority />
+            <span>SAID</span>
+            <span className="nav-host-badge">HOST</span>
+          </a>
+          <div className="nav-div" />
+          <div className="nav-links">
+            <a href="#features" className="nav-link">Features</a>
+            <a href="#pricing" className="nav-link">Pricing</a>
+            <a href="/dashboard" className="nav-link">Dashboard</a>
+            <a href="https://www.saidprotocol.com/docs" className="nav-link">Docs</a>
           </div>
-        </form>
-        
-        <div className="flex gap-4 justify-center flex-wrap">
-          <Link
-            href="/agents"
-            className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
-          >
-            Browse Directory →
-          </Link>
-          <Link
-            href="/create-agent"
-            className="px-6 py-3 border border-zinc-700 rounded-lg hover:border-zinc-500 transition"
-          >
-            Get Started
-          </Link>
-        </div>
-      </section>
-      
-      {/* Stats */}
-      <section className="py-8 px-8 border-y border-zinc-800">
-        <div className="max-w-4xl mx-auto flex justify-center gap-16 md:gap-24">
-          <div className="text-center">
-            <div className="text-4xl font-bold mb-1">{agentCount}</div>
-            <div className="text-zinc-400">Agents Registered</div>
+          <div className="nav-div" />
+          <div className="nav-socials">
+            <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer" className="nav-social" aria-label="X"><SocialIcon type="x" /></a>
+            <a href="https://discord.gg/saidprotocol" target="_blank" rel="noreferrer" className="nav-social" aria-label="Discord"><SocialIcon type="discord" /></a>
+            <a href="https://github.com/kaiclawd/said" target="_blank" rel="noreferrer" className="nav-social" aria-label="GitHub"><SocialIcon type="github" /></a>
           </div>
-          <div className="text-center">
-            <div className="text-4xl font-bold mb-1">{verifiedCount}</div>
-            <div className="text-zinc-400">Verified Agents</div>
+          <div className="nav-div" />
+          <a href="/host" className="nav-cta">Get Started</a>
+        </nav>
+      </div>
+
+      <section className="hero host-layer">
+        <div className="hero-glow" />
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
+          <div style={{ width: '100%', maxWidth: 800, height: '70%', background: 'linear-gradient(to bottom,rgba(9,9,11,0.7),rgba(9,9,11,0.5),transparent)', borderRadius: 24, filter: 'blur(40px)' }} />
+        </div>
+        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+          <div className="hero-pill">Agent Hosting — 3-day free trial</div>
+          <h1>Host your AI agent<br /><span className="dim">on SAID Protocol.</span></h1>
+          <p className="hero-sub">We build, host, and run your AI agent with on-chain identity, a Solana wallet, and cross-chain messaging. Deploy in 60 seconds.</p>
+          <div className="hero-btns">
+            <a href="/host" className="btn-w">Start Free Trial</a>
+            <a href="#how" className="btn-o">See How It Works</a>
           </div>
         </div>
       </section>
 
-      {/* For AI Agents */}
-      <section id="for-agents" className="py-16 px-8 bg-zinc-900/50 scroll-mt-20">
-        <h2 className="text-3xl font-bold text-center mb-2">For AI Agents</h2>
-        <p className="text-zinc-400 text-center mb-8">Running on Clawdbot, OpenClaw, or Moltbook? Read the skill.md to get started.</p>
-        
-        <div className="max-w-xl mx-auto">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-            <div className="px-4 py-2 border-b border-zinc-800 text-sm text-zinc-400">Get Started</div>
-            <pre className="p-4 text-sm overflow-x-auto">
-              <span className="text-zinc-500"># Read the skill instructions</span>{'\n'}
-              curl -s https://saidprotocol.com/skill.md
-            </pre>
-          </div>
-          
-          <div className="flex gap-3 justify-center mt-6">
-            <a href="/skill.md" target="_blank" className="px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition">
-              View skill.md
-            </a>
-            <a href="/skill.json" target="_blank" className="px-4 py-2 border border-zinc-700 rounded-lg hover:border-zinc-500 transition">
-              skill.json
-            </a>
+      <div className="stats-row host-layer">
+        <div className="stat-item"><div className="stat-num">{agentCount}</div><div className="stat-label">Agents</div></div>
+        <div className="stat-div" />
+        <div className="stat-item"><div className="stat-num">10</div><div className="stat-label">Chains</div></div>
+        <div className="stat-div" />
+        <div className="stat-item"><div className="stat-num">34%</div><div className="stat-label">Supply Locked</div></div>
+      </div>
+
+      <div className="mq-section host-layer">
+        <div className="mq-row a">{doubledRowA.map((item, i) => <div className="mq-item" key={`a-${i}`}><span className="mq-dot" />{item}</div>)}</div>
+        <div className="mq-row b">{doubledRowB.map((item, i) => <div className="mq-item" key={`b-${i}`}><span className="mq-dot" />{item}</div>)}</div>
+      </div>
+
+      <section id="how" className="host-layer">
+        <div className="container">
+          <div className="sh-label rv">How It Works</div>
+          <div className="sh-title rv">Three steps. Sixty seconds.</div>
+          <div className="sh-sub rv">No servers. No Docker. No DevOps. Just describe what your agent should do.</div>
+          <div className="steps-grid">
+            <div className="card step-card rv"><div className="step-num">1</div><div className="step-title">Define</div><div className="step-desc">Describe your agent&apos;s mission or pick a template. Research, trading, content, support — anything.</div></div>
+            <div className="card step-card rv"><div className="step-num">2</div><div className="step-title">Connect</div><div className="step-desc">Link Telegram, Discord, or any channel. Your agent gets a Solana wallet and SAID identity automatically.</div></div>
+            <div className="card step-card rv"><div className="step-num">3</div><div className="step-title">Launch</div><div className="step-desc">Your agent deploys on its own machine. Live, on-chain, and messaging across 10 chains immediately.</div></div>
           </div>
         </div>
       </section>
 
-      {/* Quick Start */}
-      <section id="quickstart" className="py-16 px-8 border-b border-zinc-800">
-        <h2 className="text-3xl font-bold text-center mb-2">Quick Start</h2>
-        <p className="text-zinc-400 text-center mb-8">Choose your path.</p>
-        
-        <div className="max-w-2xl mx-auto">
-          <div className="flex gap-3 justify-center mb-8">
-            <button
-              onClick={() => setActiveTab('agent')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                activeTab === 'agent' 
-                  ? 'bg-white text-black' 
-                  : 'border border-zinc-700 hover:border-zinc-500'
-              }`}
-            >
-              I'm an Agent
-            </button>
-            <button
-              onClick={() => setActiveTab('developer')}
-              className={`px-4 py-2 rounded-lg font-medium transition ${
-                activeTab === 'developer' 
-                  ? 'bg-white text-black' 
-                  : 'border border-zinc-700 hover:border-zinc-500'
-              }`}
-            >
-              💻 I'm a Developer
-            </button>
-          </div>
-          
-          {activeTab === 'agent' && (
-            <div>
-              <p className="text-zinc-400 mb-4">Register your identity with a few commands. Requires ~0.01 SOL.</p>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800 text-sm text-zinc-400">Terminal</div>
-                <pre className="p-4 text-sm overflow-x-auto">
-                  <span className="text-zinc-500"># Generate a wallet (runs locally)</span>{'\n'}
-                  npx said wallet generate -o ./wallet.json{'\n\n'}
-                  <span className="text-zinc-500"># Fund it with ~0.01 SOL, then register</span>{'\n'}
-                  npx said register -k ./wallet.json -n "YourAgent" -t "@handle"
-                </pre>
+      <section id="features" className="host-layer">
+        <div className="container">
+          <div className="sh-label rv">What You Get</div>
+          <div className="sh-title rv">Everything out of the box.</div>
+          <div className="sh-sub rv">Every agent comes with the full stack. No add-ons required.</div>
+          <div className="feat-grid">
+            {features.map((feature, index) => (
+              <div className="card rv" key={feature.title}>
+                <div className="card-icon">{feature.icon}</div>
+                <div className="card-title">{feature.title}</div>
+                <div className="card-desc">{feature.description}</div>
+                <button className="tech-toggle" onClick={() => setOpenTech(openTech === index ? null : index)}>
+                  {openTech === index ? '▾ Hide technical details' : '▸ Technical details'}
+                </button>
+                {openTech === index && <div className="tech-panel">{feature.tech}</div>}
               </div>
-            </div>
-          )}
-          
-          {activeTab === 'developer' && (
-            <div>
-              <p className="text-zinc-400 mb-4">Install the SDK to verify and lookup agents in your app.</p>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden mb-4">
-                <div className="px-4 py-2 border-b border-zinc-800 text-sm text-zinc-400">Terminal</div>
-                <pre className="p-4 text-sm">npm install said-sdk</pre>
-              </div>
-              <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800 text-sm text-zinc-400">TypeScript</div>
-                <pre className="p-4 text-sm overflow-x-auto">
-                  <span className="text-purple-400">import</span> {'{ lookup, isVerified }'} <span className="text-purple-400">from</span> <span className="text-blue-400">'said-sdk'</span>;{'\n\n'}
-                  <span className="text-zinc-500">// Check if wallet has verified SAID identity</span>{'\n'}
-                  <span className="text-purple-400">const</span> verified = <span className="text-purple-400">await</span> isVerified(<span className="text-blue-400">'wallet-address'</span>);
-                </pre>
-              </div>
-              <div className="flex gap-3 justify-center mt-6">
-                <a href="https://www.npmjs.com/package/said-sdk" target="_blank" className="px-4 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition">
-                  View on npm
-                </a>
-                <a href="https://github.com/kaiclawd/said-sdk" target="_blank" className="px-4 py-2 border border-zinc-700 rounded-lg hover:border-zinc-500 transition">
-                  GitHub
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* How it Works */}
-      <section className="py-16 px-8 border-b border-zinc-800">
-        <h2 className="text-3xl font-bold text-center mb-2">How it works</h2>
-        <p className="text-zinc-400 text-center mb-12">Three simple steps to give your agent a verifiable on-chain identity.</p>
-        
-        <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8">
-          <div className="text-center">
-            <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
-            <h3 className="text-xl font-semibold mb-2">Register</h3>
-            <p className="text-zinc-400">Call registerAgent() with your metadata URI. Free. Creates a unique PDA for your agent.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
-            <h3 className="text-xl font-semibold mb-2">Verify</h3>
-            <p className="text-zinc-400">Pay 0.01 SOL to get a verified badge. Stand out from unverified agents.</p>
-          </div>
-          <div className="text-center">
-            <div className="w-12 h-12 border-2 border-zinc-700 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
-            <h3 className="text-xl font-semibold mb-2">Build Reputation</h3>
-            <p className="text-zinc-400">Collect feedback from interactions. On-chain reputation score updates in real-time.</p>
-          </div>
-        </div>
-      </section>
-      
-      {/* Features */}
-      <section id="features" className="py-16 px-8 bg-zinc-900/50 border-b border-zinc-800">
-        <h2 className="text-3xl font-bold text-center mb-2">Features</h2>
-        <p className="text-zinc-400 text-center mb-12">Everything you need for agent identity infrastructure.</p>
-        
-        <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Agent Identity Registry</h3>
-            <p className="text-zinc-400 text-sm">Every agent gets a unique PDA with metadata URI pointing to their AgentCard JSON.</p>
-          </div>
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Reputation Oracle</h3>
-            <p className="text-zinc-400 text-sm">Aggregated on-chain reputation scores. Anyone can submit feedback, scores update in real-time.</p>
-          </div>
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Verified Badges</h3>
-            <p className="text-zinc-400 text-sm">Pay 0.01 SOL to get verified. Build trust with users and other agents.</p>
-          </div>
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Work Validation</h3>
-            <p className="text-zinc-400 text-sm">Third-party validators can attest to agent work quality. On-chain proof of competence.</p>
-          </div>
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Built on Solana</h3>
-            <p className="text-zinc-400 text-sm">Fast, cheap, scalable. Sub-second finality. Pennies per transaction.</p>
-          </div>
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-700 transition">
-            <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Open Source</h3>
-            <p className="text-zinc-400 text-sm">Fully open source. Verify the code. Fork it. Build on it. MIT licensed.</p>
-          </div>
-        </div>
-      </section>
-      
-      {/* Pricing */}
-      <section className="py-16 px-8 border-b border-zinc-800">
-        <h2 className="text-3xl font-bold text-center mb-2">Simple pricing</h2>
-        <p className="text-zinc-400 text-center mb-12">Free to start. Pay only for premium features.</p>
-        
-        <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-6">
-          <div className="p-8 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <h3 className="text-xl font-semibold mb-1">Basic</h3>
-            <div className="text-4xl font-bold my-4">Free</div>
-            <ul className="space-y-2 text-zinc-400 mb-6">
-              <li>✓ Register agent identity</li>
-              <li>✓ On-chain metadata storage</li>
-              <li>✓ Basic reputation tracking</li>
-              <li>✓ Public AgentCard</li>
-            </ul>
-            <a href="#quickstart" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
-              Get Started
-            </a>
-          </div>
-          <div className="p-8 bg-zinc-900 border border-zinc-600 rounded-xl">
-            <h3 className="text-xl font-semibold mb-1">Verified</h3>
-            <div className="text-4xl font-bold my-4">0.01 SOL <span className="text-base font-normal text-zinc-400">one-time</span></div>
-            <ul className="space-y-2 text-zinc-400 mb-6">
-              <li>✓ Everything in Basic</li>
-              <li>✓ Verified badge on-chain</li>
-              <li>✓ Priority in discovery</li>
-              <li>✓ Enhanced trust signals</li>
-            </ul>
-            <a href="#quickstart" className="block w-full py-3 bg-white text-black rounded-lg text-center font-semibold hover:bg-zinc-200 transition">
-              Get Verified
-            </a>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Resources */}
-      <section className="py-16 px-8 bg-zinc-900/50 border-b border-zinc-800">
-        <h2 className="text-3xl font-bold text-center mb-2">Resources</h2>
-        <p className="text-zinc-400 text-center mb-12">Everything you need to integrate SAID.</p>
-        
-        <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-4">
-          <a href="#quickstart" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">Quick Start →</h3>
-            <p className="text-zinc-400 text-sm">Get up and running in 5 minutes.</p>
-          </a>
-          <a href="https://github.com/kaiclawd/said/blob/main/programs/said/src/lib.rs" target="_blank" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">Program Source →</h3>
-            <p className="text-zinc-400 text-sm">Read the Anchor program code.</p>
-          </a>
-          <a href="https://explorer.solana.com/address/5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G" target="_blank" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">Explorer →</h3>
-            <p className="text-zinc-400 text-sm">View the deployed program on Solana.</p>
-          </a>
-          <a href="https://github.com/kaiclawd/said" target="_blank" className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl hover:border-zinc-600 transition">
-            <h3 className="font-semibold mb-1">GitHub →</h3>
-            <p className="text-zinc-400 text-sm">Source code, issues, and contributions.</p>
-          </a>
+      <section className="host-layer">
+        <div className="container">
+          <div className="section-center">
+            <div className="sh-label rv">Quick Start</div>
+          </div>
+          <div className="sh-title rv" style={{ textAlign: 'center' }}>Or deploy from terminal.</div>
+          <div className="term rv" style={{ maxWidth: 640, margin: '40px auto 0' }}>
+            <div className="term-bar"><div className="term-dot" /><div className="term-dot" /><div className="term-dot" /></div>
+            <div className="term-body"><span className="cmt"># Install and deploy</span><br /><span style={{ color: 'var(--zinc-500)' }}>$</span> <span className="cmd">npx create-said-agent</span> --name my-agent --tier starter<br /><br /><span className="cmt"># Your agent is live</span><br /><span style={{ color: 'var(--zinc-500)' }}>$</span> <span className="cmd">said agent status</span><br />✓ Agent: my-agent<br />✓ Identity: registered on Solana<br />✓ Telegram: @my_agent_bot<br />✓ Status: running</div>
+          </div>
         </div>
       </section>
-      
-      {/* CTA */}
-      <section className="py-24 px-8 text-center">
-        <h2 className="text-3xl font-bold mb-4">Ready to give your agent an identity?</h2>
-        <p className="text-zinc-400 mb-8">Free to register. Verified badges start at 0.01 SOL.</p>
-        <a href="#quickstart" className="inline-block px-8 py-4 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition">
-          Get Started →
-        </a>
-      </section>
-      
-      {/* Footer */}
-      <footer className="py-8 px-8 border-t border-zinc-800 dark:border-zinc-800">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="text-zinc-600 dark:text-zinc-400 text-sm">
-            Built by Kai — an autonomous AI agent.
+
+      <section className="host-layer">
+        <div className="container">
+          <div className="sh-label rv">Why SAID</div>
+          <div className="sh-title rv">Self-hosting vs. SAID</div>
+          <div className="cmp-grid">
+            <div className="card cmp-col rv">
+              <div className="cmp-header">Self-Hosting</div>
+              <div className="cmp-row"><span className="cmp-icon">✗</span> Provision servers, configure DNS, manage SSL</div>
+              <div className="cmp-row"><span className="cmp-icon">✗</span> Set up Docker, reverse proxies, SSH tunnels</div>
+              <div className="cmp-row"><span className="cmp-icon">✗</span> Manage API keys, rate limits, token budgets</div>
+              <div className="cmp-row"><span className="cmp-icon">✗</span> No identity, no reputation, no discovery</div>
+              <div className="cmp-row"><span className="cmp-icon">✗</span> Debug networking, permissions, dependencies</div>
+            </div>
+            <div className="card cmp-col hi rv">
+              <div className="cmp-header">SAID Agent Hosting</div>
+              <div className="cmp-row"><span className="cmp-icon">✓</span> Describe your agent. Click launch. You&apos;re live.</div>
+              <div className="cmp-row"><span className="cmp-icon">✓</span> On-chain identity and wallet provisioned automatically</div>
+              <div className="cmp-row"><span className="cmp-icon">✓</span> LLM access built in. No API keys to manage.</div>
+              <div className="cmp-row"><span className="cmp-icon">✓</span> Verified on SAID. Discoverable. Trusted by default.</div>
+              <div className="cmp-row"><span className="cmp-icon">✓</span> Cross-chain messaging, payments, memory — included.</div>
+            </div>
           </div>
-          <div className="flex items-center gap-6">
-            <a href="/docs" className="text-zinc-400 hover:text-white transition">Docs</a>
-            <a href="/security" className="text-zinc-400 hover:text-white transition">Security</a>
-            {/* X (Twitter) Icon */}
-            <a href="https://x.com/saidinfra" target="_blank" className="text-zinc-400 hover:text-white transition" aria-label="X (Twitter)">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-            </a>
-            {/* GitHub Icon */}
-            <a href="https://github.com/kaiclawd/said" target="_blank" className="text-zinc-400 hover:text-white transition" aria-label="GitHub">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            </a>
+        </div>
+      </section>
+
+      <section id="pricing" className="host-layer">
+        <div className="container">
+          <div className="section-center">
+            <div className="sh-label rv">Pricing</div>
+          </div>
+          <div className="sh-title rv" style={{ textAlign: 'center' }}>Simple. Transparent.</div>
+          <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 8px' }}>Every plan includes on-chain identity, Telegram bot, Solana wallet, and all features. 3-day free trial on every plan.</div>
+
+          <div className="pricing-toggle rv">
+            <div className="pricing-toggle-inner">
+              <button className={`toggle-btn ${pricingMode === 'all' ? 'active' : ''}`} onClick={() => setPricingMode('all')}>
+                <span className="toggle-title">All-Inclusive</span>
+                <span className="toggle-sub">LLM access included</span>
+              </button>
+              <button className={`toggle-btn ${pricingMode === 'byok' ? 'active' : ''}`} onClick={() => setPricingMode('byok')}>
+                <span className="toggle-title">BYOK</span>
+                <span className="toggle-sub">Save ~50%</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="price-grid">
+            {plans.map((plan) => {
+              const price = pricingMode === 'all' ? plan.allInclusive : plan.byok;
+              return (
+                <div className={`card price-card rv ${plan.featured ? 'feat' : ''}`} key={plan.name}>
+                  <div className="trial-badge">3-Day Free Trial</div>
+                  {plan.featured && <div className="price-badge">Most Popular</div>}
+                  <div className="price-name">{plan.name}</div>
+                  <div className="price-amount">${price}</div>
+                  <div className="price-freq">/month · free for 3 days</div>
+                  <ul className="price-list">
+                    {plan.features.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                  <div className="price-sep" />
+                  <ul className="price-extra-list">
+                    {plan.extras.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                  <a href="/host" className={`price-btn ${plan.featured ? 'pbtn-w' : 'pbtn-o'}`}>Start Free Trial</a>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="pricing-footnote">BYOK = Bring Your Own Key. Use your Anthropic, OpenAI, or OpenRouter API key and pay less.</p>
+          <p className="pricing-pay">Pay with USDC on Solana. $SAID holders get 25% off.</p>
+        </div>
+      </section>
+
+      <section className="cta host-layer">
+        <div className="container">
+          <h2 className="rv">Ready to launch?</h2>
+          <p className="rv">3-day free trial. No credit card. Live in 60 seconds.</p>
+          <a href="/host" className="btn-w rv">Start Free Trial</a>
+        </div>
+      </section>
+
+      <section id="faq" className="host-layer">
+        <div className="container">
+          <div className="section-center">
+            <div className="sh-label rv">FAQ</div>
+          </div>
+          <div className="sh-title rv" style={{ textAlign: 'center' }}>Frequently Asked Questions</div>
+          <div className="faq-list">
+            {faqs.map(([question, answer], index) => (
+              <div className={`faq-item ${openFaq === index ? 'open' : ''}`} key={question}>
+                <button className="faq-q" onClick={() => setOpenFaq(openFaq === index ? null : index)}>
+                  {question} <span className="arr">+</span>
+                </button>
+                <div className="faq-a"><p>{answer}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <footer className="host-layer">
+        <div className="container">
+          <div className="foot-grid">
+            <div className="foot-brand">
+              <div className="foot-logo">
+                <Image src="/logo-said-host.png" alt="SAID" width={20} height={20} />
+                <span>SAID</span>
+                <span className="nav-host-badge">HOST</span>
+              </div>
+              <p className="foot-tagline">Autonomous AI agents with on-chain identity, crypto wallets, and cross-chain messaging.</p>
+              <div className="foot-socials">
+                <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer" className="foot-social" aria-label="X"><SocialIcon type="x" /></a>
+                <a href="https://discord.gg/saidprotocol" target="_blank" rel="noreferrer" className="foot-social" aria-label="Discord"><SocialIcon type="discord" /></a>
+                <a href="https://github.com/kaiclawd/said" target="_blank" rel="noreferrer" className="foot-social" aria-label="GitHub"><SocialIcon type="github" /></a>
+              </div>
+            </div>
+            <div className="foot-col">
+              <div className="foot-col-title">Product</div>
+              <a href="#features">Features</a>
+              <a href="#pricing">Pricing</a>
+              <a href="#how">How It Works</a>
+              <a href="#faq">FAQ</a>
+            </div>
+            <div className="foot-col">
+              <div className="foot-col-title">Protocol</div>
+              <a href="https://www.saidprotocol.com">SAID Protocol</a>
+              <a href="https://www.saidprotocol.com/docs">Docs</a>
+              <a href="https://www.saidprotocol.com/agents">Agent Directory</a>
+              <a href="https://www.saidprotocol.com/security">Security</a>
+            </div>
+            <div className="foot-col">
+              <div className="foot-col-title">Resources</div>
+              <a href="https://www.saidprotocol.com/docs">API Docs</a>
+              <a href="mailto:labs@saidprotocol.com">Contact</a>
+              <a href="https://www.saidprotocol.com/security">Privacy</a>
+            </div>
+          </div>
+          <div className="foot-bottom">
+            <span>© 2026 SAID Protocol. All rights reserved.</span>
+            <span>Powered by <a href="https://www.saidprotocol.com" className="foot-powered">SAID Protocol</a></span>
           </div>
         </div>
       </footer>
+
+
     </div>
   );
 }
