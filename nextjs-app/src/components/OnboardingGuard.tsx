@@ -1,17 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import OnboardingModal from './OnboardingModal';
 import { useAuth } from '@/hooks/useAuth';
 
 const API_URL = 'https://api.saidprotocol.com';
+const HOSTING_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://app.saidprotocol.com';
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { authenticated, ready } = usePrivy();
+  const { wallets: solanaWallets } = useSolanaWallets();
   const { sessionToken, loading: authLoading } = useAuth();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
+  const walletSynced = useRef(false);
 
   useEffect(() => {
     async function checkProfile() {
@@ -58,6 +62,31 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
     checkProfile();
   }, [ready, authenticated, sessionToken, authLoading]);
+
+  // Auto-save embedded Solana wallet address to billing backend
+  useEffect(() => {
+    if (!authenticated || !sessionToken || authLoading || walletSynced.current) return;
+    
+    // Find the embedded wallet (not external)
+    const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
+    if (!embeddedWallet?.address) return;
+
+    walletSynced.current = true;
+    
+    fetch(`${HOSTING_API_URL}/api/billing/set-wallet`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionToken}`,
+      },
+      body: JSON.stringify({ walletAddress: embeddedWallet.address }),
+    })
+      .then(res => {
+        if (res.ok) console.log('[OnboardingGuard] Wallet synced:', embeddedWallet.address);
+        else console.error('[OnboardingGuard] Wallet sync failed:', res.status);
+      })
+      .catch(err => console.error('[OnboardingGuard] Wallet sync error:', err));
+  }, [authenticated, sessionToken, authLoading, solanaWallets]);
 
   const handleOnboardingComplete = async (data: { username: string; displayName: string; avatar?: string }) => {
     if (!sessionToken) return;
