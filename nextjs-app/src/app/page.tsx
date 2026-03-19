@@ -113,7 +113,7 @@ function SocialIcon({ type }: { type: 'x' | 'discord' | 'github' }) {
 export default function HostLandingPage() {
   const [pricingMode, setPricingMode] = useState<'all' | 'byok'>('all');
   const [agentCount, setAgentCount] = useState('1,500+');
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [openTech, setOpenTech] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
@@ -216,7 +216,10 @@ export default function HostLandingPage() {
                 )}
               </div>
             ) : (
-              <button onClick={() => login()} className="nav-cta">Log In</button>
+              <>
+                <button onClick={() => login()} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Log In</button>
+                <a href="/host" className="nav-cta">Start Free Trial</a>
+              </>
             )}
           </div>
         </nav>
@@ -243,7 +246,7 @@ export default function HostLandingPage() {
         <div className="stat-div" />
         <div className="stat-item"><div className="stat-num">10</div><div className="stat-label">Chains</div></div>
         <div className="stat-div" />
-        <div className="stat-item"><div className="stat-num">34%</div><div className="stat-label">Supply Locked</div></div>
+        <div className="stat-item"><div className="stat-num">99.9%</div><div className="stat-label">Uptime</div></div>
       </div>
 
       <div className="mq-section host-layer">

@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SAID Protocol - Identity Infrastructure for AI Agents",
+  title: "SAID Host - Deploy AI Agents in 60 Seconds",
   description: "On-chain identity, reputation, and verification for autonomous AI agents. Built on Solana.",
   icons: {
     icon: '/favicon.png',
