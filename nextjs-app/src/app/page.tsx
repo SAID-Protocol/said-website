@@ -139,6 +139,19 @@ export default function HostLandingPage() {
     return () => observer.disconnect();
   }, []);
 
+  // Fetch live agent count
+  useEffect(() => {
+    fetch('https://api.saidprotocol.com/api/stats')
+      .then(r => r.json())
+      .then(data => {
+        if (data.totalAgents) {
+          const rounded = Math.floor(data.totalAgents / 50) * 50;
+          setAgentCount(rounded.toLocaleString() + '+');
+        }
+      })
+      .catch(() => {}); // fallback to default
+  }, []);
+
   // Close avatar dropdown on click outside
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
