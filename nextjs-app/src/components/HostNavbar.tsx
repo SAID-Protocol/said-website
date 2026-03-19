@@ -144,12 +144,20 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
               )}
             </div>
           ) : (
-            <button
-              onClick={() => login()}
-              className="hidden md:block px-3 py-1.5 text-sm font-medium text-black bg-white rounded-full hover:bg-zinc-200 transition shrink-0 whitespace-nowrap border-none cursor-pointer"
-            >
-              Log In
-            </button>
+            <>
+              <button
+                onClick={() => login()}
+                className="hidden md:block px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap bg-transparent border-none cursor-pointer"
+              >
+                Log In
+              </button>
+              <a
+                href="#pricing"
+                className="hidden md:block px-3 py-1.5 text-sm font-semibold text-black bg-white rounded-full hover:bg-zinc-200 transition whitespace-nowrap no-underline"
+              >
+                Start Free Trial
+              </a>
+            </>
           )}
 
           {/* Mobile hamburger */}
