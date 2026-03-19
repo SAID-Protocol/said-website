@@ -1,22 +1,77 @@
 'use client';
 
 import { usePrivy } from '@privy-io/react-auth';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import HostNavbar from '@/components/HostNavbar';
+import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { useFundWallet } from '@privy-io/react-auth/solana';
 
 export default function ProfilePage() {
   const { authenticated, user, login } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
+  const { fundWallet } = useFundWallet();
   const { sessionToken } = useAuth();
   const [agentCount, setAgentCount] = useState(0);
   const [verifiedCount, setVerifiedCount] = useState(0);
   const [feedbackGiven, setFeedbackGiven] = useState(0);
   const [memberSince, setMemberSince] = useState('');
   const [loading, setLoading] = useState(true);
+  const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
+  const [solBalance, setSolBalance] = useState<string | null>(null);
+
+  const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+  const fetchBalances = useCallback(async (address: string) => {
+    const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
+    try {
+      // Fetch USDC balance
+      const tokenRes = await fetch(rpc, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0', id: 1,
+          method: 'getTokenAccountsByOwner',
+          params: [address, { mint: USDC_MINT }, { encoding: 'jsonParsed' }],
+        }),
+      });
+      const tokenData = await tokenRes.json();
+      const accounts = tokenData?.result?.value;
+      setUsdcBalance(accounts?.length > 0
+        ? accounts[0].account.data.parsed.info.tokenAmount.uiAmount.toFixed(2)
+        : '0.00');
+
+      // Fetch SOL balance
+      const solRes = await fetch(rpc, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0', id: 2,
+          method: 'getBalance',
+          params: [address],
+        }),
+      });
+      const solData = await solRes.json();
+      setSolBalance(solData?.result?.value != null
+        ? (solData.result.value / 1e9).toFixed(4)
+        : '0.0000');
+    } catch {
+      setUsdcBalance(null);
+      setSolBalance(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    const embedded = solanaWallets.find(w => w.walletClientType === 'privy');
+    if (embedded?.address) {
+      fetchBalances(embedded.address);
+      const interval = setInterval(() => fetchBalances(embedded.address), 30000);
+      return () => clearInterval(interval);
+    }
+  }, [solanaWallets, fetchBalances]);
   
   // Profile data from database
   const [displayName, setDisplayName] = useState('');
@@ -256,14 +311,16 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <HostNavbar />
+      <AsciiBackground />
+      <div className="relative z-10 min-h-screen flex flex-col pt-24">
       
-      <main className="flex-1 max-w-6xl mx-auto w-full px-8 py-12">
+      <main className="flex-1 max-w-6xl mx-auto w-full px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
           
           {/* Left: User Card */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center h-fit lg:sticky lg:top-24">
+          <div className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-6 text-center h-fit lg:sticky lg:top-24">
             {/* Avatar with hover edit */}
             <div 
               className="relative w-28 h-28 mx-auto mb-5 group cursor-pointer"
@@ -322,7 +379,7 @@ export default function ProfilePage() {
           <div className="space-y-6">
             
             {/* Activity Stats */}
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <section className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-6">
               <h2 className="text-lg font-semibold mb-5">Activity Stats</h2>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 
@@ -368,17 +425,48 @@ export default function ProfilePage() {
               </div>
             </section>
 
-            {/* Embedded Wallet */}
+            {/* Deposit Wallet */}
             {(() => {
               const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
               if (!embeddedWallet?.address) return null;
               return (
-                <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                  <h2 className="text-lg font-semibold mb-4">Your Wallet</h2>
-                  <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-3">
-                    <p className="text-xs text-zinc-500 mb-1">Solana Address</p>
+                <section className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold">Deposit Wallet</h2>
+                    <button
+                      onClick={async () => {
+                        try {
+                          await fundWallet(embeddedWallet.address, {
+                            cluster: { name: 'mainnet-beta' },
+                            defaultFundingMethod: 'card',
+                          });
+                        } catch (err) {
+                          console.error('Funding failed:', err);
+                        }
+                      }}
+                      className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-1.5 text-sm font-medium text-emerald-400 hover:bg-emerald-500/20 transition"
+                    >
+                      + Add Funds
+                    </button>
+                  </div>
+
+                  {/* Balances */}
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                      <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">USDC Balance</p>
+                      <p className="text-xl font-bold text-white">${usdcBalance ?? '—'}</p>
+                    </div>
+                    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                      <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1">SOL Balance</p>
+                      <p className="text-xl font-bold text-white">{solBalance ?? '—'} <span className="text-sm font-normal text-zinc-500">SOL</span></p>
+                    </div>
+                  </div>
+
+                  {/* Address */}
+                  <div className="rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-wider text-zinc-500 mb-1.5">Deposit Address (Solana)</p>
                     <div className="flex items-center gap-2">
-                      <code className="text-sm text-zinc-300 font-mono break-all">{embeddedWallet.address}</code>
+                      <code className="text-[13px] text-zinc-300 font-mono break-all leading-relaxed">{embeddedWallet.address}</code>
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(embeddedWallet.address);
@@ -386,51 +474,23 @@ export default function ProfilePage() {
                           if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); }
                         }}
                         id="copy-profile-wallet"
-                        className="shrink-0 rounded-md border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-xs text-zinc-400 hover:bg-zinc-700 hover:text-white transition"
+                        className="shrink-0 rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-zinc-400 hover:bg-white/10 hover:text-white transition"
                       >
                         Copy
                       </button>
                     </div>
-                    <p className="text-[11px] text-zinc-600 mt-1.5">Send USDC (Solana) to fund your hosting account</p>
+                  </div>
+
+                  <div className="mt-3 flex items-start gap-2 text-[12px] text-zinc-500">
+                    <svg className="w-4 h-4 shrink-0 mt-0.5 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 16v-4M12 8h.01" />
+                    </svg>
+                    <span>Send <strong className="text-zinc-400">USDC</strong> on Solana to this address to fund your hosting account. Deposits are credited automatically.</span>
                   </div>
                 </section>
               );
             })()}
-
-            {/* API Keys - Coming Soon (Frosted Glass) */}
-            <section className="relative rounded-xl overflow-hidden">
-              {/* Background content (blurred) */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 filter blur-[2px]">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-lg font-semibold">API Keys</h2>
-                  <button className="px-3 py-1.5 bg-white text-black rounded-lg text-sm font-medium">
-                    + Create Key
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 font-mono text-sm flex justify-between items-center">
-                    <span className="text-zinc-400">said_api_xxxx...xxxx</span>
-                    <span className="text-xs text-zinc-500">Created Feb 10</span>
-                  </div>
-                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 font-mono text-sm flex justify-between items-center">
-                    <span className="text-zinc-400">said_api_yyyy...yyyy</span>
-                    <span className="text-xs text-zinc-500">Created Feb 8</span>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Frosted glass overlay */}
-              <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-md rounded-xl border border-zinc-700/50 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                    </svg>
-                    <span className="font-semibold">API Keys Coming Soon</span>
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
         </div>
       </main>
@@ -499,6 +559,7 @@ export default function ProfilePage() {
       )}
 
       <Footer />
-    </div>
+      </div>
+    </>
   );
 }
