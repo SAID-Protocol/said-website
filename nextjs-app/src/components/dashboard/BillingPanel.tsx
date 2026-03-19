@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useFundWallet } from '@privy-io/react-auth/solana';
 import { api, BillingInfo } from '@/lib/api';
+import WalletQRModal from '@/components/WalletQRModal';
 
 const tierLabels: Record<string, string> = {
   starter: 'Starter',
@@ -24,6 +25,7 @@ export default function BillingPanel() {
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showQR, setShowQR] = useState(false);
 
   useEffect(() => {
     loadBilling();
@@ -111,6 +113,19 @@ export default function BillingPanel() {
             <div className="flex items-center gap-2">
               <code className="text-sm text-zinc-300 font-mono break-all">{billing.privyWalletAddress}</code>
               <button
+                onClick={() => setShowQR(true)}
+                className="shrink-0 rounded-md border border-white/10 bg-white/5 p-1.5 text-zinc-400 hover:bg-white/10 hover:text-white transition"
+                title="Show QR Code"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                  <rect x="14" y="14" width="3" height="3" />
+                  <rect x="18" y="18" width="3" height="3" />
+                </svg>
+              </button>
+              <button
                 onClick={() => {
                   navigator.clipboard.writeText(billing.privyWalletAddress!);
                   const btn = document.getElementById('copy-wallet-btn');
@@ -123,6 +138,9 @@ export default function BillingPanel() {
               </button>
             </div>
             <p className="text-[11px] text-zinc-600 mt-1.5">Send USDC (Solana) to this address to fund your account</p>
+            {showQR && (
+              <WalletQRModal address={billing.privyWalletAddress!} onClose={() => setShowQR(false)} />
+            )}
           </div>
         )}
       </div>

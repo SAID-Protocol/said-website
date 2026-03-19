@@ -9,6 +9,7 @@ import HostFooter from '@/components/HostFooter';
 import { useAuth } from '@/hooks/useAuth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import { useFundWallet } from '@privy-io/react-auth/solana';
+import WalletQRModal from '@/components/WalletQRModal';
 
 export default function ProfilePage() {
   const { authenticated, user, login } = usePrivy();
@@ -22,6 +23,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const [solBalance, setSolBalance] = useState<string | null>(null);
+  const [showQR, setShowQR] = useState(false);
 
   const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
@@ -468,6 +470,21 @@ export default function ProfilePage() {
                     <div className="flex items-center gap-2">
                       <code className="text-[13px] text-zinc-300 font-mono break-all leading-relaxed">{embeddedWallet.address}</code>
                       <button
+                        onClick={() => setShowQR(true)}
+                        className="shrink-0 rounded-md border border-white/10 bg-white/5 p-1.5 text-zinc-400 hover:bg-white/10 hover:text-white transition"
+                        title="Show QR Code"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="3" y="3" width="7" height="7" />
+                          <rect x="14" y="3" width="7" height="7" />
+                          <rect x="3" y="14" width="7" height="7" />
+                          <rect x="14" y="14" width="3" height="3" />
+                          <rect x="18" y="18" width="3" height="3" />
+                          <rect x="18" y="14" width="3" height="1" />
+                          <rect x="14" y="18" width="1" height="3" />
+                        </svg>
+                      </button>
+                      <button
                         onClick={() => {
                           navigator.clipboard.writeText(embeddedWallet.address);
                           const btn = document.getElementById('copy-profile-wallet');
@@ -480,6 +497,11 @@ export default function ProfilePage() {
                       </button>
                     </div>
                   </div>
+
+                  {/* QR Modal */}
+                  {showQR && (
+                    <WalletQRModal address={embeddedWallet.address} onClose={() => setShowQR(false)} />
+                  )}
 
                   <div className="mt-3 flex items-start gap-2 text-[12px] text-zinc-500">
                     <svg className="w-4 h-4 shrink-0 mt-0.5 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
