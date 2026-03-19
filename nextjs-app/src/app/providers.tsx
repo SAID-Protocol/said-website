@@ -8,11 +8,11 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <PrivyProvider
       appId="cmlbxd3qu00jqi80c4pibohzv"
       config={{
-        loginMethods: ['email', 'wallet', 'google', 'twitter'],
+        loginMethods: ['email', 'google', 'twitter'],
         appearance: {
           theme: 'dark',
           accentColor: '#667eea',
-          logo: '/logo.png',
+          logo: '/logo-dark.png',
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
