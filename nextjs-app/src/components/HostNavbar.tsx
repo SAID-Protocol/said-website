@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePrivy } from '@privy-io/react-auth';
-import { useState, useEffect, useRef } from 'react';
+import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface HostNavbarProps {
   noCollapse?: boolean;
@@ -11,10 +12,56 @@ interface HostNavbarProps {
 
 export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
   const { login, logout, authenticated, user } = usePrivy();
+  const { wallets: solanaWallets } = useSolanaWallets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
   const lastScrollY = useRef(0);
+
+  // USDC mint on Solana mainnet
+  const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+
+  const fetchUsdcBalance = useCallback(async (address: string) => {
+    try {
+      const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
+      const res = await fetch(rpc, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0', id: 1,
+          method: 'getTokenAccountsByOwner',
+          params: [
+            address,
+            { mint: USDC_MINT },
+            { encoding: 'jsonParsed' },
+          ],
+        }),
+      });
+      const data = await res.json();
+      const accounts = data?.result?.value;
+      if (accounts && accounts.length > 0) {
+        const amount = accounts[0].account.data.parsed.info.tokenAmount.uiAmount;
+        setUsdcBalance(amount.toFixed(2));
+      } else {
+        setUsdcBalance('0.00');
+      }
+    } catch {
+      setUsdcBalance(null);
+    }
+  }, []);
+
+  // Fetch balance when wallet available
+  useEffect(() => {
+    if (!authenticated) { setUsdcBalance(null); return; }
+    const embedded = solanaWallets.find(w => w.walletClientType === 'privy');
+    if (embedded?.address) {
+      fetchUsdcBalance(embedded.address);
+      // Refresh every 30s
+      const interval = setInterval(() => fetchUsdcBalance(embedded.address), 30000);
+      return () => clearInterval(interval);
+    }
+  }, [authenticated, solanaWallets, fetchUsdcBalance]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -119,7 +166,18 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
 
           {/* Auth — OUTSIDE collapsible so dropdown is never clipped */}
           {authenticated ? (
-            <div className="relative shrink-0 hidden md:block host-avatar-wrap">
+            <div className="relative shrink-0 hidden md:flex items-center gap-2 host-avatar-wrap">
+              {/* USDC Balance chip */}
+              {usdcBalance !== null && !collapsed && (
+                <Link
+                  href="/billing"
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] border border-white/[0.08] hover:bg-white/[0.08] transition text-sm no-underline"
+                >
+                  <span className="text-[11px] font-bold text-emerald-400">$</span>
+                  <span className="text-[13px] font-medium text-zinc-300">{usdcBalance}</span>
+                  <span className="text-[10px] text-zinc-500">USDC</span>
+                </Link>
+              )}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
                 className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700 text-white text-[13px] font-semibold flex items-center justify-center transition-all cursor-pointer"
@@ -216,6 +274,12 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
 
               {authenticated ? (
                 <>
+                  {usdcBalance !== null && (
+                    <Link href="/billing" className="flex items-center gap-2 px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition" onClick={() => setMobileMenuOpen(false)}>
+                      <span className="text-emerald-400 font-bold">$</span>
+                      <span className="font-medium">{usdcBalance} USDC</span>
+                    </Link>
+                  )}
                   <Link href="/profile" className="px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition" onClick={() => setMobileMenuOpen(false)}>
                     Profile
                   </Link>
