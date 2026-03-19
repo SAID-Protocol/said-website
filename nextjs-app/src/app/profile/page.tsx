@@ -6,9 +6,11 @@ import Link from 'next/link';
 import HostNavbar from '@/components/HostNavbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
+import { useSolanaWallets } from '@privy-io/react-auth/solana';
 
 export default function ProfilePage() {
   const { authenticated, user, login } = usePrivy();
+  const { wallets: solanaWallets } = useSolanaWallets();
   const { sessionToken } = useAuth();
   const [agentCount, setAgentCount] = useState(0);
   const [verifiedCount, setVerifiedCount] = useState(0);
@@ -366,13 +368,34 @@ export default function ProfilePage() {
               </div>
             </section>
 
-            {/* Recent Activity */}
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h2 className="text-lg font-semibold mb-5">Recent Activity</h2>
-              <div className="text-center py-6 text-zinc-500 text-sm">
-                No recent activity
-              </div>
-            </section>
+            {/* Embedded Wallet */}
+            {(() => {
+              const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
+              if (!embeddedWallet?.address) return null;
+              return (
+                <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                  <h2 className="text-lg font-semibold mb-4">Your Wallet</h2>
+                  <div className="rounded-lg border border-zinc-700 bg-zinc-800/50 px-4 py-3">
+                    <p className="text-xs text-zinc-500 mb-1">Solana Address</p>
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm text-zinc-300 font-mono break-all">{embeddedWallet.address}</code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(embeddedWallet.address);
+                          const btn = document.getElementById('copy-profile-wallet');
+                          if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); }
+                        }}
+                        id="copy-profile-wallet"
+                        className="shrink-0 rounded-md border border-zinc-700 bg-zinc-800 px-2.5 py-1 text-xs text-zinc-400 hover:bg-zinc-700 hover:text-white transition"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-zinc-600 mt-1.5">Send USDC (Solana) to fund your hosting account</p>
+                  </div>
+                </section>
+              );
+            })()}
 
             {/* API Keys - Coming Soon (Frosted Glass) */}
             <section className="relative rounded-xl overflow-hidden">

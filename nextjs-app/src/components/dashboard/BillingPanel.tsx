@@ -106,9 +106,24 @@ export default function BillingPanel() {
           </button>
         </div>
         {billing.privyWalletAddress && (
-          <p className="mt-3 text-xs text-zinc-600">
-            Wallet: {billing.privyWalletAddress.slice(0, 8)}...{billing.privyWalletAddress.slice(-6)}
-          </p>
+          <div className="mt-4 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
+            <p className="text-xs text-zinc-500 mb-1">Your Wallet Address</p>
+            <div className="flex items-center gap-2">
+              <code className="text-sm text-zinc-300 font-mono break-all">{billing.privyWalletAddress}</code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(billing.privyWalletAddress!);
+                  const btn = document.getElementById('copy-wallet-btn');
+                  if (btn) { btn.textContent = '✓'; setTimeout(() => { btn.textContent = 'Copy'; }, 1500); }
+                }}
+                id="copy-wallet-btn"
+                className="shrink-0 rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-zinc-400 hover:bg-white/10 hover:text-white transition"
+              >
+                Copy
+              </button>
+            </div>
+            <p className="text-[11px] text-zinc-600 mt-1.5">Send USDC (Solana) to this address to fund your account</p>
+          </div>
         )}
       </div>
 
