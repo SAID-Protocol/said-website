@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
+import { usePrivy } from '@privy-io/react-auth';
 import AsciiBackground from '@/components/AsciiBackground';
 import './host-landing.css';
 
@@ -114,7 +115,9 @@ export default function HostLandingPage() {
   const [agentCount, setAgentCount] = useState('1,500+');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [openTech, setOpenTech] = useState<number | null>(null);
-  const [scrolled, setScrolled] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const lastScrollY = useRef(0);
+  const { login, authenticated } = usePrivy();
 
   const doubledRowA = useMemo(() => [...marqueeRowA, ...marqueeRowA], []);
   const doubledRowB = useMemo(() => [...marqueeRowB, ...marqueeRowB], []);
@@ -135,8 +138,17 @@ export default function HostLandingPage() {
   }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 100);
-    onScroll();
+    const onScroll = () => {
+      const scrollY = window.scrollY;
+      const scrollingDown = scrollY > lastScrollY.current;
+      if (scrollY > 100 && scrollingDown) {
+        setCollapsed(true);
+      } else if (!scrollingDown) {
+        setCollapsed(false);
+      }
+      if (scrollY <= 20) setCollapsed(false);
+      lastScrollY.current = scrollY;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -157,27 +169,33 @@ export default function HostLandingPage() {
       <div className="grain-fix" />
 
       <div className="nav-wrap">
-        <nav className={`nav-pill ${scrolled ? 'scrolled' : ''}`}>
+        <nav className={`nav-pill ${collapsed ? 'collapsed' : ''}`}>
           <a href="/" className="nav-logo">
             <Image src="/logo-said-host.png" alt="SAID" width={24} height={24} priority />
             <span>SAID</span>
             <span className="nav-host-badge">HOST</span>
           </a>
-          <div className="nav-div" />
-          <div className="nav-links">
-            <a href="#features" className="nav-link">Features</a>
-            <a href="#pricing" className="nav-link">Pricing</a>
-            <a href="/dashboard" className="nav-link">Dashboard</a>
-            <a href="https://www.saidprotocol.com/docs" className="nav-link">Docs</a>
+          <div className={`nav-collapsible ${collapsed ? 'hidden-col' : ''}`}>
+            <div className="nav-div" />
+            <div className="nav-links">
+              <a href="#features" className="nav-link">Features</a>
+              <a href="#pricing" className="nav-link">Pricing</a>
+              <a href="/dashboard" className="nav-link">Dashboard</a>
+              <a href="https://www.saidprotocol.com/docs" className="nav-link">Docs</a>
+            </div>
+            <div className="nav-div" />
+            <div className="nav-socials">
+              <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer" className="nav-social" aria-label="X"><SocialIcon type="x" /></a>
+              <a href="https://discord.gg/saidprotocol" target="_blank" rel="noreferrer" className="nav-social" aria-label="Discord"><SocialIcon type="discord" /></a>
+              <a href="https://github.com/kaiclawd/said" target="_blank" rel="noreferrer" className="nav-social" aria-label="GitHub"><SocialIcon type="github" /></a>
+            </div>
+            <div className="nav-div" />
+            {authenticated ? (
+              <a href="/dashboard" className="nav-cta">Dashboard</a>
+            ) : (
+              <button onClick={() => login()} className="nav-cta">Log In</button>
+            )}
           </div>
-          <div className="nav-div" />
-          <div className="nav-socials">
-            <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer" className="nav-social" aria-label="X"><SocialIcon type="x" /></a>
-            <a href="https://discord.gg/saidprotocol" target="_blank" rel="noreferrer" className="nav-social" aria-label="Discord"><SocialIcon type="discord" /></a>
-            <a href="https://github.com/kaiclawd/said" target="_blank" rel="noreferrer" className="nav-social" aria-label="GitHub"><SocialIcon type="github" /></a>
-          </div>
-          <div className="nav-div" />
-          <a href="/host" className="nav-cta">Get Started</a>
         </nav>
       </div>
 
