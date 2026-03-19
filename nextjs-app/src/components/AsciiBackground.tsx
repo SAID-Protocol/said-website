@@ -271,8 +271,8 @@ export default function AsciiBackground() {
 
   return (
     <>
-      <canvas ref={canvasRef} className="ascii-bg-canvas" />
-      <div ref={vignetteRef} className="ascii-bg-vignette" />
+      <canvas ref={canvasRef} className="ascii-bg-canvas" style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', width: '100%', height: '100%' }} />
+      <div ref={vignetteRef} className="ascii-bg-vignette" style={{ position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', background: 'radial-gradient(ellipse at center, transparent 30%, rgba(9,9,11,.8) 100%)' }} />
     </>
   );
 }
