@@ -311,10 +311,17 @@ export default function HostLandingPage() {
           <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 8px' }}>Every plan includes on-chain SAID identity, Solana wallet, persistent workspace, and A2A messaging. 3-day free trial.</div>
 
           <div className="pricing-toggle rv">
-            <div className="pricing-toggle-inner">
+            <div className="pricing-toggle-inner" id="pricing-toggle">
+              <div
+                className="toggle-pill"
+                style={{
+                  left: pricingMode === 'all' ? '3px' : '50%',
+                  width: 'calc(50% - 3px)',
+                }}
+              />
               <button className={`toggle-btn ${pricingMode === 'all' ? 'active' : ''}`} onClick={() => setPricingMode('all')}>
                 <span className="toggle-title">All-Inclusive</span>
-                <span className="toggle-sub">LLM access included</span>
+                <span className="toggle-sub">LLM included</span>
               </button>
               <button className={`toggle-btn ${pricingMode === 'byok' ? 'active' : ''}`} onClick={() => setPricingMode('byok')}>
                 <span className="toggle-title">BYOK</span>

@@ -153,7 +153,8 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
               </button>
               <a
                 href="#pricing"
-                className="hidden md:block px-3 py-1.5 text-sm font-semibold text-black bg-white rounded-full hover:bg-zinc-200 transition whitespace-nowrap no-underline"
+                className="hidden md:block px-3 py-1.5 text-sm font-semibold bg-white rounded-full hover:bg-zinc-200 transition whitespace-nowrap no-underline"
+                style={{ color: '#0a0a0a' }}
               >
                 Start Free Trial
               </a>
