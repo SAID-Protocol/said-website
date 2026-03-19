@@ -3,7 +3,7 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
+import HostNavbar from '@/components/HostNavbar';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -255,7 +255,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      <HostNavbar />
       
       <main className="flex-1 max-w-6xl mx-auto w-full px-8 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
