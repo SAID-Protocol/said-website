@@ -221,7 +221,7 @@ export default function ProfilePage() {
   if (!authenticated) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <HostNavbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center px-8">
             <h1 className="text-2xl font-bold mb-4">Please log in to view your profile</h1>
@@ -241,7 +241,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <Navbar />
+        <HostNavbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin mb-4"></div>

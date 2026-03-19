@@ -225,7 +225,6 @@ export default function DashboardPage() {
         return <ActivityPanel agentId={selectedAgent.id} />;
       case 'settings':
         return <SettingsPanel agent={selectedAgent} />;
-        return <SettingsPanel agent={selectedAgent} />;
       default:
         return null;
     }
