@@ -288,6 +288,7 @@ export default function HostLandingPage() {
         </div>
       </section>
 
+      {/* Terminal Quick Start section — commented out for hosting site, CLI lives in docs
       <section className="host-layer">
         <div className="container">
           <div className="section-center">
@@ -300,6 +301,7 @@ export default function HostLandingPage() {
           </div>
         </div>
       </section>
+      */}
 
       <section className="host-layer">
         <div className="container">
