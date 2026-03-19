@@ -8,7 +8,7 @@ import AgentList from '@/components/dashboard/AgentList';
 import ChatPanel from '@/components/dashboard/ChatPanel';
 import ConfigurePanel from '@/components/dashboard/ConfigurePanel';
 import SettingsPanel from '@/components/dashboard/SettingsPanel';
-import Navbar from '@/components/Navbar';
+import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import { CogIcon, BarChartIcon, ShieldIcon } from '@/components/host/icons';
 
@@ -167,7 +167,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <>
-        <Navbar />
+        <HostNavbar noCollapse />
         <AsciiBackground />
         <div className="relative z-10 min-h-screen px-4 pb-12 pt-24 sm:px-6">
           <div className="flex items-center justify-center py-12">
@@ -181,7 +181,7 @@ export default function DashboardPage() {
   if (error) {
     return (
       <>
-        <Navbar />
+        <HostNavbar noCollapse />
         <AsciiBackground />
         <div className="relative z-10 min-h-screen px-4 pb-12 pt-24 sm:px-6">
           <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-6 text-center">
@@ -195,7 +195,7 @@ export default function DashboardPage() {
   if (!agentId || !selectedAgent) {
     return (
       <>
-        <Navbar />
+        <HostNavbar noCollapse />
         <AsciiBackground />
         <div className="relative z-10 min-h-screen px-4 pb-12 pt-24 sm:px-6">
           <div className="mx-auto max-w-7xl">
@@ -232,7 +232,7 @@ export default function DashboardPage() {
 
   return (
     <>
-    <Navbar />
+    <HostNavbar noCollapse />
     <AsciiBackground />
     <div className="relative z-10 h-screen overflow-hidden px-4 pt-24 sm:px-6">
       <div className="flex h-full min-h-0 flex-col overflow-hidden pb-6">

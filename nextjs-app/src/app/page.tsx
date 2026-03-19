@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import { usePrivy } from '@privy-io/react-auth';
 import AsciiBackground from '@/components/AsciiBackground';
+import HostNavbar from '@/components/HostNavbar';
 import './host-landing.css';
 
 type Feature = {
@@ -143,10 +144,7 @@ export default function HostLandingPage() {
   const [agentCount, setAgentCount] = useState('1,500+');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [openTech, setOpenTech] = useState<number | null>(null);
-  const [collapsed, setCollapsed] = useState(false);
-  const [avatarOpen, setAvatarOpen] = useState(false);
-  const lastScrollY = useRef(0);
-  const avatarRef = useRef<HTMLDivElement>(null);
+  // Nav state moved to HostNavbar component
   const { login, logout, authenticated, user } = usePrivy();
 
   const doubledRowA = useMemo(() => [...marqueeRowA, ...marqueeRowA], []);
@@ -180,32 +178,9 @@ export default function HostLandingPage() {
       .catch(() => {}); // fallback to default
   }, []);
 
-  // Close avatar dropdown on click outside
-  useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
-        setAvatarOpen(false);
-      }
-    };
-    document.addEventListener('click', onClick);
-    return () => document.removeEventListener('click', onClick);
-  }, []);
+  // Avatar dropdown click-outside moved to HostNavbar
 
-  useEffect(() => {
-    const onScroll = () => {
-      const scrollY = window.scrollY;
-      const scrollingDown = scrollY > lastScrollY.current;
-      if (scrollY > 100 && scrollingDown) {
-        setCollapsed(true);
-      } else if (!scrollingDown) {
-        setCollapsed(false);
-      }
-      if (scrollY <= 20) setCollapsed(false);
-      lastScrollY.current = scrollY;
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  // Scroll collapse moved to HostNavbar
 
   useEffect(() => {
     fetch('https://api.saidprotocol.com/api/stats')
@@ -222,49 +197,7 @@ export default function HostLandingPage() {
       <AsciiBackground />
       <div className="grain-fix" />
 
-      <div className="nav-wrap">
-        <nav className={`nav-pill ${collapsed ? 'collapsed' : ''}`}>
-          <a href="/" className="nav-logo">
-            <Image src="/logo-said-host.png" alt="SAID" width={24} height={24} priority />
-            <span>SAID</span>
-            <span className="nav-host-badge">HOST</span>
-          </a>
-          <div className={`nav-collapsible ${collapsed ? 'hidden-col' : ''}`}>
-            <div className="nav-div" />
-            <div className="nav-links">
-              <a href="#features" className="nav-link">Features</a>
-              <a href="#pricing" className="nav-link">Pricing</a>
-              <a href="https://www.saidprotocol.com/docs" className="nav-link">Docs</a>
-            </div>
-            <div className="nav-div" />
-            <div className="nav-socials">
-              <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer" className="nav-social" aria-label="X"><SocialIcon type="x" /></a>
-              <a href="https://discord.gg/saidprotocol" target="_blank" rel="noreferrer" className="nav-social" aria-label="Discord"><SocialIcon type="discord" /></a>
-              <a href="https://github.com/kaiclawd/said" target="_blank" rel="noreferrer" className="nav-social" aria-label="GitHub"><SocialIcon type="github" /></a>
-            </div>
-            <div className="nav-div" />
-            {authenticated ? (
-              <div className="nav-avatar-wrap" ref={avatarRef}>
-                <button className="nav-avatar" onClick={() => setAvatarOpen(!avatarOpen)}>
-                  {user?.email?.address?.[0]?.toUpperCase() || user?.wallet?.address?.slice(0, 2) || '?'}
-                </button>
-                {avatarOpen && (
-                  <div className="nav-dropdown">
-                    <a href="/dashboard" className="nav-dd-item">Dashboard</a>
-                    <a href="/dashboard?tab=settings" className="nav-dd-item">Settings</a>
-                    <button onClick={() => { logout(); setAvatarOpen(false); }} className="nav-dd-item nav-dd-logout">Log Out</button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <>
-                <button onClick={() => login()} className="nav-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>Log In</button>
-                <a href="#pricing" className="nav-cta">Start Free Trial</a>
-              </>
-            )}
-          </div>
-        </nav>
-      </div>
+      <HostNavbar />
 
       <section className="hero host-layer">
         <div className="hero-glow" />

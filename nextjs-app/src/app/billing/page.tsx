@@ -1,13 +1,13 @@
 'use client';
 
-import Navbar from '@/components/Navbar';
+import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import BillingPanel from '@/components/dashboard/BillingPanel';
 
 export default function BillingPage() {
   return (
     <>
-      <Navbar />
+      <HostNavbar noCollapse />
       <AsciiBackground />
       <div className="relative z-10 min-h-screen px-4 pb-12 pt-24 sm:px-6">
         <div className="mx-auto max-w-4xl">

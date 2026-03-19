@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
-import Navbar from '@/components/Navbar';
+import HostNavbar from '@/components/HostNavbar';
 import Footer from '@/components/Footer';
 import AsciiBackground from '@/components/AsciiBackground';
 import StepIndicator from '@/components/host/StepIndicator';
@@ -232,7 +232,7 @@ export default function HostAgentPage() {
     <div className="min-h-screen flex flex-col bg-black relative">
       <AsciiBackground />
       <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar />
+        <HostNavbar noCollapse />
         
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-center">Host an Agent</h1>
