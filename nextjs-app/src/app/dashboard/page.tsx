@@ -8,36 +8,23 @@ import AgentList from '@/components/dashboard/AgentList';
 import ChatPanel from '@/components/dashboard/ChatPanel';
 import ConfigurePanel from '@/components/dashboard/ConfigurePanel';
 import SettingsPanel from '@/components/dashboard/SettingsPanel';
-import BillingPanel from '@/components/dashboard/BillingPanel';
 import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import { CogIcon, BarChartIcon, ShieldIcon } from '@/components/host/icons';
 
-function WalletIcon({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1" y="5" width="22" height="16" rx="2" ry="2" />
-      <path d="M16 14h.01" />
-      <path d="M1 10h22" />
-    </svg>
-  );
-}
-
-type RightTab = 'configure' | 'analytics' | 'billing' | 'settings';
-type MobileTab = 'chat' | 'configure' | 'analytics' | 'billing' | 'settings';
+type RightTab = 'configure' | 'analytics' | 'settings';
+type MobileTab = 'chat' | 'configure' | 'analytics' | 'settings';
 
 const mobileTabs: Array<{ id: MobileTab; label: string; icon: React.ReactNode }> = [
   { id: 'chat', label: 'Chat', icon: null },
   { id: 'configure', label: 'Configure', icon: <CogIcon size={14} /> },
   { id: 'analytics', label: 'Analytics', icon: <BarChartIcon size={14} /> },
-  { id: 'billing', label: 'Billing', icon: <WalletIcon size={14} /> },
   { id: 'settings', label: 'Settings', icon: <ShieldIcon size={14} /> },
 ];
 
 const rightTabs: Array<{ id: RightTab; label: string; icon: React.ReactNode }> = [
   { id: 'configure', label: 'Configure', icon: <CogIcon size={14} /> },
   { id: 'analytics', label: 'Analytics', icon: <BarChartIcon size={14} /> },
-  { id: 'billing', label: 'Billing', icon: <WalletIcon size={14} /> },
   { id: 'settings', label: 'Settings', icon: <ShieldIcon size={14} /> },
 ];
 
@@ -236,8 +223,6 @@ export default function DashboardPage() {
         return <ConfigurePanel agent={selectedAgent} />;
       case 'analytics':
         return <ActivityPanel agentId={selectedAgent.id} />;
-      case 'billing':
-        return <BillingPanel />;
       case 'settings':
         return <SettingsPanel agent={selectedAgent} />;
       default:

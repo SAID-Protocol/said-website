@@ -157,6 +157,13 @@ export default function Navbar() {
                 >
                   My Agents
                 </Link>
+                <Link
+                  href="/billing"
+                  className="block px-4 py-3 hover:bg-zinc-800 transition"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Billing
+                </Link>
                 <hr className="border-zinc-800" />
                 <button
                   onClick={() => { logout(); setMenuOpen(false); }}
