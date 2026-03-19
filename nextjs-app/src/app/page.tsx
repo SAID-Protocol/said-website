@@ -75,10 +75,11 @@ const plans: Plan[] = [
     badge: '3-Day Free Trial',
     features: [
       '2 vCPU / 4GB RAM / 40GB SSD',
-      '600 daily units (Haiku)',
+      '$10/mo API credits (Haiku)',
       'Telegram channel',
       'SAID identity + Solana wallet',
       'A2A messaging (10 chains)',
+      'Persistent workspace',
       '7-day memory retention',
     ],
     extras: ['$2 USDC funded at signup'],
@@ -92,7 +93,7 @@ const plans: Plan[] = [
     featured: true,
     features: [
       '4 vCPU / 8GB RAM / 80GB SSD',
-      '1,200 daily units (Haiku + Sonnet)',
+      '$30/mo API credits (Haiku + Sonnet)',
       'Telegram + Discord',
       'Browser automation',
       'Code execution',
@@ -109,7 +110,7 @@ const plans: Plan[] = [
     badge: '3-Day Free Trial',
     features: [
       '8 vCPU / 16GB RAM / 160GB SSD',
-      '3,000 daily units (All models + Opus)',
+      '$75/mo API credits (All models + Opus)',
       'All channels + API access',
       'Browser automation',
       'Full code execution',
