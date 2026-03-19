@@ -82,7 +82,7 @@ const plans: Plan[] = [
       'Persistent workspace',
       '7-day memory retention',
     ],
-    extras: ['$2 USDC funded at signup'],
+    extras: ['$2 USDC funded at signup', 'Email support'],
   },
   {
     name: 'Pro',
