@@ -128,6 +128,9 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
               </button>
               {menuOpen && (
                 <div className="absolute right-0 top-[calc(100%+8px)] min-w-[160px] bg-zinc-950 border border-white/[.08] rounded-[10px] p-1 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,.5)] z-[100]">
+                  <Link href="/profile" className="block w-full px-3.5 py-2.5 text-[13px] font-medium text-zinc-300 rounded-md hover:bg-white/5 hover:text-white transition text-left" onClick={() => setMenuOpen(false)}>
+                    Profile
+                  </Link>
                   <Link href="/dashboard" className="block w-full px-3.5 py-2.5 text-[13px] font-medium text-zinc-300 rounded-md hover:bg-white/5 hover:text-white transition text-left" onClick={() => setMenuOpen(false)}>
                     Dashboard
                   </Link>
@@ -213,6 +216,9 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
 
               {authenticated ? (
                 <>
+                  <Link href="/profile" className="px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition" onClick={() => setMobileMenuOpen(false)}>
+                    Profile
+                  </Link>
                   <Link href="/dashboard" className="px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition" onClick={() => setMobileMenuOpen(false)}>
                     Dashboard
                   </Link>
