@@ -15,20 +15,6 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
   useEffect(() => {
     async function checkProfile() {
-      // On hosting site, skip onboarding entirely — just authenticate
-      // The protocol site (www.saidprotocol.com) handles username/avatar setup
-      const isHostingSite = typeof window !== 'undefined' && (
-        window.location.hostname.startsWith('host.') ||
-        window.location.pathname.startsWith('/billing') ||
-        window.location.pathname.startsWith('/dashboard') ||
-        window.location.pathname.startsWith('/host')
-      );
-      
-      if (isHostingSite) {
-        setChecking(false);
-        return;
-      }
-
       // If not authenticated, no need to check - just show content
       if (ready && !authenticated) {
         setChecking(false);
