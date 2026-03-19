@@ -15,6 +15,7 @@ type Feature = {
 
 type Plan = {
   name: string;
+  tier: string;
   allInclusive: number;
   byok: number;
   badge: string;
@@ -68,6 +69,7 @@ const features: Feature[] = [
 const plans: Plan[] = [
   {
     name: 'Starter',
+    tier: 'starter',
     allInclusive: 39,
     byok: 19,
     badge: '3-Day Free Trial',
@@ -76,6 +78,7 @@ const plans: Plan[] = [
   },
   {
     name: 'Pro',
+    tier: 'pro',
     allInclusive: 99,
     byok: 49,
     badge: 'Most Popular · 3-Day Free Trial',
@@ -85,6 +88,7 @@ const plans: Plan[] = [
   },
   {
     name: 'Power',
+    tier: 'power',
     allInclusive: 249,
     byok: 99,
     badge: '3-Day Free Trial',
@@ -379,7 +383,7 @@ export default function HostLandingPage() {
                   <ul className="price-extra-list">
                     {plan.extras.map((item) => <li key={item}>{item}</li>)}
                   </ul>
-                  <a href="/host" className={`price-btn ${plan.featured ? 'pbtn-w' : 'pbtn-o'}`}>Start Free Trial</a>
+                  <a href={`/host?tier=${plan.tier}`} className={`price-btn ${plan.featured ? 'pbtn-w' : 'pbtn-o'}`}>Start Free Trial</a>
                 </div>
               );
             })}

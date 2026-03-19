@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -88,8 +88,10 @@ const ADVANCED_SKILLS = [
 ];
 
 export default function HostAgentPage() {
-  const { authenticated, login } = usePrivy();
+  const { authenticated, ready, login } = usePrivy();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const tierFromUrl = searchParams.get('tier') as 'starter' | 'pro' | 'power' | null;
   const [currentStep, setCurrentStep] = useState<Step>(1);
   
   // Step 1: Define Your Agent
@@ -106,8 +108,8 @@ export default function HostAgentPage() {
   const [dailyLimit, setDailyLimit] = useState('10');
   const [enabledSkills, setEnabledSkills] = useState<Set<string>>(new Set());
   
-  // Step 3: Plan
-  const [selectedPlan, setSelectedPlan] = useState<'free' | 'starter' | 'pro' | 'power' | null>(null);
+  // Plan (from URL or step 3 fallback)
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'starter' | 'pro' | 'power' | null>(tierFromUrl);
   const [annualBilling, setAnnualBilling] = useState(false);
   
   // Launch state
@@ -235,9 +237,27 @@ export default function HostAgentPage() {
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-center">Host an Agent</h1>
           <p className="text-zinc-400 mb-8 text-center max-w-2xl mx-auto">
-            We'll build, host, and run your AI agent for you. Just configure and deploy.
+            {selectedPlan ? `${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan · 3-day free trial` : "We'll build, host, and run your AI agent for you. Just configure and deploy."}
           </p>
           
+          {ready && !authenticated ? (
+            <div className="text-center py-20">
+              <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-zinc-400">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold mb-3">Sign in to get started</h2>
+              <p className="text-zinc-400 mb-6">Create an account or log in to deploy your agent.</p>
+              <button
+                onClick={() => login()}
+                className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
+              >
+                Log In / Sign Up
+              </button>
+            </div>
+          ) : (
+          <>
           <StepIndicator 
             currentStep={currentStep} 
             steps={['Define', 'Connect', 'Launch']}
@@ -476,93 +496,67 @@ export default function HostAgentPage() {
             </div>
           )}
           
-          {/* Step 3: Launch */}
+          {/* Step 3: Confirm & Launch */}
           {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="flex justify-center mb-6">
-                <div className="inline-flex items-center gap-3 p-1 bg-white/5 rounded-lg">
-                  <button
-                    onClick={() => setAnnualBilling(false)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${!annualBilling ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
-                  >
-                    Monthly
-                  </button>
-                  <button
-                    onClick={() => setAnnualBilling(true)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${annualBilling ? 'bg-white text-black' : 'text-zinc-400 hover:text-white'}`}
-                  >
-                    Annual
-                    <span className="ml-2 text-xs text-green-400">20% off</span>
-                  </button>
+            <div className="space-y-6 max-w-2xl mx-auto">
+              {selectedPlan ? (
+                <>
+                  <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
+                    <h3 className="text-lg font-semibold mb-4">Review & Launch</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-zinc-400">Agent Name</span>
+                        <span className="font-medium">{agentName}</span>
+                      </div>
+                      {selectedTemplate && (
+                        <div className="flex justify-between items-center py-2 border-b border-white/5">
+                          <span className="text-zinc-400">Template</span>
+                          <span className="font-medium">{TEMPLATES.find(t => t.id === selectedTemplate)?.name}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-zinc-400">Personality</span>
+                        <span className="font-medium">{PERSONALITY_PRESETS.find(p => p.id === selectedPersonality)?.name}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-zinc-400">Autonomy</span>
+                        <span className="font-medium capitalize">{autonomyLevel}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2 border-b border-white/5">
+                        <span className="text-zinc-400">Telegram</span>
+                        <span className="font-medium">{telegramBotToken ? '✓ Connected' : 'Not set (can add later)'}</span>
+                      </div>
+                      <div className="flex justify-between items-center py-2">
+                        <span className="text-zinc-400">Plan</span>
+                        <span className="font-semibold text-white capitalize">{selectedPlan} · 3-day free trial</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between pt-4">
+                    <button
+                      onClick={() => setCurrentStep(2)}
+                      className="px-8 py-3 border border-zinc-700 rounded-lg font-semibold hover:border-zinc-500 transition"
+                    >
+                      ← Back
+                    </button>
+                    <button
+                      onClick={() => handlePlanSelect(selectedPlan)}
+                      className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
+                    >
+                      🚀 Launch Agent
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* Fallback: if no tier in URL, show plan selection */
+                <div className="text-center py-12">
+                  <p className="text-zinc-400 mb-4">No plan selected. Choose a plan from the pricing page.</p>
+                  <a href="/#pricing" className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition inline-block">
+                    View Plans
+                  </a>
                 </div>
-              </div>
-              
-              <div className="grid md:grid-cols-4 gap-6">
-                <PlanCard
-                  name="Free Beta"
-                  price="$0"
-                  period="mo"
-                  features={[
-                    '1 agent',
-                    '100 LLM calls/month',
-                    '1GB storage',
-                    'SAID identity',
-                    'Solana wallet',
-                    'A2A messaging',
-                    'Basic dashboard',
-                  ]}
-                  onSelect={() => handlePlanSelect('free')}
-                />
-                <PlanCard
-                  name="Starter"
-                  price={annualBilling ? '$31' : '$39'}
-                  period="mo"
-                  features={[
-                    'Fast model only',
-                    '$5 API credits + $2 USDC/mo',
-                    'SAID identity',
-                    'Web chat interface',
-                    'Email support',
-                  ]}
-                  onSelect={() => handlePlanSelect('starter')}
-                />
-                <PlanCard
-                  name="Pro"
-                  price={annualBilling ? '$79' : '$99'}
-                  period="mo"
-                  highlighted
-                  features={[
-                    'All models',
-                    '$15 API credits + $5 USDC/mo',
-                    'SAID + ERC-8004',
-                    'Web + Telegram',
-                    'Priority support',
-                  ]}
-                  onSelect={() => handlePlanSelect('pro')}
-                />
-                <PlanCard
-                  name="Power"
-                  price={annualBilling ? '$199' : '$249'}
-                  period="mo"
-                  features={[
-                    'Premium priority',
-                    '$50 API credits + $15 USDC/mo',
-                    'Full identity suite',
-                    'All channels + API',
-                    'Dedicated support',
-                  ]}
-                  onSelect={() => handlePlanSelect('power')}
-                />
-              </div>
-              
-              <div className="flex justify-between pt-4">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  className="px-8 py-3 border border-zinc-700 rounded-lg font-semibold hover:border-zinc-500 transition"
-                >
-                  ← Back
-                </button>
-              </div>
+              )}
             </div>
           )}
           
@@ -679,6 +673,8 @@ export default function HostAgentPage() {
                 </>
               )}
             </div>
+          )}
+          </>
           )}
         </main>
 
