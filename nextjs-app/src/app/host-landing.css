@@ -14,8 +14,8 @@
 .foot-powered:hover{color:#fff}
 @media(max-width:768px){.foot-grid{grid-template-columns:1fr 1fr;gap:32px}.foot-bottom{flex-direction:column;gap:8px;text-align:center}}
 @media(max-width:560px){.foot-grid{grid-template-columns:1fr}}
-.nav-collapsible{display:flex;align-items:center;gap:8px;transition:all .5s ease;overflow:hidden;max-width:800px;opacity:1}
-.nav-collapsible.hidden-col{max-width:0;opacity:0;gap:0}
+.nav-collapsible{display:flex;align-items:center;gap:8px;transition:all .5s ease;overflow:visible;max-width:800px;opacity:1}
+.nav-collapsible.hidden-col{max-width:0;opacity:0;gap:0;overflow:hidden}
 .nav-pill.collapsed{background:rgba(9,9,11,.95);box-shadow:0 8px 32px rgba(0,0,0,.3);transform:scale(.97)}
 .nav-cta{padding:6px 12px;font-size:14px;font-weight:600;background:#fff;color:#0a0a0a;border-radius:9999px;transition:opacity .2s;white-space:nowrap;border:none;cursor:pointer}
 .nav-avatar-wrap{position:relative}
