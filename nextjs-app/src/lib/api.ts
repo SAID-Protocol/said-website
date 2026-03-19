@@ -218,4 +218,10 @@ export const api = {
     apiFetch<PaymentRecord[]>(`/api/billing/payments?limit=${limit}`),
   
   getPricing: () => apiFetch<PricingData>('/api/billing/pricing'),
+
+  getSignerStatus: () =>
+    apiFetch<{ consented: boolean }>('/api/billing/signer-status'),
+
+  markSignerConsented: () =>
+    apiFetch<{ success: boolean }>('/api/billing/signer-consented', { method: 'POST' }),
 };

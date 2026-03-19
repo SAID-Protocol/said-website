@@ -2,20 +2,27 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
+import { useSessionSigners } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import OnboardingModal from './OnboardingModal';
 import { useAuth } from '@/hooks/useAuth';
+import { api } from '@/lib/api';
 
 const API_URL = 'https://api.saidprotocol.com';
 const HOSTING_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://app.saidprotocol.com';
 
+// Key quorum ID from Privy Dashboard (authorization key for server-side billing)
+const SIGNER_QUORUM_ID = 'wmuak9gzqdi85cl1galpqs41';
+
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { authenticated, ready } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
+  const { addSessionSigners } = useSessionSigners();
   const { sessionToken, loading: authLoading } = useAuth();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
   const walletSynced = useRef(false);
+  const signerChecked = useRef(false);
 
   useEffect(() => {
     async function checkProfile() {
@@ -87,6 +94,44 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
       })
       .catch(err => console.error('[OnboardingGuard] Wallet sync error:', err));
   }, [authenticated, sessionToken, authLoading, solanaWallets]);
+
+  // Auto-add server signer to user's embedded wallet (one-time consent)
+  useEffect(() => {
+    if (!authenticated || !sessionToken || authLoading || signerChecked.current) return;
+    
+    const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
+    if (!embeddedWallet?.address) return;
+
+    signerChecked.current = true;
+
+    (async () => {
+      try {
+        // Check if already consented
+        const { consented } = await api.getSignerStatus();
+        if (consented) {
+          console.log('[OnboardingGuard] Signer already consented');
+          return;
+        }
+
+        // Request consent — Privy shows a confirmation modal to the user
+        console.log('[OnboardingGuard] Requesting signer consent...');
+        await addSessionSigners({
+          address: embeddedWallet.address,
+          signers: [{
+            signerId: SIGNER_QUORUM_ID,
+            policyIds: [], // Full permission — we only use it for USDC billing transfers
+          }],
+        });
+
+        // Mark consent in our DB
+        await api.markSignerConsented();
+        console.log('[OnboardingGuard] Signer consent granted ✅');
+      } catch (err) {
+        // User may have rejected the consent modal — that's fine, we'll ask again next login
+        console.error('[OnboardingGuard] Signer consent failed:', err);
+      }
+    })();
+  }, [authenticated, sessionToken, authLoading, solanaWallets, addSessionSigners]);
 
   const handleOnboardingComplete = async (data: { username: string; displayName: string; avatar?: string }) => {
     if (!sessionToken) return;
