@@ -70,21 +70,36 @@ const plans: Plan[] = [
   {
     name: 'Starter',
     tier: 'starter',
-    allInclusive: 39,
-    byok: 19,
+    allInclusive: 29,
+    byok: 14,
     badge: '3-Day Free Trial',
-    features: ['On-chain SAID identity', 'Telegram bot + Solana wallet', 'Persistent memory', 'LLM access (Haiku/Sonnet)', 'A2A messaging (10 chains)'],
-    extras: ['$5 USDC funded to agent wallet', 'On-chain SAID identity'],
+    features: [
+      '2 vCPU / 4GB RAM / 40GB SSD',
+      '600 daily units (Haiku)',
+      'Telegram channel',
+      'SAID identity + Solana wallet',
+      'A2A messaging (10 chains)',
+      '7-day memory retention',
+    ],
+    extras: ['$2 USDC funded at signup'],
   },
   {
     name: 'Pro',
     tier: 'pro',
     allInclusive: 99,
-    byok: 49,
+    byok: 39,
     badge: 'Most Popular · 3-Day Free Trial',
     featured: true,
-    features: ['Everything in Starter', 'Sonnet + Opus access', 'x402 micropayments', 'Priority support', 'Early access to features'],
-    extras: ['$10 USDC funded to agent wallet', '90-day memory retention'],
+    features: [
+      '4 vCPU / 8GB RAM / 80GB SSD',
+      '1,200 daily units (Haiku + Sonnet)',
+      'Telegram + Discord',
+      'Browser automation',
+      'Code execution',
+      '30-day memory retention',
+      'x402 micropayments',
+    ],
+    extras: ['$5 USDC funded at signup', 'Priority support'],
   },
   {
     name: 'Power',
@@ -92,8 +107,16 @@ const plans: Plan[] = [
     allInclusive: 249,
     byok: 99,
     badge: '3-Day Free Trial',
-    features: ['Everything in Pro', 'Upgraded compute', 'Dedicated support', 'Custom integrations', 'SLA guarantee'],
-    extras: ['$25 USDC funded to agent wallet', 'Dedicated support channel'],
+    features: [
+      '8 vCPU / 16GB RAM / 160GB SSD',
+      '3,000 daily units (All models + Opus)',
+      'All channels + API access',
+      'Browser automation',
+      'Full code execution',
+      '90-day memory retention',
+      'x402 micropayments',
+    ],
+    extras: ['$15 USDC funded at signup', 'Dedicated support channel'],
   },
 ];
 
@@ -351,7 +374,7 @@ export default function HostLandingPage() {
             <div className="sh-label rv">Pricing</div>
           </div>
           <div className="sh-title rv" style={{ textAlign: 'center' }}>Simple. Transparent.</div>
-          <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 8px' }}>Every plan includes on-chain identity, Telegram bot, Solana wallet, and all features. 3-day free trial on every plan.</div>
+          <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 8px' }}>Every plan includes on-chain SAID identity, Solana wallet, persistent workspace, and A2A messaging. 3-day free trial.</div>
 
           <div className="pricing-toggle rv">
             <div className="pricing-toggle-inner">
