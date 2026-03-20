@@ -337,8 +337,8 @@ export default function HostLandingPage() {
           <div className="section-center">
             <div className="sh-label rv">Pricing</div>
           </div>
-          <div className="sh-title rv" style={{ textAlign: 'center' }}>Simple. Transparent.</div>
-          <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 8px' }}>Every plan includes on-chain SAID identity, Solana wallet, persistent workspace, and A2A messaging. 3-day free trial.</div>
+          <div className="sh-title rv" style={{ textAlign: 'center', fontSize: 'clamp(24px, 3.5vw, 36px)', marginBottom: '8px' }}>Simple. Transparent.</div>
+          <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 4px', fontSize: '15px' }}>All plans include SAID identity, Solana wallet, and A2A messaging. 3-day free trial.</div>
 
           <div className="pricing-toggle rv">
             <div className="pricing-toggle-inner" id="pricing-toggle">
@@ -351,11 +351,9 @@ export default function HostLandingPage() {
               />
               <button className={`toggle-btn ${pricingMode === 'all' ? 'active' : ''}`} onClick={() => setPricingMode('all')}>
                 <span className="toggle-title">All-Inclusive</span>
-                <span className="toggle-sub">LLM included</span>
               </button>
               <button className={`toggle-btn ${pricingMode === 'byok' ? 'active' : ''}`} onClick={() => setPricingMode('byok')}>
                 <span className="toggle-title">BYOK</span>
-                <span className="toggle-sub">Save ~50%</span>
               </button>
             </div>
           </div>
