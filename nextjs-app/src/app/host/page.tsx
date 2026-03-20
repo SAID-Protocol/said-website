@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import HostNavbar from '@/components/HostNavbar';
-import Footer from '@/components/Footer';
+import HostFooter from '@/components/HostFooter';
 import AsciiBackground from '@/components/AsciiBackground';
 import StepIndicator from '@/components/host/StepIndicator';
 import { api, Agent } from '@/lib/api';
@@ -28,7 +28,7 @@ import {
   RocketIcon,
 } from '@/components/host/icons';
 
-type Step = 1 | 2 | 3 | 4;
+type Step = 1 | 2 | 3 | 4 | 5;
 type AutonomyLevel = 'observer' | 'assistant' | 'autonomous';
 type PersonalityPreset = 'professional' | 'casual' | 'research' | 'trading' | 'custom';
 
@@ -147,7 +147,7 @@ export default function HostAgentPage() {
     setSelectedPlan(plan);
     setIsLaunching(true);
     setLaunchError(null);
-    setCurrentStep(4);
+    setCurrentStep(5);
     
     try {
       // Build program.md from wizard config
@@ -260,26 +260,26 @@ export default function HostAgentPage() {
           <>
           <StepIndicator 
             currentStep={currentStep} 
-            steps={['Define', 'Connect', 'Launch']}
+            steps={['Name', 'Personality', 'Connect', 'Launch']}
           />
           
-          {/* Step 1: Define Your Agent */}
+          {/* Step 1: Name Your Agent */}
           {currentStep === 1 && (
             <div className="space-y-6">
               <div>
-                <label className="block font-medium mb-1">Describe what you want your agent to do</label>
-                <p className="text-sm text-zinc-400 mb-3">This becomes your agent&apos;s core mission — it&apos;ll guide every decision it makes. You can always change this later.</p>
-                <textarea
-                  value={customDescription}
-                  onChange={(e) => setCustomDescription(e.target.value)}
-                  placeholder="e.g., Monitor my portfolio and alert me on Telegram when specific conditions are met..."
-                  rows={3}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 resize-none"
+                <label className="block font-medium mb-2">Agent Name *</label>
+                <input
+                  type="text"
+                  value={agentName}
+                  onChange={(e) => setAgentName(e.target.value)}
+                  placeholder="Give your agent a name..."
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 text-lg"
                 />
               </div>
-              
+
               <div>
-                <h3 className="font-medium mb-4">Or choose a template</h3>
+                <h3 className="font-medium mb-2">Or start from a template</h3>
+                <p className="text-sm text-zinc-400 mb-4">Pick a template to pre-fill name and personality, or skip and configure manually.</p>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {TEMPLATES.map(template => (
                     <TemplateCard
@@ -294,19 +294,23 @@ export default function HostAgentPage() {
                 </div>
               </div>
               
-              <div>
-                <label className="block font-medium mb-2">Agent Name *</label>
-                <input
-                  type="text"
-                  value={agentName}
-                  onChange={(e) => setAgentName(e.target.value)}
-                  placeholder="My Agent"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
-                />
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  disabled={!canContinueStep1}
+                  className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Continue →
+                </button>
               </div>
-              
+            </div>
+          )}
+          
+          {/* Step 2: Personality & System Prompt */}
+          {currentStep === 2 && (
+            <div className="space-y-6">
               <div>
-                <h3 className="font-medium mb-4">Personality</h3>
+                <h3 className="font-medium mb-4">Choose a personality</h3>
                 <div className="grid sm:grid-cols-2 gap-4">
                   {PERSONALITY_PRESETS.map(preset => (
                     <button
@@ -337,147 +341,18 @@ export default function HostAgentPage() {
                 </div>
               </div>
               
-              {selectedPersonality === 'custom' && (
-                <div>
-                  <label className="block font-medium mb-2">System Prompt</label>
-                  <textarea
-                    value={customSystemPrompt}
-                    onChange={(e) => setCustomSystemPrompt(e.target.value)}
-                    placeholder="You are a helpful assistant that..."
-                    rows={6}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 resize-none font-mono text-sm"
-                  />
-                </div>
-              )}
-              
-              <div className="flex justify-end pt-4">
-                <button
-                  onClick={() => setCurrentStep(2)}
-                  disabled={!canContinueStep1}
-                  className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Continue →
-                </button>
+              <div>
+                <label className="block font-medium mb-1">System Prompt</label>
+                <p className="text-sm text-zinc-400 mb-3">This is your agent&apos;s core mission — it guides every decision. {selectedPersonality !== 'custom' ? 'Pre-filled from your personality choice. Edit freely.' : 'Write your own instructions.'}</p>
+                <textarea
+                  value={customSystemPrompt}
+                  onChange={(e) => setCustomSystemPrompt(e.target.value)}
+                  placeholder="You are a helpful assistant that..."
+                  rows={5}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 resize-none font-mono text-sm"
+                />
               </div>
-            </div>
-          )}
-          
-          {/* Step 2: Connect & Configure */}
-          {currentStep === 2 && (
-            <div className="space-y-8">
-              {/* Connections */}
-              <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
-                <h3 className="text-lg font-semibold mb-4">Connections</h3>
-                <div>
-                  <label className="block font-medium mb-2 text-sm">Telegram Bot Token <span className="text-zinc-500 font-normal">(optional)</span></label>
-                  <p className="text-sm text-zinc-400 mb-3">Create a bot via @BotFather on Telegram (takes 30 seconds), then paste the token here.</p>
-                  <input
-                    type="text"
-                    value={telegramBotToken}
-                    onChange={(e) => setTelegramBotToken(e.target.value)}
-                    placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 font-mono text-sm"
-                  />
-                </div>
 
-              </div>
-              
-              {/* Autonomy */}
-              <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
-                <h3 className="text-lg font-semibold mb-4">Autonomy Level</h3>
-                <div className="space-y-3">
-                  <AutonomyCard
-                    icon={<EyeIcon />}
-                    title="Observer"
-                    description="Monitors and responds when asked. Never takes action on its own."
-                    value="observer"
-                    selected={autonomyLevel === 'observer'}
-                    onSelect={() => setAutonomyLevel('observer')}
-                  />
-                  <AutonomyCard
-                    icon={<UsersIcon />}
-                    title="Assistant"
-                    description="Researches, drafts, and suggests. Asks before external actions."
-                    value="assistant"
-                    selected={autonomyLevel === 'assistant'}
-                    onSelect={() => setAutonomyLevel('assistant')}
-                  />
-                  <AutonomyCard
-                    icon={<ZapIcon />}
-                    title="Autonomous"
-                    description="Acts independently within budget limits."
-                    value="autonomous"
-                    selected={autonomyLevel === 'autonomous'}
-                    onSelect={() => setAutonomyLevel('autonomous')}
-                  />
-                  
-                  {autonomyLevel === 'autonomous' && (
-                    <div className="mt-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                      <h4 className="font-semibold text-yellow-400 mb-3 flex items-center gap-2">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                          <line x1="12" y1="9" x2="12" y2="13"/>
-                          <line x1="12" y1="17" x2="12.01" y2="17"/>
-                        </svg>
-                        Spending Limits
-                      </h4>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm text-zinc-400 mb-2">Per-action limit (USD)</label>
-                          <input
-                            type="number"
-                            value={perActionLimit}
-                            onChange={(e) => setPerActionLimit(e.target.value)}
-                            min="0"
-                            step="0.01"
-                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm text-zinc-400 mb-2">Daily limit (USD)</label>
-                          <input
-                            type="number"
-                            value={dailyLimit}
-                            onChange={(e) => setDailyLimit(e.target.value)}
-                            min="0"
-                            step="1"
-                            className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              {/* Advanced Skills */}
-              <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
-                <h3 className="text-lg font-semibold mb-2">Advanced Skills</h3>
-                <p className="text-sm text-zinc-400 mb-4">
-                  All agents include web search, file ops, A2A messaging, and x402 payments by default.
-                </p>
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {ADVANCED_SKILLS.map(skill => (
-                    <div key={skill.id} className="relative">
-                      <SkillToggleCard
-                        icon={skill.icon}
-                        name={skill.name}
-                        description={skill.description}
-                        risk={skill.risk}
-                        enabled={enabledSkills.has(skill.id)}
-                        onToggle={(enabled) => toggleSkill(skill.id, enabled)}
-                        disabled={skill.comingSoon}
-                      />
-                      {skill.comingSoon && (
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-zinc-800 border border-zinc-700 rounded text-xs font-semibold text-zinc-400">
-                          Coming Soon
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
               <div className="flex justify-between pt-4">
                 <button
                   onClick={() => setCurrentStep(1)}
@@ -487,8 +362,7 @@ export default function HostAgentPage() {
                 </button>
                 <button
                   onClick={() => setCurrentStep(3)}
-                  disabled={!canContinueStep2}
-                  className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
                 >
                   Continue →
                 </button>
@@ -496,8 +370,74 @@ export default function HostAgentPage() {
             </div>
           )}
           
-          {/* Step 3: Confirm & Launch */}
+          {/* Step 3: Connect Telegram */}
           {currentStep === 3 && (
+            <div className="space-y-6 max-w-2xl mx-auto">
+              <div className="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
+                <h3 className="text-lg font-semibold mb-2">Connect Telegram</h3>
+                <p className="text-sm text-zinc-400 mb-4">Give your agent a Telegram bot so you can chat with it directly. This is optional — you can always add it later from the dashboard.</p>
+                
+                <input
+                  type="text"
+                  value={telegramBotToken}
+                  onChange={(e) => setTelegramBotToken(e.target.value)}
+                  placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg backdrop-blur-sm focus:outline-none focus:border-zinc-600 font-mono text-sm mb-4"
+                />
+
+                {/* Inline BotFather Guide */}
+                <details className="group">
+                  <summary className="cursor-pointer text-sm font-medium text-zinc-400 hover:text-white transition flex items-center gap-2">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="transition group-open:rotate-90">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                    How do I get a Telegram bot token?
+                  </summary>
+                  <div className="mt-3 p-4 bg-white/[0.03] border border-white/[0.06] rounded-lg space-y-3 text-sm">
+                    <div className="flex gap-3">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">1</span>
+                      <p className="text-zinc-400">Open Telegram and search for <strong className="text-white">@BotFather</strong></p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">2</span>
+                      <p className="text-zinc-400">Send <code className="px-1.5 py-0.5 bg-white/10 rounded text-white">/newbot</code></p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">3</span>
+                      <p className="text-zinc-400">Choose a <strong className="text-white">display name</strong> for your bot (e.g. &quot;My SAID Agent&quot;)</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">4</span>
+                      <p className="text-zinc-400">Choose a <strong className="text-white">username</strong> ending in &quot;bot&quot; (e.g. &quot;mysaidagent_bot&quot;)</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">5</span>
+                      <p className="text-zinc-400">BotFather gives you a <strong className="text-white">token</strong> — paste it above</p>
+                    </div>
+                    <p className="text-zinc-500 text-xs pt-1">Takes about 30 seconds. Your bot will be private to you.</p>
+                  </div>
+                </details>
+              </div>
+              
+              <div className="flex justify-between pt-4">
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  className="px-8 py-3 border border-zinc-700 rounded-lg font-semibold hover:border-zinc-500 transition"
+                >
+                  ← Back
+                </button>
+                <button
+                  onClick={() => setCurrentStep(4)}
+                  className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
+                >
+                  {telegramBotToken.trim() ? 'Continue →' : 'Skip for now →'}
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Step 4: Review & Launch */}
+          {currentStep === 4 && (
             <div className="space-y-6 max-w-2xl mx-auto">
               {selectedPlan ? (
                 <>
@@ -508,19 +448,13 @@ export default function HostAgentPage() {
                         <span className="text-zinc-400">Agent Name</span>
                         <span className="font-medium">{agentName}</span>
                       </div>
-                      {selectedTemplate && (
-                        <div className="flex justify-between items-center py-2 border-b border-white/5">
-                          <span className="text-zinc-400">Template</span>
-                          <span className="font-medium">{TEMPLATES.find(t => t.id === selectedTemplate)?.name}</span>
-                        </div>
-                      )}
                       <div className="flex justify-between items-center py-2 border-b border-white/5">
                         <span className="text-zinc-400">Personality</span>
                         <span className="font-medium">{PERSONALITY_PRESETS.find(p => p.id === selectedPersonality)?.name}</span>
                       </div>
                       <div className="flex justify-between items-center py-2 border-b border-white/5">
-                        <span className="text-zinc-400">Autonomy</span>
-                        <span className="font-medium capitalize">{autonomyLevel}</span>
+                        <span className="text-zinc-400">System Prompt</span>
+                        <span className="font-medium text-right max-w-[250px] truncate">{customSystemPrompt ? customSystemPrompt.slice(0, 50) + '...' : 'Default'}</span>
                       </div>
                       <div className="flex justify-between items-center py-2 border-b border-white/5">
                         <span className="text-zinc-400">Telegram</span>
@@ -535,7 +469,7 @@ export default function HostAgentPage() {
 
                   <div className="flex justify-between pt-4">
                     <button
-                      onClick={() => setCurrentStep(2)}
+                      onClick={() => setCurrentStep(3)}
                       className="px-8 py-3 border border-zinc-700 rounded-lg font-semibold hover:border-zinc-500 transition"
                     >
                       ← Back
@@ -560,8 +494,8 @@ export default function HostAgentPage() {
             </div>
           )}
           
-          {/* Step 4: Launching / Success */}
-          {currentStep === 4 && (
+          {/* Step 5: Launching / Success */}
+          {currentStep === 5 && (
             <div className="max-w-3xl mx-auto">
               {isLaunching && (
                 <div className="text-center py-20">
@@ -588,7 +522,7 @@ export default function HostAgentPage() {
                   <h2 className="text-3xl font-bold mb-2">Launch Failed</h2>
                   <p className="text-zinc-400 mb-6">{launchError}</p>
                   <button
-                    onClick={() => { setLaunchError(null); setCurrentStep(3); }}
+                    onClick={() => { setLaunchError(null); setCurrentStep(4); }}
                     className="px-8 py-3 border border-zinc-700 rounded-lg font-semibold hover:border-zinc-500 transition"
                   >
                     ← Try Again
@@ -678,7 +612,7 @@ export default function HostAgentPage() {
           )}
         </main>
 
-        <Footer />
+        <HostFooter />
       </div>
     </div>
   );
