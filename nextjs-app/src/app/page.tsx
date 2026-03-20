@@ -78,7 +78,7 @@ const plans: Plan[] = [
     byok: 14,
     badge: '3-Day Free Trial',
     features: [
-      '2 vCPU / 4GB RAM / 40GB SSD',
+      'Dedicated agent container',
       '$10/mo API credits (Haiku)',
       'Telegram channel',
       'SAID identity + Solana wallet',
@@ -87,7 +87,7 @@ const plans: Plan[] = [
       '7-day memory retention',
     ],
     byokFeatures: [
-      '2 vCPU / 4GB RAM / 40GB SSD',
+      'Dedicated agent container',
       'Bring your own API key',
       'Telegram channel',
       'SAID identity + Solana wallet',
@@ -106,7 +106,7 @@ const plans: Plan[] = [
     badge: 'Most Popular · 3-Day Free Trial',
     featured: true,
     features: [
-      '4 vCPU / 8GB RAM / 80GB SSD',
+      'Dedicated agent container',
       '$30/mo API credits (Haiku + Sonnet)',
       'Telegram + Discord',
       'Browser automation',
@@ -115,7 +115,7 @@ const plans: Plan[] = [
       'x402 micropayments',
     ],
     byokFeatures: [
-      '4 vCPU / 8GB RAM / 80GB SSD',
+      'Dedicated agent container',
       'Bring your own API key',
       'Telegram + Discord',
       'Browser automation',
@@ -133,7 +133,7 @@ const plans: Plan[] = [
     byok: 99,
     badge: '3-Day Free Trial',
     features: [
-      '8 vCPU / 16GB RAM / 160GB SSD',
+      'Dedicated agent container',
       '$75/mo API credits (All models + Opus)',
       'All channels + API access',
       'Browser automation',
@@ -142,7 +142,7 @@ const plans: Plan[] = [
       'x402 micropayments',
     ],
     byokFeatures: [
-      '8 vCPU / 16GB RAM / 160GB SSD',
+      'Dedicated agent container',
       'Bring your own API key',
       'All channels + API access',
       'Browser automation',
