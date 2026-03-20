@@ -20,12 +20,19 @@ interface Agent {
   registrationSource?: string | null;
 }
 
+const PAGE_SIZE = 50;
+
 function AgentsContent() {
   const searchParams = useSearchParams();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>('reputation');
+  const [totalAgents, setTotalAgents] = useState(0);
+  const [verifiedCount, setVerifiedCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
     // Initialize search from URL params
@@ -33,31 +40,72 @@ function AgentsContent() {
     if (urlSearch) {
       setSearchQuery(urlSearch);
     }
-    fetchAgents();
-    // Poll every 30s as fallback
-    const interval = setInterval(fetchAgents, 30000);
+    // Fetch stats for accurate counts
+    fetch('https://api.saidprotocol.com/api/stats')
+      .then(r => r.json())
+      .then(data => {
+        if (data.totalAgents) setTotalAgents(data.totalAgents);
+        if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
+      })
+      .catch(() => {});
+    // Fetch first batch of agents
+    fetchAgents(0, true);
+    // Poll stats every 30s
+    const interval = setInterval(() => {
+      fetch('https://api.saidprotocol.com/api/stats')
+        .then(r => r.json())
+        .then(data => {
+          if (data.totalAgents) setTotalAgents(data.totalAgents);
+          if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
+        })
+        .catch(() => {});
+    }, 30000);
     // SSE: real-time updates when agents register
     let es: EventSource | null = null;
     try {
       es = new EventSource('https://api.saidprotocol.com/api/events');
-      es.onmessage = () => fetchAgents();
+      es.onmessage = () => {
+        fetchAgents(0, true);
+        fetch('https://api.saidprotocol.com/api/stats')
+          .then(r => r.json())
+          .then(data => {
+            if (data.totalAgents) setTotalAgents(data.totalAgents);
+            if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
+          })
+          .catch(() => {});
+      };
       es.onerror = () => { es?.close(); es = null; };
     } catch {}
     return () => { clearInterval(interval); es?.close(); };
   }, [searchParams]);
 
-  const fetchAgents = async () => {
+  const fetchAgents = async (fetchOffset: number, reset: boolean = false) => {
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents?limit=2000');
+      if (reset) setLoading(true);
+      else setLoadingMore(true);
+      
+      const res = await fetch(`https://api.saidprotocol.com/api/agents?limit=${PAGE_SIZE}&offset=${fetchOffset}`);
       if (res.ok) {
         const data = await res.json();
-        setAgents(data.agents || []);
+        const newAgents = data.agents || [];
+        if (reset) {
+          setAgents(newAgents);
+        } else {
+          setAgents(prev => [...prev, ...newAgents]);
+        }
+        setOffset(fetchOffset + newAgents.length);
+        setHasMore(newAgents.length === PAGE_SIZE);
       }
     } catch (err) {
       console.error('Failed to fetch agents:', err);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
+  };
+
+  const loadMore = () => {
+    fetchAgents(offset, false);
   };
 
   const filteredAgents = agents.filter(agent => {
@@ -157,11 +205,11 @@ function AgentsContent() {
             {/* Stats */}
             <div className="flex justify-center gap-8 mb-12 text-sm">
               <div className="text-center">
-                <div className="text-2xl font-bold">{agents.length}</div>
+                <div className="text-2xl font-bold">{totalAgents.toLocaleString()}</div>
                 <div className="text-zinc-400">Total Agents</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">{agents.filter(a => a.isVerified).length}</div>
+                <div className="text-2xl font-bold text-green-400">{verifiedCount.toLocaleString()}</div>
                 <div className="text-zinc-400">Verified</div>
               </div>
             </div>
@@ -194,6 +242,26 @@ function AgentsContent() {
                   ))}
                 </div>
               </section>
+            )}
+
+            {/* Load More */}
+            {hasMore && !searchQuery && (
+              <div className="text-center mt-10">
+                <button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="px-8 py-3 bg-zinc-900/50 border border-zinc-700/50 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingMore ? (
+                    <span className="flex items-center gap-2">
+                      <span className="inline-block w-4 h-4 border-2 border-zinc-600 border-t-white rounded-full animate-spin"></span>
+                      Loading...
+                    </span>
+                  ) : (
+                    `Load More · ${agents.length.toLocaleString()} of ${totalAgents.toLocaleString()} shown`
+                  )}
+                </button>
+              </div>
             )}
 
             {filteredAgents.length === 0 && (
