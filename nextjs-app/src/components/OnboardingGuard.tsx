@@ -14,6 +14,14 @@ const HOSTING_API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://app.saidprot
 // Key quorum ID from Privy Dashboard (authorization key for server-side billing)
 const SIGNER_QUORUM_ID = 'wmuak9gzqdi85cl1galpqs41';
 
+// SECURITY: Policy ID that restricts signer to USDC transfers only
+// TODO: Create this policy in Privy Dashboard > Session Signers > Policies
+// Policy should restrict to:
+// - Token: USDC SPL (EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v)
+// - Max transfer: $1000/day (prevents runaway billing)
+// - Allowed recipient: SAID billing wallet only
+const BILLING_POLICY_ID = process.env.NEXT_PUBLIC_SIGNER_POLICY_ID || 'POLICY_NOT_SET';
+
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { authenticated, ready } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
@@ -115,11 +123,18 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
         // Request consent — Privy shows a confirmation modal to the user
         console.log('[OnboardingGuard] Requesting signer consent...');
+        
+        // Verify policy is configured (fail-safe)
+        if (BILLING_POLICY_ID === 'POLICY_NOT_SET') {
+          console.error('[OnboardingGuard] CRITICAL: Billing policy not configured!');
+          throw new Error('Billing policy not configured. Contact support.');
+        }
+        
         await addSessionSigners({
           address: embeddedWallet.address,
           signers: [{
             signerId: SIGNER_QUORUM_ID,
-            policyIds: [], // Full permission — we only use it for USDC billing transfers
+            policyIds: [BILLING_POLICY_ID], // RESTRICTED: USDC transfers only, max $1000/day
           }],
         });
 
