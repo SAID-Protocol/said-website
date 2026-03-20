@@ -28,25 +28,22 @@ export default function ProfilePage() {
   const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
   const fetchBalances = useCallback(async (address: string) => {
-    const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
     try {
-      // Fetch USDC balance
-      const tokenRes = await fetch(rpc, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0', id: 1,
-          method: 'getTokenAccountsByOwner',
-          params: [address, { mint: USDC_MINT }, { encoding: 'jsonParsed' }],
-        }),
-      });
-      const tokenData = await tokenRes.json();
-      const accounts = tokenData?.result?.value;
-      setUsdcBalance(accounts?.length > 0
-        ? accounts[0].account.data.parsed.info.tokenAmount.uiAmount.toFixed(2)
-        : '0.00');
+      // Fetch USDC balance from backend API (no rate limits)
+      if (sessionToken) {
+        const usdcRes = await fetch('https://app.saidprotocol.com/api/billing/balance', {
+          headers: { 'Authorization': `Bearer ${sessionToken}` },
+        });
+        if (usdcRes.ok) {
+          const data = await usdcRes.json();
+          setUsdcBalance(data.balance?.toFixed(2) || '0.00');
+        } else {
+          setUsdcBalance('0.00');
+        }
+      }
 
-      // Fetch SOL balance
+      // Fetch SOL balance from QuickNode RPC (avoid public RPC)
+      const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
       const solRes = await fetch(rpc, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -64,7 +61,7 @@ export default function ProfilePage() {
       setUsdcBalance(null);
       setSolBalance(null);
     }
-  }, []);
+  }, [sessionToken]);
 
   useEffect(() => {
     const embedded = solanaWallets.find(w => w.walletClientType === 'privy');

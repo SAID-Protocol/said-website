@@ -23,46 +23,39 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
   // USDC mint on Solana mainnet
   const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
-  const fetchUsdcBalance = useCallback(async (address: string) => {
+  const fetchUsdcBalance = useCallback(async () => {
+    if (!sessionToken) return;
+    
     try {
-      const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
-      const res = await fetch(rpc, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0', id: 1,
-          method: 'getTokenAccountsByOwner',
-          params: [
-            address,
-            { mint: USDC_MINT },
-            { encoding: 'jsonParsed' },
-          ],
-        }),
+      const res = await fetch('https://app.saidprotocol.com/api/billing/balance', {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        },
       });
-      const data = await res.json();
-      const accounts = data?.result?.value;
-      if (accounts && accounts.length > 0) {
-        const amount = accounts[0].account.data.parsed.info.tokenAmount.uiAmount;
-        setUsdcBalance(amount.toFixed(2));
+      
+      if (res.ok) {
+        const data = await res.json();
+        setUsdcBalance(data.balance?.toFixed(2) || '0.00');
       } else {
         setUsdcBalance('0.00');
       }
     } catch {
       setUsdcBalance(null);
     }
-  }, []);
+  }, [sessionToken]);
 
-  // Fetch balance when wallet available
+  // Fetch balance when authenticated
   useEffect(() => {
-    if (!authenticated) { setUsdcBalance(null); return; }
-    const embedded = solanaWallets.find(w => w.walletClientType === 'privy');
-    if (embedded?.address) {
-      fetchUsdcBalance(embedded.address);
-      // Refresh every 30s
-      const interval = setInterval(() => fetchUsdcBalance(embedded.address), 30000);
-      return () => clearInterval(interval);
+    if (!authenticated || !sessionToken) { 
+      setUsdcBalance(null); 
+      return; 
     }
-  }, [authenticated, solanaWallets, fetchUsdcBalance]);
+    
+    fetchUsdcBalance();
+    // Refresh every 10s
+    const interval = setInterval(() => fetchUsdcBalance(), 10000);
+    return () => clearInterval(interval);
+  }, [authenticated, sessionToken, fetchUsdcBalance]);
 
   // Fetch avatar
   useEffect(() => {
