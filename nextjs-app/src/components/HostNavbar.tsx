@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePrivy } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 interface HostNavbarProps {
   noCollapse?: boolean;
@@ -13,6 +14,7 @@ interface HostNavbarProps {
 export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
   const { login, logout, authenticated, user } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
+  const { sessionToken } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
