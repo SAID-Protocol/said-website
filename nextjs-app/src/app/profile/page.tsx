@@ -29,20 +29,16 @@ export default function ProfilePage() {
 
   const fetchBalances = useCallback(async (address: string) => {
     try {
-      // Fetch USDC balance from backend API (no rate limits)
-      if (sessionToken) {
-        const usdcRes = await fetch('https://app.saidprotocol.com/api/billing/balance', {
-          headers: { 'Authorization': `Bearer ${sessionToken}` },
-        });
-        if (usdcRes.ok) {
-          const data = await usdcRes.json();
-          setUsdcBalance(data.balance?.toFixed(2) || '0.00');
-        } else {
-          setUsdcBalance('0.00');
-        }
+      // Fetch USDC balance from backend proxy (no rate limits, keeps RPC private)
+      const usdcRes = await fetch(`https://app.saidprotocol.com/api/balance/${address}`);
+      if (usdcRes.ok) {
+        const data = await usdcRes.json();
+        setUsdcBalance(data.balance?.toFixed(2) || '0.00');
+      } else {
+        setUsdcBalance('0.00');
       }
 
-      // Fetch SOL balance from QuickNode RPC (avoid public RPC)
+      // Fetch SOL balance from public RPC (low rate limit risk for SOL-only calls)
       const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
       const solRes = await fetch(rpc, {
         method: 'POST',
@@ -61,7 +57,7 @@ export default function ProfilePage() {
       setUsdcBalance(null);
       setSolBalance(null);
     }
-  }, [sessionToken]);
+  }, []);
 
   useEffect(() => {
     const embedded = solanaWallets.find(w => w.walletClientType === 'privy');
