@@ -182,7 +182,10 @@ export default function HostLandingPage() {
       .then((r) => r.json())
       .then((d) => {
         const count = d?.totalAgents ?? d?.agents ?? d?.total_agents;
-        if (typeof count === 'number') setAgentCount(`${count.toLocaleString()}+`);
+        if (typeof count === 'number') {
+          const rounded = Math.floor(count / 50) * 50;
+          setAgentCount(rounded.toLocaleString() + '+');
+        }
       })
       .catch(() => undefined);
   }, []);

@@ -17,6 +17,7 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [usdcBalance, setUsdcBalance] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const lastScrollY = useRef(0);
 
   // USDC mint on Solana mainnet
@@ -62,6 +63,16 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
       return () => clearInterval(interval);
     }
   }, [authenticated, solanaWallets, fetchUsdcBalance]);
+
+  // Fetch avatar
+  useEffect(() => {
+    if (!authenticated || !user) { setAvatarUrl(null); return; }
+    // Check Privy social accounts for profile picture
+    const twitterPic = (user as any)?.twitter?.profilePictureUrl;
+    const googlePic = (user as any)?.google?.picture;
+    if (twitterPic) { setAvatarUrl(twitterPic); return; }
+    if (googlePic) { setAvatarUrl(googlePic); return; }
+  }, [authenticated, user]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -180,9 +191,13 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
               )}
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700 text-white text-[13px] font-semibold flex items-center justify-center transition-all cursor-pointer"
+                className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-700 text-white text-[13px] font-semibold flex items-center justify-center transition-all cursor-pointer overflow-hidden"
               >
-                {getInitial()}
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
+                ) : (
+                  getInitial()
+                )}
               </button>
               {menuOpen && (
                 <div className="absolute right-0 top-[calc(100%+8px)] min-w-[160px] bg-zinc-950 border border-white/[.08] rounded-[10px] p-1 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,.5)] z-[100]">
