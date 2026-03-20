@@ -23,7 +23,9 @@ type Plan = {
   badge: string;
   featured?: boolean;
   features: string[];
+  byokFeatures?: string[];
   extras: string[];
+  byokExtras?: string[];
 };
 
 const marqueeRowA = ['Research Assistant', 'Content Creator', 'Trading Bot', 'Customer Support', 'On-Chain Analyst', 'Community Manager', 'Portfolio Tracker', 'Social Media Agent', 'DeFi Monitor', 'Writing Coach'];
@@ -84,7 +86,17 @@ const plans: Plan[] = [
       'Persistent workspace',
       '7-day memory retention',
     ],
+    byokFeatures: [
+      '2 vCPU / 4GB RAM / 40GB SSD',
+      'Bring your own API key',
+      'Telegram channel',
+      'SAID identity + Solana wallet',
+      'A2A messaging (10 chains)',
+      'Persistent workspace',
+      '7-day memory retention',
+    ],
     extras: ['$2 USDC funded at signup', 'Email support'],
+    byokExtras: ['$2 USDC funded at signup', 'Email support', 'Anthropic / OpenAI / OpenRouter'],
   },
   {
     name: 'Pro',
@@ -102,7 +114,17 @@ const plans: Plan[] = [
       '30-day memory retention',
       'x402 micropayments',
     ],
+    byokFeatures: [
+      '4 vCPU / 8GB RAM / 80GB SSD',
+      'Bring your own API key',
+      'Telegram + Discord',
+      'Browser automation',
+      'Code execution',
+      '30-day memory retention',
+      'x402 micropayments',
+    ],
     extras: ['$5 USDC funded at signup', 'Priority support'],
+    byokExtras: ['$5 USDC funded at signup', 'Priority support', 'Anthropic / OpenAI / OpenRouter'],
   },
   {
     name: 'Power',
@@ -119,7 +141,17 @@ const plans: Plan[] = [
       '90-day memory retention',
       'x402 micropayments',
     ],
+    byokFeatures: [
+      '8 vCPU / 16GB RAM / 160GB SSD',
+      'Bring your own API key',
+      'All channels + API access',
+      'Browser automation',
+      'Full code execution',
+      '90-day memory retention',
+      'x402 micropayments',
+    ],
     extras: ['$15 USDC funded at signup', 'Dedicated support channel'],
+    byokExtras: ['$15 USDC funded at signup', 'Dedicated support channel', 'Anthropic / OpenAI / OpenRouter'],
   },
 ];
 
@@ -331,6 +363,8 @@ export default function HostLandingPage() {
           <div className="price-grid">
             {plans.map((plan) => {
               const price = pricingMode === 'all' ? plan.allInclusive : plan.byok;
+              const features = pricingMode === 'byok' && plan.byokFeatures ? plan.byokFeatures : plan.features;
+              const extras = pricingMode === 'byok' && plan.byokExtras ? plan.byokExtras : plan.extras;
               return (
                 <div className={`card price-card rv ${plan.featured ? 'feat' : ''}`} key={plan.name}>
                   <div className="trial-badge">3-Day Free Trial</div>
@@ -339,11 +373,11 @@ export default function HostLandingPage() {
                   <div className="price-amount">${price}</div>
                   <div className="price-freq">/month · free for 3 days</div>
                   <ul className="price-list">
-                    {plan.features.map((item) => <li key={item}>{item}</li>)}
+                    {features.map((item) => <li key={item}>{item}</li>)}
                   </ul>
                   <div className="price-sep" />
                   <ul className="price-extra-list">
-                    {plan.extras.map((item) => <li key={item}>{item}</li>)}
+                    {extras.map((item) => <li key={item}>{item}</li>)}
                   </ul>
                   <a href={`/host?tier=${plan.tier}`} className={`price-btn ${plan.featured ? 'pbtn-w' : 'pbtn-o'}`}>Start Free Trial</a>
                 </div>
