@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { usePrivy } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 
 interface HostNavbarProps {
   noCollapse?: boolean;
@@ -14,7 +13,6 @@ interface HostNavbarProps {
 export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
   const { login, logout, authenticated, user } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
-  const { sessionToken } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -25,15 +23,9 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
   // USDC mint on Solana mainnet
   const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
-  const fetchUsdcBalance = useCallback(async () => {
-    if (!sessionToken) return;
-    
+  const fetchUsdcBalance = useCallback(async (address: string) => {
     try {
-      const res = await fetch('https://app.saidprotocol.com/api/billing/balance', {
-        headers: {
-          'Authorization': `Bearer ${sessionToken}`,
-        },
-      });
+      const res = await fetch(`https://app.saidprotocol.com/api/balance/${address}`);
       
       if (res.ok) {
         const data = await res.json();
@@ -44,20 +36,23 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
     } catch {
       setUsdcBalance(null);
     }
-  }, [sessionToken]);
+  }, []);
 
-  // Fetch balance when authenticated
+  // Fetch balance when wallet available
   useEffect(() => {
-    if (!authenticated || !sessionToken) { 
+    if (!authenticated) { 
       setUsdcBalance(null); 
       return; 
     }
     
-    fetchUsdcBalance();
-    // Refresh every 10s
-    const interval = setInterval(() => fetchUsdcBalance(), 10000);
-    return () => clearInterval(interval);
-  }, [authenticated, sessionToken, fetchUsdcBalance]);
+    const embedded = solanaWallets.find(w => w.walletClientType === 'privy');
+    if (embedded?.address) {
+      fetchUsdcBalance(embedded.address);
+      // Refresh every 10s
+      const interval = setInterval(() => fetchUsdcBalance(embedded.address), 10000);
+      return () => clearInterval(interval);
+    }
+  }, [authenticated, solanaWallets, fetchUsdcBalance]);
 
   // Fetch avatar
   useEffect(() => {
