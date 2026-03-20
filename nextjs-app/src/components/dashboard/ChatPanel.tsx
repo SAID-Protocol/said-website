@@ -190,6 +190,22 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
       ]);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
+      
+      // Auto-retry on 503 (agent still starting up)
+      if (errorMsg.includes('503') || errorMsg.includes('still starting')) {
+        setError('Agent is starting up — retrying in 5 seconds...');
+        setTimeout(() => {
+          setError(null);
+          setIsTyping(false);
+          // Remove the pending user message and re-send
+          setMessages(prev => prev.slice(0, -1));
+          setTimeout(() => {
+            setDraft(userMessage.content);
+          }, 100);
+        }, 5000);
+        return;
+      }
+      
       setError(errorMsg);
 
       setMessages((current) => [
