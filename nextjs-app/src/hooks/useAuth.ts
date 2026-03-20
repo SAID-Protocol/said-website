@@ -28,8 +28,6 @@ export function useAuth() {
       const walletAddress = user.wallet?.address;
       const displayName = email?.split('@')[0] || 'User';
 
-      console.log('Logging into backend with:', { privyId, email, walletAddress, displayName, hasToken: !!accessToken });
-
       const res = await fetch(`${API_URL}/auth/login-privy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

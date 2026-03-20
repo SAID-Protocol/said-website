@@ -136,7 +136,10 @@ export default function ChatPanel({ agentId }: ChatPanelProps) {
 
     try {
       // Convert messages to API format (map 'agent' to 'assistant')
-      const apiMessages = updatedMessages.map(msg => ({
+      // Send only last 20 messages to avoid token limits
+      const MESSAGE_WINDOW = 20;
+      const recentMessages = updatedMessages.slice(-MESSAGE_WINDOW);
+      const apiMessages = recentMessages.map(msg => ({
         role: msg.role === 'agent' ? 'assistant' : msg.role,
         content: msg.content,
       }));
