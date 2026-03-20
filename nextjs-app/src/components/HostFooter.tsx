@@ -4,8 +4,8 @@ import Image from 'next/image';
 
 export default function HostFooter() {
   return (
-    <footer className="relative z-10 border-t border-white/[0.06] mt-auto">
-      <div className="mx-auto max-w-6xl px-6 py-12 sm:px-8">
+    <footer className="relative z-10 border-t border-white/[0.06] mt-auto w-full bg-black/60 backdrop-blur-sm">
+      <div className="w-full px-8 py-12 sm:px-16 lg:px-24">
         <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
