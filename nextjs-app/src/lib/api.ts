@@ -224,4 +224,10 @@ export const api = {
 
   markSignerConsented: () =>
     apiFetch<{ success: boolean }>('/api/billing/signer-consented', { method: 'POST' }),
+
+  payManually: (txSignature: string) =>
+    apiFetch<{ success: boolean; message: string; txSignature: string }>('/api/billing/pay', {
+      method: 'POST',
+      body: JSON.stringify({ txSignature }),
+    }),
 };

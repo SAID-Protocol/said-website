@@ -1,10 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useFundWallet } from '@privy-io/react-auth/solana';
+import { useFundWallet, useWallets, useSignAndSendTransaction } from '@privy-io/react-auth/solana';
 import toast from 'react-hot-toast';
 import { api, BillingInfo } from '@/lib/api';
 import WalletQRModal from '@/components/WalletQRModal';
+import { 
+  address, 
+  createSolanaRpc,
+  pipe,
+  createTransactionMessage,
+  setTransactionMessageFeePayer,
+  setTransactionMessageLifetimeUsingBlockhash,
+  appendTransactionMessageInstructions,
+  compileTransaction,
+  getTransactionEncoder,
+} from '@solana/kit';
+import { findAssociatedTokenPda, getTransferInstruction, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
+
+const USDC_MINT = address('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+const TREASURY_WALLET = address('HUpEuDs3FC4T3xMZ3n8EGe16QLJFSnjbd1Kzh6C22YyP');
+const RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=be1d86a2-00ff-4405-b693-1399154a5380';
 
 const tierLabels: Record<string, string> = {
   starter: 'Starter',
@@ -23,10 +39,13 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 
 export default function BillingPanel() {
   const { fundWallet } = useFundWallet();
+  const { wallets, ready: walletsReady } = useWallets();
+  const { signAndSendTransaction } = useSignAndSendTransaction();
   const [billing, setBilling] = useState<BillingInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     loadBilling();
@@ -41,6 +60,100 @@ export default function BillingPanel() {
       setError(err instanceof Error ? err.message : 'Failed to load billing');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePayNow() {
+    if (!billing || !billing.monthlyAmountUsd || !billing.privyWalletAddress) {
+      toast.error('Missing billing information');
+      return;
+    }
+
+    const monthlyAmount = billing.monthlyAmountUsd;
+    
+    if (billing.walletBalance < monthlyAmount) {
+      toast.error(`Insufficient balance. You have $${billing.walletBalance.toFixed(2)} but need $${monthlyAmount}`);
+      return;
+    }
+
+    const privyWallet = walletsReady ? wallets?.find(w => w.standardWallet?.name === 'Privy') : null;
+    if (!privyWallet) {
+      toast.error('Wallet not found. Please refresh and try again.');
+      return;
+    }
+
+    setPaying(true);
+    const loadingToast = toast.loading('Processing payment...');
+
+    try {
+      const { getLatestBlockhash } = createSolanaRpc(RPC_URL);
+      const { value: latestBlockhash } = await getLatestBlockhash().send();
+      
+      const userAddress = address(billing.privyWalletAddress);
+      const usdcAmount = BigInt(Math.floor(monthlyAmount * 1_000_000)); // USDC has 6 decimals
+      
+      // Derive Associated Token Accounts for USDC
+      const [userTokenAccount] = await findAssociatedTokenPda({
+        mint: USDC_MINT,
+        owner: userAddress,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+      });
+      
+      const [treasuryTokenAccount] = await findAssociatedTokenPda({
+        mint: USDC_MINT,
+        owner: TREASURY_WALLET,
+        tokenProgram: TOKEN_PROGRAM_ADDRESS,
+      });
+      
+      // Build USDC transfer instruction
+      const transferInstruction = getTransferInstruction({
+        source: userTokenAccount,
+        destination: treasuryTokenAccount,
+        authority: userAddress,
+        amount: usdcAmount,
+      });
+      
+      // Create transaction using @solana/kit
+      const transaction = pipe(
+        createTransactionMessage({ version: 0 }),
+        (tx) => setTransactionMessageFeePayer(userAddress, tx),
+        (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+        (tx) => appendTransactionMessageInstructions([transferInstruction], tx),
+        (tx) => compileTransaction(tx),
+        (tx) => new Uint8Array(getTransactionEncoder().encode(tx))
+      );
+      
+      console.log('[Pay] Transferring', monthlyAmount, 'USDC to treasury');
+      
+      // Sign and send using Privy
+      const result = await signAndSendTransaction({
+        transaction,
+        wallet: privyWallet,
+      });
+      
+      const signatureStr = Buffer.from(result.signature).toString('base64');
+      console.log('[Pay] Transaction confirmed:', signatureStr);
+      
+      // Notify backend
+      await api.payManually(signatureStr);
+      
+      toast.dismiss(loadingToast);
+      toast.success(`Payment successful! Subscription activated.`);
+      
+      // Refresh billing
+      await loadBilling();
+      
+    } catch (err) {
+      console.error('[Pay] Error:', err);
+      toast.dismiss(loadingToast);
+      const message = err instanceof Error ? err.message : 'Payment failed';
+      if (message.includes('User rejected') || message.includes('user rejected')) {
+        toast.error('Payment cancelled');
+      } else {
+        toast.error(message);
+      }
+    } finally {
+      setPaying(false);
     }
   }
 
@@ -144,6 +257,30 @@ export default function BillingPanel() {
           </div>
         )}
       </div>
+
+      {/* Pay Now Button */}
+      {billing.monthlyAmountUsd && 
+       billing.billingStatus !== 'active' && 
+       billing.walletBalance >= billing.monthlyAmountUsd && (
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-6 backdrop-blur-md">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-emerald-300">Ready to Activate</h3>
+              <p className="mt-1 text-sm text-emerald-200/70">
+                You have sufficient funds to activate your {tierLabels[billing.tier]} subscription
+                ({billing.billingMode === 'byok' ? 'BYOK' : 'All-Inclusive'}) for ${billing.monthlyAmountUsd}/mo.
+              </p>
+            </div>
+            <button
+              onClick={handlePayNow}
+              disabled={paying}
+              className="shrink-0 rounded-lg bg-emerald-500 px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {paying ? 'Processing...' : `Pay $${billing.monthlyAmountUsd}`}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Subscription Status */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
