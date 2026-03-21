@@ -1,6 +1,7 @@
 'use client';
 
 import { PrivyProvider } from '@privy-io/react-auth';
+import { createSolanaRpc, createSolanaRpcSubscriptions } from '@solana/kit';
 import { Toaster } from 'react-hot-toast';
 import OnboardingGuard from '@/components/OnboardingGuard';
 import ApiAuthProvider from '@/components/ApiAuthProvider';
@@ -17,7 +18,15 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           logo: '/logo-dark.png',
         },
         embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
+          solana: { createOnLogin: 'users-without-wallets' },
+        },
+        solana: {
+          rpcs: {
+            'solana:mainnet': {
+              rpc: createSolanaRpc('https://mainnet.helius-rpc.com/?api-key=be1d86a2-00ff-4405-b693-1399154a5380'),
+              rpcSubscriptions: createSolanaRpcSubscriptions('wss://mainnet.helius-rpc.com/?api-key=be1d86a2-00ff-4405-b693-1399154a5380'),
+            },
+          },
         },
       }}
     >

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePrivy } from '@privy-io/react-auth';
-import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { useWallets } from '@privy-io/react-auth/solana';
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface HostNavbarProps {
@@ -12,7 +12,7 @@ interface HostNavbarProps {
 
 export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
   const { login, logout, authenticated, user } = usePrivy();
-  const { wallets: solanaWallets } = useSolanaWallets();
+  const { wallets: solanaWallets } = useWallets();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -45,7 +45,7 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
       return; 
     }
     
-    const embedded = solanaWallets.find(w => w.walletClientType === 'privy');
+    const embedded = solanaWallets.find(w => w.standardWallet?.name === 'Privy');
     if (embedded?.address) {
       fetchUsdcBalance(embedded.address);
       // Refresh every 10s

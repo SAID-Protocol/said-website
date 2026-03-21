@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useSessionSigners } from '@privy-io/react-auth';
-import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { useWallets } from '@privy-io/react-auth/solana';
 import toast from 'react-hot-toast';
 import OnboardingModal from './OnboardingModal';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,7 +25,7 @@ const BILLING_POLICY_ID = process.env.NEXT_PUBLIC_SIGNER_POLICY_ID || 'POLICY_NO
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { authenticated, ready, getAccessToken } = usePrivy();
-  const { wallets: solanaWallets } = useSolanaWallets();
+  const { wallets: solanaWallets } = useWallets();
   const { addSessionSigners } = useSessionSigners();
   const { sessionToken, loading: authLoading } = useAuth();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
@@ -84,7 +84,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     if (!authenticated || !ready || walletSynced.current) return;
     
     // Find the embedded wallet (not external)
-    const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
+    const embeddedWallet = solanaWallets.find(w => w.standardWallet?.name === 'Privy');
     if (!embeddedWallet?.address) return;
 
     walletSynced.current = true;
@@ -118,7 +118,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
   useEffect(() => {
     if (!authenticated || !ready || signerChecked.current) return;
     
-    const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
+    const embeddedWallet = solanaWallets.find(w => w.standardWallet?.name === 'Privy');
     if (!embeddedWallet?.address) return;
 
     signerChecked.current = true;

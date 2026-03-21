@@ -93,9 +93,8 @@ export default function BillingPanel() {
                 return;
               }
               try {
-                await fundWallet(billing.privyWalletAddress, {
-                  cluster: { name: 'mainnet-beta' },
-                  defaultFundingMethod: 'card',
+                await fundWallet({
+                  address: billing.privyWalletAddress,
                 });
                 // Refresh billing after funding
                 setTimeout(loadBilling, 5000);

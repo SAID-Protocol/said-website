@@ -8,13 +8,13 @@ import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import HostFooter from '@/components/HostFooter';
 import { useAuth } from '@/hooks/useAuth';
-import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { useWallets } from '@privy-io/react-auth/solana';
 import { useFundWallet } from '@privy-io/react-auth/solana';
 import WalletQRModal from '@/components/WalletQRModal';
 
 export default function ProfilePage() {
   const { authenticated, user, login } = usePrivy();
-  const { wallets: solanaWallets } = useSolanaWallets();
+  const { wallets: solanaWallets } = useWallets();
   const { fundWallet } = useFundWallet();
   const { sessionToken } = useAuth();
   const [agentCount, setAgentCount] = useState(0);
@@ -61,7 +61,7 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    const embedded = solanaWallets.find(w => w.walletClientType === 'privy');
+    const embedded = solanaWallets.find(w => w.standardWallet?.name === 'Privy');
     if (embedded?.address) {
       fetchBalances(embedded.address);
       const interval = setInterval(() => fetchBalances(embedded.address), 30000);
@@ -424,7 +424,7 @@ export default function ProfilePage() {
 
             {/* Deposit Wallet */}
             {(() => {
-              const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
+              const embeddedWallet = solanaWallets.find(w => w.standardWallet?.name === 'Privy');
               if (!embeddedWallet?.address) return null;
               return (
                 <section className="rounded-xl border border-white/10 bg-white/[0.03] backdrop-blur-md p-5">
@@ -433,9 +433,8 @@ export default function ProfilePage() {
                     <button
                       onClick={async () => {
                         try {
-                          await fundWallet(embeddedWallet.address, {
-                            cluster: { name: 'mainnet-beta' },
-                            defaultFundingMethod: 'card',
+                          await fundWallet({
+                            address: embeddedWallet.address,
                           });
                         } catch (err) {
                           console.error('Funding failed:', err);
