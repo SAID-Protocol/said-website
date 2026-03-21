@@ -24,7 +24,7 @@ const SIGNER_QUORUM_ID = 'wmuak9gzqdi85cl1galpqs41';
 const BILLING_POLICY_ID = process.env.NEXT_PUBLIC_SIGNER_POLICY_ID || 'POLICY_NOT_SET';
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
-  const { authenticated, ready } = usePrivy();
+  const { authenticated, ready, getAccessToken } = usePrivy();
   const { wallets: solanaWallets } = useSolanaWallets();
   const { addSessionSigners } = useSessionSigners();
   const { sessionToken, loading: authLoading } = useAuth();
@@ -81,7 +81,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
   // Auto-save embedded Solana wallet address to billing backend
   useEffect(() => {
-    if (!authenticated || !sessionToken || authLoading || walletSynced.current) return;
+    if (!authenticated || !ready || walletSynced.current) return;
     
     // Find the embedded wallet (not external)
     const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
@@ -89,24 +89,34 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
     walletSynced.current = true;
     
-    fetch(`${HOSTING_API_URL}/api/billing/set-wallet`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionToken}`,
-      },
-      body: JSON.stringify({ walletAddress: embeddedWallet.address }),
-    })
-      .then(res => {
+    (async () => {
+      try {
+        const accessToken = await getAccessToken();
+        if (!accessToken) {
+          console.error('[OnboardingGuard] No access token available');
+          return;
+        }
+
+        const res = await fetch(`${HOSTING_API_URL}/api/billing/set-wallet`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ walletAddress: embeddedWallet.address }),
+        });
+
         if (res.ok) console.log('[OnboardingGuard] Wallet synced:', embeddedWallet.address);
         else console.error('[OnboardingGuard] Wallet sync failed:', res.status);
-      })
-      .catch(err => console.error('[OnboardingGuard] Wallet sync error:', err));
-  }, [authenticated, sessionToken, authLoading, solanaWallets]);
+      } catch (err) {
+        console.error('[OnboardingGuard] Wallet sync error:', err);
+      }
+    })();
+  }, [authenticated, ready, solanaWallets, getAccessToken]);
 
   // Auto-add server signer to user's embedded wallet (one-time consent)
   useEffect(() => {
-    if (!authenticated || !sessionToken || authLoading || signerChecked.current) return;
+    if (!authenticated || !ready || signerChecked.current) return;
     
     const embeddedWallet = solanaWallets.find(w => w.walletClientType === 'privy');
     if (!embeddedWallet?.address) return;
@@ -147,7 +157,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         console.error('[OnboardingGuard] Signer consent failed:', err);
       }
     })();
-  }, [authenticated, sessionToken, authLoading, solanaWallets, addSessionSigners]);
+  }, [authenticated, ready, solanaWallets, addSessionSigners]);
 
   const handleOnboardingComplete = async (data: { username: string; displayName: string; avatar?: string }) => {
     if (!sessionToken) return;
