@@ -30,30 +30,16 @@ export default function ProfilePage() {
 
   const fetchBalances = useCallback(async (address: string) => {
     try {
-      // Fetch USDC balance from backend proxy (no rate limits, keeps RPC private)
-      const usdcRes = await fetch(`https://app.saidprotocol.com/api/balance/${address}`);
-      if (usdcRes.ok) {
-        const data = await usdcRes.json();
+      // Fetch both USDC and SOL balances from backend (reliable, no rate limits)
+      const res = await fetch(`https://app.saidprotocol.com/api/balance/${address}`);
+      if (res.ok) {
+        const data = await res.json();
         setUsdcBalance(data.balance?.toFixed(2) || '0.00');
+        setSolBalance(data.solBalance?.toFixed(4) || '0.0000');
       } else {
         setUsdcBalance('0.00');
+        setSolBalance('0.0000');
       }
-
-      // Fetch SOL balance from public RPC (low rate limit risk for SOL-only calls)
-      const rpc = process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
-      const solRes = await fetch(rpc, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: '2.0', id: 2,
-          method: 'getBalance',
-          params: [address],
-        }),
-      });
-      const solData = await solRes.json();
-      setSolBalance(solData?.result?.value != null
-        ? (solData.result.value / 1e9).toFixed(4)
-        : '0.0000');
     } catch {
       setUsdcBalance(null);
       setSolBalance(null);
