@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { useSessionSigners } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import toast from 'react-hot-toast';
 import OnboardingModal from './OnboardingModal';
 import { useAuth } from '@/hooks/useAuth';
 import { api } from '@/lib/api';
@@ -176,11 +177,11 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
       } else {
         const error = await res.json();
         console.error('[OnboardingGuard] Save failed:', error);
-        alert(`Failed to update profile: ${error.error || 'Unknown error'}`);
+        toast.error(`Failed to update profile: ${error.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error('[OnboardingGuard] Error during save:', err);
-      alert('Failed to update profile. Please try again.');
+      toast.error('Failed to update profile. Please try again.');
     }
   };
 

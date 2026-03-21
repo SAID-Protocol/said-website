@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/hooks/useAuth';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -103,7 +104,7 @@ export default function CreateAgentPage() {
       setStep('success');
     } catch (err) {
       console.error(err);
-      alert('Registration failed. Please try again.');
+      toast.error('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,7 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import toast from 'react-hot-toast';
 import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import HostFooter from '@/components/HostFooter';
@@ -163,7 +164,7 @@ export default function ProfilePage() {
 
   const handleSaveProfile = async () => {
     if (!sessionToken) {
-      alert('Session expired. Please refresh and try again.');
+      toast.error('Session expired. Please refresh and try again.');
       return;
     }
     
@@ -198,16 +199,16 @@ export default function ProfilePage() {
       } else {
         console.error('Profile save failed:', data);
         if (data.error?.includes('username')) {
-          alert('Username already taken. Please choose another.');
+          toast.error('Username already taken. Please choose another.');
         } else if (data.error?.includes('Unique constraint')) {
-          alert('Username already taken. Please choose another.');
+          toast.error('Username already taken. Please choose another.');
         } else {
-          alert(data.error || 'Failed to update profile');
+          toast.error(data.error || 'Failed to update profile');
         }
       }
     } catch (err) {
       console.error('Failed to save profile:', err);
-      alert('Failed to save profile. Please try again.');
+      toast.error('Failed to save profile. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -223,11 +224,11 @@ export default function ProfilePage() {
     
     // Validate file type and size
     if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
+      toast.error('Please select an image file');
       return;
     }
     if (file.size > 500000) { // 500KB max
-      alert('Image too large. Please select an image under 500KB.');
+      toast.error('Image too large. Please select an image under 500KB.');
       return;
     }
     
@@ -252,20 +253,21 @@ export default function ProfilePage() {
         if (res.ok) {
           const data = await res.json();
           setAvatarUrl(data.user.avatarUrl || base64);
+          toast.success('Avatar updated successfully');
         } else {
           const data = await res.json();
-          alert(data.error || 'Failed to upload avatar');
+          toast.error(data.error || 'Failed to upload avatar');
         }
         setUploadingAvatar(false);
       };
       reader.onerror = () => {
-        alert('Failed to read image file');
+        toast.error('Failed to read image file');
         setUploadingAvatar(false);
       };
       reader.readAsDataURL(file);
     } catch (err) {
       console.error('Failed to upload avatar:', err);
-      alert('Failed to upload avatar');
+      toast.error('Failed to upload avatar');
       setUploadingAvatar(false);
     }
   };

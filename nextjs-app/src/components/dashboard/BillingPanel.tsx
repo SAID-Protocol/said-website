@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useFundWallet } from '@privy-io/react-auth/solana';
+import toast from 'react-hot-toast';
 import { api, BillingInfo } from '@/lib/api';
 import WalletQRModal from '@/components/WalletQRModal';
 
@@ -88,7 +89,7 @@ export default function BillingPanel() {
           <button
             onClick={async () => {
               if (!billing?.privyWalletAddress) {
-                alert('No wallet found. Please log out and log back in.');
+                toast.error('No wallet found. Please log out and log back in.');
                 return;
               }
               try {

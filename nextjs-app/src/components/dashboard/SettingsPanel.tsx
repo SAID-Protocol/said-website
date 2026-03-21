@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Agent, api } from '@/lib/api';
 import { ShieldIcon } from '@/components/host/icons';
 
@@ -70,7 +71,7 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
       await api.stopAgent(agent.id);
       window.location.reload();
     } catch (err) {
-      alert(`Failed to pause agent: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      toast.error(`Failed to pause agent: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -88,7 +89,7 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
       await api.deleteAgent(agent.id);
       window.location.href = '/dashboard';
     } catch (err) {
-      alert(`Failed to delete agent: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      toast.error(`Failed to delete agent: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 
@@ -276,7 +277,7 @@ export default function SettingsPanel({ agent }: SettingsPanelProps) {
                   await api.startAgent(agent.id);
                   window.location.reload();
                 } catch (err) {
-                  alert(`Failed to restart: ${err instanceof Error ? err.message : 'Unknown error'}`);
+                  toast.error(`Failed to restart: ${err instanceof Error ? err.message : 'Unknown error'}`);
                 }
               }}
               className="flex w-full items-center rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-left transition hover:bg-emerald-500/20"
