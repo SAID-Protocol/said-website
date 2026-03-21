@@ -67,6 +67,7 @@ export interface BillingInfo {
   privyWalletAddress: string | null;
   paymentToken: string;
   walletBalance: number;
+  solBalance: number;
   recentPayments: PaymentRecord[];
 }
 

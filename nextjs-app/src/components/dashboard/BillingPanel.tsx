@@ -303,11 +303,21 @@ export default function BillingPanel() {
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-zinc-500">Wallet Balance</p>
-            <p className="mt-1 text-3xl font-bold text-white">
-              ${billing.walletBalance.toFixed(2)}
-              <span className="ml-2 text-sm font-normal text-zinc-500">USDC</span>
-            </p>
+            <p className="text-xs text-zinc-500">Wallet Balances</p>
+            <div className="mt-1 flex items-baseline gap-4">
+              <div>
+                <span className="text-3xl font-bold text-white">
+                  ${billing.walletBalance.toFixed(2)}
+                </span>
+                <span className="ml-2 text-sm font-normal text-zinc-500">USDC</span>
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-purple-400">
+                  {billing.solBalance?.toFixed(4) || '0.0000'}
+                </span>
+                <span className="ml-2 text-sm font-normal text-zinc-500">SOL</span>
+              </div>
+            </div>
           </div>
           <div className="flex gap-2">
             <button
@@ -374,6 +384,26 @@ export default function BillingPanel() {
             {showQR && (
               <WalletQRModal address={billing.privyWalletAddress!} onClose={() => setShowQR(false)} />
             )}
+          </div>
+        )}
+
+        {/* Low SOL Warning */}
+        {billing.privyWalletAddress && (!billing.solBalance || billing.solBalance < 0.001) && (
+          <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3">
+            <div className="flex items-start gap-3">
+              <svg className="h-5 w-5 shrink-0 text-amber-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-300">SOL Needed for Transactions</p>
+                <p className="mt-1 text-xs text-amber-200/70">
+                  Your wallet needs a small amount of SOL (~0.01 SOL) to pay for transaction fees when withdrawing or making payments.
+                </p>
+                <p className="mt-2 text-xs text-amber-200/70">
+                  <strong>Send 0.01 SOL</strong> to the wallet address above to enable transactions.
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>
