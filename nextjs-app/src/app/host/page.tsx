@@ -196,6 +196,8 @@ export default function HostAgentPage() {
       
       try {
         const price = TIER_PRICES[plan] || 29;
+        // Set tier on user record BEFORE payment so billing/pay knows the amount
+        await api.updateTier(plan, 'all_inclusive');
         await processPayment(price);
         // Immediately switch from "Processing Payment" to "Launching"
         setPaying(false);
