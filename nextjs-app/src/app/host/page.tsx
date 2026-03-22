@@ -197,6 +197,9 @@ export default function HostAgentPage() {
       try {
         const price = TIER_PRICES[plan] || 29;
         await processPayment(price);
+        // Immediately switch from "Processing Payment" to "Launching"
+        setPaying(false);
+        setIsLaunching(true);
         toast.success(`Payment of $${price} confirmed!`);
       } catch (err) {
         setPaying(false);
@@ -207,14 +210,12 @@ export default function HostAgentPage() {
           setLaunchError(message);
         }
         return;
-      } finally {
-        setPaying(false);
       }
+    } else {
+      // Free trial — go straight to launching
+      setIsLaunching(true);
+      setCurrentStep(5);
     }
-    
-    // Now create the agent
-    setIsLaunching(true);
-    setCurrentStep(5);
     
     try {
       // Build program.md from wizard config
