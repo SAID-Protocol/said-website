@@ -3,6 +3,20 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
+import { useWallets, useSignAndSendTransaction } from '@privy-io/react-auth/solana';
+import toast from 'react-hot-toast';
+import { 
+  address, 
+  createSolanaRpc,
+  pipe,
+  createTransactionMessage,
+  setTransactionMessageFeePayer,
+  setTransactionMessageLifetimeUsingBlockhash,
+  appendTransactionMessageInstructions,
+  compileTransaction,
+  getTransactionEncoder,
+} from '@solana/kit';
+import { findAssociatedTokenPda, getTransferInstruction, TOKEN_PROGRAM_ADDRESS } from '@solana-program/token';
 import HostNavbar from '@/components/HostNavbar';
 import HostFooter from '@/components/HostFooter';
 import AsciiBackground from '@/components/AsciiBackground';
@@ -87,8 +101,20 @@ const ADVANCED_SKILLS = [
   { id: 'lp', icon: <EditIcon size={20} />, name: 'LP interactions', description: 'Add/remove liquidity', risk: 'red' as const, comingSoon: true },
 ];
 
+const USDC_MINT = address('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v');
+const TREASURY_WALLET = address('HUpEuDs3FC4T3xMZ3n8EGe16QLJFSnjbd1Kzh6C22YyP');
+const RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=be1d86a2-00ff-4405-b693-1399154a5380';
+
+const TIER_PRICES: Record<string, number> = {
+  starter: 29,
+  pro: 79,
+  power: 199,
+};
+
 export default function HostAgentPage() {
   const { authenticated, ready, login } = usePrivy();
+  const { wallets, ready: walletsReady } = useWallets();
+  const { signAndSendTransaction } = useSignAndSendTransaction();
   const router = useRouter();
   const searchParams = useSearchParams();
   const tierFromUrl = searchParams.get('tier') as 'starter' | 'pro' | 'power' | null;
@@ -117,6 +143,22 @@ export default function HostAgentPage() {
   const [launchError, setLaunchError] = useState<string | null>(null);
   const [createdAgent, setCreatedAgent] = useState<Agent | null>(null);
   
+  // Payment state
+  const [existingAgentCount, setExistingAgentCount] = useState<number | null>(null);
+  const [paying, setPaying] = useState(false);
+  const requiresPayment = existingAgentCount !== null && existingAgentCount > 0;
+  
+  // Check existing agents on auth
+  useEffect(() => {
+    if (authenticated && ready) {
+      api.listAgents().then(agents => {
+        setExistingAgentCount(agents.length);
+      }).catch(() => {
+        setExistingAgentCount(0); // Assume new user if API fails
+      });
+    }
+  }, [authenticated, ready]);
+
   const canContinueStep1 = agentName.trim().length > 0;
   const canContinueStep2 = true; // All fields in step 2 are optional
 
@@ -145,8 +187,33 @@ export default function HostAgentPage() {
     }
     
     setSelectedPlan(plan);
-    setIsLaunching(true);
     setLaunchError(null);
+    
+    // If user already has agents, collect payment first
+    if (requiresPayment && plan !== 'free') {
+      setPaying(true);
+      setCurrentStep(5);
+      
+      try {
+        const price = TIER_PRICES[plan] || 29;
+        await processPayment(price);
+        toast.success(`Payment of $${price} confirmed!`);
+      } catch (err) {
+        setPaying(false);
+        const message = err instanceof Error ? err.message : 'Payment failed';
+        if (message.includes('User rejected') || message.includes('user rejected')) {
+          setLaunchError('Payment cancelled. You need to pay upfront to create additional agents.');
+        } else {
+          setLaunchError(message);
+        }
+        return;
+      } finally {
+        setPaying(false);
+      }
+    }
+    
+    // Now create the agent
+    setIsLaunching(true);
     setCurrentStep(5);
     
     try {
@@ -192,6 +259,60 @@ export default function HostAgentPage() {
     } finally {
       setIsLaunching(false);
     }
+  };
+  
+  const processPayment = async (amountUsd: number) => {
+    const privyWallet = walletsReady ? wallets?.find(w => w.standardWallet?.name === 'Privy') : null;
+    if (!privyWallet) {
+      throw new Error('Wallet not found. Please refresh and try again.');
+    }
+
+    const { getLatestBlockhash } = createSolanaRpc(RPC_URL);
+    const { value: latestBlockhash } = await getLatestBlockhash().send();
+    
+    const userAddress = address(privyWallet.address);
+    const usdcAmount = BigInt(Math.floor(amountUsd * 1_000_000)); // USDC has 6 decimals
+    
+    const [userTokenAccount] = await findAssociatedTokenPda({
+      mint: USDC_MINT,
+      owner: userAddress,
+      tokenProgram: TOKEN_PROGRAM_ADDRESS,
+    });
+    
+    const [treasuryTokenAccount] = await findAssociatedTokenPda({
+      mint: USDC_MINT,
+      owner: TREASURY_WALLET,
+      tokenProgram: TOKEN_PROGRAM_ADDRESS,
+    });
+    
+    const transferInstruction = getTransferInstruction({
+      source: userTokenAccount,
+      destination: treasuryTokenAccount,
+      authority: userAddress,
+      amount: usdcAmount,
+    });
+    
+    const transaction = pipe(
+      createTransactionMessage({ version: 0 }),
+      (tx) => setTransactionMessageFeePayer(userAddress, tx),
+      (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+      (tx) => appendTransactionMessageInstructions([transferInstruction], tx),
+      (tx) => compileTransaction(tx),
+      (tx) => new Uint8Array(getTransactionEncoder().encode(tx))
+    );
+    
+    console.log('[Launch] Processing $' + amountUsd + ' USDC payment');
+    
+    const result = await signAndSendTransaction({
+      transaction,
+      wallet: privyWallet,
+    });
+    
+    const signatureStr = Buffer.from(result.signature).toString('base64');
+    console.log('[Launch] Payment confirmed:', signatureStr);
+    
+    // Record payment with backend
+    await api.payManually(signatureStr);
   };
   
   const buildProgramMd = (): string => {
@@ -462,7 +583,12 @@ export default function HostAgentPage() {
                       </div>
                       <div className="flex justify-between items-center py-2">
                         <span className="text-zinc-400">Plan</span>
-                        <span className="font-semibold text-white capitalize">{selectedPlan} · 3-day free trial</span>
+                        <span className="font-semibold text-white capitalize">
+                          {selectedPlan}
+                          {requiresPayment 
+                            ? ` · $${TIER_PRICES[selectedPlan || 'starter']}/mo` 
+                            : ' · 3-day free trial'}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -476,9 +602,14 @@ export default function HostAgentPage() {
                     </button>
                     <button
                       onClick={() => handlePlanSelect(selectedPlan)}
-                      className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
+                      disabled={paying}
+                      className="px-8 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      🚀 Launch Agent
+                      {paying 
+                        ? 'Processing Payment...' 
+                        : requiresPayment 
+                          ? `💳 Pay $${TIER_PRICES[selectedPlan || 'starter']} & Launch`
+                          : '🚀 Launch Agent'}
                     </button>
                   </div>
                 </>
@@ -497,14 +628,18 @@ export default function HostAgentPage() {
           {/* Step 5: Launching / Success */}
           {currentStep === 5 && (
             <div className="max-w-3xl mx-auto">
-              {isLaunching && (
+              {(isLaunching || paying) && (
                 <div className="text-center py-20">
                   <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center mx-auto mb-6 animate-pulse">
                     <RocketIcon size={40} />
                   </div>
-                  <h2 className="text-3xl font-bold mb-2">Launching {agentName}...</h2>
+                  <h2 className="text-3xl font-bold mb-2">
+                    {paying ? 'Processing Payment...' : `Launching ${agentName}...`}
+                  </h2>
                   <p className="text-zinc-400 mb-6">
-                    Creating OpenRouter key → Spinning up infrastructure → Booting agent
+                    {paying 
+                      ? 'Please confirm the transaction in your wallet'
+                      : 'Creating OpenRouter key → Spinning up infrastructure → Booting agent'}
                   </p>
                   <div className="w-64 h-1 bg-white/10 rounded-full mx-auto overflow-hidden">
                     <div className="h-full bg-white/60 rounded-full animate-[loading_2s_ease-in-out_infinite]" style={{ width: '60%' }} />
