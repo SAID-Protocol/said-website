@@ -65,11 +65,11 @@ interface DotGridBackgroundProps {
 
 export default function DotGridBackground({
   spacing = 9,
-  energy: energyProp = 0.4,
-  breathe: breatheAmp = 0.2,
+  energy: energyProp = 0.55,
+  breathe: breatheAmp = 0.3,
   breatheSpeed = 1.5,
   drift = true,
-  driftAmount = 0.12,
+  driftAmount = 0.18,
   bg = '#09090b',
 }: DotGridBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -160,8 +160,8 @@ export default function DotGridBackground({
           const total = Math.min(1, nm * (0.25 + en * 0.75));
 
           // Dot properties — warm amber HSL tint
-          const r = 0.3 + total * 3.0;
-          const a = 0.03 + total * 0.42;
+          const r = 0.4 + total * 3.2;
+          const a = 0.05 + total * 0.50;
           const h = Math.round(42 + total * 18);  // 42-60 hue (amber)
           const s = Math.round(3 + total * 25);   // 3-28% saturation
           const l = Math.round(8 + total * 52);   // 8-58% lightness
