@@ -39,9 +39,9 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 
 const tierPrices: Record<string, number> = {
   free: 0,
-  starter: 9,
-  pro: 29,
-  power: 99,
+  starter: 29,
+  pro: 79,
+  power: 199,
 };
 
 export default function BillingPanel() {
