@@ -66,7 +66,7 @@ interface DotGridBackgroundProps {
 export default function DotGridBackground({
   spacing = 9,
   energy: energyProp = 0.55,
-  breathe: breatheAmp = 0.3,
+  breathe: breatheAmp = 0,
   breatheSpeed = 1.5,
   drift = true,
   driftAmount = 0.18,
