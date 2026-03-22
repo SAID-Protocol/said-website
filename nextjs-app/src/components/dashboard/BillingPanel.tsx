@@ -379,6 +379,10 @@ export default function BillingPanel() {
 
   return (
     <div className="space-y-6">
+      {/* QR Modal — rendered at top level to escape stacking context */}
+      {showQR && billing?.privyWalletAddress && (
+        <WalletQRModal address={billing.privyWalletAddress} onClose={() => setShowQR(false)} />
+      )}
       {/* Wallet Balance Card */}
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
         <div className="flex items-center justify-between">
@@ -461,9 +465,6 @@ export default function BillingPanel() {
               </button>
             </div>
             <p className="text-[11px] text-zinc-600 mt-1.5">Send USDC (Solana) to this address to fund your account</p>
-            {showQR && (
-              <WalletQRModal address={billing.privyWalletAddress!} onClose={() => setShowQR(false)} />
-            )}
           </div>
         )}
 
