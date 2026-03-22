@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useFundWallet, useWallets, useSignAndSendTransaction } from '@privy-io/react-auth/solana';
 import toast from 'react-hot-toast';
-import { api, BillingInfo } from '@/lib/api';
+import { api, Agent, BillingInfo } from '@/lib/api';
 import WalletQRModal from '@/components/WalletQRModal';
 import { 
   address, 
@@ -37,15 +37,24 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'Cancelled', color: 'text-zinc-500' },
 };
 
+const tierPrices: Record<string, number> = {
+  free: 0,
+  starter: 9,
+  pro: 29,
+  power: 99,
+};
+
 export default function BillingPanel() {
   const { fundWallet } = useFundWallet();
   const { wallets, ready: walletsReady } = useWallets();
   const { signAndSendTransaction } = useSignAndSendTransaction();
   const [billing, setBilling] = useState<BillingInfo | null>(null);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showQR, setShowQR] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [payingAgentId, setPayingAgentId] = useState<string | null>(null);
   const [showWithdraw, setShowWithdraw] = useState(false);
   const [withdrawAddress, setWithdrawAddress] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
@@ -53,6 +62,7 @@ export default function BillingPanel() {
 
   useEffect(() => {
     loadBilling();
+    loadAgents();
   }, []);
 
   async function loadBilling() {
@@ -64,6 +74,76 @@ export default function BillingPanel() {
       setError(err instanceof Error ? err.message : 'Failed to load billing');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadAgents() {
+    try {
+      const data = await api.listAgents();
+      setAgents(data);
+    } catch {
+      // Non-critical — billing page still works without agent list
+    }
+  }
+
+  async function handlePayForAgent(agentId: string, amount: number) {
+    if (!billing?.privyWalletAddress) {
+      toast.error('Missing wallet information');
+      return;
+    }
+    if (billing.walletBalance < amount) {
+      toast.error(`Insufficient balance. You have $${billing.walletBalance.toFixed(2)} but need $${amount}`);
+      return;
+    }
+    const privyWallet = walletsReady ? wallets?.find(w => w.standardWallet?.name === 'Privy') : null;
+    if (!privyWallet) {
+      toast.error('Wallet not found. Please refresh.');
+      return;
+    }
+
+    setPayingAgentId(agentId);
+    const loadingToast = toast.loading('Processing payment...');
+
+    try {
+      const { getLatestBlockhash } = createSolanaRpc(RPC_URL);
+      const { value: latestBlockhash } = await getLatestBlockhash().send();
+      const userAddress = address(billing.privyWalletAddress);
+      const usdcAmount = BigInt(Math.floor(amount * 1_000_000));
+
+      const [userTokenAccount] = await findAssociatedTokenPda({ mint: USDC_MINT, owner: userAddress, tokenProgram: TOKEN_PROGRAM_ADDRESS });
+      const [treasuryTokenAccount] = await findAssociatedTokenPda({ mint: USDC_MINT, owner: TREASURY_WALLET, tokenProgram: TOKEN_PROGRAM_ADDRESS });
+
+      const transferInstruction = getTransferInstruction({ source: userTokenAccount, destination: treasuryTokenAccount, authority: userAddress, amount: usdcAmount });
+
+      const transaction = pipe(
+        createTransactionMessage({ version: 0 }),
+        (tx) => setTransactionMessageFeePayer(userAddress, tx),
+        (tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx),
+        (tx) => appendTransactionMessageInstructions([transferInstruction], tx),
+        (tx) => compileTransaction(tx),
+        (tx) => new Uint8Array(getTransactionEncoder().encode(tx))
+      );
+
+      const result = await signAndSendTransaction({ transaction, wallet: privyWallet });
+      const signatureStr = Buffer.from(result.signature).toString('base64');
+
+      // TODO: Backend needs per-agent payment endpoint. For now use manual payment.
+      await api.payManually(signatureStr);
+
+      toast.dismiss(loadingToast);
+      toast.success('Payment successful!');
+      await loadBilling();
+      await loadAgents();
+    } catch (err) {
+      toast.dismiss(loadingToast);
+      const message = err instanceof Error ? err.message : 'Payment failed';
+      if (message.includes('User rejected') || message.includes('user rejected')) {
+        toast.error('Payment cancelled');
+      } else {
+        toast.error(message);
+      }
+    } finally {
+      setPayingAgentId(null);
     }
   }
 
@@ -408,10 +488,11 @@ export default function BillingPanel() {
         )}
       </div>
 
-      {/* Pay Now Button */}
+      {/* Pay Now Button — only for single-agent users */}
       {billing.monthlyAmountUsd && 
        billing.billingStatus !== 'active' && 
-       billing.walletBalance >= billing.monthlyAmountUsd && (
+       billing.walletBalance >= billing.monthlyAmountUsd &&
+       agents.length <= 1 && (
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-6 backdrop-blur-md">
           <div className="flex items-center justify-between">
             <div>
@@ -429,6 +510,93 @@ export default function BillingPanel() {
               {paying ? 'Processing...' : `Pay $${billing.monthlyAmountUsd}`}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Multi-agent hint */}
+      {billing.monthlyAmountUsd &&
+       billing.billingStatus !== 'active' &&
+       agents.length > 1 && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 backdrop-blur-md">
+          <p className="text-sm text-amber-300">
+            You have {agents.length} agents. Use the table below to pay for each agent individually.
+          </p>
+        </div>
+      )}
+
+      {/* Agent Billing Table */}
+      {agents.length > 0 && (
+        <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
+          <h3 className="mb-4 text-sm font-medium text-zinc-400">Your Agents</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="pb-3 text-left text-xs font-medium text-zinc-500">Agent</th>
+                  <th className="pb-3 text-left text-xs font-medium text-zinc-500">Tier</th>
+                  <th className="pb-3 text-left text-xs font-medium text-zinc-500">Status</th>
+                  <th className="pb-3 text-left text-xs font-medium text-zinc-500">Monthly</th>
+                  <th className="pb-3 text-right text-xs font-medium text-zinc-500">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {agents.map((agent) => {
+                  const price = tierPrices[agent.tier] || 0;
+                  const agentStatus = agent.status === 'running'
+                    ? { label: 'Active', color: 'text-emerald-400', dot: 'bg-emerald-500' }
+                    : agent.status === 'paused' || agent.status === 'stopped'
+                    ? { label: 'Paused', color: 'text-amber-400', dot: 'bg-amber-500' }
+                    : agent.status === 'error'
+                    ? { label: 'Error', color: 'text-red-400', dot: 'bg-red-500' }
+                    : { label: 'Creating', color: 'text-blue-400', dot: 'bg-blue-500' };
+                  const canPay = price > 0 && billing && billing.walletBalance >= price;
+
+                  return (
+                    <tr key={agent.id} className="group">
+                      <td className="py-3 pr-4">
+                        <p className="text-sm font-medium text-white">{agent.name}</p>
+                        <p className="text-xs text-zinc-600 font-mono">{agent.id.slice(0, 8)}</p>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-xs font-medium text-zinc-300">
+                          {tierLabels[agent.tier] || agent.tier}
+                        </span>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <div className="flex items-center gap-2">
+                          <span className={`h-1.5 w-1.5 rounded-full ${agentStatus.dot}`} />
+                          <span className={`text-xs ${agentStatus.color}`}>{agentStatus.label}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 pr-4">
+                        <span className="text-sm text-white">
+                          {price > 0 ? `$${price}` : 'Free'}
+                        </span>
+                      </td>
+                      <td className="py-3 text-right">
+                        {price > 0 ? (
+                          <button
+                            onClick={() => handlePayForAgent(agent.id, price)}
+                            disabled={!canPay || payingAgentId === agent.id}
+                            className="rounded-lg bg-amber-500/90 px-3 py-1.5 text-xs font-medium text-black transition-all hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {payingAgentId === agent.id ? 'Paying...' : `Pay $${price}`}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-zinc-600">Free tier</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {billing && agents.some(a => tierPrices[a.tier] > 0 && billing.walletBalance < tierPrices[a.tier]) && (
+            <p className="mt-3 text-xs text-amber-400/70">
+              💡 Add funds to pay for agents with insufficient balance
+            </p>
+          )}
         </div>
       )}
 
