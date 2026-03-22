@@ -101,7 +101,7 @@ const plans: Plan[] = [
   {
     name: 'Pro',
     tier: 'pro',
-    allInclusive: 99,
+    allInclusive: 79,
     byok: 39,
     badge: 'Most Popular · 3-Day Free Trial',
     featured: true,
@@ -129,7 +129,7 @@ const plans: Plan[] = [
   {
     name: 'Power',
     tier: 'power',
-    allInclusive: 249,
+    allInclusive: 199,
     byok: 99,
     badge: '3-Day Free Trial',
     features: [
