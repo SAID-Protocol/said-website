@@ -378,7 +378,7 @@ export default function HostAgentPage() {
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-center">Host an Agent</h1>
           <p className="text-zinc-400 mb-8 text-center max-w-2xl mx-auto">
-            {selectedPlan ? `${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan · 3-day free trial` : "We'll build, host, and run your AI agent for you. Just configure and deploy."}
+            {selectedPlan ? `${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan${requiresPayment ? ` · $${TIER_PRICES[selectedPlan || 'starter']}/mo` : ' · 3-day free trial'}` : "We'll build, host, and run your AI agent for you. Just configure and deploy."}
           </p>
           
           {ready && !authenticated ? (
