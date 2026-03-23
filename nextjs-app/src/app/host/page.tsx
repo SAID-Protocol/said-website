@@ -316,11 +316,20 @@ export default function HostAgentPage() {
       wallet: privyWallet,
     });
     
-    // Privy v3 signAndSendTransaction returns signature as base58 string
-    const signatureStr = typeof result.signature === 'string' 
-      ? result.signature 
-      : Buffer.from(result.signature).toString('base64');
-    console.log('[Launch] Payment confirmed:', signatureStr);
+    // Privy v3 signAndSendTransaction returns { signature } 
+    // signature can be: string (base58 tx hash), Uint8Array, or nested object
+    let signatureStr: string;
+    if (typeof result.signature === 'string') {
+      signatureStr = result.signature;
+    } else if (result.signature instanceof Uint8Array) {
+      // Convert bytes to base58
+      const { encode } = await import('bs58');
+      signatureStr = encode(result.signature);
+    } else {
+      // Fallback: stringify whatever we got
+      signatureStr = String(result.signature);
+    }
+    console.log('[Launch] Payment signature:', signatureStr, 'type:', typeof result.signature, 'constructor:', result.signature?.constructor?.name);
     
     // Record payment with backend
     await api.payManually(signatureStr);
