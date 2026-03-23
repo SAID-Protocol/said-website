@@ -138,9 +138,9 @@ export default function HostDocsPage() {
       <AsciiBackground />
       <HostNavbar />
 
-      <div className="flex flex-1 relative z-10">
+      <div className="flex flex-1 relative z-10 pt-20">
         {/* Left Sidebar */}
-        <aside className="hidden lg:block w-64 p-6 fixed top-[64px] left-0 bg-zinc-950/80 backdrop-blur-sm">
+        <aside className="hidden lg:block w-64 p-6 fixed top-[80px] left-0 bottom-0 bg-zinc-950/80 backdrop-blur-sm overflow-y-auto">
           <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Hosting Docs</div>
           <nav className="space-y-1">
             {sections.map((section) => (
