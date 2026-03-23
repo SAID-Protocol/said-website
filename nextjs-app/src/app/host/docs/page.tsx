@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import AsciiBackground from '@/components/AsciiBackground';
+import HostNavbar from '@/components/HostNavbar';
 
 const sections = [
   { id: 'overview', title: 'Overview' },
@@ -70,19 +71,9 @@ export default function HostDocsPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <AsciiBackground />
+      <HostNavbar />
 
-      {/* Top bar */}
-      <div className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/host" className="flex items-center gap-2 text-sm font-medium text-zinc-300 hover:text-white transition">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
-            Back to Platform
-          </Link>
-          <span className="text-xs text-zinc-500">SAID Hosting · Documentation</span>
-        </div>
-      </div>
-
-      <div className="flex pt-14">
+      <div className="flex pt-16">
         {/* Sidebar */}
         <aside className="hidden lg:block w-56 fixed top-14 left-0 bottom-0 border-r border-white/5 bg-zinc-950/50 backdrop-blur-sm p-6 overflow-y-auto z-40">
           <div className="text-[10px] uppercase tracking-widest text-zinc-600 mb-4">Documentation</div>
