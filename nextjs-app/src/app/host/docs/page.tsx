@@ -95,8 +95,8 @@ function CopyButton({ text }: { text: string }) {
 function CodeBlock({ children, copyable }: { children: string; copyable?: boolean }) {
   return (
     <div className="relative group">
-      <pre className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 overflow-x-auto text-sm">
-        <code className="text-zinc-300">{children}</code>
+      <pre className="bg-zinc-950/80 border border-zinc-800/60 rounded-lg p-4 overflow-x-auto text-xs sm:text-sm backdrop-blur-sm max-w-full">
+        <code className="text-zinc-300 break-all sm:break-normal">{children}</code>
       </pre>
       {copyable && (
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -109,12 +109,14 @@ function CodeBlock({ children, copyable }: { children: string; copyable?: boolea
 
 function ContractBox({ label, address }: { label: string; address: string }) {
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 flex items-center justify-between">
-      <div>
+    <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="min-w-0 flex-1">
         <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">{label}</div>
-        <code className="text-sm text-zinc-300 font-mono">{address}</code>
+        <code className="text-xs sm:text-sm text-zinc-300 font-mono break-all">{address}</code>
       </div>
-      <CopyButton text={address} />
+      <div className="shrink-0">
+        <CopyButton text={address} />
+      </div>
     </div>
   );
 }
@@ -138,32 +140,34 @@ export default function HostDocsPage() {
       <AsciiBackground />
       <HostNavbar />
 
-      <div className="flex flex-1 relative z-10">
-        {/* Left Sidebar */}
-        <aside className="hidden lg:block w-64 p-6 fixed top-[64px] left-0 bg-zinc-950">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
-          <nav className="space-y-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                onClick={(e) => {
-                  e.currentTarget.blur();
-                  scrollToSection(section.id);
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
-              >
-                <span className="text-zinc-500">{section.icon}</span>
-                {section.title}
-              </button>
-            ))}
-          </nav>
+      <div className="relative z-10 pt-28 pb-16">
+        {/* Sidebar — positioned to the left of centered content */}
+        <aside className="hidden xl:block fixed top-28 left-[max(1rem,calc(50%-448px-14rem-2rem))] w-52">
+          <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl p-4">
+            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
+            <nav className="space-y-1">
+              {sections.map((section) => (
+                <button
+                  key={section.id}
+                  onClick={(e) => {
+                    e.currentTarget.blur();
+                    scrollToSection(section.id);
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                >
+                  <span className="text-zinc-500">{section.icon}</span>
+                  {section.title}
+                </button>
+              ))}
+            </nav>
+          </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-4xl px-8 py-12 lg:ml-64">
+        {/* Main Content — centered independently */}
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 pb-12">
 
           {/* Overview */}
-          <section id="overview" className="mb-16">
+          <section id="overview" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.overview}</span>
               <h1 className="text-3xl font-bold">SAID Hosting</h1>
@@ -189,7 +193,7 @@ export default function HostDocsPage() {
           </section>
 
           {/* Getting Started */}
-          <section id="getting-started" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="getting-started" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.start}</span>
               <h2 className="text-2xl font-bold">Getting Started</h2>
@@ -224,7 +228,7 @@ export default function HostDocsPage() {
           </section>
 
           {/* Tiers & Pricing */}
-          <section id="tiers" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="tiers" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.tiers}</span>
               <h2 className="text-2xl font-bold">Tiers & Pricing</h2>
@@ -288,7 +292,7 @@ export default function HostDocsPage() {
           </section>
 
           {/* Agent Setup */}
-          <section id="agent-setup" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="agent-setup" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.agent}</span>
               <h2 className="text-2xl font-bold">Agent Setup</h2>
@@ -316,7 +320,7 @@ export default function HostDocsPage() {
           </section>
 
           {/* Skills */}
-          <section id="skills" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="skills" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.skills}</span>
               <h2 className="text-2xl font-bold">Bundled Skills</h2>
@@ -348,7 +352,7 @@ export default function HostDocsPage() {
           </section>
 
           {/* On-Chain Identity */}
-          <section id="identity" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="identity" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.identity}</span>
               <h2 className="text-2xl font-bold">On-Chain Identity</h2>
@@ -402,7 +406,7 @@ export default function HostDocsPage() {
           </section>
 
           {/* Billing */}
-          <section id="billing" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="billing" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.billing}</span>
               <h2 className="text-2xl font-bold">Billing & Payments</h2>
@@ -449,7 +453,7 @@ export default function HostDocsPage() {
           </section>
 
           {/* Telegram Setup */}
-          <section id="telegram" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="telegram" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.telegram}</span>
               <h2 className="text-2xl font-bold">Telegram Setup</h2>
@@ -484,7 +488,7 @@ my_said_agent_bot
           </section>
 
           {/* FAQ */}
-          <section id="faq" className="mb-16 pt-8 border-t border-zinc-800">
+          <section id="faq" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.faq}</span>
               <h2 className="text-2xl font-bold">FAQ</h2>
@@ -530,7 +534,7 @@ my_said_agent_bot
           </section>
 
           {/* Resources */}
-          <section className="mb-16 pt-8 border-t border-zinc-800">
+          <section className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <h2 className="text-2xl font-bold mb-6">Resources</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <a href="https://www.saidprotocol.com/docs" target="_blank" className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 hover:border-zinc-700 transition-colors">
@@ -555,7 +559,9 @@ my_said_agent_bot
         </main>
       </div>
 
-      <Footer />
+      <div className="relative z-10">
+        <Footer />
+      </div>
     </div>
   );
 }
