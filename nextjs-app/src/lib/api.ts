@@ -169,7 +169,16 @@ export const api = {
   getAgentLogs: (id: string) => apiFetch<ActivityItem[]>(`/api/agents/${id}/logs`),
   
   chatWithAgent: async (id: string, messagesOrString: Array<{ role: string; content: string }> | string) => {
-    const gatewayToken = getGatewayToken(id);
+    let gatewayToken = getGatewayToken(id);
+    
+    // If not in localStorage, fetch from API (supports cross-device access)
+    if (!gatewayToken) {
+      const agent = await apiFetch<Agent>(`/api/agents/${id}`);
+      if (agent.gatewayToken) {
+        setGatewayToken(id, agent.gatewayToken);
+        gatewayToken = agent.gatewayToken;
+      }
+    }
     
     if (!gatewayToken) {
       throw new Error('Gateway token not found. Please recreate this agent.');
