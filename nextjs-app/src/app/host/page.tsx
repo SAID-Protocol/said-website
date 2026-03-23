@@ -316,7 +316,10 @@ export default function HostAgentPage() {
       wallet: privyWallet,
     });
     
-    const signatureStr = Buffer.from(result.signature).toString('base64');
+    // Privy v3 signAndSendTransaction returns signature as base58 string
+    const signatureStr = typeof result.signature === 'string' 
+      ? result.signature 
+      : Buffer.from(result.signature).toString('base64');
     console.log('[Launch] Payment confirmed:', signatureStr);
     
     // Record payment with backend
