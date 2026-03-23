@@ -193,7 +193,7 @@ export default function HostLandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Fetch live agent count + trials remaining
+  // Fetch live agent count from protocol API
   useEffect(() => {
     fetch('https://api.saidprotocol.com/api/stats')
       .then(r => r.json())
@@ -202,29 +202,23 @@ export default function HostLandingPage() {
           const rounded = Math.floor(data.totalAgents / 50) * 50;
           setAgentCount(rounded.toLocaleString() + '+');
         }
+      })
+      .catch(() => {});
+    
+    // Fetch trials remaining from hosting API
+    fetch('https://app.saidprotocol.com/api/stats')
+      .then(r => r.json())
+      .then(data => {
         if (typeof data.trialsRemaining === 'number') {
           setTrialsRemaining(data.trialsRemaining);
         }
       })
-      .catch(() => {}); // fallback to default
+      .catch(() => {});
   }, []);
 
   // Avatar dropdown click-outside moved to HostNavbar
 
   // Scroll collapse moved to HostNavbar
-
-  useEffect(() => {
-    fetch('https://api.saidprotocol.com/api/stats')
-      .then((r) => r.json())
-      .then((d) => {
-        const count = d?.totalAgents ?? d?.agents ?? d?.total_agents;
-        if (typeof count === 'number') {
-          const rounded = Math.floor(count / 50) * 50;
-          setAgentCount(rounded.toLocaleString() + '+');
-        }
-      })
-      .catch(() => undefined);
-  }, []);
 
   return (
     <div className="host-landing-page">
