@@ -139,7 +139,7 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
               <a href="/#pricing" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
                 Pricing
               </a>
-              <a href="https://www.saidprotocol.com/docs" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
+              <a href="/host/docs" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
                 Docs
               </a>
             </div>
@@ -257,7 +257,7 @@ export default function HostNavbar({ noCollapse = false }: HostNavbarProps) {
               <a href="/#pricing" className="px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition" onClick={() => setMobileMenuOpen(false)}>
                 Pricing
               </a>
-              <a href="https://www.saidprotocol.com/docs" className="px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition" onClick={() => setMobileMenuOpen(false)}>
+              <a href="/host/docs" className="px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition" onClick={() => setMobileMenuOpen(false)}>
                 Docs
               </a>
 
