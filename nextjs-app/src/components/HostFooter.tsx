@@ -6,7 +6,7 @@ export default function HostFooter() {
   return (
     <footer className="relative z-10 border-t border-white/[0.06] mt-auto w-full bg-black/60 backdrop-blur-sm">
       <div className="w-full px-8 py-12 sm:px-16 lg:px-24">
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-5">
           {/* Brand */}
           <div className="col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 mb-3">
@@ -64,7 +64,15 @@ export default function HostFooter() {
             <div className="flex flex-col gap-2">
               <a href="https://www.saidprotocol.com/docs" className="text-[13px] text-zinc-500 hover:text-white transition">API Docs</a>
               <a href="mailto:labs@saidprotocol.com" className="text-[13px] text-zinc-500 hover:text-white transition">Contact</a>
-              <a href="https://www.saidprotocol.com/security" className="text-[13px] text-zinc-500 hover:text-white transition">Privacy</a>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div className="sm:col-span-1">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">Legal</h3>
+            <div className="flex flex-col gap-2">
+              <a href="/terms" className="text-[13px] text-zinc-500 hover:text-white transition">Terms of Service</a>
+              <a href="/privacy" className="text-[13px] text-zinc-500 hover:text-white transition">Privacy Policy</a>
             </div>
           </div>
         </div>
