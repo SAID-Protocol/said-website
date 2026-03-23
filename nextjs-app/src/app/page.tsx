@@ -169,6 +169,7 @@ const faqs = [
 export default function HostLandingPage() {
   const [pricingMode, setPricingMode] = useState<'all' | 'byok'>('all');
   const [agentCount, setAgentCount] = useState('1,500+');
+  const [trialsRemaining, setTrialsRemaining] = useState<number | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [openTech, setOpenTech] = useState<number | null>(null);
   // Nav state moved to HostNavbar component
@@ -192,7 +193,7 @@ export default function HostLandingPage() {
     return () => observer.disconnect();
   }, []);
 
-  // Fetch live agent count
+  // Fetch live agent count + trials remaining
   useEffect(() => {
     fetch('https://api.saidprotocol.com/api/stats')
       .then(r => r.json())
@@ -200,6 +201,9 @@ export default function HostLandingPage() {
         if (data.totalAgents) {
           const rounded = Math.floor(data.totalAgents / 50) * 50;
           setAgentCount(rounded.toLocaleString() + '+');
+        }
+        if (typeof data.trialsRemaining === 'number') {
+          setTrialsRemaining(data.trialsRemaining);
         }
       })
       .catch(() => {}); // fallback to default
@@ -235,7 +239,7 @@ export default function HostLandingPage() {
           <div style={{ width: '100%', maxWidth: 800, height: '70%', background: 'linear-gradient(to bottom,rgba(9,9,11,0.7),rgba(9,9,11,0.5),transparent)', borderRadius: 24, filter: 'blur(40px)' }} />
         </div>
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="hero-pill">Agent Hosting — 3-day free trial</div>
+          <div className="hero-pill">{trialsRemaining !== null ? `${trialsRemaining} of 50 free trials remaining` : 'Agent Hosting — 3-day free trial'}</div>
           <h1>Host your AI agent<br /><span className="dim">on SAID Protocol.</span></h1>
           <p className="hero-sub">We build, host, and run your AI agent with on-chain identity, a Solana wallet, and cross-chain messaging. Deploy in 60 seconds.</p>
           <div className="hero-btns">
