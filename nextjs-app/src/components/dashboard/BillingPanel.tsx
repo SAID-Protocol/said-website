@@ -385,7 +385,7 @@ export default function BillingPanel() {
       )}
       {/* Wallet Balance Card */}
       <div className="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-xs text-zinc-500">Wallet Balances</p>
             <div className="mt-1 flex items-baseline gap-4">
