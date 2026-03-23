@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import Link from 'next/link';
+import HostNavbar from '@/components/HostNavbar';
+import AsciiBackground from '@/components/AsciiBackground';
 
 export const metadata: Metadata = {
   title: 'Terms of Service | SAID Protocol',
@@ -8,11 +9,13 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="max-w-3xl mx-auto px-6 py-24">
-        <Link href="/" className="text-zinc-500 hover:text-white text-sm mb-8 inline-block">← Back</Link>
-        <h1 className="text-4xl font-bold mb-2">Terms of Service</h1>
-        <p className="text-zinc-500 mb-10">Last updated: March 23, 2026</p>
+    <div className="min-h-screen bg-black text-white relative">
+      <AsciiBackground />
+      <div className="relative z-10">
+        <HostNavbar />
+        <div className="max-w-3xl mx-auto px-6 pt-28 pb-24">
+          <h1 className="text-4xl font-bold mb-2">Terms of Service</h1>
+          <p className="text-zinc-500 mb-10">Last updated: March 23, 2026</p>
 
         <div className="space-y-8 text-zinc-300 text-[15px] leading-relaxed">
           <section>
@@ -91,6 +94,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-white mb-3">11. Contact</h2>
             <p>Questions? Email us at <a href="mailto:labs@saidprotocol.com" className="text-amber-400 hover:text-amber-300">labs@saidprotocol.com</a></p>
           </section>
+        </div>
         </div>
       </div>
     </div>
