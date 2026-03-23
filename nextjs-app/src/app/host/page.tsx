@@ -118,7 +118,11 @@ export default function HostAgentPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tierFromUrl = searchParams.get('tier') as 'starter' | 'pro' | 'power' | null;
-  const [currentStep, setCurrentStep] = useState<Step>(1);
+  const [currentStep, setCurrentStepRaw] = useState<Step>(1);
+  const setCurrentStep = (step: Step) => {
+    setCurrentStepRaw(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   
   // Step 1: Define Your Agent
   const [customDescription, setCustomDescription] = useState('');
@@ -166,9 +170,10 @@ export default function HostAgentPage() {
     setSelectedTemplate(templateId);
     const template = TEMPLATES.find(t => t.id === templateId);
     if (template && template.id !== 'custom') {
-      setAgentName(template.name);
-    } else {
-      setAgentName('');
+      // Only set name if user hasn't typed a custom one
+      if (!agentName.trim()) {
+        setAgentName(template.name);
+      }
     }
   };
 
