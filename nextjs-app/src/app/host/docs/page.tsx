@@ -72,7 +72,7 @@ const sections = [
   { id: 'agent-setup', title: 'Agent Setup', icon: Icons.agent },
   { id: 'skills', title: 'Bundled Skills', icon: Icons.skills },
   { id: 'identity', title: 'On-Chain Identity', icon: Icons.identity },
-  { id: 'billing', title: 'Billing & Payments', icon: Icons.billing },
+  { id: 'billing', title: 'Billing', icon: Icons.billing },
   { id: 'telegram', title: 'Telegram Setup', icon: Icons.telegram },
   { id: 'faq', title: 'FAQ', icon: Icons.faq },
 ];
@@ -409,7 +409,7 @@ export default function HostDocsPage() {
           <section id="billing" className="mb-8 p-8 bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl scroll-mt-24">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-white">{Icons.billing}</span>
-              <h2 className="text-2xl font-bold">Billing & Payments</h2>
+              <h2 className="text-2xl font-bold">Billing</h2>
             </div>
             <p className="text-zinc-400 mb-6">
               All payments are in USDC on Solana. No credit cards, no subscriptions to cancel — pay directly from your wallet.
