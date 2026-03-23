@@ -323,8 +323,8 @@ export default function HostAgentPage() {
       signatureStr = result.signature;
     } else if (result.signature instanceof Uint8Array) {
       // Convert bytes to base58
-      const { encode } = await import('bs58');
-      signatureStr = encode(result.signature);
+      const bs58 = await import('bs58');
+      signatureStr = bs58.default.encode(result.signature);
     } else {
       // Fallback: stringify whatever we got
       signatureStr = String(result.signature);
