@@ -173,7 +173,8 @@ export const api = {
     
     // If not in localStorage, fetch from API (supports cross-device access)
     if (!gatewayToken) {
-      const agent = await apiFetch<Agent>(`/api/agents/${id}`);
+      const data = await apiFetch<{ agent: Agent } | Agent>(`/api/agents/${id}`);
+      const agent = 'agent' in data ? data.agent : data;
       if (agent.gatewayToken) {
         setGatewayToken(id, agent.gatewayToken);
         gatewayToken = agent.gatewayToken;
