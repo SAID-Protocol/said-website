@@ -1,0 +1,48 @@
+'use client';
+
+const partners = [
+  { name: 'OpenClaw', logo: '/platforms/openclaw.png', url: 'https://openclaw.ai' },
+  { name: 'Spawnr', logo: '/platforms/spawnr.png', url: 'https://spawnr.io' },
+  { name: 'SAID Hosting', logo: '/platforms/said-hosting.png', url: 'https://host.saidprotocol.com' },
+  { name: 'Atelier', logo: '/platforms/atelier.jpg', url: 'https://atelier.ac' },
+  { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
+];
+
+export default function PartnerTicker() {
+  // Duplicate for seamless loop
+  const items = [...partners, ...partners, ...partners];
+
+  return (
+    <section className="py-10 px-4 overflow-hidden">
+      <p className="text-center text-xs text-zinc-500 uppercase tracking-widest mb-6">
+        Ecosystem Partners & Integrations
+      </p>
+      <div className="relative max-w-4xl mx-auto">
+        {/* Fade edges */}
+        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
+        
+        <div className="flex animate-partner-scroll">
+          {items.map((partner, i) => (
+            <a
+              key={`${partner.name}-${i}`}
+              href={partner.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-8 shrink-0 group"
+            >
+              <img
+                src={partner.logo}
+                alt={partner.name}
+                className="w-8 h-8 rounded-full opacity-50 group-hover:opacity-100 transition-opacity"
+              />
+              <span className="text-zinc-500 text-sm font-medium whitespace-nowrap group-hover:text-zinc-300 transition-colors">
+                {partner.name}
+              </span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

@@ -8,7 +8,17 @@ const config: Config = {
   ],
   darkMode: ['selector', '[data-theme="dark"]'],
   theme: {
-    extend: {},
+    extend: {
+      animation: {
+        'partner-scroll': 'partner-scroll 30s linear infinite',
+      },
+      keyframes: {
+        'partner-scroll': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-33.333%)' },
+        },
+      },
+    },
   },
   plugins: [],
 };

@@ -8,6 +8,7 @@ import AsciiBackground from '@/components/AsciiBackground';
 import MessageTicker from '@/components/MessageTicker';
 import RotatingWord from '@/components/RotatingWord';
 import PageLoader from '@/components/PageLoader';
+import PartnerTicker from '@/components/PartnerTicker';
 
 export default function Home() {
   const router = useRouter();
@@ -120,6 +121,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Partner Ticker */}
+      <PartnerTicker />
 
       {/* Section 1: Identity & Reputation */}
       <section className="py-20 px-4 sm:px-8 ">
