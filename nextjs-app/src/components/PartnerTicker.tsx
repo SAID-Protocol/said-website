@@ -38,7 +38,7 @@ export default function PartnerTicker() {
               href={partner.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2.5 px-4 py-2 mx-3 shrink-0 group bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition"
+              className="flex items-center gap-2.5 px-4 py-2 mx-3 shrink-0 group bg-white/10 border border-white/15 rounded-full hover:bg-white/15 transition"
             >
               <img
                 src={partner.logo}
