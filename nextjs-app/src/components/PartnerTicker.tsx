@@ -4,7 +4,7 @@ const partners = [
   { name: 'OpenClaw', logo: '/platforms/openclaw.png', url: 'https://openclaw.ai' },
   { name: 'Spawnr', logo: '/platforms/spawnr.png', url: 'https://spawnr.io' },
   { name: 'SAID Hosting', logo: '/platforms/said-hosting.png', url: 'https://host.saidprotocol.com' },
-  { name: 'Atelier', logo: '/platforms/atelier.jpg', url: 'https://atelier.ac' },
+  { name: 'Atelier', logo: '/platforms/atelier.jpg', url: 'https://atelierai.xyz/' },
   { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
 ];
 
