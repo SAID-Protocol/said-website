@@ -4,6 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -222,6 +223,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
+      <AsciiBackground />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center px-8">
             <h1 className="text-2xl font-bold mb-4">Please log in to view your profile</h1>
@@ -242,6 +244,7 @@ export default function ProfilePage() {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />
+      <AsciiBackground />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin mb-4"></div>
@@ -256,6 +259,7 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      <AsciiBackground />
       
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">

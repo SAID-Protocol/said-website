@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
 
 export default function IntegratePage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      <AsciiBackground />
       
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
         <div className="mb-8">

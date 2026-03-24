@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Connection, Transaction, VersionedTransaction } from '@solana/web3.js';
 import Navbar from '@/components/Navbar';
+import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
 
 export default function MintPassportPage() {
@@ -137,6 +138,7 @@ export default function MintPassportPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      <AsciiBackground />
       
       <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
         <div className="text-center mb-8">

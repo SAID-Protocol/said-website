@@ -1,12 +1,14 @@
 'use client';
 
 import Navbar from '@/components/Navbar';
+import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
 
 export default function SecurityPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
+      <AsciiBackground />
       
       <main className="flex-1 max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
         <div className="flex items-center gap-3 mb-4">

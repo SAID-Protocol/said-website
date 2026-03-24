@@ -4,6 +4,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import AsciiBackground from '@/components/AsciiBackground';
 import { useAuth } from '@/hooks/useAuth';
 
 interface Agent {
@@ -54,6 +55,7 @@ export default function MyAgentsPage() {
     return (
       <div className="min-h-screen">
         <Navbar />
+      <AsciiBackground />
         <div className="max-w-xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 text-center">
           <h1 className="text-2xl font-bold mb-4">Please log in to view your agents</h1>
           <button
@@ -71,6 +73,7 @@ export default function MyAgentsPage() {
     return (
       <div className="min-h-screen">
         <Navbar />
+      <AsciiBackground />
         <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
           <div className="text-center py-16">
             <div className="text-zinc-400">Loading your agents...</div>
@@ -83,6 +86,7 @@ export default function MyAgentsPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <AsciiBackground />
       
       <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
         <div className="flex justify-between items-center mb-8">
