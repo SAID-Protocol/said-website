@@ -378,13 +378,13 @@ function AgentCard({ agent }: { agent: Agent }) {
                 <span className="text-zinc-400 text-[10px] font-medium">Claw Pump</span>
               </div>
             )}
-            {agent.registrationSource === 'said-hosting' && (
+            {(agent.registrationSource === 'said-hosting' || agent.description?.includes('said-hosting') || agent.description?.includes('host.saidprotocol')) && (
               <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Hosted on SAID">
                 <img src="/platforms/said-hosting.png" alt="SAID" className="w-3.5 h-3.5 rounded-full" />
                 <span className="text-zinc-400 text-[10px] font-medium">SAID Hosted</span>
               </div>
             )}
-            {agent.registrationSource === 'atelier' && (
+            {(agent.registrationSource === 'atelier' || agent.description?.includes('atelier')) && (
               <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Atelier">
                 <img src="/platforms/atelier.jpg" alt="Atelier" className="w-3.5 h-3.5 rounded-full" />
                 <span className="text-zinc-400 text-[10px] font-medium">Atelier</span>
