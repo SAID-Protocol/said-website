@@ -19,15 +19,14 @@ export default function PartnerTicker() {
           100% { transform: translateX(-33.333%); }
         }
         .partner-scroll-track {
-          animation: partner-scroll 30s linear infinite;
+          animation: partner-scroll 15s linear infinite;
         }
       `}</style>
       <p className="text-center text-xs text-zinc-500 uppercase tracking-widest mb-6">
         Ecosystem Partners & Integrations
       </p>
       <div className="relative max-w-4xl mx-auto">
-        <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
+
         
         <div className="flex partner-scroll-track">
           {items.map((partner, i) => (
