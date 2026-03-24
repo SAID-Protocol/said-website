@@ -25,11 +25,11 @@ export default function PartnerTicker() {
       <p className="text-center text-xs text-zinc-500 uppercase tracking-widest mb-6">
         Ecosystem Partners & Integrations
       </p>
-      <div className="relative max-w-4xl mx-auto">
+      <div className="relative max-w-4xl mx-auto overflow-hidden">
         <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
         
-        <div className="flex partner-scroll-track">
+        <div className="flex partner-scroll-track px-24">
           {items.map((partner, i) => (
             <a
               key={`${partner.name}-${i}`}
