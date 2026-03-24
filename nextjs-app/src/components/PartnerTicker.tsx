@@ -9,20 +9,27 @@ const partners = [
 ];
 
 export default function PartnerTicker() {
-  // Duplicate for seamless loop
   const items = [...partners, ...partners, ...partners];
 
   return (
     <section className="py-10 px-4 overflow-hidden">
+      <style jsx global>{`
+        @keyframes partner-scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-33.333%); }
+        }
+        .partner-scroll-track {
+          animation: partner-scroll 30s linear infinite;
+        }
+      `}</style>
       <p className="text-center text-xs text-zinc-500 uppercase tracking-widest mb-6">
         Ecosystem Partners & Integrations
       </p>
       <div className="relative max-w-4xl mx-auto">
-        {/* Fade edges */}
         <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-zinc-950 to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-zinc-950 to-transparent z-10 pointer-events-none" />
         
-        <div className="flex animate-partner-scroll">
+        <div className="flex partner-scroll-track">
           {items.map((partner, i) => (
             <a
               key={`${partner.name}-${i}`}
