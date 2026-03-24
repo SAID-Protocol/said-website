@@ -24,11 +24,14 @@ export default function PartnerTicker() {
       <p className="text-center text-xs text-zinc-500 uppercase tracking-widest mb-6">
         Ecosystem Partners & Integrations
       </p>
-      <div className="relative max-w-4xl mx-auto overflow-hidden">
-        <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: 'linear-gradient(to right, black 0%, rgba(0,0,0,0.7) 40%, transparent 100%)' }} />
-        <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: 'linear-gradient(to left, black 0%, rgba(0,0,0,0.7) 40%, transparent 100%)' }} />
-        
-        <div className="flex partner-scroll-track px-24">
+      <div
+        className="relative max-w-4xl mx-auto overflow-hidden"
+        style={{
+          maskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
+        }}
+      >
+        <div className="flex partner-scroll-track">
           {items.map((partner, i) => (
             <a
               key={`${partner.name}-${i}`}
