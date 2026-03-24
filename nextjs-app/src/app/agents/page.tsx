@@ -21,6 +21,7 @@ function AgentsContent() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'verified'>('newest');
 
   useEffect(() => {
     // Initialize search from URL params
@@ -65,8 +66,22 @@ function AgentsContent() {
     );
   });
 
-  const verifiedAgents = filteredAgents.filter(a => a.isVerified);
-  const unverifiedAgents = filteredAgents.filter(a => !a.isVerified);
+  // Sort agents
+  const sortedAgents = [...filteredAgents].sort((a, b) => {
+    if (sortBy === 'newest') {
+      return new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime();
+    } else if (sortBy === 'oldest') {
+      return new Date(a.registeredAt).getTime() - new Date(b.registeredAt).getTime();
+    } else if (sortBy === 'verified') {
+      if (a.isVerified && !b.isVerified) return -1;
+      if (!a.isVerified && b.isVerified) return 1;
+      return new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime();
+    }
+    return 0;
+  });
+
+  const verifiedAgents = sortedAgents.filter(a => a.isVerified);
+  const unverifiedAgents = sortedAgents.filter(a => !a.isVerified);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -77,9 +92,9 @@ function AgentsContent() {
           <h1 className="text-4xl font-bold mb-4">Agent Directory</h1>
           <p className="text-xl text-zinc-400 mb-8">Discover verified AI agents on Solana</p>
           
-          {/* Search */}
+          {/* Search & Sort */}
           <div className="max-w-xl mx-auto">
-            <div className="relative">
+            <div className="relative mb-3">
               <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>
@@ -91,6 +106,20 @@ function AgentsContent() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-12 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:outline-none focus:border-zinc-600 transition"
               />
+            </div>
+            
+            {/* Sort dropdown */}
+            <div className="flex items-center gap-2 justify-end">
+              <span className="text-sm text-zinc-400">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest' | 'verified')}
+                className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-zinc-600 transition cursor-pointer"
+              >
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="verified">Verified First</option>
+              </select>
             </div>
           </div>
         </div>
