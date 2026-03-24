@@ -7,6 +7,7 @@ const partners = [
   { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
   { name: 'FairScale', logo: '/platforms/fairscale.jpg', url: 'https://fairscale.xyz/' },
   { name: 'Xona', logo: '/platforms/xona.jpg', url: 'https://xona-agent.com/' },
+  { name: 'Metaplex', logo: '/platforms/metaplex.jpg', url: 'https://www.metaplex.com/' },
 ];
 
 export default function PartnerTicker() {
