@@ -6,6 +6,7 @@ const partners = [
   { name: 'Atelier', logo: '/platforms/atelier.jpg', url: 'https://atelierai.xyz/' },
   { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
   { name: 'FairScale', logo: '/platforms/fairscale.jpg', url: 'https://fairscale.xyz/' },
+  { name: 'Xona', logo: '/platforms/xona.jpg', url: 'https://xona-agent.com/' },
 ];
 
 export default function PartnerTicker() {
