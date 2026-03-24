@@ -3,7 +3,6 @@
 const partners = [
   { name: 'OpenClaw', logo: '/platforms/openclaw.png', url: 'https://openclaw.ai' },
   { name: 'Spawnr', logo: '/platforms/spawnr.png', url: 'https://spawnr.io' },
-  { name: 'SAID Hosting', logo: '/platforms/said-hosting.png', url: 'https://host.saidprotocol.com' },
   { name: 'Atelier', logo: '/platforms/atelier.jpg', url: 'https://atelierai.xyz/' },
   { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
 ];
@@ -36,14 +35,14 @@ export default function PartnerTicker() {
               href={partner.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-8 shrink-0 group"
+              className="flex items-center gap-2.5 px-4 py-2 mx-3 shrink-0 group bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition"
             >
               <img
                 src={partner.logo}
                 alt={partner.name}
-                className="w-8 h-8 rounded-full opacity-50 group-hover:opacity-100 transition-opacity"
+                className="w-5 h-5 rounded-full"
               />
-              <span className="text-zinc-500 text-sm font-medium whitespace-nowrap group-hover:text-zinc-300 transition-colors">
+              <span className="text-zinc-400 text-xs font-medium whitespace-nowrap group-hover:text-zinc-200 transition-colors">
                 {partner.name}
               </span>
             </a>
