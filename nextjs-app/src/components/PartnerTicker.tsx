@@ -5,6 +5,7 @@ const partners = [
   { name: 'Spawnr', logo: '/platforms/spawnr.png', url: 'https://spawnr.io' },
   { name: 'Atelier', logo: '/platforms/atelier.jpg', url: 'https://atelierai.xyz/' },
   { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
+  { name: 'FairScale', logo: '/platforms/fairscale.jpg', url: 'https://fairscale.xyz/' },
 ];
 
 export default function PartnerTicker() {
