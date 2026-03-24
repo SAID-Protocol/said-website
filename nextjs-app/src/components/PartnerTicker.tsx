@@ -8,6 +8,7 @@ const partners = [
   { name: 'FairScale', logo: '/platforms/fairscale.jpg', url: 'https://fairscale.xyz/' },
   { name: 'Xona', logo: '/platforms/xona.jpg', url: 'https://xona-agent.com/' },
   { name: 'Metaplex', logo: '/platforms/metaplex.jpg', url: 'https://www.metaplex.com/' },
+  { name: 'Juice', logo: '/platforms/juice.jpg', url: 'https://www.juiceeverything.com/' },
 ];
 
 export default function PartnerTicker() {
