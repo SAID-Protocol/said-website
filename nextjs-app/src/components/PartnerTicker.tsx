@@ -12,17 +12,15 @@ const partners = [
 ];
 
 export default function PartnerTicker() {
-  const items = [...partners, ...partners, ...partners];
-
   return (
     <section className="py-10 px-4 overflow-hidden">
       <style jsx global>{`
         @keyframes partner-scroll {
           0% { transform: translateX(0); }
-          100% { transform: translateX(-33.333%); }
+          100% { transform: translateX(-50%); }
         }
         .partner-scroll-track {
-          animation: partner-scroll 15s linear infinite;
+          animation: partner-scroll 20s linear infinite;
         }
       `}</style>
       <p className="text-center text-xs text-zinc-500 uppercase tracking-widest mb-6">
@@ -35,8 +33,8 @@ export default function PartnerTicker() {
           WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%)',
         }}
       >
-        <div className="flex partner-scroll-track">
-          {items.map((partner, i) => (
+        <div className="flex partner-scroll-track" style={{ width: 'max-content' }}>
+          {[...partners, ...partners].map((partner, i) => (
             <a
               key={`${partner.name}-${i}`}
               href={partner.url}
