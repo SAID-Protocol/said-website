@@ -106,6 +106,9 @@ export default function Navbar() {
               <Link href="/token" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
                 $SAID
               </Link>
+              <a href="https://host.saidprotocol.com" target="_blank" rel="noopener noreferrer" className="px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition rounded-full hover:bg-zinc-800/50 whitespace-nowrap">
+                Host
+              </a>
             </div>
 
             {/* Divider */}
@@ -244,6 +247,15 @@ export default function Navbar() {
               >
                 $SAID
               </Link>
+              <a
+                href="https://host.saidprotocol.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800/50 rounded-lg transition"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Host
+              </a>
               
               <div className="h-px bg-white/10 my-2"></div>
               
