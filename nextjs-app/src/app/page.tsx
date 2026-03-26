@@ -206,7 +206,7 @@ export default function HostLandingPage() {
       .catch(() => {});
     
     // Fetch trials remaining from hosting API
-    fetch('https://said-platform-api.fly.dev/api/stats')
+    fetch('https://app.saidprotocol.com/api/stats')
       .then(r => r.json())
       .then(data => {
         if (typeof data.trialsRemaining === 'number') {
