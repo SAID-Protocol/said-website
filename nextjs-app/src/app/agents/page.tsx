@@ -7,6 +7,20 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AsciiBackground from '@/components/AsciiBackground';
 
+interface TrustScore {
+  score: number;
+  tier: string;
+  badges: string[];
+  sources: string[];
+  identity: number;
+  activity: number;
+  economic: number;
+  ecosystem: number;
+  longevity: number;
+  fairscale: number;
+  computedAt: string;
+}
+
 interface Agent {
   wallet: string;
   name: string;
@@ -18,7 +32,16 @@ interface Agent {
   feedbackCount?: number;
   lastActivity?: string;
   registrationSource?: string | null;
+  trustScore?: TrustScore | null;
 }
+
+const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  platinum: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
+  gold: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
+  silver: { bg: 'bg-zinc-400/10', text: 'text-zinc-300', border: 'border-zinc-400/30' },
+  bronze: { bg: 'bg-orange-600/10', text: 'text-orange-400', border: 'border-orange-600/30' },
+  unverified: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30' },
+};
 
 const PAGE_SIZE = 50;
 
@@ -392,12 +415,21 @@ function AgentCard({ agent }: { agent: Agent }) {
             )}
           </div>
           <div className="flex items-center gap-3 text-[10px] text-zinc-500">
-            {agent.reputationScore != null && agent.reputationScore > 0 && (
+            {agent.trustScore && agent.trustScore.score > 0 ? (
+              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${TIER_COLORS[agent.trustScore.tier]?.bg || TIER_COLORS.unverified.bg} ${TIER_COLORS[agent.trustScore.tier]?.border || TIER_COLORS.unverified.border} border`} title={`Trust Score: ${agent.trustScore.score}/100 (${agent.trustScore.sources.join(' + ')})`}>
+                <span className={`font-bold text-[11px] ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unverified.text}`}>
+                  {agent.trustScore.score}
+                </span>
+                <span className={`text-[9px] uppercase font-medium ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unverified.text}`}>
+                  {agent.trustScore.tier}
+                </span>
+              </div>
+            ) : agent.reputationScore != null && agent.reputationScore > 0 ? (
               <div className="flex items-center gap-1" title="Reputation Score">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
                 {agent.reputationScore}
               </div>
-            )}
+            ) : null}
             {agent.registeredAt && (
               <span title={new Date(agent.registeredAt).toLocaleDateString()}>
                 {timeAgoShort(agent.registeredAt)}
