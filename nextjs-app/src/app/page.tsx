@@ -206,7 +206,7 @@ export default function HostLandingPage() {
       .catch(() => {});
     
     // Fetch trials remaining from hosting API
-    fetch('https://app.saidprotocol.com/api/stats')
+    fetch('https://said-platform-api.fly.dev/api/stats')
       .then(r => r.json())
       .then(data => {
         if (typeof data.trialsRemaining === 'number') {
@@ -233,7 +233,11 @@ export default function HostLandingPage() {
           <div style={{ width: '100%', maxWidth: 800, height: '70%', background: 'linear-gradient(to bottom,rgba(9,9,11,0.7),rgba(9,9,11,0.5),transparent)', borderRadius: 24, filter: 'blur(40px)' }} />
         </div>
         <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="hero-pill">{trialsRemaining !== null ? `${trialsRemaining} free trials remaining` : 'Agent Hosting — free trial'}</div>
+          <div className="hero-pill">
+            {trialsRemaining !== null 
+              ? (trialsRemaining === 0 ? 'Free trials sold out' : `${trialsRemaining} free trials remaining`)
+              : 'Agent Hosting — free trial'}
+          </div>
           <h1>Host your AI agent<br /><span className="dim">on SAID Protocol.</span></h1>
           <p className="hero-sub">We build, host, and run your AI agent with on-chain identity, a Solana wallet, and cross-chain messaging. Deploy in 60 seconds.</p>
           <div className="hero-btns">
@@ -363,7 +367,9 @@ export default function HostLandingPage() {
               const extras = pricingMode === 'byok' && plan.byokExtras ? plan.byokExtras : plan.extras;
               return (
                 <div className={`card price-card rv ${plan.featured ? 'feat' : ''}`} key={plan.name}>
-                  <div className="trial-badge">3-Day Free Trial</div>
+                  <div className="trial-badge" style={trialsRemaining === 0 ? { background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444' } : {}}>
+                    {trialsRemaining === 0 ? 'Sold Out' : '3-Day Free Trial'}
+                  </div>
                   {plan.featured && <div className="price-badge">Most Popular</div>}
                   <div className="price-name">{plan.name}</div>
                   <div className="price-amount">${price}</div>
@@ -375,7 +381,15 @@ export default function HostLandingPage() {
                   <ul className="price-extra-list">
                     {extras.map((item) => <li key={item}>{item}</li>)}
                   </ul>
-                  <a href={`/host?tier=${plan.tier}`} className={`price-btn ${plan.featured ? 'pbtn-w' : 'pbtn-o'}`}>Start Free Trial</a>
+                  {trialsRemaining !== null && trialsRemaining === 0 ? (
+                    <button disabled className="price-btn pbtn-disabled" style={{ opacity: 0.5, cursor: 'not-allowed' }}>
+                      Trials Sold Out
+                    </button>
+                  ) : (
+                    <a href={`/host?tier=${plan.tier}`} className={`price-btn ${plan.featured ? 'pbtn-w' : 'pbtn-o'}`}>
+                      Start Free Trial
+                    </a>
+                  )}
                 </div>
               );
             })}
