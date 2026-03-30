@@ -11,8 +11,9 @@ const statusColors = {
   error: 'bg-red-500',
 };
 
-const tierLabels = {
+const tierLabels: Record<string, string> = {
   free: 'Free',
+  trial: 'Trial',
   starter: 'Starter',
   pro: 'Pro',
   power: 'Power',
@@ -55,9 +56,12 @@ export default function AgentList({ agents }: AgentListProps) {
           </div>
           <div className="space-y-2 text-sm text-zinc-400">
             <div className="flex justify-between">
-              <span>AI Credits:</span>
+              <span>{agent.tier === 'trial' ? 'Prompts:' : 'AI Credits:'}</span>
               <span className="text-white">
-                {agent.aiCreditsUsed.toFixed(1)} / {agent.aiCreditsLimit.toFixed(1)}
+                {agent.tier === 'trial' 
+                  ? `${agent.aiCreditsUsed} / ${agent.aiCreditsLimit}`
+                  : `${agent.aiCreditsUsed.toFixed(1)} / ${agent.aiCreditsLimit.toFixed(1)}`
+                }
               </span>
             </div>
             <div className="flex justify-between">

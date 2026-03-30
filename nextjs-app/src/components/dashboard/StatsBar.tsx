@@ -25,15 +25,16 @@ const statusColors = {
   error: 'bg-red-500',
 };
 
-const tierLabels = {
+const tierLabels: Record<string, string> = {
   free: 'Free',
+  trial: 'Trial',
   starter: 'Starter',
   pro: 'Pro',
   power: 'Power',
 };
 
 export default function StatsBar({ agent }: StatsBarProps) {
-  const [usage, setUsage] = useState<{ llm: { used: number; limit: number } | null } | null>(null);
+  const [usage, setUsage] = useState<{ llm: { used: number; limit: number; unit?: string } | null } | null>(null);
   
   useEffect(() => {
     async function fetchUsage() {
@@ -53,6 +54,7 @@ export default function StatsBar({ agent }: StatsBarProps) {
 
   const creditsUsed = usage?.llm?.used ?? agent.aiCreditsUsed;
   const creditsLimit = usage?.llm?.limit ?? agent.aiCreditsLimit;
+  const isPrompts = usage?.llm?.unit === 'prompts';
   const pct = creditsLimit > 0 ? (creditsUsed / creditsLimit) * 100 : 0;
 
   // Calculate uptime if agent is running
@@ -78,8 +80,8 @@ export default function StatsBar({ agent }: StatsBarProps) {
         value="—" 
       />
       <StatCard
-        label="AI Credits"
-        value={`${creditsUsed.toFixed(1)} / ${creditsLimit.toFixed(1)}`}
+        label={isPrompts ? "Prompts" : "AI Credits"}
+        value={isPrompts ? `${creditsUsed} / ${creditsLimit}` : `${creditsUsed.toFixed(1)} / ${creditsLimit.toFixed(1)}`}
         extra={
           <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
             <div className="h-full rounded-full bg-amber-500" style={{ width: `${Math.min(pct, 100)}%` }} />

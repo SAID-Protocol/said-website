@@ -8,7 +8,7 @@ export interface Agent {
   flyMachineId: string | null;
   flyAppName: string | null;
   status: 'creating' | 'running' | 'paused' | 'stopped' | 'error';
-  tier: 'free' | 'starter' | 'pro' | 'power';
+  tier: 'free' | 'trial' | 'starter' | 'pro' | 'power';
   saidIdentity: string | null;
   programMd: string | null;
   config: string | null;
@@ -200,7 +200,7 @@ export const api = {
   },
   
   getAgentUsage: (id: string) =>
-    apiFetch<{ llm: { provider: string; limit: number; used: number; remaining: number; disabled: boolean } | null; tier: string }>(`/api/agents/${id}/usage`),
+    apiFetch<{ llm: { provider: string; unit?: string; limit: number; used: number; remaining: number; disabled?: boolean } | null; tier: string }>(`/api/agents/${id}/usage`),
   
   // Billing
   getBilling: () => apiFetch<BillingInfo>('/api/billing'),
