@@ -3,41 +3,53 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { api, Agent } from '@/lib/api';
-import ActivityPanel from '@/components/dashboard/ActivityPanel';
 import AgentList from '@/components/dashboard/AgentList';
 import ChatPanel from '@/components/dashboard/ChatPanel';
 import ConfigurePanel from '@/components/dashboard/ConfigurePanel';
+import OverviewPanel from '@/components/dashboard/OverviewPanel';
 import SettingsPanel from '@/components/dashboard/SettingsPanel';
 import HostNavbar from '@/components/HostNavbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import HostFooter from '@/components/HostFooter';
 import { CogIcon, BarChartIcon, ShieldIcon } from '@/components/host/icons';
 
-type RightTab = 'configure' | 'analytics' | 'settings';
-type MobileTab = 'chat' | 'configure' | 'analytics' | 'settings';
+// Chat icon for tab
+function ChatIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
 
-const mobileTabs: Array<{ id: MobileTab; label: string; icon: React.ReactNode }> = [
-  { id: 'chat', label: 'Chat', icon: null },
+// Home/overview icon
+function HomeIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" />
+      <rect x="14" y="3" width="7" height="7" />
+      <rect x="14" y="14" width="7" height="7" />
+      <rect x="3" y="14" width="7" height="7" />
+    </svg>
+  );
+}
+
+type TabId = 'overview' | 'chat' | 'configure' | 'settings';
+
+const tabs: Array<{ id: TabId; label: string; icon: React.ReactNode }> = [
+  { id: 'overview', label: 'Overview', icon: <HomeIcon size={14} /> },
+  { id: 'chat', label: 'Chat', icon: <ChatIcon size={14} /> },
   { id: 'configure', label: 'Configure', icon: <CogIcon size={14} /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChartIcon size={14} /> },
   { id: 'settings', label: 'Settings', icon: <ShieldIcon size={14} /> },
 ];
 
-const rightTabs: Array<{ id: RightTab; label: string; icon: React.ReactNode }> = [
-  { id: 'configure', label: 'Configure', icon: <CogIcon size={14} /> },
-  { id: 'analytics', label: 'Analytics', icon: <BarChartIcon size={14} /> },
-  { id: 'settings', label: 'Settings', icon: <ShieldIcon size={14} /> },
-];
-
-function TabBar<T extends string>({
-  tabs,
+function TabBar({
   activeTab,
   onChange,
   className = '',
 }: {
-  tabs: Array<{ id: T; label: string; icon: React.ReactNode }>;
-  activeTab: T;
-  onChange: (tab: T) => void;
+  activeTab: TabId;
+  onChange: (tab: TabId) => void;
   className?: string;
 }) {
   return (
@@ -66,57 +78,26 @@ function TabBar<T extends string>({
   );
 }
 
-function OnboardingCard({ onDismiss }: { onDismiss: () => void }) {
-  return (
-    <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 backdrop-blur-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-            <h3 className="text-base font-semibold text-emerald-300">Your agent is live</h3>
-          </div>
-          
-          <div className="mt-4 flex items-center gap-2">
-            <div className="flex items-center gap-2 text-sm text-emerald-200">
-              <span className="text-emerald-400">✓</span>
-              <span>Agent deployed</span>
-            </div>
-            <span className="text-emerald-500/50">→</span>
-            <div className="text-sm text-emerald-300 font-medium">Test it out (chat below)</div>
-            <span className="text-emerald-500/50">→</span>
-            <div className="text-sm text-emerald-200/70">Customize (optional)</div>
-          </div>
-        </div>
-        
-        <button
-          type="button"
-          onClick={onDismiss}
-          className="text-xs text-emerald-400 hover:text-emerald-300 transition"
-        >
-          Dismiss
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function DashboardPage() {
   const searchParams = useSearchParams();
   const agentId = searchParams.get('agent');
 
-  const [rightTab, setRightTab] = useState<RightTab>('configure');
-  const [mobileTab, setMobileTab] = useState<MobileTab>('chat');
-
+  const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showOnboarding, setShowOnboarding] = useState(true);
   const [usage, setUsage] = useState<{ llm: { used: number; limit: number; unit?: string } | null } | null>(null);
+
+  // Listen for tab change events from child components
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const tab = (e as CustomEvent).detail as TabId;
+      if (tabs.some(t => t.id === tab)) setActiveTab(tab);
+    };
+    window.addEventListener('dashboard-tab', handler);
+    return () => window.removeEventListener('dashboard-tab', handler);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -128,7 +109,6 @@ export default function DashboardPage() {
           const { agent } = await api.getAgent(agentId);
           setSelectedAgent(agent);
           
-          // Load usage data
           try {
             const usageData = await api.getAgentUsage(agentId);
             setUsage(usageData);
@@ -152,16 +132,12 @@ export default function DashboardPage() {
   // Auto-refresh usage
   useEffect(() => {
     if (!agentId) return;
-    
     const interval = setInterval(async () => {
       try {
         const usageData = await api.getAgentUsage(agentId);
         setUsage(usageData);
-      } catch (err) {
-        console.error('Failed to refresh usage:', err);
-      }
+      } catch {}
     }, 30000);
-    
     return () => clearInterval(interval);
   }, [agentId]);
 
@@ -193,6 +169,7 @@ export default function DashboardPage() {
     );
   }
 
+  // Agent list view (no agent selected)
   if (!agentId || !selectedAgent) {
     return (
       <>
@@ -214,17 +191,20 @@ export default function DashboardPage() {
     );
   }
 
+  // Usage for header bar
   const creditsUsed = usage?.llm?.used ?? selectedAgent.aiCreditsUsed;
   const creditsLimit = usage?.llm?.limit ?? selectedAgent.aiCreditsLimit;
   const isPrompts = usage?.llm?.unit === 'prompts';
   const creditsPct = creditsLimit > 0 ? (creditsUsed / creditsLimit) * 100 : 0;
 
-  const renderRightContent = (tab: RightTab | MobileTab) => {
+  const renderContent = (tab: TabId) => {
     switch (tab) {
+      case 'overview':
+        return <OverviewPanel agent={selectedAgent} />;
+      case 'chat':
+        return <ChatPanel agentId={selectedAgent.id} />;
       case 'configure':
         return <ConfigurePanel agent={selectedAgent} />;
-      case 'analytics':
-        return <ActivityPanel agentId={selectedAgent.id} />;
       case 'settings':
         return <SettingsPanel agent={selectedAgent} />;
       default:
@@ -238,18 +218,12 @@ export default function DashboardPage() {
     <AsciiBackground />
     <div className="relative z-10 h-screen overflow-hidden px-4 pt-24 sm:px-6">
       <div className="flex h-full min-h-0 flex-col overflow-hidden pb-6">
-        {/* Top Bar */}
-        <div className="flex-none pb-6">
+
+        {/* Top Bar: Agent name + status + usage */}
+        <div className="flex-none pb-4">
           <div className="flex items-center justify-between gap-4">
-            {/* Left: Back arrow + Agent name + Status */}
             <div className="flex items-center gap-4">
-              <a
-                href="/dashboard"
-                className="text-zinc-500 transition hover:text-white"
-                title="Back to agents"
-              >
-                ←
-              </a>
+              <a href="/dashboard" className="text-zinc-500 transition hover:text-white" title="Back to agents">←</a>
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-semibold text-white">{selectedAgent.name}</h1>
                 <div className="flex items-center gap-2">
@@ -261,14 +235,10 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Right: Tier badge + AI Credits */}
             <div className="flex items-center gap-4">
-              {/* Tier Badge */}
               <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-zinc-300">
                 {selectedAgent.tier.charAt(0).toUpperCase() + selectedAgent.tier.slice(1)}
               </div>
-
-              {/* AI Credits / Prompts */}
               <div className="group relative min-w-[140px]">
                 <div className="flex items-baseline gap-1.5">
                   <span className="font-mono text-sm text-white">{isPrompts ? creditsUsed : creditsUsed.toFixed(1)}</span>
@@ -280,53 +250,28 @@ export default function DashboardPage() {
                   {isPrompts ? '7-day free trial — upgrade for unlimited usage' : 'AI credits refill monthly with your plan'}
                 </div>
                 <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
-                  <div 
-                    className="h-full rounded-full bg-amber-500 transition-all" 
-                    style={{ width: `${Math.min(creditsPct, 100)}%` }} 
-                  />
+                  <div className="h-full rounded-full bg-amber-500 transition-all" style={{ width: `${Math.min(creditsPct, 100)}%` }} />
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Onboarding Card (dismissible, shows on first visit) */}
-        {showOnboarding && (
-          <div className="flex-none pb-6">
-            <OnboardingCard onDismiss={() => setShowOnboarding(false)} />
-          </div>
-        )}
+        {/* Tabs + Content */}
+        <TabBar activeTab={activeTab} onChange={setActiveTab} className="flex-none mb-4" />
 
-        {/* Main Area */}
         <div className="min-h-0 flex-1 overflow-hidden">
-          {/* Mobile: Full-width tabs */}
-          <div className="flex h-full min-h-0 flex-col overflow-hidden lg:hidden">
-            <TabBar tabs={mobileTabs} activeTab={mobileTab} onChange={setMobileTab} className="mb-4 flex-none" />
-            <div className="min-h-0 flex-1 overflow-hidden">
-              {mobileTab === 'chat' ? (
-                <ChatPanel agentId={selectedAgent.id} />
-              ) : (
-                <div className="h-full overflow-y-auto">
-                  {renderRightContent(mobileTab)}
-                </div>
-              )}
+          {activeTab === 'chat' ? (
+            <ChatPanel agentId={selectedAgent.id} />
+          ) : activeTab === 'overview' ? (
+            <OverviewPanel agent={selectedAgent} />
+          ) : (
+            <div className="h-full overflow-y-auto">
+              {renderContent(activeTab)}
             </div>
-          </div>
-
-          {/* Desktop: Chat 65% + Right panel 35% */}
-          <div className="hidden h-full min-h-0 gap-6 overflow-hidden lg:grid" style={{ gridTemplateColumns: '65fr 35fr' }}>
-            <div className="min-h-0">
-              <ChatPanel agentId={selectedAgent.id} />
-            </div>
-
-            <div className="flex min-h-0 flex-col overflow-hidden">
-              <TabBar tabs={rightTabs} activeTab={rightTab} onChange={setRightTab} className="mb-4 flex-none" />
-              <div className="min-h-0 flex-1 overflow-hidden">
-                {renderRightContent(rightTab)}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
+
       </div>
     </div>
     <HostFooter />
