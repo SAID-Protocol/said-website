@@ -10,6 +10,7 @@ export interface Agent {
   status: 'creating' | 'running' | 'paused' | 'stopped' | 'error';
   tier: 'free' | 'trial' | 'starter' | 'pro' | 'power';
   saidIdentity: string | null;
+  walletAddress: string | null;
   programMd: string | null;
   config: string | null;
   gatewayTokenHash: string | null;

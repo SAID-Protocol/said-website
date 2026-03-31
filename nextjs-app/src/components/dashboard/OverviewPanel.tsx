@@ -85,7 +85,7 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
   const limit = usage?.llm?.limit ?? agent.aiCreditsLimit;
   const pct = limit > 0 ? (used / limit) * 100 : 0;
 
-  // Determine connection statuses
+  // Determine connection statuses from agent data
   const hasTelegram = agent.config ? (() => {
     try { 
       const c = JSON.parse(agent.config);
@@ -93,7 +93,8 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
     } catch { return false; }
   })() : false;
   
-  const hasWallet = !!agent.saidIdentity;
+  const walletAddress = agent.walletAddress ?? agent.saidIdentity;
+  const hasWallet = !!walletAddress;
 
   const handleTestAgent = async () => {
     setTesting(true);
@@ -125,25 +126,27 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
         {/* Connections Grid */}
         <div>
           <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500 mb-3">Connections</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <StatusCard 
-              label="Telegram" 
-              value={hasTelegram ? 'Bot configured' : 'Not set up'}
-              status={hasTelegram ? 'connected' : 'none'}
-              detail={hasTelegram ? 'Receiving messages' : 'Add token in Settings'}
-            />
+          <div className={`grid grid-cols-1 gap-3 ${hasTelegram ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
             <StatusCard 
               label="Wallet" 
-              value={agent.saidIdentity ? `${agent.saidIdentity.slice(0, 4)}...${agent.saidIdentity.slice(-4)}` : 'No wallet'}
-              status={hasWallet ? 'connected' : 'none'}
-              detail={hasWallet ? 'Solana mainnet' : 'Auto-created on deploy'}
+              value={walletAddress ? `${walletAddress.slice(0, 4)}...${walletAddress.slice(-4)}` : 'Creating...'}
+              status={hasWallet ? 'connected' : 'pending'}
+              detail={hasWallet ? 'Solana mainnet' : 'Generated on first boot'}
             />
             <StatusCard 
               label="SAID Identity" 
               value={hasWallet ? 'Registered' : 'Pending'}
               status={hasWallet ? 'connected' : 'pending'}
-              detail="On-chain agent identity"
+              detail={hasWallet ? 'On-chain agent identity' : 'Registers after wallet is created'}
             />
+            {hasTelegram && (
+              <StatusCard 
+                label="Telegram" 
+                value="Bot connected"
+                status="connected"
+                detail="Receiving messages"
+              />
+            )}
           </div>
         </div>
 
@@ -184,11 +187,20 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
               onClick={handleTestAgent}
               variant="primary"
             />
-            <QuickAction 
-              label="💬 Open in Telegram"
-              description={hasTelegram ? 'Chat with your agent on Telegram' : 'Connect Telegram first in Settings'}
-              onClick={hasTelegram ? () => window.open('https://t.me/', '_blank') : undefined}
-            />
+            {hasTelegram && (
+              <QuickAction 
+                label="💬 Open in Telegram"
+                description="Chat with your agent on Telegram"
+                onClick={() => window.open('https://t.me/', '_blank')}
+              />
+            )}
+            {hasWallet && (
+              <QuickAction 
+                label="🔗 View On-Chain Identity"
+                description={`View your agent's SAID profile`}
+                onClick={() => window.open(`https://www.saidprotocol.com/agents/${walletAddress}`, '_blank')}
+              />
+            )}
             <QuickAction 
               label="⚙️ Configure Agent"
               description="Set your agent's mission, personality, and tools"
