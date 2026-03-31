@@ -95,6 +95,7 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
   
   const walletAddress = agent.walletAddress ?? agent.saidIdentity;
   const hasWallet = !!walletAddress;
+  const saidPda = agent.saidPda;
 
   const handleTestAgent = async () => {
     setTesting(true);
@@ -135,9 +136,9 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
             />
             <StatusCard 
               label="SAID Identity" 
-              value={hasWallet ? 'Registered' : 'Pending'}
-              status={hasWallet ? 'connected' : 'pending'}
-              detail={hasWallet ? 'On-chain agent identity' : 'Registers after wallet is created'}
+              value={saidPda ? `${saidPda.slice(0, 4)}...${saidPda.slice(-4)}` : hasWallet ? 'Registered' : 'Pending'}
+              status={saidPda ? 'connected' : hasWallet ? 'connected' : 'pending'}
+              detail={saidPda ? 'On-chain PDA (verified)' : hasWallet ? 'On-chain agent identity' : 'Registers after wallet is created'}
             />
             {hasTelegram && (
               <StatusCard 

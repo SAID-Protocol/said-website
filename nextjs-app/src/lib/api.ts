@@ -11,6 +11,7 @@ export interface Agent {
   tier: 'free' | 'trial' | 'starter' | 'pro' | 'power';
   saidIdentity: string | null;
   walletAddress: string | null;
+  saidPda: string | null;
   programMd: string | null;
   config: string | null;
   gatewayTokenHash: string | null;
