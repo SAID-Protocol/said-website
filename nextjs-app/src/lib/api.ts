@@ -93,10 +93,10 @@ export interface PricingData {
 
 export interface ActivityItem {
   id: number;
-  agent_id: string;
+  agentId: string;
   type: string;
   data: string | null;
-  created_at: string;
+  createdAt: string;
 }
 
 // Store the access token getter globally

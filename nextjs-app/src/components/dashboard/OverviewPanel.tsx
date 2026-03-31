@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Agent, api } from '@/lib/api';
+import { Agent, ActivityItem, api } from '@/lib/api';
 
 interface OverviewPanelProps {
   agent: Agent;
@@ -76,6 +76,100 @@ function CogIcon({ size = 16 }: { size?: number }) {
   );
 }
 
+// Activity feed helpers
+const EVENT_META: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
+  message_sent:     { icon: <ArrowUpIcon />,   label: 'Sent a message',      color: 'text-emerald-400' },
+  message_received: { icon: <ArrowDownIcon />, label: 'Received a message',  color: 'text-blue-400' },
+  heartbeat:        { icon: <PulseIcon />,     label: 'Heartbeat',           color: 'text-zinc-500' },
+  boot:             { icon: <RocketIcon />,    label: 'Agent started',       color: 'text-amber-400' },
+  shutdown:         { icon: <PowerIcon />,     label: 'Agent stopped',       color: 'text-red-400' },
+  error:            { icon: <AlertIcon />,     label: 'Error',               color: 'text-red-400' },
+  tool_call:        { icon: <WrenchIcon />,    label: 'Used a tool',         color: 'text-purple-400' },
+  transaction:      { icon: <TxIcon />,        label: 'Transaction',         color: 'text-amber-400' },
+  system:           { icon: <InfoIcon />,      label: 'System',              color: 'text-zinc-400' },
+};
+
+function ArrowUpIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>;
+}
+function ArrowDownIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="21 8 21 21 8 21"/><line x1="21" y1="21" x2="3" y2="3"/></svg>;
+}
+function PulseIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>;
+}
+function RocketIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09Z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2Z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>;
+}
+function PowerIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v10"/><path d="M18.4 6.6a9 9 0 1 1-12.77.04"/></svg>;
+}
+function AlertIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>;
+}
+function WrenchIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>;
+}
+function TxIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>;
+}
+function InfoIcon() {
+  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>;
+}
+
+function timeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = Math.max(0, now - then);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function ActivityFeed({ items }: { items: ActivityItem[] }) {
+  if (!items.length) {
+    return (
+      <div className="text-center py-6 text-sm text-zinc-500">
+        No activity yet — send your agent a message to get started
+      </div>
+    );
+  }
+
+  // Filter out consecutive heartbeats, keep only the latest
+  const filtered = items.filter((item, i) => {
+    if (item.type === 'heartbeat' && i < items.length - 1 && items[i + 1]?.type === 'heartbeat') return false;
+    return true;
+  });
+
+  return (
+    <div className="space-y-0">
+      {filtered.slice(0, 15).map((item) => {
+        const meta = EVENT_META[item.type] || EVENT_META.system;
+        return (
+          <div key={item.id} className="flex items-start gap-3 py-2.5 border-b border-white/5 last:border-0">
+            <div className={`mt-0.5 flex-shrink-0 ${meta.color}`}>
+              {meta.icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-sm text-zinc-300">{meta.label}</span>
+              {item.data && item.type !== 'heartbeat' && (
+                <p className="text-xs text-zinc-500 truncate mt-0.5">{item.data}</p>
+              )}
+            </div>
+            <span className="text-xs text-zinc-600 flex-shrink-0 whitespace-nowrap">
+              {timeAgo(item.createdAt)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function QuickAction({ icon, label, description, onClick, variant = 'default' }: {
   icon: React.ReactNode;
   label: string;
@@ -108,16 +202,23 @@ function QuickAction({ icon, label, description, onClick, variant = 'default' }:
 
 export default function OverviewPanel({ agent }: OverviewPanelProps) {
   const [usage, setUsage] = useState<{ llm: { used: number; limit: number; unit?: string } | null } | null>(null);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     api.getAgentUsage(agent.id).then(setUsage).catch(() => {});
+    api.getAgentLogs(agent.id).then(setActivity).catch(() => {});
     const interval = setInterval(() => {
       api.getAgentUsage(agent.id).then(setUsage).catch(() => {});
+      api.getAgentLogs(agent.id).then(setActivity).catch(() => {});
     }, 30000);
     return () => clearInterval(interval);
   }, [agent.id]);
+
+  // Derive "last active" from most recent non-heartbeat activity or updatedAt
+  const lastActiveEvent = activity.find(a => a.type !== 'heartbeat');
+  const lastActiveTime = lastActiveEvent?.createdAt || agent.updatedAt;
 
   const isPrompts = usage?.llm?.unit === 'prompts';
   const used = usage?.llm?.used ?? agent.aiCreditsUsed;
@@ -162,6 +263,11 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
             <span className="text-sm font-medium text-white">
               {agent.status === 'running' ? 'Agent is running' : 'Agent is offline'}
             </span>
+            {lastActiveTime && agent.status === 'running' && (
+              <span className="text-xs text-zinc-500">
+                · Last active {timeAgo(lastActiveTime)}
+              </span>
+            )}
           </div>
         </div>
 
@@ -225,6 +331,14 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
                 {limit - used} prompts remaining in your 7-day trial
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Activity Feed */}
+        <div>
+          <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500 mb-3">Activity</h3>
+          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+            <ActivityFeed items={activity} />
           </div>
         </div>
 
