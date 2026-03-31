@@ -9,7 +9,7 @@ export interface Agent {
   flyAppName: string | null;
   status: 'creating' | 'running' | 'paused' | 'stopped' | 'error';
   tier: 'free' | 'trial' | 'starter' | 'pro' | 'power';
-  saidIdentity: string | null;
+  saidIdentity: string | null;  // Legacy — use walletAddress/saidPda instead
   walletAddress: string | null;
   saidPda: string | null;
   programMd: string | null;
