@@ -1,6 +1,7 @@
 'use client';
 
-import { Agent } from '@/lib/api';
+import { useEffect, useState } from 'react';
+import { Agent, api } from '@/lib/api';
 import Link from 'next/link';
 
 const statusColors = {
@@ -23,6 +24,59 @@ interface AgentListProps {
   agents: Agent[];
 }
 
+function AgentCard({ agent }: { agent: Agent }) {
+  const [usage, setUsage] = useState<{ llm: { used: number; limit: number; unit?: string } | null } | null>(null);
+
+  useEffect(() => {
+    if (agent.tier === 'trial') {
+      api.getAgentUsage(agent.id).then(setUsage).catch(() => {});
+    }
+  }, [agent.id, agent.tier]);
+
+  const isPrompts = agent.tier === 'trial';
+  const used = usage?.llm?.used ?? agent.aiCreditsUsed;
+  const limit = usage?.llm?.limit ?? agent.aiCreditsLimit;
+
+  return (
+    <Link
+      href={`/dashboard?agent=${agent.id}`}
+      className="group rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-white/20 hover:bg-white/10"
+    >
+      <div className="mb-4 flex items-start justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white group-hover:text-amber-500 transition">
+            {agent.name}
+          </h3>
+          <p className="mt-1 text-xs uppercase tracking-wider text-zinc-500">
+            {tierLabels[agent.tier]}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1">
+          <span className={`h-2 w-2 rounded-full ${statusColors[agent.status]}`} />
+          <span className="text-xs text-zinc-300">{agent.status}</span>
+        </div>
+      </div>
+      <div className="space-y-2 text-sm text-zinc-400">
+        <div className="flex justify-between">
+          <span>{isPrompts ? 'Prompts:' : 'AI Credits:'}</span>
+          <span className="text-white">
+            {isPrompts 
+              ? `${used} / ${limit}`
+              : `${used.toFixed(1)} / ${limit.toFixed(1)}`
+            }
+          </span>
+        </div>
+        <div className="flex justify-between">
+          <span>Created:</span>
+          <span className="text-white">
+            {new Date(agent.createdAt).toLocaleDateString()}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
 export default function AgentList({ agents }: AgentListProps) {
   if (agents.length === 0) {
     return (
@@ -35,43 +89,7 @@ export default function AgentList({ agents }: AgentListProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {agents.map((agent) => (
-        <Link
-          key={agent.id}
-          href={`/dashboard?agent=${agent.id}`}
-          className="group rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition hover:border-white/20 hover:bg-white/10"
-        >
-          <div className="mb-4 flex items-start justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-white group-hover:text-amber-500 transition">
-                {agent.name}
-              </h3>
-              <p className="mt-1 text-xs uppercase tracking-wider text-zinc-500">
-                {tierLabels[agent.tier]}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/30 px-3 py-1">
-              <span className={`h-2 w-2 rounded-full ${statusColors[agent.status]}`} />
-              <span className="text-xs text-zinc-300">{agent.status}</span>
-            </div>
-          </div>
-          <div className="space-y-2 text-sm text-zinc-400">
-            <div className="flex justify-between">
-              <span>{agent.tier === 'trial' ? 'Prompts:' : 'AI Credits:'}</span>
-              <span className="text-white">
-                {agent.tier === 'trial' 
-                  ? `${agent.aiCreditsUsed} / ${agent.aiCreditsLimit}`
-                  : `${agent.aiCreditsUsed.toFixed(1)} / ${agent.aiCreditsLimit.toFixed(1)}`
-                }
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span>Created:</span>
-              <span className="text-white">
-                {new Date(agent.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-        </Link>
+        <AgentCard key={agent.id} agent={agent} />
       ))}
     </div>
   );
