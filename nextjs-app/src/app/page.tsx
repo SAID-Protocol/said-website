@@ -162,7 +162,7 @@ const faqs = [
   ['What AI model does it use?', 'Claude by Anthropic. Sonnet by default for power and speed. Switch models anytime. BYOK also supports Anthropic, OpenAI, and OpenRouter.'],
   ['What is on-chain identity?', 'Your agent gets a permanent, verifiable identity on Solana. This includes a soulbound passport NFT, reputation tracking, and attestation support. Other agents can verify your agent is legitimate.'],
   ['What is A2A messaging?', 'Agent-to-agent messaging across 10 chains — Solana, Ethereum, Base, Polygon, Avalanche, and more. Powered by x402 micropayments.'],
-  ['Is there a free trial?', 'Yes — every plan comes with a 3-day free trial. Full access, no restrictions. Cancel anytime before you are charged.'],
+  ['Is there a free trial?', 'Yes — every plan comes with a 7-day free trial. Full access, no restrictions. Cancel anytime before you are charged.'],
   ['Can I cancel anytime?', 'Yes. No contracts, no fees. Your agent’s on-chain identity persists even after cancellation.'],
 ] as const;
 
@@ -340,7 +340,7 @@ export default function HostLandingPage() {
             <div className="sh-label rv">Pricing</div>
           </div>
           <div className="sh-title rv" style={{ textAlign: 'center', fontSize: 'clamp(24px, 3.5vw, 36px)', marginBottom: '8px' }}>Simple. Transparent.</div>
-          <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 4px', fontSize: '15px' }}>All plans include SAID identity, Solana wallet, and A2A messaging. 3-day free trial.</div>
+          <div className="sh-sub rv" style={{ textAlign: 'center', margin: '0 auto 4px', fontSize: '15px' }}>All plans include SAID identity, Solana wallet, and A2A messaging. 7-day free trial.</div>
 
           <div className="pricing-toggle rv">
             <div className="pricing-toggle-inner" id="pricing-toggle">
@@ -373,7 +373,7 @@ export default function HostLandingPage() {
                   {plan.featured && <div className="price-badge">Most Popular</div>}
                   <div className="price-name">{plan.name}</div>
                   <div className="price-amount">${price}</div>
-                  <div className="price-freq">/month · free for 3 days</div>
+                  <div className="price-freq">/month · free for 7 days</div>
                   <ul className="price-list">
                     {features.map((item) => <li key={item}>{item}</li>)}
                   </ul>
@@ -403,7 +403,7 @@ export default function HostLandingPage() {
       <section className="cta host-layer">
         <div className="container">
           <h2 className="rv">Ready to launch?</h2>
-          <p className="rv">3-day free trial. No credit card. Live in 60 seconds.</p>
+          <p className="rv">7-day free trial. No credit card. Live in 60 seconds.</p>
           <a href="#pricing" className="btn-w rv">Start Free Trial</a>
         </div>
       </section>

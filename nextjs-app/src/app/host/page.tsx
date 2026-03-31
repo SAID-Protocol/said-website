@@ -378,7 +378,7 @@ export default function HostAgentPage() {
         <main className="flex-1 max-w-5xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
           <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-center">Host an Agent</h1>
           <p className="text-zinc-400 mb-8 text-center max-w-2xl mx-auto">
-            {selectedPlan ? `${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan${requiresPayment ? ` · $${TIER_PRICES[selectedPlan || 'starter']}/mo` : ' · 3-day free trial'}` : "We'll build, host, and run your AI agent for you. Just configure and deploy."}
+            {selectedPlan ? `${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan${requiresPayment ? ` · $${TIER_PRICES[selectedPlan || 'starter']}/mo` : ' · 7-day free trial'}` : "We'll build, host, and run your AI agent for you. Just configure and deploy."}
           </p>
           
           {ready && !authenticated ? (
@@ -607,7 +607,7 @@ export default function HostAgentPage() {
                           {selectedPlan}
                           {requiresPayment 
                             ? ` · $${TIER_PRICES[selectedPlan || 'starter']}/mo` 
-                            : ' · 3-day free trial'}
+                            : ' · 7-day free trial'}
                         </span>
                       </div>
                     </div>
@@ -731,11 +731,11 @@ export default function HostAgentPage() {
                     
                     <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
                       <div className="text-center">
-                        <div className="text-2xl font-bold">${createdAgent.aiCreditsLimit}</div>
-                        <div className="text-xs text-zinc-500">API Credits</div>
+                        <div className="text-2xl font-bold">{createdAgent.tier === 'trial' ? createdAgent.aiCreditsLimit : `$${createdAgent.aiCreditsLimit}`}</div>
+                        <div className="text-xs text-zinc-500">{createdAgent.tier === 'trial' ? 'Prompt Limit' : 'API Credits'}</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold">${createdAgent.aiCreditsUsed?.toFixed(2) || '0.00'}</div>
+                        <div className="text-2xl font-bold">{createdAgent.tier === 'trial' ? (createdAgent.aiCreditsUsed || 0) : `$${createdAgent.aiCreditsUsed?.toFixed(2) || '0.00'}`}</div>
                         <div className="text-xs text-zinc-500">Used</div>
                       </div>
                       <div className="text-center">

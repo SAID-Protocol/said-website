@@ -659,7 +659,7 @@ export default function BillingPanel() {
       {billing.billingStatus === 'grace' && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4">
           <p className="text-sm text-red-300">
-            ⚠️ Payment failed. Your agent will be paused in 3 days if funds are not added.
+            ⚠️ Payment failed. Your agent will be paused in 7 days if funds are not added.
           </p>
         </div>
       )}

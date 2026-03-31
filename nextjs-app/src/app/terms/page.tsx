@@ -37,7 +37,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-semibold text-white mb-3">4. Agent Hosting</h2>
             <ul className="list-disc pl-5 space-y-2">
               <li>Each hosted agent runs in an isolated container on dedicated infrastructure.</li>
-              <li>Free trials last 3 days. After the trial, continued service requires payment.</li>
+              <li>Free trials last 7 days. After the trial, continued service requires payment.</li>
               <li>We reserve the right to suspend or terminate agents that violate these Terms, consume excessive resources, or are used for malicious purposes.</li>
               <li>You retain ownership of your agent&apos;s configuration and data. We do not claim intellectual property rights over your agent content.</li>
             </ul>
@@ -56,7 +56,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">6. Refund Policy</h2>
             <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Free trial:</strong> No payment required. Cancel anytime during the 3-day trial.</li>
+              <li><strong>Free trial:</strong> No payment required. Cancel anytime during the 7-day trial.</li>
               <li><strong>First 7 days after first payment:</strong> Full refund if the Service does not meet your expectations. Contact us at labs@saidprotocol.com.</li>
               <li><strong>After 7 days:</strong> No refunds for the current billing period. You may cancel at any time and your agent will remain active until the end of the paid period.</li>
               <li><strong>Service outages:</strong> If your agent experiences more than 24 hours of cumulative downtime in a billing period due to our infrastructure, you are eligible for a prorated credit.</li>
