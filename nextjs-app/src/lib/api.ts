@@ -12,6 +12,8 @@ export interface Agent {
   saidIdentity: string | null;  // Legacy — use walletAddress/saidPda instead
   walletAddress: string | null;
   saidPda: string | null;
+  saidRegistered: boolean;
+  saidVerified: boolean;
   programMd: string | null;
   config: string | null;
   gatewayTokenHash: string | null;

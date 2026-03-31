@@ -96,6 +96,8 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
   const walletAddress = agent.walletAddress ?? agent.saidIdentity;
   const hasWallet = !!walletAddress;
   const saidPda = agent.saidPda;
+  const saidRegistered = agent.saidRegistered;
+  const saidVerified = agent.saidVerified;
 
   const handleTestAgent = async () => {
     setTesting(true);
@@ -136,9 +138,18 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
             />
             <StatusCard 
               label="SAID Identity" 
-              value={saidPda ? `${saidPda.slice(0, 4)}...${saidPda.slice(-4)}` : hasWallet ? 'Registered' : 'Pending'}
-              status={saidPda ? 'connected' : hasWallet ? 'connected' : 'pending'}
-              detail={saidPda ? 'On-chain PDA (verified)' : hasWallet ? 'On-chain agent identity' : 'Registers after wallet is created'}
+              value={
+                saidVerified ? `${saidPda!.slice(0, 4)}...${saidPda!.slice(-4)} ✓` 
+                : saidRegistered ? `${saidPda!.slice(0, 4)}...${saidPda!.slice(-4)}`
+                : saidPda ? 'Not registered'
+                : 'Pending'
+              }
+              status={saidVerified ? 'connected' : saidRegistered ? 'connected' : 'pending'}
+              detail={
+                saidVerified ? 'Verified on Solana mainnet'
+                : saidRegistered ? 'Registered (not yet verified)'
+                : 'On-chain identity pending'
+              }
             />
             {hasTelegram && (
               <StatusCard 
