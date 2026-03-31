@@ -41,7 +41,43 @@ function StatusCard({ label, value, status, detail }: {
   );
 }
 
-function QuickAction({ label, description, onClick, variant = 'default' }: {
+// SVG Icons for quick actions
+function BeakerIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.5 3h15" /><path d="M6 3v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V3" /><path d="M6 14h12" />
+    </svg>
+  );
+}
+
+function SendIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" />
+    </svg>
+  );
+}
+
+function LinkIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+    </svg>
+  );
+}
+
+function CogIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function QuickAction({ icon, label, description, onClick, variant = 'default' }: {
+  icon: React.ReactNode;
   label: string;
   description: string;
   onClick?: () => void;
@@ -57,6 +93,9 @@ function QuickAction({ label, description, onClick, variant = 'default' }: {
           : 'border-white/10 bg-white/5 hover:bg-white/10'
       }`}
     >
+      <div className={`mt-0.5 flex-shrink-0 ${variant === 'primary' ? 'text-amber-400' : 'text-zinc-400'}`}>
+        {icon}
+      </div>
       <div>
         <div className={`text-sm font-medium ${variant === 'primary' ? 'text-amber-300' : 'text-white'}`}>
           {label}
@@ -193,31 +232,34 @@ export default function OverviewPanel({ agent }: OverviewPanelProps) {
         <div>
           <h3 className="text-xs font-medium uppercase tracking-wider text-zinc-500 mb-3">Quick Actions</h3>
           <div className="space-y-2">
-            <QuickAction 
-              label="🧪 Test Agent" 
+            <QuickAction
+              icon={<BeakerIcon />}
+              label="Test Agent" 
               description={testing ? 'Sending test message...' : testResult || 'Send a test message to verify your agent is responding'}
               onClick={handleTestAgent}
               variant="primary"
             />
             {hasTelegram && (
-              <QuickAction 
-                label="💬 Open in Telegram"
+              <QuickAction
+                icon={<SendIcon />}
+                label="Open in Telegram"
                 description="Chat with your agent on Telegram"
                 onClick={() => window.open('https://t.me/', '_blank')}
               />
             )}
             {hasWallet && (
-              <QuickAction 
-                label="🔗 View On-Chain Identity"
+              <QuickAction
+                icon={<LinkIcon />}
+                label="View On-Chain Identity"
                 description={`View your agent's SAID profile`}
                 onClick={() => window.open(`https://www.saidprotocol.com/agents/${walletAddress}`, '_blank')}
               />
             )}
-            <QuickAction 
-              label="⚙️ Configure Agent"
+            <QuickAction
+              icon={<CogIcon />}
+              label="Configure Agent"
               description="Set your agent's mission, personality, and tools"
               onClick={() => {
-                // Navigate to configure tab - dispatch custom event
                 window.dispatchEvent(new CustomEvent('dashboard-tab', { detail: 'configure' }));
               }}
             />
