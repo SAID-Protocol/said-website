@@ -158,7 +158,7 @@ export default function ActivityPanel({ agentId }: ActivityPanelProps) {
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="text-sm font-medium text-white capitalize">{item.type}</h3>
                         <span className="shrink-0 text-xs text-zinc-500">
-                          {formatRelativeTime(item.created_at)}
+                          {formatRelativeTime(item.createdAt)}
                         </span>
                       </div>
                       <p className="mt-1 text-sm leading-6 text-zinc-400">{description}</p>
