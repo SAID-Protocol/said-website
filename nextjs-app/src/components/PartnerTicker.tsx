@@ -10,6 +10,7 @@ const partners = [
   { name: 'Metaplex', logo: '/platforms/metaplex.jpg', url: 'https://www.metaplex.com/' },
   { name: 'Privy', logo: '/platforms/privy.jpg', url: 'https://www.privy.io/' },
   { name: 'Juice', logo: '/platforms/juice.jpg', url: 'https://www.juiceeverything.com/' },
+  { name: 'Open Wallet Standard', logo: '/platforms/ows.jpg', url: 'https://openwallet.sh' },
 ];
 
 export default function PartnerTicker() {
