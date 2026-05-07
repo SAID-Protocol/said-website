@@ -23,6 +23,9 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   
+  // API Keys
+  const [apiKeys, setApiKeys] = useState<Array<{ agentId: string; agentName: string; key: string; revealed: boolean }>>([]);
+
   // Edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState('');
@@ -96,10 +99,41 @@ export default function ProfilePage() {
           const date = new Date(oldest.registeredAt);
           setMemberSince(date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
         }
+
+        // Fetch API keys for each agent
+        const keys = await Promise.all(agents.map(async (agent: any) => {
+          try {
+            const keyRes = await fetch(`https://api.saidprotocol.com/api/agents/${agent.id}/api-key`, {
+              headers: { 'Authorization': `Bearer ${sessionToken}` },
+            });
+            if (keyRes.ok) {
+              const keyData = await keyRes.json();
+              if (keyData.gatewayToken) {
+                return { agentId: agent.id, agentName: agent.name || 'Agent', key: keyData.gatewayToken, revealed: false };
+              }
+            }
+          } catch {}
+          return null;
+        }));
+        setApiKeys(keys.filter(Boolean) as typeof apiKeys);
       }
     } catch (err) {
       console.error('Failed to fetch agent stats:', err);
     }
+  };
+
+  const rotateProfileKey = async (agentId: string) => {
+    if (!sessionToken) return;
+    try {
+      const res = await fetch(`https://api.saidprotocol.com/api/agents/${agentId}/rotate-key`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setApiKeys(prev => prev.map(k => k.agentId === agentId ? { ...k, key: data.gatewayToken } : k));
+      }
+    } catch {}
   };
 
   const handleEditClick = () => {
@@ -378,39 +412,43 @@ export default function ProfilePage() {
               </div>
             </section>
 
-            {/* API Keys - Coming Soon (Frosted Glass) */}
-            <section className="relative rounded-xl overflow-hidden">
-              {/* Background content (blurred) */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 filter blur-[2px]">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-lg font-semibold">API Keys</h2>
-                  <button className="px-3 py-1.5 bg-white text-black rounded-lg text-sm font-medium">
-                    + Create Key
-                  </button>
+            {/* API Keys */}
+            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="text-lg font-semibold">API Keys</h2>
+              </div>
+              {apiKeys.length === 0 ? (
+                <div className="text-center py-6 text-zinc-500 text-sm">
+                  No agents yet. <Link href="/create-agent" className="text-white hover:underline">Create one</Link> to get an API key.
                 </div>
+              ) : (
                 <div className="space-y-3">
-                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 font-mono text-sm flex justify-between items-center">
-                    <span className="text-zinc-400">said_api_xxxx...xxxx</span>
-                    <span className="text-xs text-zinc-500">Created Feb 10</span>
-                  </div>
-                  <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-3 font-mono text-sm flex justify-between items-center">
-                    <span className="text-zinc-400">said_api_yyyy...yyyy</span>
-                    <span className="text-xs text-zinc-500">Created Feb 8</span>
-                  </div>
+                  {apiKeys.map(({ agentId, agentName, key, revealed }) => (
+                    <div key={agentId} className="bg-zinc-800 border border-zinc-700 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{agentName}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => { navigator.clipboard.writeText(key); }}
+                            className="px-2 py-0.5 text-xs bg-zinc-700 rounded hover:bg-zinc-600 transition"
+                          >
+                            Copy
+                          </button>
+                          <button
+                            onClick={() => rotateProfileKey(agentId)}
+                            className="px-2 py-0.5 text-xs bg-zinc-700 text-red-400 rounded hover:bg-zinc-600 transition"
+                          >
+                            Rotate
+                          </button>
+                        </div>
+                      </div>
+                      <div className="font-mono text-xs text-zinc-400 break-all">
+                        {revealed ? key : key.substring(0, 12) + '••••••••••••'}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              
-              {/* Frosted glass overlay */}
-              <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-md rounded-xl border border-zinc-700/50 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path>
-                    </svg>
-                    <span className="font-semibold">API Keys Coming Soon</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </section>
           </div>
         </div>
