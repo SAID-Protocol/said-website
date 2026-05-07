@@ -80,7 +80,7 @@ export default function ProfilePage() {
     if (!sessionToken) return;
     
     try {
-      const res = await fetch('https://api.saidprotocol.com/users/me/agents', {
+      const res = await fetch('https://api.saidprotocol.com/api/agents', {
         headers: {
           'Authorization': `Bearer ${sessionToken}`,
         },
@@ -88,7 +88,7 @@ export default function ProfilePage() {
       
       if (res.ok) {
         const data = await res.json();
-        const agents = data.agents || [];
+        const agents = Array.isArray(data) ? data : (data.agents || []);
         setAgentCount(agents.length);
         setVerifiedCount(agents.filter((a: any) => a.isVerified).length);
         
