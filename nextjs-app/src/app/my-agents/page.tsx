@@ -14,6 +14,7 @@ interface Agent {
   description?: string;
   isVerified: boolean;
   twitter?: string;
+  gatewayToken?: string;
 }
 
 export default function MyAgentsPage() {
@@ -21,6 +22,48 @@ export default function MyAgentsPage() {
   const { sessionToken, loading: authLoading } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [rotatingId, setRotatingId] = useState<string | null>(null);
+  const [showKeyForId, setShowKeyForId] = useState<string | null>(null);
+  const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
+
+  const fetchApiKey = async (agentId: string) => {
+    if (apiKeys[agentId] || !sessionToken) return;
+    try {
+      const res = await fetch(`https://api.saidprotocol.com/api/agents/${agentId}/api-key`, {
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.gatewayToken) {
+          setApiKeys(prev => ({ ...prev, [agentId]: data.gatewayToken }));
+        }
+      }
+    } catch {}
+  };
+
+  const rotateKey = async (agentId: string) => {
+    if (!sessionToken) return;
+    if (!confirm('This will invalidate the old API key. Any integrations using it will stop working. Continue?')) return;
+    setRotatingId(agentId);
+    try {
+      const res = await fetch(`https://api.saidprotocol.com/api/agents/${agentId}/rotate-key`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setApiKeys(prev => ({ ...prev, [agentId]: data.gatewayToken }));
+      }
+    } catch {}
+    setRotatingId(null);
+  };
+
+  const copyKey = (agentId: string, key: string) => {
+    navigator.clipboard.writeText(key);
+    setCopiedId(agentId);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   useEffect(() => {
     if (sessionToken) {
@@ -148,6 +191,50 @@ export default function MyAgentsPage() {
                     >
                       @{agent.twitter.replace('@', '')}
                     </a>
+                  )}
+                </div>
+
+                {/* API Key section */}
+                <div className="mt-4 pt-4 border-t border-zinc-800">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">API Key</span>
+                    <div className="flex gap-2">
+                      {apiKeys[agent.id] && (
+                        <>
+                          <button
+                            onClick={() => copyKey(agent.id, apiKeys[agent.id])}
+                            className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
+                          >
+                            {copiedId === agent.id ? '✓ Copied' : 'Copy'}
+                          </button>
+                          <button
+                            onClick={() => rotateKey(agent.id)}
+                            disabled={rotatingId === agent.id}
+                            className="px-3 py-1 text-xs bg-zinc-800 border border-red-900/50 text-red-400 rounded hover:border-red-500/50 transition disabled:opacity-50"
+                          >
+                            {rotatingId === agent.id ? 'Rotating...' : 'Rotate'}
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => {
+                          if (showKeyForId === agent.id) {
+                            setShowKeyForId(null);
+                          } else {
+                            fetchApiKey(agent.id);
+                            setShowKeyForId(agent.id);
+                          }
+                        }}
+                        className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
+                      >
+                        {showKeyForId === agent.id ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                  </div>
+                  {showKeyForId === agent.id && (
+                    <div className="mt-2 font-mono text-xs bg-zinc-950 px-3 py-2 rounded border border-zinc-800 break-all">
+                      {apiKeys[agent.id] || '••••••••••••••••••••••••'}
+                    </div>
                   )}
                 </div>
               </div>

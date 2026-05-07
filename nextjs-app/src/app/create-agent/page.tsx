@@ -27,6 +27,8 @@ export default function CreateAgentPage() {
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const [copied, setCopied] = useState(false);
   const [walletDownloaded, setWalletDownloaded] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
 
   const generateWallet = async () => {
     const { Keypair } = await import('@solana/web3.js');
@@ -102,6 +104,29 @@ export default function CreateAgentPage() {
       }
       
       setStep('success');
+      
+      // Try to fetch API key for this agent
+      if (sessionToken && agentWallet) {
+        try {
+          // Get user's agents from platform API
+          const agentsRes = await fetch('https://api.saidprotocol.com/api/agents', {
+            headers: { 'Authorization': `Bearer ${sessionToken}` },
+          });
+          if (agentsRes.ok) {
+            const agents = await agentsRes.json();
+            const match = Array.isArray(agents) ? agents.find((a: any) => a.walletAddress === agentWallet) : null;
+            if (match?.id) {
+              const keyRes = await fetch(`https://api.saidprotocol.com/api/agents/${match.id}/api-key`, {
+                headers: { 'Authorization': `Bearer ${sessionToken}` },
+              });
+              if (keyRes.ok) {
+                const keyData = await keyRes.json();
+                if (keyData.gatewayToken) setApiKey(keyData.gatewayToken);
+              }
+            }
+          }
+        } catch {}
+      }
     } catch (err) {
       console.error(err);
       alert('Registration failed. Please try again.');
@@ -493,6 +518,30 @@ export default function CreateAgentPage() {
               </div>
             </div>
             
+            {/* API Key for SeekerClaw integration */}
+            {apiKey && (
+              <div className="p-5 bg-indigo-500/10 backdrop-blur-md border border-indigo-500/30 rounded-xl mb-6">
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-indigo-300">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                  </svg>
+                  Your API Key
+                </h3>
+                <p className="text-zinc-400 text-sm mb-3">Copy this key into the SeekerClaw app to connect your agent.</p>
+                <div className="flex gap-2">
+                  <code className="flex-1 p-3 bg-zinc-950 rounded text-sm font-mono text-indigo-300 overflow-x-auto">
+                    {apiKey}
+                  </code>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(apiKey); setCopiedKey(true); setTimeout(() => setCopiedKey(false), 2000); }}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 transition"
+                  >
+                    {copiedKey ? '✓ Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-4">
               <Link
                 href="/docs"
