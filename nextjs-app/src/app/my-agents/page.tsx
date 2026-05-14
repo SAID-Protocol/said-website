@@ -37,9 +37,15 @@ export default function MyAgentsPage() {
         const data = await res.json();
         if (data.gatewayToken) {
           setApiKeys(prev => ({ ...prev, [agentId]: data.gatewayToken }));
+        } else {
+          console.warn('[fetchApiKey] No gatewayToken returned for', agentId, data);
         }
+      } else {
+        console.warn('[fetchApiKey] Failed', res.status, await res.text());
       }
-    } catch {}
+    } catch (err) {
+      console.error('[fetchApiKey] Error', err);
+    }
   };
 
   const rotateKey = async (agentId: string) => {
