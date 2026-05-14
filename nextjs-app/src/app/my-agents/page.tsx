@@ -77,7 +77,7 @@ export default function MyAgentsPage() {
     if (!sessionToken) return;
     
     try {
-      const res = await fetch('https://api.saidprotocol.com/users/me/agents', {
+      const res = await fetch('https://api.saidprotocol.com/api/agents', {
         headers: {
           'Authorization': `Bearer ${sessionToken}`,
         },
@@ -86,7 +86,7 @@ export default function MyAgentsPage() {
       if (!res.ok) throw new Error('Failed to fetch agents');
       
       const data = await res.json();
-      setAgents(data.agents || []);
+      setAgents(Array.isArray(data) ? data : (data.agents || []));
     } catch (err) {
       console.error('Failed to fetch agents:', err);
     } finally {
