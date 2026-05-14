@@ -1,12 +1,13 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
-
-const API_URL = 'https://api.saidprotocol.com';
+import { API_URL, fetchWithBackoff } from '@/lib/api';
 
 export function useAuth() {
   const { user, authenticated, ready, getAccessToken } = usePrivy();
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const loginAttempted = useRef(false);
+  const loginInProgress = useRef(false);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -18,8 +19,9 @@ export function useAuth() {
   }, []);
 
   const loginToBackend = useCallback(async () => {
-    if (!user) return;
-    
+    if (!user || loginInProgress.current) return;
+
+    loginInProgress.current = true;
     setLoading(true);
     try {
       const accessToken = await getAccessToken();
@@ -30,7 +32,7 @@ export function useAuth() {
 
       console.log('Logging into backend with:', { privyId, email, walletAddress, displayName, hasToken: !!accessToken });
 
-      const res = await fetch(`${API_URL}/auth/login-privy`, {
+      const res = await fetchWithBackoff(`${API_URL}/auth/login-privy`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -40,37 +42,52 @@ export function useAuth() {
           displayName,
           accessToken,
         }),
-      });
+      }, 2); // max 2 retries for login
 
       const data = await res.json();
       
       if (!res.ok) {
         console.error('Backend login error:', data);
-        throw new Error(data.error || 'Login failed');
+        // Don't clear token on failure — keep whatever we had
+        return;
       }
 
       const token = data.sessionToken;
       console.log('Got session token:', token ? 'yes' : 'no');
       
-      setSessionToken(token);
-      localStorage.setItem('said_session_token', token);
+      if (token) {
+        setSessionToken(token);
+        localStorage.setItem('said_session_token', token);
+      }
     } catch (err) {
       console.error('Backend login failed:', err);
+      // Don't clear existing token on network error
     } finally {
       setLoading(false);
+      loginInProgress.current = false;
     }
   }, [user]);
 
   // Auto-login when Privy is ready and user is authenticated
+  // Only attempt ONCE per session to prevent infinite loops
   useEffect(() => {
-    if (ready && authenticated && user && !sessionToken) {
+    if (ready && authenticated && user && !sessionToken && !loginAttempted.current) {
+      loginAttempted.current = true;
       loginToBackend();
     }
   }, [ready, authenticated, user, sessionToken, loginToBackend]);
 
+  // Reset login attempt when user logs out / changes
+  useEffect(() => {
+    if (!authenticated) {
+      loginAttempted.current = false;
+    }
+  }, [authenticated]);
+
   const logout = () => {
     setSessionToken(null);
     localStorage.removeItem('said_session_token');
+    loginAttempted.current = false;
   };
 
   return {
