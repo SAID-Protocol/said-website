@@ -92,7 +92,9 @@ export default function MyAgentsPage() {
       if (!res.ok) throw new Error('Failed to fetch agents');
       
       const data = await res.json();
-      setAgents(Array.isArray(data) ? data : (data.agents || []));
+      const list = Array.isArray(data) ? data : (data.agents || []);
+      // Defensive: ensure every agent has required fields
+      setAgents(list.map((a: any) => ({ ...a, name: a.name || 'Unnamed', wallet: a.wallet || a.walletAddress || '' })));
     } catch (err) {
       console.error('Failed to fetch agents:', err);
     } finally {
@@ -170,7 +172,7 @@ export default function MyAgentsPage() {
                 <div className="flex justify-between items-center">
                   <div className="flex gap-4 items-center">
                     <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                      {agent.name[0]}
+                      {(agent.name || '?')[0]}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
