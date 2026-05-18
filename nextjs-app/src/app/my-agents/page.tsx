@@ -83,7 +83,7 @@ export default function MyAgentsPage() {
     if (!sessionToken) return;
     
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents', {
+      const res = await fetch('https://api.saidprotocol.com/api/agents?mine=true', {
         headers: {
           'Authorization': `Bearer ${sessionToken}`,
         },
