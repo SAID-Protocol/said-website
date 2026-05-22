@@ -7,6 +7,8 @@ import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import { useAuth } from '@/hooks/useAuth';
 
+type AgentSource = 'hosted' | 'protocol';
+
 interface Agent {
   id: string;
   wallet: string;
@@ -15,6 +17,8 @@ interface Agent {
   isVerified: boolean;
   twitter?: string;
   gatewayToken?: string;
+  source: AgentSource;
+  hasApiKey?: boolean;
 }
 
 export default function MyAgentsPage() {
@@ -30,7 +34,6 @@ export default function MyAgentsPage() {
   const fetchApiKey = async (agentId: string) => {
     if (apiKeys[agentId] || !sessionToken) return;
     try {
-      // Try hosting API first (has gateway tokens for hosted agents)
       const res = await fetch(`https://app.saidprotocol.com/api/agents/${agentId}/api-key`, {
         headers: { 'x-api-key': sessionToken },
       });
@@ -38,7 +41,6 @@ export default function MyAgentsPage() {
         const data = await res.json();
         if (data.gatewayToken) {
           setApiKeys(prev => ({ ...prev, [agentId]: data.gatewayToken }));
-          return;
         }
       }
     } catch (err) {
@@ -79,50 +81,76 @@ export default function MyAgentsPage() {
 
   const fetchMyAgents = async () => {
     if (!sessionToken) return;
-    
-    try {
-      // Try protocol API first (agents linked to this user)
-      const res = await fetch('https://api.saidprotocol.com/api/agents?mine=true', {
-        headers: {
-          'Authorization': `Bearer ${sessionToken}`,
-        },
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        const list = Array.isArray(data) ? data : (data.agents || []);
-        if (list.length > 0) {
-          setAgents(list.map((a: any) => ({ ...a, name: a.name || 'Unnamed', wallet: a.wallet || a.walletAddress || '' })));
-          return;
-        }
-      }
 
-      // Fallback: try hosting API (agents created via dashboard)
+    const hostedAgents: Agent[] = [];
+    const protocolAgents: Agent[] = [];
+
+    // Fetch hosted agents (app.saidprotocol.com — hosting API)
+    try {
       const hostingRes = await fetch('https://app.saidprotocol.com/api/agents', {
-        headers: {
-          'Authorization': `Bearer ${sessionToken}`,
-        },
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
-      
       if (hostingRes.ok) {
         const hostingData = await hostingRes.json();
-        const hostingList = Array.isArray(hostingData) ? hostingData : [];
-        setAgents(hostingList.map((a: any) => ({ ...a, name: a.name || 'Unnamed', wallet: a.walletAddress || a.wallet || '' })));
-      } else {
-        throw new Error('Failed to fetch agents');
+        const list = Array.isArray(hostingData) ? hostingData : [];
+        for (const a of list) {
+          hostedAgents.push({
+            id: a.id,
+            wallet: a.walletAddress || a.wallet || '',
+            name: a.name || 'Unnamed',
+            description: a.description,
+            isVerified: a.isVerified ?? false,
+            twitter: a.twitter,
+            gatewayToken: a.gatewayToken,
+            source: 'hosted',
+            hasApiKey: true,
+          });
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch agents:', err);
-    } finally {
-      setLoading(false);
+      console.error('Failed to fetch hosted agents:', err);
     }
+
+    // Fetch protocol agents (api.saidprotocol.com — on-chain registry)
+    try {
+      const protocolRes = await fetch('https://api.saidprotocol.com/api/agents?mine=true', {
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
+      });
+      if (protocolRes.ok) {
+        const protocolData = await protocolRes.json();
+        const list = Array.isArray(protocolData) ? protocolData : (protocolData.agents || []);
+        const hostedIds = new Set(hostedAgents.map(a => a.id));
+        const hostedWallets = new Set(hostedAgents.map(a => a.wallet));
+        for (const a of list) {
+          const wallet = a.wallet || a.walletAddress || '';
+          // Skip if already in hosted list (deduplicate)
+          if (hostedIds.has(a.id) || hostedWallets.has(wallet)) continue;
+          protocolAgents.push({
+            id: a.id,
+            wallet,
+            name: a.name || 'Unnamed',
+            description: a.description,
+            isVerified: a.isVerified ?? false,
+            twitter: a.twitter,
+            source: 'protocol',
+            hasApiKey: false,
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch protocol agents:', err);
+    }
+
+    // Hosted first, then protocol-only
+    setAgents([...hostedAgents, ...protocolAgents]);
+    setLoading(false);
   };
 
   if (!authenticated) {
     return (
       <div className="min-h-screen">
         <Navbar />
-      <AsciiBackground />
+        <AsciiBackground />
         <div className="max-w-xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 text-center relative z-10">
           <h1 className="text-2xl font-bold mb-4">Please log in to view your agents</h1>
           <button
@@ -140,7 +168,7 @@ export default function MyAgentsPage() {
     return (
       <div className="min-h-screen">
         <Navbar />
-      <AsciiBackground />
+        <AsciiBackground />
         <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 relative z-10">
           <div className="text-center py-16">
             <div className="text-zinc-400">Loading your agents...</div>
@@ -154,7 +182,7 @@ export default function MyAgentsPage() {
     <div className="min-h-screen">
       <Navbar />
       <AsciiBackground />
-      
+
       <div className="max-w-4xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 relative z-10">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">My Agents</h1>
@@ -165,7 +193,7 @@ export default function MyAgentsPage() {
             + Create Agent
           </Link>
         </div>
-        
+
         {agents.length === 0 ? (
           <div className="text-center py-16 bg-zinc-900 border border-zinc-800 rounded-xl">
             <div className="text-4xl mb-4">🤖</div>
@@ -183,11 +211,19 @@ export default function MyAgentsPage() {
             {agents.map((agent) => (
               <div
                 key={agent.id}
-                className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl"
+                className={`p-6 bg-zinc-900 border rounded-xl ${
+                  agent.source === 'hosted'
+                    ? 'border-indigo-500/30'
+                    : 'border-zinc-800'
+                }`}
               >
                 <div className="flex justify-between items-center">
                   <div className="flex gap-4 items-center">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold ${
+                      agent.source === 'hosted'
+                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                        : 'bg-gradient-to-br from-zinc-600 to-zinc-700'
+                    }`}>
                       {(agent.name || '?')[0]}
                     </div>
                     <div>
@@ -196,6 +232,15 @@ export default function MyAgentsPage() {
                         {agent.isVerified && (
                           <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">
                             ✓ Verified
+                          </span>
+                        )}
+                        {agent.source === 'hosted' ? (
+                          <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-xs rounded">
+                            ⚡ Hosted
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 bg-zinc-700/50 text-zinc-400 text-xs rounded">
+                            Protocol Only
                           </span>
                         )}
                       </div>
@@ -218,49 +263,66 @@ export default function MyAgentsPage() {
                   )}
                 </div>
 
-                {/* API Key section */}
-                <div className="mt-4 pt-4 border-t border-zinc-800">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">API Key</span>
-                    <div className="flex gap-2">
-                      {apiKeys[agent.id] && (
-                        <>
-                          <button
-                            onClick={() => copyKey(agent.id, apiKeys[agent.id])}
-                            className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
-                          >
-                            {copiedId === agent.id ? '✓ Copied' : 'Copy'}
-                          </button>
-                          <button
-                            onClick={() => rotateKey(agent.id)}
-                            disabled={rotatingId === agent.id}
-                            className="px-3 py-1 text-xs bg-zinc-800 border border-red-900/50 text-red-400 rounded hover:border-red-500/50 transition disabled:opacity-50"
-                          >
-                            {rotatingId === agent.id ? 'Rotating...' : 'Rotate'}
-                          </button>
-                        </>
-                      )}
-                      <button
-                        onClick={() => {
-                          if (showKeyForId === agent.id) {
-                            setShowKeyForId(null);
-                          } else {
-                            fetchApiKey(agent.id);
-                            setShowKeyForId(agent.id);
-                          }
-                        }}
-                        className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
+                {agent.source === 'hosted' ? (
+                  /* Full API Key section for hosted agents */
+                  <div className="mt-4 pt-4 border-t border-zinc-800">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">API Key</span>
+                      <div className="flex gap-2">
+                        {apiKeys[agent.id] && (
+                          <>
+                            <button
+                              onClick={() => copyKey(agent.id, apiKeys[agent.id])}
+                              className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
+                            >
+                              {copiedId === agent.id ? '✓ Copied' : 'Copy'}
+                            </button>
+                            <button
+                              onClick={() => rotateKey(agent.id)}
+                              disabled={rotatingId === agent.id}
+                              className="px-3 py-1 text-xs bg-zinc-800 border border-red-900/50 text-red-400 rounded hover:border-red-500/50 transition disabled:opacity-50"
+                            >
+                              {rotatingId === agent.id ? 'Rotating...' : 'Rotate'}
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => {
+                            if (showKeyForId === agent.id) {
+                              setShowKeyForId(null);
+                            } else {
+                              fetchApiKey(agent.id);
+                              setShowKeyForId(agent.id);
+                            }
+                          }}
+                          className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
+                        >
+                          {showKeyForId === agent.id ? 'Hide' : 'Show'}
+                        </button>
+                      </div>
+                    </div>
+                    {showKeyForId === agent.id && (
+                      <div className="mt-2 font-mono text-xs bg-zinc-950 px-3 py-2 rounded border border-zinc-800 break-all">
+                        {apiKeys[agent.id] || 'Loading...'}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Upgrade CTA for protocol-only agents */
+                  <div className="mt-4 pt-4 border-t border-zinc-800">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-zinc-500">
+                        Identity registered on-chain. Upgrade to get API access, signing & wallet capabilities.
+                      </p>
+                      <Link
+                        href={`/create-agent?upgrade=${agent.id}`}
+                        className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition shrink-0 ml-4"
                       >
-                        {showKeyForId === agent.id ? 'Hide' : 'Show'}
-                      </button>
+                        ⚡ Upgrade to Hosted
+                      </Link>
                     </div>
                   </div>
-                  {showKeyForId === agent.id && (
-                    <div className="mt-2 font-mono text-xs bg-zinc-950 px-3 py-2 rounded border border-zinc-800 break-all">
-                      {apiKeys[agent.id] || 'No API key available for this agent'}
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             ))}
           </div>
