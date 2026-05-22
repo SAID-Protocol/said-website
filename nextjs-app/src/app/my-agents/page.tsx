@@ -41,9 +41,6 @@ export default function MyAgentsPage() {
           return;
         }
       }
-      } else {
-        console.warn('[fetchApiKey] Failed', res.status, await res.text());
-      }
     } catch (err) {
       console.error('[fetchApiKey] Error', err);
     }
