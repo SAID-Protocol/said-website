@@ -30,16 +30,17 @@ export default function MyAgentsPage() {
   const fetchApiKey = async (agentId: string) => {
     if (apiKeys[agentId] || !sessionToken) return;
     try {
-      const res = await fetch(`https://api.saidprotocol.com/api/agents/${agentId}/api-key`, {
-        headers: { 'Authorization': `Bearer ${sessionToken}` },
+      // Try hosting API first (has gateway tokens for hosted agents)
+      const res = await fetch(`https://app.saidprotocol.com/api/agents/${agentId}/api-key`, {
+        headers: { 'x-api-key': sessionToken },
       });
       if (res.ok) {
         const data = await res.json();
         if (data.gatewayToken) {
           setApiKeys(prev => ({ ...prev, [agentId]: data.gatewayToken }));
-        } else {
-          console.warn('[fetchApiKey] No gatewayToken returned for', agentId, data);
+          return;
         }
+      }
       } else {
         console.warn('[fetchApiKey] Failed', res.status, await res.text());
       }
@@ -259,7 +260,7 @@ export default function MyAgentsPage() {
                   </div>
                   {showKeyForId === agent.id && (
                     <div className="mt-2 font-mono text-xs bg-zinc-950 px-3 py-2 rounded border border-zinc-800 break-all">
-                      {apiKeys[agent.id] || '••••••••••••••••••••••••'}
+                      {apiKeys[agent.id] || 'No API key available for this agent'}
                     </div>
                   )}
                 </div>
