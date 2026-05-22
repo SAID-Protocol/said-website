@@ -434,12 +434,14 @@ export default function ProfilePage() {
                           >
                             {revealed ? 'Hide' : 'Show'}
                           </button>
+                          {revealed && (
                           <button
                             onClick={() => { navigator.clipboard.writeText(key); }}
                             className="px-2 py-0.5 text-xs bg-zinc-700 rounded hover:bg-zinc-600 transition"
                           >
                             Copy
                           </button>
+                          )}
                           <button
                             onClick={() => rotateProfileKey(agentId)}
                             className="px-2 py-0.5 text-xs bg-zinc-700 text-red-400 rounded hover:bg-zinc-600 transition"
