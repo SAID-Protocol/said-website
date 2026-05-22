@@ -83,18 +83,36 @@ export default function MyAgentsPage() {
     if (!sessionToken) return;
     
     try {
+      // Try protocol API first (agents linked to this user)
       const res = await fetch('https://api.saidprotocol.com/api/agents?mine=true', {
         headers: {
           'Authorization': `Bearer ${sessionToken}`,
         },
       });
       
-      if (!res.ok) throw new Error('Failed to fetch agents');
+      if (res.ok) {
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : (data.agents || []);
+        if (list.length > 0) {
+          setAgents(list.map((a: any) => ({ ...a, name: a.name || 'Unnamed', wallet: a.wallet || a.walletAddress || '' })));
+          return;
+        }
+      }
+
+      // Fallback: try hosting API (agents created via dashboard)
+      const hostingRes = await fetch('https://app.saidprotocol.com/api/agents', {
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+        },
+      });
       
-      const data = await res.json();
-      const list = Array.isArray(data) ? data : (data.agents || []);
-      // Defensive: ensure every agent has required fields
-      setAgents(list.map((a: any) => ({ ...a, name: a.name || 'Unnamed', wallet: a.wallet || a.walletAddress || '' })));
+      if (hostingRes.ok) {
+        const hostingData = await hostingRes.json();
+        const hostingList = Array.isArray(hostingData) ? hostingData : [];
+        setAgents(hostingList.map((a: any) => ({ ...a, name: a.name || 'Unnamed', wallet: a.walletAddress || a.wallet || '' })));
+      } else {
+        throw new Error('Failed to fetch agents');
+      }
     } catch (err) {
       console.error('Failed to fetch agents:', err);
     } finally {

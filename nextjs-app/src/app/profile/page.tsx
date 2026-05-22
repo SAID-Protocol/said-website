@@ -429,6 +429,12 @@ export default function ProfilePage() {
                         <span className="text-sm font-medium">{agentName}</span>
                         <div className="flex gap-2">
                           <button
+                            onClick={() => setApiKeys(prev => prev.map(k => k.agentId === agentId ? { ...k, revealed: !revealed } : k))}
+                            className="px-2 py-0.5 text-xs bg-zinc-700 rounded hover:bg-zinc-600 transition"
+                          >
+                            {revealed ? 'Hide' : 'Show'}
+                          </button>
+                          <button
                             onClick={() => { navigator.clipboard.writeText(key); }}
                             className="px-2 py-0.5 text-xs bg-zinc-700 rounded hover:bg-zinc-600 transition"
                           >
