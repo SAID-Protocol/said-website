@@ -8,9 +8,7 @@ import {
   PartiallyDecodedInstruction,
 } from '@solana/web3.js';
 
-// TODO: replace with the treasury wallet that performs buybacks and burns.
-// Until this is set, the section renders an empty/coming-soon state.
-const BURN_BUYBACK_WALLET = '';
+const BURN_BUYBACK_WALLET = 'GFqYiHVb9XGuKavUBin5qzcsq1okjLFDV4ZCZNx5tupV';
 
 const SAID_MINT = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
 const SAID_DECIMALS = 6;
