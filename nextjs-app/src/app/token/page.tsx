@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
+import BuybackBurnSection from '@/components/BuybackBurnSection';
 
 const Icons = {
   token: (
@@ -152,7 +153,7 @@ export default function TokenPage() {
                   </div>
                 </div>
                 <p className="text-center text-zinc-500 mt-6 text-sm">
-                  50% of the dev buy is locked for 1 year — maximum bullish signal.
+                  50% of the dev buy is locked for 1 year.
                 </p>
               </div>
 
@@ -167,6 +168,9 @@ export default function TokenPage() {
               </div>
             </div>
           </section>
+
+          {/* Buybacks & Burns */}
+          <BuybackBurnSection />
 
           {/* Grants Program */}
           <section className="py-20 px-4">
