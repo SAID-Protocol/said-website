@@ -1,21 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import {
-  Connection,
-  PublicKey,
-  ParsedInstruction,
-  PartiallyDecodedInstruction,
-} from '@solana/web3.js';
 
-const BURN_BUYBACK_WALLET = 'GFqYiHVb9XGuKavUBin5qzcsq1okjLFDV4ZCZNx5tupV';
-
-const SAID_MINT = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
-const SAID_DECIMALS = 6;
 const TOTAL_SUPPLY = 1_000_000_000;
-const RPC_URL =
-  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com';
-const TX_FETCH_LIMIT = 200;
 
 type EventType = 'burn' | 'buyback';
 
@@ -24,6 +11,15 @@ type BurnEvent = {
   blockTime: number;
   type: EventType;
   amount: number;
+};
+
+type BurnsResponse = {
+  totalBurned: number;
+  totalBoughtBack: number;
+  burnCount: number;
+  buybackCount: number;
+  events: BurnEvent[];
+  updatedAt: number;
 };
 
 const Icons = {
@@ -80,86 +76,6 @@ function shortSig(sig: string): string {
   return `${sig.slice(0, 6)}…${sig.slice(-4)}`;
 }
 
-async function fetchBurnHistory(): Promise<BurnEvent[]> {
-  if (!BURN_BUYBACK_WALLET) return [];
-
-  const connection = new Connection(RPC_URL, 'confirmed');
-  const wallet = new PublicKey(BURN_BUYBACK_WALLET);
-
-  const sigs = await connection.getSignaturesForAddress(wallet, {
-    limit: TX_FETCH_LIMIT,
-  });
-  if (sigs.length === 0) return [];
-
-  const txs = await connection.getParsedTransactions(
-    sigs.map((s) => s.signature),
-    { maxSupportedTransactionVersion: 0 },
-  );
-
-  const events: BurnEvent[] = [];
-
-  for (let i = 0; i < txs.length; i++) {
-    const tx = txs[i];
-    const sigInfo = sigs[i];
-    if (!tx || tx.meta?.err) continue;
-
-    const blockTime = tx.blockTime ?? sigInfo.blockTime ?? 0;
-    if (!blockTime) continue;
-
-    const allInstructions: (ParsedInstruction | PartiallyDecodedInstruction)[] = [
-      ...tx.transaction.message.instructions,
-      ...(tx.meta?.innerInstructions?.flatMap((ii) => ii.instructions) ?? []),
-    ];
-
-    let burnedThisTx = 0;
-    for (const ix of allInstructions) {
-      const parsed = (ix as ParsedInstruction).parsed;
-      if (!parsed || typeof parsed !== 'object') continue;
-      if (parsed.type !== 'burn' && parsed.type !== 'burnChecked') continue;
-      const info = parsed.info as {
-        mint?: string;
-        amount?: string;
-        tokenAmount?: { uiAmount?: number };
-      };
-      if (info.mint !== SAID_MINT) continue;
-      const amt =
-        parsed.type === 'burnChecked'
-          ? Number(info.tokenAmount?.uiAmount ?? 0)
-          : Number(info.amount ?? 0) / 10 ** SAID_DECIMALS;
-      if (amt > 0) {
-        burnedThisTx += amt;
-        events.push({
-          signature: sigInfo.signature,
-          blockTime,
-          type: 'burn',
-          amount: amt,
-        });
-      }
-    }
-
-    const preBals = tx.meta?.preTokenBalances ?? [];
-    const postBals = tx.meta?.postTokenBalances ?? [];
-    const sumWalletSaid = (
-      bals: { mint?: string; owner?: string; uiTokenAmount: { uiAmount: number | null } }[],
-    ) =>
-      bals
-        .filter((b) => b.mint === SAID_MINT && b.owner === BURN_BUYBACK_WALLET)
-        .reduce((s, b) => s + (b.uiTokenAmount.uiAmount ?? 0), 0);
-    const delta = sumWalletSaid(postBals) - sumWalletSaid(preBals);
-    const grossInflow = delta + burnedThisTx;
-    if (grossInflow > 0.000001) {
-      events.push({
-        signature: sigInfo.signature,
-        blockTime,
-        type: 'buyback',
-        amount: grossInflow,
-      });
-    }
-  }
-
-  return events.sort((a, b) => b.blockTime - a.blockTime);
-}
-
 function StatCard({
   icon,
   label,
@@ -184,21 +100,24 @@ function StatCard({
 }
 
 export default function BuybackBurnSection() {
-  const [events, setEvents] = useState<BurnEvent[] | null>(null);
+  const [data, setData] = useState<BurnsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetchBurnHistory()
-      .then((evts) => {
-        if (!cancelled) setEvents(evts);
+    fetch('/api/burns')
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`API returned ${res.status}`);
+        return (await res.json()) as BurnsResponse;
+      })
+      .then((d) => {
+        if (!cancelled) setData(d);
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        console.error('Failed to load burn history:', err);
+        console.error('Failed to load burn data:', err);
         setError(err instanceof Error ? err.message : 'Failed to load data');
-        setEvents([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -208,20 +127,8 @@ export default function BuybackBurnSection() {
     };
   }, []);
 
-  const { totalBurned, totalBoughtBack, burnCount, latestEvents } = useMemo(() => {
-    const list = events ?? [];
-    const burns = list.filter((e) => e.type === 'burn');
-    const buys = list.filter((e) => e.type === 'buyback');
-    return {
-      totalBurned: burns.reduce((s, e) => s + e.amount, 0),
-      totalBoughtBack: buys.reduce((s, e) => s + e.amount, 0),
-      burnCount: burns.length,
-      latestEvents: list.slice(0, 12),
-    };
-  }, [events]);
-
-  const burnedPctSupply = (totalBurned / TOTAL_SUPPLY) * 100;
-  const walletConfigured = BURN_BUYBACK_WALLET.length > 0;
+  const latestEvents = useMemo(() => data?.events.slice(0, 12) ?? [], [data]);
+  const burnedPctSupply = data ? (data.totalBurned / TOTAL_SUPPLY) * 100 : 0;
 
   return (
     <section className="py-20 px-4">
@@ -240,20 +147,20 @@ export default function BuybackBurnSection() {
           <StatCard
             icon={Icons.flame}
             label="Total Burned"
-            value={loading ? '—' : `${formatTokenAmount(totalBurned)} SAID`}
-            sub={loading ? undefined : `${burnedPctSupply.toFixed(4)}% of supply`}
+            value={loading || !data ? '—' : `${formatTokenAmount(data.totalBurned)} SAID`}
+            sub={loading || !data ? undefined : `${burnedPctSupply.toFixed(4)}% of supply`}
           />
           <StatCard
             icon={Icons.cart}
             label="Total Bought Back"
-            value={loading ? '—' : `${formatTokenAmount(totalBoughtBack)} SAID`}
-            sub={loading ? undefined : 'Across all buyback transactions'}
+            value={loading || !data ? '—' : `${formatTokenAmount(data.totalBoughtBack)} SAID`}
+            sub={loading || !data ? undefined : `${data.buybackCount} buyback ${data.buybackCount === 1 ? 'tx' : 'txs'}`}
           />
           <StatCard
             icon={Icons.chart}
             label="Burns Executed"
-            value={loading ? '—' : `${burnCount}`}
-            sub={loading ? undefined : 'Weekly cadence'}
+            value={loading || !data ? '—' : `${data.burnCount}`}
+            sub={loading || !data ? undefined : 'Weekly cadence'}
           />
         </div>
 
@@ -293,17 +200,13 @@ export default function BuybackBurnSection() {
 
             {loading ? (
               <div className="px-6 py-10 text-center text-zinc-500 text-sm">Loading…</div>
-            ) : !walletConfigured ? (
-              <div className="px-6 py-10 text-center text-zinc-500 text-sm">
-                Burn tracker activates once the buyback wallet is published. Watch this space.
-              </div>
             ) : error ? (
               <div className="px-6 py-10 text-center text-zinc-500 text-sm">
                 Couldn&apos;t load on-chain data. Try again later.
               </div>
             ) : latestEvents.length === 0 ? (
               <div className="px-6 py-10 text-center text-zinc-500 text-sm">
-                No burns or buybacks yet — first one coming soon.
+                No burns or buybacks detected in recent history.
               </div>
             ) : (
               latestEvents.map((e) => (
