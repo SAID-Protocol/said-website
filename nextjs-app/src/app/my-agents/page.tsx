@@ -60,8 +60,8 @@ export default function MyAgentsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        if (data.gatewayToken) {
-          setApiKeys(prev => ({ ...prev, [agentId]: data.gatewayToken }));
+        if (data.apiKey) {
+          setApiKeys(prev => ({ ...prev, [agentId]: data.apiKey }));
           setShowKeyForId(agentId);
         }
       } else {
