@@ -1,18 +1,27 @@
 import { NextResponse } from 'next/server';
+import {
+  Connection,
+  ParsedInstruction,
+  PartiallyDecodedInstruction,
+} from '@solana/web3.js';
 
 export const revalidate = 300;
 
 const WALLET = 'GFqYiHVb9XGuKavUBin5qzcsq1okjLFDV4ZCZNx5tupV';
 const SAID_MINT = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
-const MAX_PAGES = 30;
+const SAID_DECIMALS = 6;
+const BUYBACK_PAGES = 30;
 const PAGE_LIMIT = 100;
-const BURN_QUERY_PAGES = 5;
-const KNOWN_BURN_ADDRESSES = new Set([
-  '1nc1nerator11111111111111111111111111111111',
-]);
+
+// Append confirmed burn tx signatures here. Each is fetched individually
+// via Helius RPC and parsed for SPL/Token-2022 burn instructions. Cheap
+// to keep growing — the wallet's lifetime history is too large to scan
+// every request.
+const KNOWN_BURN_SIGNATURES: string[] = [
+  '5agrBigR29C6HaJkZweqawyiWYXiiV99epdYgAQNK8aCgwAiHyMq2nyDBK74op2jCbtSvN4YtPkZS7jTQU24gkX2',
+];
 
 type EventKind = 'burn' | 'buyback';
-
 type BurnEvent = {
   signature: string;
   blockTime: number;
@@ -27,66 +36,12 @@ type HeliusTokenTransfer = {
   tokenAmount: number;
 };
 
-type HeliusInstruction = {
-  programId?: string;
-  parsed?: { type?: string; info?: { mint?: string; amount?: string | number; tokenAmount?: { uiAmount?: number } } };
-  innerInstructions?: HeliusInstruction[];
-};
-
 type HeliusTx = {
   signature: string;
   timestamp: number;
   type?: string;
   tokenTransfers?: HeliusTokenTransfer[];
-  instructions?: HeliusInstruction[];
 };
-
-function classifyTx(tx: HeliusTx): BurnEvent[] {
-  const out: BurnEvent[] = [];
-  const transfers = (tx.tokenTransfers ?? []).filter((t) => t.mint === SAID_MINT);
-
-  const inAmt = transfers
-    .filter((t) => t.toUserAccount === WALLET)
-    .reduce((s, t) => s + (t.tokenAmount || 0), 0);
-  const outAmt = transfers
-    .filter((t) => t.fromUserAccount === WALLET)
-    .reduce((s, t) => s + (t.tokenAmount || 0), 0);
-  const toBurnAddr = transfers
-    .filter(
-      (t) =>
-        t.fromUserAccount === WALLET &&
-        (t.toUserAccount == null || (t.toUserAccount && KNOWN_BURN_ADDRESSES.has(t.toUserAccount))),
-    )
-    .reduce((s, t) => s + (t.tokenAmount || 0), 0);
-
-  let burnFromIx = 0;
-  const visit = (ix: HeliusInstruction) => {
-    const t = ix.parsed?.type;
-    if ((t === 'burn' || t === 'burnChecked') && ix.parsed?.info?.mint === SAID_MINT) {
-      const info = ix.parsed.info;
-      const amt =
-        t === 'burnChecked'
-          ? Number(info.tokenAmount?.uiAmount ?? 0)
-          : Number(info.amount ?? 0) / 1_000_000;
-      if (amt > 0) burnFromIx += amt;
-    }
-    for (const inner of ix.innerInstructions ?? []) visit(inner);
-  };
-  for (const ix of tx.instructions ?? []) visit(ix);
-
-  const burnAmount = Math.max(burnFromIx, toBurnAddr, tx.type === 'BURN' ? outAmt : 0);
-
-  if (burnAmount > 0.000001) {
-    out.push({ signature: tx.signature, blockTime: tx.timestamp, type: 'burn', amount: burnAmount });
-  }
-
-  const buybackAmount = inAmt - Math.max(0, outAmt - burnAmount);
-  if (buybackAmount > 0.000001 && tx.type !== 'BURN') {
-    out.push({ signature: tx.signature, blockTime: tx.timestamp, type: 'buyback', amount: buybackAmount });
-  }
-
-  return out;
-}
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -102,18 +57,13 @@ async function fetchWithRetry(url: string, attempts = 4): Promise<Response> {
   throw new Error(typeof lastErr === 'string' ? lastErr : 'retry exhausted');
 }
 
-async function paginate(
-  apiKey: string,
-  maxPages: number,
-  type?: string,
-): Promise<HeliusTx[]> {
-  const all: HeliusTx[] = [];
+async function fetchRecentBuybacks(apiKey: string): Promise<BurnEvent[]> {
+  const events: BurnEvent[] = [];
   let before: string | undefined;
-  for (let page = 0; page < maxPages; page++) {
+  for (let page = 0; page < BUYBACK_PAGES; page++) {
     const url = new URL(`https://api.helius.xyz/v0/addresses/${WALLET}/transactions`);
     url.searchParams.set('api-key', apiKey);
     url.searchParams.set('limit', String(PAGE_LIMIT));
-    if (type) url.searchParams.set('type', type);
     if (before) url.searchParams.set('before', before);
 
     const res = await fetchWithRetry(url.toString());
@@ -123,12 +73,80 @@ async function paginate(
     }
     const txs = (await res.json()) as HeliusTx[];
     if (!Array.isArray(txs) || txs.length === 0) break;
-    all.push(...txs);
+
+    for (const tx of txs) {
+      const transfers = (tx.tokenTransfers ?? []).filter((t) => t.mint === SAID_MINT);
+      const incoming = transfers
+        .filter((t) => t.toUserAccount === WALLET)
+        .reduce((s, t) => s + (t.tokenAmount || 0), 0);
+      const outgoing = transfers
+        .filter((t) => t.fromUserAccount === WALLET)
+        .reduce((s, t) => s + (t.tokenAmount || 0), 0);
+      const delta = incoming - outgoing;
+      if (delta > 0.000001) {
+        events.push({
+          signature: tx.signature,
+          blockTime: tx.timestamp,
+          type: 'buyback',
+          amount: delta,
+        });
+      }
+    }
+
     before = txs[txs.length - 1].signature;
     if (txs.length < PAGE_LIMIT) break;
     await sleep(120);
   }
-  return all;
+  return events;
+}
+
+async function fetchKnownBurns(conn: Connection): Promise<BurnEvent[]> {
+  if (KNOWN_BURN_SIGNATURES.length === 0) return [];
+
+  const events: BurnEvent[] = [];
+  // Sequentially to avoid bursting the RPC.
+  for (const sig of KNOWN_BURN_SIGNATURES) {
+    let tx;
+    try {
+      tx = await conn.getParsedTransaction(sig, { maxSupportedTransactionVersion: 0 });
+    } catch {
+      continue;
+    }
+    if (!tx || tx.meta?.err) continue;
+    const blockTime = tx.blockTime ?? 0;
+    if (!blockTime) continue;
+
+    const allIx: (ParsedInstruction | PartiallyDecodedInstruction)[] = [
+      ...tx.transaction.message.instructions,
+      ...(tx.meta?.innerInstructions?.flatMap((ii) => ii.instructions) ?? []),
+    ];
+
+    let burned = 0;
+    for (const ix of allIx) {
+      const parsed = (ix as ParsedInstruction).parsed;
+      if (!parsed || typeof parsed !== 'object') continue;
+      if (parsed.type !== 'burn' && parsed.type !== 'burnChecked') continue;
+      const info = parsed.info as {
+        mint?: string;
+        amount?: string;
+        tokenAmount?: { uiAmount?: number };
+      };
+      if (info.mint !== SAID_MINT) continue;
+      const amt =
+        parsed.type === 'burnChecked'
+          ? Number(info.tokenAmount?.uiAmount ?? 0)
+          : Number(info.amount ?? 0) / 10 ** SAID_DECIMALS;
+      if (amt > 0) burned += amt;
+    }
+
+    if (burned > 0) {
+      events.push({ signature: sig, blockTime, type: 'burn', amount: burned });
+    }
+
+    await sleep(100);
+  }
+
+  return events;
 }
 
 export async function GET() {
@@ -137,22 +155,17 @@ export async function GET() {
     return NextResponse.json({ error: 'HELIUS_API_KEY not configured' }, { status: 500 });
   }
 
-  const events: BurnEvent[] = [];
+  const conn = new Connection(`https://mainnet.helius-rpc.com/?api-key=${apiKey}`, 'confirmed');
 
+  let burns: BurnEvent[] = [];
+  let buybacks: BurnEvent[] = [];
   try {
-    const burnTxs = await paginate(apiKey, BURN_QUERY_PAGES, 'BURN');
-    const recentTxs = await paginate(apiKey, MAX_PAGES);
-
-    const seenSigs = new Set<string>();
-    const merged = [...burnTxs, ...recentTxs].filter((tx) => {
-      if (seenSigs.has(tx.signature)) return false;
-      seenSigs.add(tx.signature);
-      return true;
-    });
-
-    for (const tx of merged) {
-      events.push(...classifyTx(tx));
-    }
+    const [bb, br] = await Promise.all([
+      fetchRecentBuybacks(apiKey),
+      fetchKnownBurns(conn),
+    ]);
+    buybacks = bb;
+    burns = br;
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'fetch failed' },
@@ -160,17 +173,19 @@ export async function GET() {
     );
   }
 
-  events.sort((a, b) => b.blockTime - a.blockTime);
-
-  const burns = events.filter((e) => e.type === 'burn');
-  const buybacks = events.filter((e) => e.type === 'buyback');
+  // Pin all burns to the top of the visible list (sorted newest-first),
+  // then append the most recent buybacks. Burns are rare and the
+  // marketing event; buybacks happen every few seconds.
+  const sortedBurns = [...burns].sort((a, b) => b.blockTime - a.blockTime);
+  const recentBuybacks = buybacks.slice(0, 100);
+  const visibleEvents = [...sortedBurns, ...recentBuybacks];
 
   return NextResponse.json({
     totalBurned: burns.reduce((s, e) => s + e.amount, 0),
     totalBoughtBack: buybacks.reduce((s, e) => s + e.amount, 0),
     burnCount: burns.length,
     buybackCount: buybacks.length,
-    events: events.slice(0, 50),
+    events: visibleEvents,
     updatedAt: Date.now(),
   });
 }
