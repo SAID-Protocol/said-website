@@ -92,6 +92,7 @@ export function useAuth() {
 
   return {
     sessionToken,
+    privyAccessToken: getAccessToken,
     loading,
     logout,
     refreshSession: loginToBackend,
