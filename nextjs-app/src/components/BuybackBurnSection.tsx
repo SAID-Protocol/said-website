@@ -127,7 +127,7 @@ export default function BuybackBurnSection() {
     };
   }, []);
 
-  const latestEvents = useMemo(() => data?.events.slice(0, 12) ?? [], [data]);
+  const latestEvents = useMemo(() => data?.events.slice(0, 20) ?? [], [data]);
   const burnedPctSupply = data ? (data.totalBurned / TOTAL_SUPPLY) * 100 : 0;
 
   return (
