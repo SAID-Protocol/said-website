@@ -23,7 +23,7 @@ interface Agent {
 
 export default function MyAgentsPage() {
   const { authenticated, login } = usePrivy();
-  const { sessionToken, loading: authLoading } = useAuth();
+  const { sessionToken, privyAccessToken, loading: authLoading } = useAuth();
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -49,12 +49,13 @@ export default function MyAgentsPage() {
   };
 
   const generateWallet = async (agentId: string) => {
-    if (!sessionToken) return;
+    if (!privyAccessToken) return;
     try {
+      const privyToken = await privyAccessToken();
       const res = await fetch(`https://app.saidprotocol.com/api/wallet/agents/${agentId}/provision-wallet`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${sessionToken}`,
+          'Authorization': `Bearer ${privyToken}`,
           'Content-Type': 'application/json',
         },
       });
