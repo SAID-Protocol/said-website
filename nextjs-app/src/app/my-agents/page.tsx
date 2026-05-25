@@ -51,7 +51,7 @@ export default function MyAgentsPage() {
   const generateWallet = async (agentId: string) => {
     if (!sessionToken) return;
     try {
-      const res = await fetch(`https://app.saidprotocol.com/api/agents/${agentId}/provision-wallet`, {
+      const res = await fetch(`https://app.saidprotocol.com/api/wallet/agents/${agentId}/provision-wallet`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${sessionToken}`,
