@@ -361,7 +361,7 @@ export default function MyAgentsPage() {
                             onClick={() => generateWallet(agent.id)}
                             className="px-4 py-2 text-sm bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
                           >
-                            Generate Wallet
+                            Get API Key
                           </button>
                         )}
                       </div>
