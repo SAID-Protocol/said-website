@@ -48,6 +48,32 @@ export default function MyAgentsPage() {
     }
   };
 
+  const generateWallet = async (agentId: string) => {
+    if (!sessionToken) return;
+    try {
+      const res = await fetch(`https://app.saidprotocol.com/api/agents/${agentId}/provision-wallet`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${sessionToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.gatewayToken) {
+          setApiKeys(prev => ({ ...prev, [agentId]: data.gatewayToken }));
+          setShowKeyForId(agentId);
+        }
+      } else {
+        const err = await res.json();
+        alert(err.error || 'Failed to generate wallet');
+      }
+    } catch (err) {
+      console.error('[generateWallet] Error', err);
+      alert('Failed to generate wallet');
+    }
+  };
+
   const rotateKey = async (agentId: string) => {
     if (!sessionToken) return;
     if (!confirm('This will invalidate the old API key. Any integrations using it will stop working. Continue?')) return;
@@ -234,15 +260,11 @@ export default function MyAgentsPage() {
                             ✓ Verified
                           </span>
                         )}
-                        {agent.source === 'hosted' ? (
-                          <span className="px-2 py-0.5 bg-indigo-500/20 text-indigo-400 text-xs rounded">
-                            ⚡ Hosted
+                      {(agent.source === 'hosted' || apiKeys[agent.id]) ? (
+                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded">
+                            ⚡ Wallet Active
                           </span>
-                        ) : (
-                          <span className="px-2 py-0.5 bg-zinc-700/50 text-zinc-400 text-xs rounded">
-                            Protocol Only
-                          </span>
-                        )}
+                        ) : null}
                       </div>
                       <p className="text-zinc-500 font-mono text-sm">
                         {agent.wallet.substring(0, 8)}...{agent.wallet.substring(agent.wallet.length - 8)}
@@ -308,19 +330,47 @@ export default function MyAgentsPage() {
                     )}
                   </div>
                 ) : (
-                  /* Upgrade CTA for protocol-only agents */
+                  /* Generate wallet for any agent */
                   <div className="mt-4 pt-4 border-t border-zinc-800">
                     <div className="flex items-center justify-between">
-                      <p className="text-sm text-zinc-500">
-                        Identity registered on-chain. Upgrade to get API access, signing & wallet capabilities.
-                      </p>
-                      <Link
-                        href={`/create-agent?upgrade=${agent.id}`}
-                        className="px-4 py-2 text-sm bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition shrink-0 ml-4"
-                      >
-                        ⚡ Upgrade to Hosted
-                      </Link>
+                      <span className="text-xs text-zinc-500 font-medium uppercase tracking-wider">Transactions</span>
+                      <div className="flex gap-2">
+                        {apiKeys[agent.id] ? (
+                          <>
+                            <button
+                              onClick={() => copyKey(agent.id, apiKeys[agent.id])}
+                              className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
+                            >
+                              {copiedId === agent.id ? '✓ Copied' : 'Copy API Key'}
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (showKeyForId === agent.id) {
+                                  setShowKeyForId(null);
+                                } else {
+                                  setShowKeyForId(agent.id);
+                                }
+                              }}
+                              className="px-3 py-1 text-xs bg-zinc-800 border border-zinc-700 rounded hover:border-zinc-500 transition"
+                            >
+                              {showKeyForId === agent.id ? 'Hide' : 'Show'}
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => generateWallet(agent.id)}
+                            className="px-4 py-2 text-sm bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
+                          >
+                            Generate Wallet
+                          </button>
+                        )}
+                      </div>
                     </div>
+                    {showKeyForId === agent.id && apiKeys[agent.id] && (
+                      <div className="mt-2 font-mono text-xs bg-zinc-950 px-3 py-2 rounded border border-zinc-800 break-all">
+                        {apiKeys[agent.id]}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
