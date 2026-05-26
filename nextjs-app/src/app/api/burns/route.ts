@@ -7,7 +7,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_TTL_MS = 30 * 60 * 1000;
 type CachedPayload = {
   totalBurned: number;
   totalBoughtBack: number;
@@ -21,8 +21,9 @@ let cached: { payload: CachedPayload; expiresAt: number } | null = null;
 const WALLET = 'GFqYiHVb9XGuKavUBin5qzcsq1okjLFDV4ZCZNx5tupV';
 const SAID_MINT = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
 const SAID_DECIMALS = 6;
-const BUYBACK_PAGES = 30;
+const BUYBACK_PAGES = 100;
 const PAGE_LIMIT = 100;
+const MAX_VISIBLE_EVENTS = 200;
 
 // Append confirmed burn tx signatures here. Each is fetched individually
 // via Helius RPC and parsed for SPL/Token-2022 burn instructions. Cheap
@@ -72,7 +73,7 @@ async function fetchRecentBuybacks(apiKey: string): Promise<BurnEvent[]> {
   const events: BurnEvent[] = [];
   let before: string | undefined;
   for (let page = 0; page < BUYBACK_PAGES; page++) {
-    const url = new URL(`https://api.helius.xyz/v0/addresses/${WALLET}/transactions`);
+    const url = new URL(`https://api-mainnet.helius-rpc.com/v0/addresses/${WALLET}/transactions`);
     url.searchParams.set('api-key', apiKey);
     url.searchParams.set('limit', String(PAGE_LIMIT));
     if (before) url.searchParams.set('before', before);
@@ -198,7 +199,7 @@ export async function GET() {
   // then append the most recent buybacks. Burns are rare and the
   // marketing event; buybacks happen every few seconds.
   const sortedBurns = [...burns].sort((a, b) => b.blockTime - a.blockTime);
-  const recentBuybacks = buybacks.slice(0, 100);
+  const recentBuybacks = buybacks.slice(0, MAX_VISIBLE_EVENTS);
   const visibleEvents = [...sortedBurns, ...recentBuybacks];
 
   const payload: CachedPayload = {
