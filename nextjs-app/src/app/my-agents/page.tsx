@@ -32,10 +32,12 @@ export default function MyAgentsPage() {
   const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
 
   const fetchApiKey = async (agentId: string) => {
-    if (apiKeys[agentId] || !sessionToken) return;
+    if (apiKeys[agentId]) return;
     try {
+      const privyToken = privyAccessToken ? await privyAccessToken() : null;
+      if (!privyToken) return;
       const res = await fetch(`https://app.saidprotocol.com/api/agents/${agentId}/api-key`, {
-        headers: { 'x-api-key': sessionToken },
+        headers: { 'Authorization': `Bearer ${privyToken}` },
       });
       if (res.ok) {
         const data = await res.json();
@@ -76,13 +78,14 @@ export default function MyAgentsPage() {
   };
 
   const rotateKey = async (agentId: string) => {
-    if (!sessionToken) return;
     if (!confirm('This will invalidate the old API key. Any integrations using it will stop working. Continue?')) return;
     setRotatingId(agentId);
     try {
-      const res = await fetch(`https://api.saidprotocol.com/api/agents/${agentId}/rotate-key`, {
+      const privyToken = privyAccessToken ? await privyAccessToken() : null;
+      if (!privyToken) return;
+      const res = await fetch(`https://app.saidprotocol.com/api/agents/${agentId}/rotate-key`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${sessionToken}` },
+        headers: { 'Authorization': `Bearer ${privyToken}` },
       });
       if (res.ok) {
         const data = await res.json();
@@ -114,13 +117,18 @@ export default function MyAgentsPage() {
 
     // Fetch hosted agents (app.saidprotocol.com — hosting API)
     try {
-      const hostingRes = await fetch('https://app.saidprotocol.com/api/agents', {
-        headers: { 'Authorization': `Bearer ${sessionToken}` },
-      });
+      const privyToken = privyAccessToken ? await privyAccessToken() : null;
+      if (privyToken) {
+        const hostingRes = await fetch('https://app.saidprotocol.com/api/agents', {
+          headers: { 'Authorization': `Bearer ${privyToken}` },
+        });
       if (hostingRes.ok) {
         const hostingData = await hostingRes.json();
         const list = Array.isArray(hostingData) ? hostingData : [];
         for (const a of list) {
+          if (a.gatewayToken) {
+            setApiKeys(prev => ({ ...prev, [a.id]: a.gatewayToken }));
+          }
           hostedAgents.push({
             id: a.id,
             wallet: a.walletAddress || a.wallet || '',
