@@ -52,7 +52,7 @@ export default function MyAgentsPage() {
     if (!privyAccessToken) return;
     try {
       const privyToken = await privyAccessToken();
-      const res = await fetch(`https://app.saidprotocol.com/api/wallet/agents/${agentId}/provision-wallet`, {
+      const res = await fetch(`https://app.saidprotocol.com/api/agents/${agentId}/provision-wallet`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${privyToken}`,
