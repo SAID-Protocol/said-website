@@ -5,7 +5,18 @@ import {
   PartiallyDecodedInstruction,
 } from '@solana/web3.js';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
+type CachedPayload = {
+  totalBurned: number;
+  totalBoughtBack: number;
+  burnCount: number;
+  buybackCount: number;
+  events: BurnEvent[];
+  updatedAt: number;
+};
+let cached: { payload: CachedPayload; expiresAt: number } | null = null;
 
 const WALLET = 'GFqYiHVb9XGuKavUBin5qzcsq1okjLFDV4ZCZNx5tupV';
 const SAID_MINT = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
@@ -48,7 +59,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 async function fetchWithRetry(url: string, attempts = 4): Promise<Response> {
   let lastErr: unknown;
   for (let i = 0; i < attempts; i++) {
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url, { cache: 'no-store' });
     if (res.ok) return res;
     if (res.status !== 429 && res.status < 500) return res;
     lastErr = `Helius ${res.status}`;
@@ -155,6 +166,11 @@ export async function GET() {
     return NextResponse.json({ error: 'HELIUS_API_KEY not configured' }, { status: 500 });
   }
 
+  const now = Date.now();
+  if (cached && cached.expiresAt > now) {
+    return NextResponse.json(cached.payload);
+  }
+
   const conn = new Connection(`https://mainnet.helius-rpc.com/?api-key=${apiKey}`, 'confirmed');
 
   let burns: BurnEvent[] = [];
@@ -167,6 +183,11 @@ export async function GET() {
     buybacks = bb;
     burns = br;
   } catch (err) {
+    // If the live fetch failed but we have a previous successful payload,
+    // serve it (even if past TTL) so transient Helius 429s don't blank the UI.
+    if (cached) {
+      return NextResponse.json({ ...cached.payload, stale: true });
+    }
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'fetch failed' },
       { status: 502 },
@@ -180,12 +201,14 @@ export async function GET() {
   const recentBuybacks = buybacks.slice(0, 100);
   const visibleEvents = [...sortedBurns, ...recentBuybacks];
 
-  return NextResponse.json({
+  const payload: CachedPayload = {
     totalBurned: burns.reduce((s, e) => s + e.amount, 0),
     totalBoughtBack: buybacks.reduce((s, e) => s + e.amount, 0),
     burnCount: burns.length,
     buybackCount: buybacks.length,
     events: visibleEvents,
     updatedAt: Date.now(),
-  });
+  };
+  cached = { payload, expiresAt: now + CACHE_TTL_MS };
+  return NextResponse.json(payload);
 }
