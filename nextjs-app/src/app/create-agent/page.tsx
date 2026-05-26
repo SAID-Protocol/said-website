@@ -12,7 +12,7 @@ type Step = 'choose' | 'register' | 'create' | 'success';
 
 export default function CreateAgentPage() {
   const { authenticated, login, ready } = usePrivy();
-  const { sessionToken } = useAuth();
+  const { sessionToken, privyAccessToken } = useAuth();
   const [step, setStep] = useState<Step>('choose');
   const [loading, setLoading] = useState(false);
   
@@ -31,15 +31,18 @@ export default function CreateAgentPage() {
   const [copiedKey, setCopiedKey] = useState(false);
 
   const generateWallet = async () => {
-    const { Keypair } = await import('@solana/web3.js');
-    const keypair = Keypair.generate();
-    const secretKeyBase64 = Buffer.from(keypair.secretKey).toString('base64');
-    const walletData = {
-      publicKey: keypair.publicKey.toBase58(),
-      secretKey: secretKeyBase64
-    };
-    setGeneratedWallet(walletData);
-    setWallet(walletData.publicKey);
+    if (!privyAccessToken) return;
+    try {
+      setLoading(true);
+      const privyToken = await privyAccessToken();
+      // We'll create the wallet + agent together on submit
+      // For now just set a flag that we want a new custodial wallet
+      setWallet('new');
+    } catch (err) {
+      console.error('Failed to prepare wallet:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const downloadWallet = () => {
@@ -74,8 +77,31 @@ export default function CreateAgentPage() {
     setLoading(true);
     
     try {
-      const agentWallet = wallet || generatedWallet?.publicKey;
-      
+      let agentWallet = wallet || generatedWallet?.publicKey;
+      let platformAgentId: string | null = null;
+
+      // If generating a new custodial wallet, create via Platform API first
+      if (agentWallet === 'new') {
+        const privyToken = await privyAccessToken();
+        const createRes = await fetch('https://app.saidprotocol.com/api/agents/create-with-wallet', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${privyToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ name }),
+        });
+        if (!createRes.ok) {
+          const err = await createRes.json();
+          throw new Error(err.error || 'Failed to create agent wallet');
+        }
+        const createData = await createRes.json();
+        agentWallet = createData.walletAddress;
+        platformAgentId = createData.agentId;
+        if (createData.apiKey) setApiKey(createData.apiKey);
+      }
+
+      // Register on Protocol API
       const res = await fetch('https://api.saidprotocol.com/api/register/pending', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -310,63 +336,14 @@ export default function CreateAgentPage() {
               Back
             </button>
             <h1 className="text-3xl font-bold mb-2">New Agent Wallet</h1>
-            <p className="text-zinc-400 mb-6">We've generated a Solana wallet for your agent</p>
-            
-            {generatedWallet && (
-              <>
-                {/* Wallet Info */}
-                <div className="p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-lg mb-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-zinc-400 text-sm">Public Address</span>
-                    <code className="text-sm font-mono bg-zinc-800 px-2 py-1 rounded">
-                      {generatedWallet.publicKey.slice(0, 8)}...{generatedWallet.publicKey.slice(-8)}
-                    </code>
-                  </div>
-                </div>
-                
-                {/* Download Wallet Warning */}
-                <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg mb-6">
-                  <h4 className="font-semibold text-yellow-400 mb-2 flex items-center gap-2">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
-                      <line x1="12" y1="9" x2="12" y2="13"/>
-                      <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    Download Your Wallet!
-                  </h4>
-                  <p className="text-sm text-zinc-400 mb-3">
-                    You'll need this file to register on-chain via CLI. We don't store private keys.
-                  </p>
-                  <button
-                    onClick={downloadWallet}
-                    className={`w-full py-3 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2 ${
-                      walletDownloaded 
-                        ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
-                        : 'bg-zinc-800 border border-zinc-700 hover:bg-zinc-700'
-                    }`}
-                  >
-                    {walletDownloaded ? (
-                      <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="20 6 9 17 4 12"/>
-                        </svg>
-                        wallet.json Downloaded
-                      </>
-                    ) : (
-                      <>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                          <polyline points="7 10 12 15 17 10"/>
-                          <line x1="12" y1="15" x2="12" y2="3"/>
-                        </svg>
-                        Download wallet.json
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-            
+            <p className="text-zinc-400 mb-6">A custodial Solana wallet will be created for your agent</p>
+
+            <div className="p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-lg mb-6">
+              <p className="text-sm text-zinc-300">
+                <strong className="text-indigo-300">Custodial wallet:</strong> We securely manage your agent's wallet. You'll get an API key to control it — no private keys to manage.
+              </p>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block font-medium mb-2">Agent Name *</label>
@@ -427,17 +404,11 @@ export default function CreateAgentPage() {
               
               <button
                 type="submit"
-                disabled={loading || !name || !walletDownloaded}
+                disabled={loading || !name}
                 className="w-full py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Registering...' : !walletDownloaded ? 'Download Wallet First' : authenticated ? 'Pre-Register Agent' : 'Log In to Continue'}
+                {loading ? 'Creating...' : authenticated ? 'Create Agent' : 'Log In to Continue'}
               </button>
-              
-              {!walletDownloaded && (
-                <p className="text-center text-zinc-500 text-sm">
-                  You must download your wallet before continuing
-                </p>
-              )}
             </form>
           </>
         )}
