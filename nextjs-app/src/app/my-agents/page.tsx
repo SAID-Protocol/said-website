@@ -122,24 +122,25 @@ export default function MyAgentsPage() {
         const hostingRes = await fetch('https://app.saidprotocol.com/api/agents', {
           headers: { 'Authorization': `Bearer ${privyToken}` },
         });
-      if (hostingRes.ok) {
-        const hostingData = await hostingRes.json();
-        const list = Array.isArray(hostingData) ? hostingData : [];
-        for (const a of list) {
-          if (a.gatewayToken) {
-            setApiKeys(prev => ({ ...prev, [a.id]: a.gatewayToken }));
+        if (hostingRes.ok) {
+          const hostingData = await hostingRes.json();
+          const list = Array.isArray(hostingData) ? hostingData : [];
+          for (const a of list) {
+            if (a.gatewayToken) {
+              setApiKeys(prev => ({ ...prev, [a.id]: a.gatewayToken }));
+            }
+            hostedAgents.push({
+              id: a.id,
+              wallet: a.walletAddress || a.wallet || '',
+              name: a.name || 'Unnamed',
+              description: a.description,
+              isVerified: a.isVerified ?? false,
+              twitter: a.twitter,
+              gatewayToken: a.gatewayToken,
+              source: 'hosted',
+              hasApiKey: true,
+            });
           }
-          hostedAgents.push({
-            id: a.id,
-            wallet: a.walletAddress || a.wallet || '',
-            name: a.name || 'Unnamed',
-            description: a.description,
-            isVerified: a.isVerified ?? false,
-            twitter: a.twitter,
-            gatewayToken: a.gatewayToken,
-            source: 'hosted',
-            hasApiKey: true,
-          });
         }
       }
     } catch (err) {
