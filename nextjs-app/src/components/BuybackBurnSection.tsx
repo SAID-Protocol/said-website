@@ -99,10 +99,13 @@ function StatCard({
   );
 }
 
+const VISIBLE_STEP = 10;
+
 export default function BuybackBurnSection() {
   const [data, setData] = useState<BurnsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(VISIBLE_STEP);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,7 +130,12 @@ export default function BuybackBurnSection() {
     };
   }, []);
 
-  const latestEvents = useMemo(() => data?.events.slice(0, 20) ?? [], [data]);
+  const allEvents = data?.events ?? [];
+  const visibleEvents = useMemo(
+    () => allEvents.slice(0, visibleCount),
+    [allEvents, visibleCount],
+  );
+  const hasMore = allEvents.length > visibleCount;
   const burnedPctSupply = data ? (data.totalBurned / TOTAL_SUPPLY) * 100 : 0;
 
   return (
@@ -204,12 +212,12 @@ export default function BuybackBurnSection() {
               <div className="px-6 py-10 text-center text-zinc-500 text-sm">
                 Couldn&apos;t load on-chain data. Try again later.
               </div>
-            ) : latestEvents.length === 0 ? (
+            ) : visibleEvents.length === 0 ? (
               <div className="px-6 py-10 text-center text-zinc-500 text-sm">
                 No burns or buybacks detected in recent history.
               </div>
             ) : (
-              latestEvents.map((e) => (
+              visibleEvents.map((e) => (
                 <div
                   key={`${e.signature}-${e.type}`}
                   className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-white/5 last:border-b-0 text-sm items-center"
@@ -245,6 +253,16 @@ export default function BuybackBurnSection() {
               ))
             )}
           </div>
+          {hasMore ? (
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => setVisibleCount((c) => c + VISIBLE_STEP)}
+                className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white transition-colors"
+              >
+                Load more
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>
