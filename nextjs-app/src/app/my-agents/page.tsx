@@ -249,7 +249,7 @@ export default function MyAgentsPage() {
                 key={agent.id}
                 className={`p-6 bg-zinc-900 border rounded-xl ${
                   agent.source === 'hosted'
-                    ? 'border-indigo-500/30'
+                    ? 'border-zinc-700'
                     : 'border-zinc-800'
                 }`}
               >
@@ -257,7 +257,7 @@ export default function MyAgentsPage() {
                   <div className="flex gap-4 items-center">
                     <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold ${
                       agent.source === 'hosted'
-                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
+                        ? 'bg-gradient-to-br from-zinc-600 to-zinc-700'
                         : 'bg-gradient-to-br from-zinc-600 to-zinc-700'
                     }`}>
                       {(agent.name || '?')[0]}
