@@ -338,9 +338,9 @@ export default function CreateAgentPage() {
             <h1 className="text-3xl font-bold mb-2">New Agent Wallet</h1>
             <p className="text-zinc-400 mb-6">A custodial Solana wallet will be created for your agent</p>
 
-            <div className="p-4 bg-indigo-500/10 border border-indigo-500/30 rounded-lg mb-6">
+            <div className="p-4 bg-zinc-800/50 border border-zinc-700 rounded-lg mb-6">
               <p className="text-sm text-zinc-300">
-                <strong className="text-indigo-300">Custodial wallet:</strong> We securely manage your agent's wallet. You'll get an API key to control it — no private keys to manage.
+                <strong className="text-zinc-300">Custodial wallet:</strong> We securely manage your agent's wallet. You'll get an API key to control it — no private keys to manage.
               </p>
             </div>
 
@@ -472,7 +472,7 @@ export default function CreateAgentPage() {
                 <div>
                   <span className="text-zinc-400 text-sm mb-2 block">3. Get verified (optional, 0.01 SOL)</span>
                   <div className="relative">
-                    <code className="block p-3 bg-zinc-950 rounded text-sm font-mono text-blue-400 overflow-x-auto">
+                    <code className="block p-3 bg-zinc-950 rounded text-sm font-mono text-green-400 overflow-x-auto">
                       npx said verify -k wallet.json
                     </code>
                     <button 
@@ -491,8 +491,8 @@ export default function CreateAgentPage() {
             
             {/* API Key for SeekerClaw integration */}
             {apiKey && (
-              <div className="p-5 bg-indigo-500/10 backdrop-blur-md border border-indigo-500/30 rounded-xl mb-6">
-                <h3 className="font-semibold mb-2 flex items-center gap-2 text-indigo-300">
+              <div className="p-5 bg-zinc-800/50 backdrop-blur-md border border-zinc-700 rounded-xl mb-6">
+                <h3 className="font-semibold mb-2 flex items-center gap-2 text-zinc-300">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>
                   </svg>
@@ -500,12 +500,12 @@ export default function CreateAgentPage() {
                 </h3>
                 <p className="text-zinc-400 text-sm mb-3">Copy this key into the SeekerClaw app to connect your agent.</p>
                 <div className="flex gap-2">
-                  <code className="flex-1 p-3 bg-zinc-950 rounded text-sm font-mono text-indigo-300 overflow-x-auto">
+                  <code className="flex-1 p-3 bg-zinc-950 rounded text-sm font-mono text-zinc-300 overflow-x-auto">
                     {apiKey}
                   </code>
                   <button
                     onClick={() => { navigator.clipboard.writeText(apiKey); setCopiedKey(true); setTimeout(() => setCopiedKey(false), 2000); }}
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-500 transition"
+                    className="px-4 py-2 bg-zinc-700 text-white rounded-lg text-sm font-medium hover:bg-zinc-600 transition"
                   >
                     {copiedKey ? '✓ Copied' : 'Copy'}
                   </button>
