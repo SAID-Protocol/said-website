@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
@@ -99,8 +99,41 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+function formatMarketCap(n: number): string {
+  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toFixed(0)}`;
+}
+
 export default function TokenPage() {
   const TOKEN_ADDRESS = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
+  const [marketCap, setMarketCap] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = () => {
+      fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_ADDRESS}`)
+        .then((r) => r.json())
+        .then((d: { pairs?: { marketCap?: number; liquidity?: { usd?: number } }[] }) => {
+          if (cancelled) return;
+          const pairs = d.pairs ?? [];
+          const top = pairs.reduce<typeof pairs[number] | null>((best, p) => {
+            const liq = p.liquidity?.usd ?? 0;
+            const bestLiq = best?.liquidity?.usd ?? -1;
+            return liq > bestLiq ? p : best;
+          }, null);
+          if (top && typeof top.marketCap === 'number') setMarketCap(top.marketCap);
+        })
+        .catch(() => {});
+    };
+    load();
+    const id = setInterval(load, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-black relative">
@@ -124,7 +157,16 @@ export default function TokenPage() {
                 <CopyButton text={TOKEN_ADDRESS} />
               </div>
             </div>
+            <div className="mt-6 flex items-center justify-center gap-2">
+              <span className="text-xs text-zinc-500 uppercase tracking-wider">Market Cap</span>
+              <span className="text-2xl md:text-3xl font-bold text-white">
+                {marketCap !== null ? formatMarketCap(marketCap) : '—'}
+              </span>
+            </div>
           </section>
+
+          {/* Buybacks & Burns */}
+          <BuybackBurnSection />
 
           {/* Treasury Mechanics */}
           <section className="py-20 px-4">
@@ -168,9 +210,6 @@ export default function TokenPage() {
               </div>
             </div>
           </section>
-
-          {/* Buybacks & Burns */}
-          <BuybackBurnSection />
 
           {/* Grants Program */}
           <section className="py-20 px-4">
