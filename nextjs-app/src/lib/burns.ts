@@ -2,6 +2,7 @@ import {
   Connection,
   ParsedInstruction,
   PartiallyDecodedInstruction,
+  PublicKey,
 } from '@solana/web3.js';
 
 const CACHE_TTL_MS = 30 * 60 * 1000;
@@ -20,6 +21,7 @@ export type BurnsPayload = {
   totalBoughtBack: number;
   burnCount: number;
   buybackCount: number;
+  treasuryBalanceSol: number | null;
   events: BurnEvent[];
   updatedAt: number;
   stale?: boolean;
@@ -29,7 +31,9 @@ export type BurnsPayload = {
 let cached: { payload: BurnsPayload; expiresAt: number } | null = null;
 
 const WALLET = 'GFqYiHVb9XGuKavUBin5qzcsq1okjLFDV4ZCZNx5tupV';
+const TREASURY_WALLET = '2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH';
 const SAID_MINT = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
+const LAMPORTS_PER_SOL = 1_000_000_000;
 const SAID_DECIMALS = 6;
 const BUYBACK_PAGES = 100;
 const PAGE_LIMIT = 100;
@@ -162,12 +166,22 @@ async function fetchKnownBurns(conn: Connection): Promise<BurnEvent[]> {
   return events;
 }
 
+async function fetchTreasuryBalance(conn: Connection): Promise<number | null> {
+  try {
+    const lamports = await conn.getBalance(new PublicKey(TREASURY_WALLET), 'confirmed');
+    return lamports / LAMPORTS_PER_SOL;
+  } catch {
+    return null;
+  }
+}
+
 function emptyPayload(error?: string): BurnsPayload {
   return {
     totalBurned: 0,
     totalBoughtBack: 0,
     burnCount: 0,
     buybackCount: 0,
+    treasuryBalanceSol: null,
     events: [],
     updatedAt: Date.now(),
     error,
@@ -189,13 +203,16 @@ export async function fetchBurnsData(): Promise<BurnsPayload> {
 
   let burns: BurnEvent[] = [];
   let buybacks: BurnEvent[] = [];
+  let treasuryBalanceSol: number | null = null;
   try {
-    const [bb, br] = await Promise.all([
+    const [bb, br, treasury] = await Promise.all([
       fetchRecentBuybacks(apiKey),
       fetchKnownBurns(conn),
+      fetchTreasuryBalance(conn),
     ]);
     buybacks = bb;
     burns = br;
+    treasuryBalanceSol = treasury;
   } catch (err) {
     if (cached) {
       return { ...cached.payload, stale: true };
@@ -212,6 +229,7 @@ export async function fetchBurnsData(): Promise<BurnsPayload> {
     totalBoughtBack: buybacks.reduce((s, e) => s + e.amount, 0),
     burnCount: burns.length,
     buybackCount: buybacks.length,
+    treasuryBalanceSol,
     events: visibleEvents,
     updatedAt: Date.now(),
   };
