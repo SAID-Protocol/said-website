@@ -22,6 +22,7 @@ export type BurnsPayload = {
   burnCount: number;
   buybackCount: number;
   treasuryBalanceSol: number | null;
+  treasuryRevenueSol: number | null;
   events: BurnEvent[];
   updatedAt: number;
   stale?: boolean;
@@ -175,6 +176,49 @@ async function fetchTreasuryBalance(conn: Connection): Promise<number | null> {
   }
 }
 
+type HeliusAccountData = {
+  account: string;
+  nativeBalanceChange?: number;
+};
+
+type HeliusTreasuryTx = {
+  signature: string;
+  timestamp: number;
+  accountData?: HeliusAccountData[];
+};
+
+async function fetchTreasuryWithdrawnLamports(apiKey: string): Promise<number | null> {
+  let withdrawn = 0;
+  let before: string | undefined;
+  try {
+    for (let page = 0; page < 50; page++) {
+      const url = new URL(`https://api-mainnet.helius-rpc.com/v0/addresses/${TREASURY_WALLET}/transactions`);
+      url.searchParams.set('api-key', apiKey);
+      url.searchParams.set('limit', String(PAGE_LIMIT));
+      if (before) url.searchParams.set('before', before);
+
+      const res = await fetchWithRetry(url.toString());
+      if (res.status === 404) break;
+      if (!res.ok) throw new Error(`Helius ${res.status}`);
+      const txs = (await res.json()) as HeliusTreasuryTx[];
+      if (!Array.isArray(txs) || txs.length === 0) break;
+
+      for (const tx of txs) {
+        const treasuryAcct = (tx.accountData ?? []).find((a) => a.account === TREASURY_WALLET);
+        const delta = treasuryAcct?.nativeBalanceChange ?? 0;
+        if (delta < 0) withdrawn += -delta;
+      }
+
+      before = txs[txs.length - 1].signature;
+      if (txs.length < PAGE_LIMIT) break;
+      await sleep(120);
+    }
+    return withdrawn;
+  } catch {
+    return null;
+  }
+}
+
 function emptyPayload(error?: string): BurnsPayload {
   return {
     totalBurned: 0,
@@ -182,6 +226,7 @@ function emptyPayload(error?: string): BurnsPayload {
     burnCount: 0,
     buybackCount: 0,
     treasuryBalanceSol: null,
+    treasuryRevenueSol: null,
     events: [],
     updatedAt: Date.now(),
     error,
@@ -204,15 +249,18 @@ export async function fetchBurnsData(): Promise<BurnsPayload> {
   let burns: BurnEvent[] = [];
   let buybacks: BurnEvent[] = [];
   let treasuryBalanceSol: number | null = null;
+  let treasuryWithdrawnLamports: number | null = null;
   try {
-    const [bb, br, treasury] = await Promise.all([
+    const [bb, br, treasury, withdrawn] = await Promise.all([
       fetchRecentBuybacks(apiKey),
       fetchKnownBurns(conn),
       fetchTreasuryBalance(conn),
+      fetchTreasuryWithdrawnLamports(apiKey),
     ]);
     buybacks = bb;
     burns = br;
     treasuryBalanceSol = treasury;
+    treasuryWithdrawnLamports = withdrawn;
   } catch (err) {
     if (cached) {
       return { ...cached.payload, stale: true };
@@ -224,12 +272,18 @@ export async function fetchBurnsData(): Promise<BurnsPayload> {
     .sort((a, b) => b.blockTime - a.blockTime)
     .slice(0, MAX_VISIBLE_EVENTS);
 
+  const treasuryRevenueSol =
+    treasuryBalanceSol !== null && treasuryWithdrawnLamports !== null
+      ? treasuryBalanceSol + treasuryWithdrawnLamports / LAMPORTS_PER_SOL
+      : null;
+
   const payload: BurnsPayload = {
     totalBurned: burns.reduce((s, e) => s + e.amount, 0),
     totalBoughtBack: buybacks.reduce((s, e) => s + e.amount, 0),
     burnCount: burns.length,
     buybackCount: buybacks.length,
     treasuryBalanceSol,
+    treasuryRevenueSol,
     events: visibleEvents,
     updatedAt: Date.now(),
   };
