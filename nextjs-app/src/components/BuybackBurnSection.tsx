@@ -86,10 +86,10 @@ function StatCard({
     <>
       <div className="flex items-center gap-2 text-zinc-400 mb-3">
         <span className="text-white">{icon}</span>
-        <span className="text-sm uppercase tracking-wider">{label}</span>
+        <span className="text-xs uppercase tracking-wider whitespace-nowrap">{label}</span>
       </div>
-      <div className="text-3xl md:text-4xl font-bold text-white">{value}</div>
-      {sub ? <div className="text-sm text-zinc-500 mt-1">{sub}</div> : null}
+      <div className="text-2xl md:text-3xl font-bold text-white whitespace-nowrap">{value}</div>
+      {sub ? <div className="text-xs text-zinc-500 mt-1">{sub}</div> : null}
     </>
   );
   const baseClass = 'bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6';
@@ -144,7 +144,7 @@ export default function BuybackBurnSection({ initialData }: { initialData: Burns
           />
           <StatCard
             icon={Icons.cart}
-            label="Total Bought Back"
+            label="Bought Back"
             value={error ? '—' : `${formatTokenAmount(data.totalBoughtBack)} SAID`}
             sub={error ? undefined : `${data.buybackCount} buyback ${data.buybackCount === 1 ? 'tx' : 'txs'}`}
           />
@@ -162,7 +162,7 @@ export default function BuybackBurnSection({ initialData }: { initialData: Burns
                 ? `${data.treasuryBalanceSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`
                 : '—'
             }
-            sub="Platform revenue · view on Solscan"
+            sub="View on Solscan"
             href="https://solscan.io/account/2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH"
           />
         </div>
