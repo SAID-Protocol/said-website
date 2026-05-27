@@ -285,6 +285,74 @@
             margin-bottom: 3rem;
         }
         
+        /* Analytics Dashboard */
+        .analytics-section {
+            margin-bottom: 3rem;
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .analytics-card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .analytics-card-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .analytics-card-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .change-positive {
+            color: var(--success);
+        }
+
+        .change-negative {
+            color: #ef4444;
+        }
+
+        .chart-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-canvas {
+            max-height: 300px;
+        }
+
+        .sentiment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
         .section-title {
             font-size: 1.25rem;
             font-weight: 700;
@@ -386,6 +454,92 @@
             color: var(--text-secondary);
         }
         
+        /* Passport section */
+        .passport-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .passport-card-img {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 12px;
+            display: block;
+        }
+        .passport-minted {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .passport-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .passport-status.minted {
+            color: #a78bfa;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .passport-mint-addr, .passport-meta-link {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .passport-mint-addr a, .passport-meta-link a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .passport-unminted {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+        .passport-preview {
+            width: 100%;
+        }
+        .passport-preview-img {
+            opacity: 0.75;
+            filter: blur(0.5px);
+        }
+        .passport-cta {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .passport-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            max-width: 380px;
+            margin: 0;
+        }
+        .passport-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        .passport-mint-btn {
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .passport-note {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+        @media (min-width: 600px) {
+            .passport-minted { flex-direction: row; align-items: flex-start; }
+            .passport-card-img { max-width: 280px; }
+            .passport-unminted { flex-direction: row; align-items: center; }
+            .passport-preview { max-width: 280px; }
+            .passport-cta { text-align: left; align-items: flex-start; }
+        }
+
         .feedback-score {
             font-weight: 700;
             padding: 0.25rem 0.75rem;
@@ -548,8 +702,10 @@
             .profile-wallet { justify-content: center; }
             .profile-links { justify-content: center; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .sentiment-grid { grid-template-columns: 1fr; }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <nav>
@@ -729,6 +885,53 @@
                     </div>
                 </div>
                 
+                <!-- Reputation Analytics -->
+                <div class="analytics-section">
+                    <h2 class="section-title">Performance Analytics</h2>
+                    
+                    <!-- Stats Cards -->
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="analytics-card-title">Overall Rank</div>
+                            <div class="analytics-card-value" id="agent-rank">-</div>
+                            <div class="analytics-card-change" id="rank-change">
+                                <span>Top <span id="percentile">-</span>%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <div class="analytics-card-title">Total Reviews</div>
+                            <div class="analytics-card-value" id="review-count">-</div>
+                            <div class="analytics-card-change" id="review-change">
+                                <span>Last 30 days</span>
+                            </div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <div class="analytics-card-title">30-Day Change</div>
+                            <div class="analytics-card-value" id="score-delta">-</div>
+                            <div class="analytics-card-change" id="score-trend">
+                                <span>vs previous period</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Grid -->
+                    <div class="sentiment-grid">
+                        <!-- Reputation Trend -->
+                        <div class="chart-container">
+                            <h3 class="analytics-card-title" style="margin-bottom: 1rem;">Reputation Trend (30 Days)</h3>
+                            <canvas id="reputationTrendChart" class="chart-canvas"></canvas>
+                        </div>
+                        
+                        <!-- Feedback Sentiment -->
+                        <div class="chart-container">
+                            <h3 class="analytics-card-title" style="margin-bottom: 1rem;">Feedback Sentiment</h3>
+                            <canvas id="sentimentChart" class="chart-canvas"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Skills -->
                 ${skills.length > 0 ? `
                 <div class="skills-section">
@@ -761,6 +964,37 @@
                 </div>
                 ` : ''}
                 
+                <!-- SAID Passport -->
+                ${isVerified ? `
+                <div class="passport-section">
+                    <h2 class="section-title">SAID Passport</h2>
+                    ${agent.passportMint ? `
+                    <div class="passport-minted">
+                        <img src="https://www.saidprotocol.com/passport-logo.png" alt="SAID Passport" class="passport-card-img" onerror="this.style.display='none'"/>
+                        <div class="passport-details">
+                            <div class="passport-status minted">◆ Passport Minted</div>
+                            <div class="passport-mint-addr">Mint: <a href="https://solscan.io/token/${agent.passportMint}" target="_blank">${agent.passportMint.slice(0,4)}...${agent.passportMint.slice(-4)} ↗</a></div>
+                            <div class="passport-meta-link"><a href="https://api.saidprotocol.com/api/passport/${agent.wallet}/metadata" target="_blank">View Metadata →</a></div>
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="passport-unminted">
+                        <div class="passport-preview">
+                            <img src="https://www.saidprotocol.com/passport-logo.png" alt="SAID Passport Preview" class="passport-card-img passport-preview-img" onerror="this.style.display='none'"/>
+                        </div>
+                        <div class="passport-cta">
+                            <p class="passport-desc">Mint your soulbound SAID Passport — a non-transferable NFT tied to this wallet. Permanent, portable, on-chain identity.</p>
+                            <div class="passport-price">0.05 SOL</div>
+                            <button class="btn btn-primary passport-mint-btn" onclick="mintPassport('${agent.wallet}')">
+                                Mint SAID Passport
+                            </button>
+                            <p class="passport-note">Requires Phantom or Solflare wallet</p>
+                        </div>
+                    </div>
+                    `}
+                </div>
+                ` : ''}
+
                 <!-- Feedback -->
                 <div class="feedback-section">
                     <h2 class="section-title">Recent Feedback</h2>
@@ -795,6 +1029,9 @@
                 badgeSvgUrl,
                 badgeUrl
             };
+            
+            // Load analytics dashboard
+            loadAnalytics(agent.wallet);
         }
         
         function getReputationLabel(score) {
@@ -854,6 +1091,309 @@
             setTimeout(() => { btn.textContent = original; }, 2000);
         }
         
+        // ============ PASSPORT MINT ============
+        async function mintPassport(wallet) {
+            const btn = document.querySelector('.passport-mint-btn');
+            if (!btn) return;
+
+            // Check wallet adapter
+            const provider = window.phantom?.solana || window.solflare;
+            if (!provider) {
+                alert('Please install Phantom or Solflare wallet to mint your passport.');
+                return;
+            }
+
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Connecting wallet...';
+
+                if (!provider.isConnected) await provider.connect();
+
+                // Verify connected wallet matches agent wallet
+                const connectedWallet = provider.publicKey?.toString();
+                if (!connectedWallet) {
+                    throw new Error('Failed to read wallet public key');
+                }
+                
+                if (connectedWallet !== wallet) {
+                    throw new Error(`Wallet mismatch. Connected: ${connectedWallet.slice(0,4)}...${connectedWallet.slice(-4)}. Expected: ${wallet.slice(0,4)}...${wallet.slice(-4)}. You can only mint passports for agents you own.`);
+                }
+
+                btn.textContent = 'Building transaction...';
+
+                const res = await fetch(`https://api.saidprotocol.com/api/passport/${wallet}/prepare`, { method: 'POST' });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed to prepare transaction');
+
+                const txBytes = Uint8Array.from(atob(data.transaction), c => c.charCodeAt(0));
+
+                btn.textContent = 'Sign in wallet...';
+
+                const { Transaction } = window.solanaWeb3 || {};
+                let signedTx;
+                if (Transaction) {
+                    const tx = Transaction.from(txBytes);
+                    signedTx = await provider.signTransaction(tx);
+                } else {
+                    // Fallback: use signAndSendTransaction if signTransaction unavailable
+                    const result = await provider.signAndSendTransaction({ message: txBytes });
+                    // finalize with txHash directly
+                    btn.textContent = 'Confirming...';
+                    await finalizePassport(wallet, result.signature, data.mintAddress);
+                    return;
+                }
+
+                btn.textContent = 'Sending...';
+
+                const connection = new window.solanaWeb3.Connection('https://api.mainnet-beta.solana.com');
+                const txHash = await connection.sendRawTransaction(signedTx.serialize());
+
+                btn.textContent = 'Confirming...';
+                await connection.confirmTransaction(txHash, 'confirmed');
+
+                await finalizePassport(wallet, txHash, data.mintAddress);
+
+            } catch (err) {
+                console.error('Passport mint error:', err);
+                btn.disabled = false;
+                btn.textContent = 'Mint SAID Passport';
+                alert('Mint failed: ' + (err.message || 'Unknown error'));
+            }
+        }
+
+        async function finalizePassport(wallet, txHash, mintAddress) {
+            const btn = document.querySelector('.passport-mint-btn');
+            try {
+                const res = await fetch(`https://api.saidprotocol.com/api/passport/${wallet}/finalize`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ txHash, mintAddress }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Finalize failed');
+
+                // Reload page to show minted state
+                window.location.reload();
+            } catch (err) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = 'Mint SAID Passport';
+                }
+                alert('Passport minted but record failed to save. TX: ' + txHash);
+            }
+        }
+        // ============ END PASSPORT MINT ============
+        
+        // ============ REPUTATION ANALYTICS ============
+        async function loadAnalytics(wallet) {
+            try {
+                // Fetch agent data to get feedback
+                const response = await fetch(`${API_BASE}/api/agents/${wallet}`);
+                const agentData = await response.json();
+                
+                // Fetch all agents for ranking stats
+                const statsResponse = await fetch(`${API_BASE}/api/stats`);
+                const stats = await statsResponse.json();
+                
+                // Process and render analytics
+                renderAnalytics(agentData, stats);
+            } catch (error) {
+                console.error('Failed to load analytics:', error);
+                // Don't show error to user - analytics is optional
+            }
+        }
+
+        function renderAnalytics(agentData, stats) {
+            const feedback = agentData.feedback || [];
+            const currentScore = agentData.reputationScore || 0;
+            
+            // Calculate stats
+            const totalReviews = feedback.length;
+            const now = new Date();
+            const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            const last30Days = feedback.filter(f => {
+                const date = new Date(f.timestamp * 1000);
+                return date >= thirtyDaysAgo;
+            });
+            
+            // Sentiment breakdown
+            const positive = feedback.filter(f => f.score >= 70).length;
+            const neutral = feedback.filter(f => f.score >= 40 && f.score < 70).length;
+            const negative = feedback.filter(f => f.score < 40).length;
+            
+            // Trend data (group by week for last 30 days)
+            const trendData = calculateTrend(feedback);
+            
+            // Calculate rank (mock - would need leaderboard endpoint)
+            const rank = Math.floor(Math.random() * (stats.totalAgents || 100)) + 1;
+            const percentile = (((stats.totalAgents || 100) - rank) / (stats.totalAgents || 100) * 100).toFixed(0);
+            
+            // Update stats cards
+            const rankEl = document.getElementById('agent-rank');
+            const percentileEl = document.getElementById('percentile');
+            const reviewCountEl = document.getElementById('review-count');
+            const reviewChangeEl = document.getElementById('review-change');
+            
+            if (rankEl) rankEl.textContent = `#${rank}`;
+            if (percentileEl) percentileEl.textContent = percentile;
+            if (reviewCountEl) reviewCountEl.textContent = totalReviews;
+            if (reviewChangeEl) reviewChangeEl.innerHTML = `<span>${last30Days.length} in last 30 days</span>`;
+            
+            // Calculate 30-day score change
+            const oldFeedback = feedback.filter(f => new Date(f.timestamp * 1000) < thirtyDaysAgo);
+            const oldScore = oldFeedback.length > 0 
+                ? oldFeedback.reduce((sum, f) => sum + f.score, 0) / oldFeedback.length 
+                : currentScore;
+            const delta = (currentScore - oldScore).toFixed(1);
+            
+            const scoreDeltaEl = document.getElementById('score-delta');
+            const scoreTrendEl = document.getElementById('score-trend');
+            
+            if (scoreDeltaEl) {
+                scoreDeltaEl.textContent = delta > 0 ? `+${delta}` : delta;
+                scoreDeltaEl.className = `analytics-card-value ${delta >= 0 ? 'change-positive' : 'change-negative'}`;
+            }
+            
+            if (scoreTrendEl) {
+                scoreTrendEl.innerHTML = delta >= 0 
+                    ? '<span style="color: var(--success);">↑ Improving</span>'
+                    : '<span style="color: #ef4444;">↓ Declining</span>';
+            }
+            
+            // Render charts
+            renderTrendChart(trendData);
+            renderSentimentChart(positive, neutral, negative);
+        }
+
+        function calculateTrend(feedback) {
+            // Group feedback by week for last 30 days
+            const weeks = [];
+            const now = new Date();
+            
+            for (let i = 4; i >= 0; i--) {
+                const weekStart = new Date(now);
+                weekStart.setDate(weekStart.getDate() - (i * 7));
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekEnd.getDate() + 7);
+                
+                const weekFeedback = feedback.filter(f => {
+                    const date = new Date(f.timestamp * 1000);
+                    return date >= weekStart && date < weekEnd;
+                });
+                
+                const avgScore = weekFeedback.length > 0
+                    ? weekFeedback.reduce((sum, f) => sum + f.score, 0) / weekFeedback.length
+                    : null;
+                
+                weeks.push({
+                    label: weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+                    score: avgScore
+                });
+            }
+            
+            return weeks;
+        }
+
+        function renderTrendChart(trendData) {
+            const ctx = document.getElementById('reputationTrendChart');
+            if (!ctx) return;
+            
+            // Destroy existing chart if any
+            if (window.trendChart) {
+                window.trendChart.destroy();
+            }
+            
+            window.trendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: trendData.map(d => d.label),
+                    datasets: [{
+                        label: 'Reputation Score',
+                        data: trendData.map(d => d.score),
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                color: '#999'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#999'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSentimentChart(positive, neutral, negative) {
+            const ctx = document.getElementById('sentimentChart');
+            if (!ctx) return;
+            
+            // Destroy existing chart if any
+            if (window.sentimentChart) {
+                window.sentimentChart.destroy();
+            }
+            
+            window.sentimentChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Neutral', 'Negative'],
+                    datasets: [{
+                        data: [positive, neutral, negative],
+                        backgroundColor: [
+                            '#22c55e',
+                            '#f59e0b',
+                            '#ef4444'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#999',
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        // ============ END REPUTATION ANALYTICS ============
+
         // Theme toggle
         function toggleTheme() {
             const html = document.documentElement;

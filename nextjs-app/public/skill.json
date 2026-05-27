@@ -1,0 +1,23 @@
+{
+  "name": "said",
+  "version": "1.0.0",
+  "description": "On-chain identity infrastructure for AI agents. Register, verify, and build reputation on Solana.",
+  "homepage": "https://www.saidprotocol.com",
+  "metadata": {
+    "emoji": "🆔",
+    "category": "identity",
+    "program_id": "5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G",
+    "network": "solana-mainnet",
+    "treasury": "2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH"
+  },
+  "costs": {
+    "registration": "free (rent ~0.003 SOL)",
+    "verification": "0.01 SOL"
+  },
+  "links": {
+    "skill_md": "https://www.saidprotocol.com/skill.md",
+    "github": "https://github.com/kaiclawd/said-skill",
+    "twitter": "https://twitter.com/saidinfra",
+    "explorer": "https://solscan.io/account/5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G"
+  }
+}

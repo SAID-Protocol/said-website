@@ -1,40 +1,44 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import OnboardingModal from './OnboardingModal';
 import { useAuth } from '@/hooks/useAuth';
-
-const API_URL = 'https://api.saidprotocol.com';
+import { API_URL, fetchWithBackoff } from '@/lib/api';
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
-  const { authenticated, ready } = usePrivy();
+  const { authenticated, ready, user } = usePrivy();
   const { sessionToken, loading: authLoading } = useAuth();
   const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [checkAttempted, setCheckAttempted] = useState(false);
 
   useEffect(() => {
     async function checkProfile() {
-      // If not authenticated, no need to check - just show content
+      // If not authenticated, no need to check
       if (ready && !authenticated) {
         setChecking(false);
+        setNeedsOnboarding(false);
         return;
       }
 
-      // Wait for everything to be ready: Privy ready, authenticated, session token exists, and auth hook is done loading
-      if (!ready || !authenticated || !sessionToken || authLoading) {
+      // Wait for everything to be ready
+      if (!ready || !authenticated || !sessionToken || authLoading || checkAttempted) {
         return;
       }
+
+      setCheckAttempted(true);
 
       try {
-        const res = await fetch(`${API_URL}/auth/me`, {
+        const res = await fetchWithBackoff(`${API_URL}/auth/me`, {
           headers: {
             'Authorization': `Bearer ${sessionToken}`,
           },
-        });
+        }, 2);
 
         if (!res.ok) {
+          // Can't fetch user data - let them through
           setChecking(false);
+          setNeedsOnboarding(false);
           return;
         }
 
@@ -42,8 +46,6 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         
         console.log('[OnboardingGuard] User data:', data);
         
-        // Only trigger onboarding if username is null/undefined OR exactly 'anonymous'
-        // This catches truly new users, not existing ones
         const needsSetup = !data.user?.username || data.user?.username === 'anonymous';
         
         console.log('[OnboardingGuard] needsSetup:', needsSetup);
@@ -51,38 +53,37 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         setNeedsOnboarding(needsSetup);
       } catch (err) {
         console.error('Failed to check profile:', err);
+        setNeedsOnboarding(false);
       } finally {
         setChecking(false);
       }
     }
 
     checkProfile();
-  }, [ready, authenticated, sessionToken, authLoading]);
+  }, [ready, authenticated, sessionToken, authLoading, checkAttempted]);
 
   const handleOnboardingComplete = async (data: { username: string; displayName: string; avatar?: string }) => {
     if (!sessionToken) return;
 
     try {
-      // Map 'avatar' to 'avatarUrl' for API
       const payload = {
         username: data.username,
         displayName: data.displayName,
         avatarUrl: data.avatar || undefined,
       };
 
-      const res = await fetch(`${API_URL}/auth/me`, {
+      const res = await fetchWithBackoff(`${API_URL}/auth/me`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify(payload),
-      });
+      }, 1);
 
       if (res.ok) {
         console.log('[OnboardingGuard] Profile updated successfully');
         setNeedsOnboarding(false);
-        // Force a page refresh to reload user data
         window.location.reload();
       } else {
         const error = await res.json();
@@ -95,7 +96,6 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     }
   };
 
-  // Show nothing while checking (only for authenticated users)
   if (authenticated && checking) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -104,11 +104,9 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     );
   }
 
-  // Show onboarding modal if needed
   if (needsOnboarding) {
     return <OnboardingModal onComplete={handleOnboardingComplete} />;
   }
 
-  // Otherwise show children
   return <>{children}</>;
 }
