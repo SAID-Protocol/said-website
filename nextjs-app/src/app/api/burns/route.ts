@@ -23,7 +23,7 @@ const SAID_MINT = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
 const SAID_DECIMALS = 6;
 const BUYBACK_PAGES = 100;
 const PAGE_LIMIT = 100;
-const MAX_VISIBLE_EVENTS = 200;
+const MAX_VISIBLE_EVENTS = 1000;
 
 // Append confirmed burn tx signatures here. Each is fetched individually
 // via Helius RPC and parsed for SPL/Token-2022 burn instructions. Cheap
@@ -195,12 +195,11 @@ export async function GET() {
     );
   }
 
-  // Pin all burns to the top of the visible list (sorted newest-first),
-  // then append the most recent buybacks. Burns are rare and the
-  // marketing event; buybacks happen every few seconds.
-  const sortedBurns = [...burns].sort((a, b) => b.blockTime - a.blockTime);
-  const recentBuybacks = buybacks.slice(0, MAX_VISIBLE_EVENTS);
-  const visibleEvents = [...sortedBurns, ...recentBuybacks];
+  // Pure chronological order, newest first. Burns appear wherever they
+  // fall by timestamp; Load More walks back through the full history.
+  const visibleEvents = [...burns, ...buybacks]
+    .sort((a, b) => b.blockTime - a.blockTime)
+    .slice(0, MAX_VISIBLE_EVENTS);
 
   const payload: CachedPayload = {
     totalBurned: burns.reduce((s, e) => s + e.amount, 0),
