@@ -297,7 +297,7 @@ export default function CreateAgentPage() {
                 disabled={loading || !name || !wallet}
                 className="w-full py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Registering...' : authenticated ? 'Pre-Register Agent' : 'Log In to Continue'}
+                {loading ? 'Registering...' : authenticated ? 'Register Agent' : 'Log In to Continue'}
               </button>
             </form>
           </>
