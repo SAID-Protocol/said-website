@@ -146,7 +146,9 @@ export default function BuybackBurnSection({ initialData }: { initialData: Burns
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                   <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Funded By</div>
-                  <div className="text-white font-semibold">Treasury creator rewards</div>
+                  <div className="text-white font-semibold text-sm">
+                    20% platform revenue + 10% creator rewards
+                  </div>
                 </div>
               </div>
             </div>
