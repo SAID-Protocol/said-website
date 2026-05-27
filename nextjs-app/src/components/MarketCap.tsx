@@ -38,12 +38,14 @@ export default function MarketCap({ tokenAddress }: { tokenAddress: string }) {
   }, [tokenAddress]);
 
   return (
-    <div className="mt-4 text-sm text-zinc-500">
-      <span className="uppercase tracking-wider">Market Cap</span>
-      <span className="mx-2 text-zinc-700">·</span>
-      <span className="text-white font-semibold text-base">
-        {marketCap !== null ? formatMarketCap(marketCap) : '—'}
-      </span>
+    <div className="mt-4">
+      <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5">
+        <span className="text-xs uppercase tracking-wider text-zinc-500">Market Cap</span>
+        <span className="text-zinc-700">·</span>
+        <span className="text-sm text-white font-semibold">
+          {marketCap !== null ? formatMarketCap(marketCap) : '—'}
+        </span>
+      </div>
     </div>
   );
 }
