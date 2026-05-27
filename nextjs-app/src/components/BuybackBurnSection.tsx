@@ -1,26 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { BurnsPayload } from '@/lib/burns';
 
 const TOTAL_SUPPLY = 1_000_000_000;
-
-type EventType = 'burn' | 'buyback';
-
-type BurnEvent = {
-  signature: string;
-  blockTime: number;
-  type: EventType;
-  amount: number;
-};
-
-type BurnsResponse = {
-  totalBurned: number;
-  totalBoughtBack: number;
-  burnCount: number;
-  buybackCount: number;
-  events: BurnEvent[];
-  updatedAt: number;
-};
 
 const Icons = {
   flame: (
@@ -101,42 +84,17 @@ function StatCard({
 
 const VISIBLE_STEP = 10;
 
-export default function BuybackBurnSection() {
-  const [data, setData] = useState<BurnsResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function BuybackBurnSection({ initialData }: { initialData: BurnsPayload }) {
   const [visibleCount, setVisibleCount] = useState(VISIBLE_STEP);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/burns')
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`API returned ${res.status}`);
-        return (await res.json()) as BurnsResponse;
-      })
-      .then((d) => {
-        if (!cancelled) setData(d);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        console.error('Failed to load burn data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load data');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const allEvents = data?.events ?? [];
+  const data = initialData;
+  const error = data.error ?? null;
   const visibleEvents = useMemo(
-    () => allEvents.slice(0, visibleCount),
-    [allEvents, visibleCount],
+    () => data.events.slice(0, visibleCount),
+    [data.events, visibleCount],
   );
-  const hasMore = allEvents.length > visibleCount;
-  const burnedPctSupply = data ? (data.totalBurned / TOTAL_SUPPLY) * 100 : 0;
+  const hasMore = data.events.length > visibleCount;
+  const burnedPctSupply = (data.totalBurned / TOTAL_SUPPLY) * 100;
 
   return (
     <section className="py-20 px-4">
@@ -155,20 +113,20 @@ export default function BuybackBurnSection() {
           <StatCard
             icon={Icons.flame}
             label="Total Burned"
-            value={loading || !data ? '—' : `${formatTokenAmount(data.totalBurned)} SAID`}
-            sub={loading || !data ? undefined : `${burnedPctSupply.toFixed(4)}% of supply`}
+            value={error ? '—' : `${formatTokenAmount(data.totalBurned)} SAID`}
+            sub={error ? undefined : `${burnedPctSupply.toFixed(4)}% of supply`}
           />
           <StatCard
             icon={Icons.cart}
             label="Total Bought Back"
-            value={loading || !data ? '—' : `${formatTokenAmount(data.totalBoughtBack)} SAID`}
-            sub={loading || !data ? undefined : `${data.buybackCount} buyback ${data.buybackCount === 1 ? 'tx' : 'txs'}`}
+            value={error ? '—' : `${formatTokenAmount(data.totalBoughtBack)} SAID`}
+            sub={error ? undefined : `${data.buybackCount} buyback ${data.buybackCount === 1 ? 'tx' : 'txs'}`}
           />
           <StatCard
             icon={Icons.chart}
             label="Burns Executed"
-            value={loading || !data ? '—' : `${data.burnCount}`}
-            sub={loading || !data ? undefined : 'Weekly cadence'}
+            value={error ? '—' : `${data.burnCount}`}
+            sub={error ? undefined : 'Weekly cadence'}
           />
         </div>
 
@@ -206,9 +164,7 @@ export default function BuybackBurnSection() {
               <div className="col-span-3 text-right">Tx</div>
             </div>
 
-            {loading ? (
-              <div className="px-6 py-10 text-center text-zinc-500 text-sm">Loading…</div>
-            ) : error ? (
+            {error ? (
               <div className="px-6 py-10 text-center text-zinc-500 text-sm">
                 Couldn&apos;t load on-chain data. Try again later.
               </div>
