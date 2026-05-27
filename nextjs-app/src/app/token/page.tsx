@@ -1,10 +1,12 @@
-'use client';
-
-import { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
 import BuybackBurnSection from '@/components/BuybackBurnSection';
+import CopyButton from '@/components/CopyButton';
+import MarketCap from '@/components/MarketCap';
+import { fetchBurnsData } from '@/lib/burns';
+
+export const dynamic = 'force-dynamic';
 
 const Icons = {
   token: (
@@ -42,17 +44,6 @@ const Icons = {
       <circle cx="18" cy="12" r="2"/>
     </svg>
   ),
-  copy: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-    </svg>
-  ),
-  check: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  ),
   rocket: (
     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
@@ -79,61 +70,10 @@ const Icons = {
   ),
 };
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
+const TOKEN_ADDRESS = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <button
-      onClick={handleCopy}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
-    >
-      {copied ? Icons.check : Icons.copy}
-      {copied ? 'Copied' : 'Copy'}
-    </button>
-  );
-}
-
-function formatMarketCap(n: number): string {
-  if (n >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(2)}B`;
-  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`;
-  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}K`;
-  return `$${n.toFixed(0)}`;
-}
-
-export default function TokenPage() {
-  const TOKEN_ADDRESS = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
-  const [marketCap, setMarketCap] = useState<number | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = () => {
-      fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_ADDRESS}`)
-        .then((r) => r.json())
-        .then((d: { pairs?: { marketCap?: number; liquidity?: { usd?: number } }[] }) => {
-          if (cancelled) return;
-          const pairs = d.pairs ?? [];
-          const top = pairs.reduce<typeof pairs[number] | null>((best, p) => {
-            const liq = p.liquidity?.usd ?? 0;
-            const bestLiq = best?.liquidity?.usd ?? -1;
-            return liq > bestLiq ? p : best;
-          }, null);
-          if (top && typeof top.marketCap === 'number') setMarketCap(top.marketCap);
-        })
-        .catch(() => {});
-    };
-    load();
-    const id = setInterval(load, 60_000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, []);
+export default async function TokenPage() {
+  const burnsData = await fetchBurnsData();
 
   return (
     <div className="min-h-screen flex flex-col bg-black relative">
@@ -157,17 +97,11 @@ export default function TokenPage() {
                 <CopyButton text={TOKEN_ADDRESS} />
               </div>
             </div>
-            <div className="mt-4 text-sm text-zinc-500">
-              <span className="uppercase tracking-wider">Market Cap</span>
-              <span className="mx-2 text-zinc-700">·</span>
-              <span className="text-white font-semibold text-base">
-                {marketCap !== null ? formatMarketCap(marketCap) : '—'}
-              </span>
-            </div>
+            <MarketCap tokenAddress={TOKEN_ADDRESS} />
           </section>
 
           {/* Buybacks & Burns */}
-          <BuybackBurnSection />
+          <BuybackBurnSection initialData={burnsData} />
 
           {/* Treasury Mechanics */}
           <section className="py-20 px-4">
