@@ -32,6 +32,13 @@ const Icons = {
       <path d="M3 10h18" />
     </svg>
   ),
+  wallet: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5" />
+      <path d="M3 5v14" />
+      <circle cx="17" cy="13" r="1.25" fill="currentColor" />
+    </svg>
+  ),
   external: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 3h6v6" />
@@ -67,22 +74,38 @@ function StatCard({
   label,
   value,
   sub,
+  href,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   sub?: string;
+  href?: string;
 }) {
-  return (
-    <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6">
+  const inner = (
+    <>
       <div className="flex items-center gap-2 text-zinc-400 mb-3">
         <span className="text-white">{icon}</span>
         <span className="text-sm uppercase tracking-wider">{label}</span>
       </div>
       <div className="text-3xl md:text-4xl font-bold text-white">{value}</div>
       {sub ? <div className="text-sm text-zinc-500 mt-1">{sub}</div> : null}
-    </div>
+    </>
   );
+  const baseClass = 'bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6';
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${baseClass} block hover:bg-white/10 transition-colors`}
+      >
+        {inner}
+      </a>
+    );
+  }
+  return <div className={baseClass}>{inner}</div>;
 }
 
 const VISIBLE_STEP = 10;
@@ -112,7 +135,7 @@ export default function BuybackBurnSection({ initialData }: { initialData: Burns
         </p>
 
         {/* Stats */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard
             icon={Icons.flame}
             label="Total Burned"
@@ -130,6 +153,17 @@ export default function BuybackBurnSection({ initialData }: { initialData: Burns
             label="Burns Executed"
             value={error ? '—' : `${data.burnCount}`}
             sub={error ? undefined : 'Weekly cadence'}
+          />
+          <StatCard
+            icon={Icons.wallet}
+            label="Treasury"
+            value={
+              data.treasuryBalanceSol !== null
+                ? `${data.treasuryBalanceSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`
+                : '—'
+            }
+            sub="Platform revenue · view on Solscan"
+            href="https://solscan.io/account/2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH"
           />
         </div>
 
