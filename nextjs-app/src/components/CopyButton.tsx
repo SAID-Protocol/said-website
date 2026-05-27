@@ -27,10 +27,11 @@ export default function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-400 hover:text-white transition-colors"
+      aria-label={copied ? 'Copied' : 'Copy'}
+      title={copied ? 'Copied' : 'Copy'}
+      className="p-1.5 text-zinc-400 hover:text-white transition-colors"
     >
       {copied ? CheckIcon : CopyIcon}
-      {copied ? 'Copied' : 'Copy'}
     </button>
   );
 }
