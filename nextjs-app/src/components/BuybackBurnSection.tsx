@@ -48,11 +48,14 @@ function formatTokenAmount(n: number): string {
 }
 
 function formatDate(blockTime: number): string {
-  return new Date(blockTime * 1000).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  const d = new Date(blockTime * 1000);
+  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
   });
+  return `${date}, ${time}`;
 }
 
 function shortSig(sig: string): string {
