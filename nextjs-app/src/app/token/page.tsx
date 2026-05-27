@@ -157,10 +157,12 @@ export default function TokenPage() {
                 <CopyButton text={TOKEN_ADDRESS} />
               </div>
             </div>
-            <div className="mt-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 inline-block text-left">
-              <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Market Cap</div>
-              <div className="text-3xl md:text-4xl font-bold text-white">
-                {marketCap !== null ? formatMarketCap(marketCap) : '—'}
+            <div className="mt-4 flex justify-center">
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 text-left">
+                <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Market Cap</div>
+                <div className="text-3xl md:text-4xl font-bold text-white">
+                  {marketCap !== null ? formatMarketCap(marketCap) : '—'}
+                </div>
               </div>
             </div>
           </section>
