@@ -156,13 +156,17 @@ export default function BuybackBurnSection({ initialData }: { initialData: Burns
           />
           <StatCard
             icon={Icons.wallet}
-            label="Treasury"
+            label="Platform Revenue"
             value={
-              data.treasuryBalanceSol !== null
-                ? `${data.treasuryBalanceSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`
+              data.treasuryRevenueSol !== null
+                ? `${data.treasuryRevenueSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`
                 : '—'
             }
-            sub="View on Solscan"
+            sub={
+              data.treasuryBalanceSol !== null
+                ? `${data.treasuryBalanceSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL in treasury · View on Solscan`
+                : 'View on Solscan'
+            }
             href="https://solscan.io/account/2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH"
           />
         </div>
