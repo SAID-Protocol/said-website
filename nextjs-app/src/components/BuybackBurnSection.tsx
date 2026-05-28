@@ -164,7 +164,7 @@ export default function BuybackBurnSection({ initialData }: { initialData: Burns
             }
             sub={
               data.treasuryBalanceSol !== null
-                ? `${data.treasuryBalanceSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL in treasury · View on Solscan`
+                ? `${data.treasuryBalanceSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL pending withdrawal · View on Solscan`
                 : 'View on Solscan'
             }
             href="https://solscan.io/account/2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH"
