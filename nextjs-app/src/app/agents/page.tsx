@@ -125,12 +125,33 @@ function AgentsContent() {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }, [searchQuery, sortBy, router, pathname]);
 
-  const fetchAgents = async (fetchOffset: number, reset: boolean = false) => {
+  // Re-fetch from offset 0 when the sort changes — API does the sort
+  // server-side for reputation/newest, so we can't just resort what's loaded.
+  const initialSortRef = useRef(true);
+  useEffect(() => {
+    if (initialSortRef.current) {
+      initialSortRef.current = false;
+      return;
+    }
+    fetchAgents(0, true, sortBy);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy]);
+
+  const fetchAgents = async (fetchOffset: number, reset: boolean = false, sortOverride?: typeof sortBy) => {
     try {
       if (reset) setLoading(true);
       else setLoadingMore(true);
-      
-      const res = await fetch(`/api/agents?limit=${PAGE_SIZE}&offset=${fetchOffset}`);
+
+      const effectiveSort = sortOverride ?? sortBy;
+      // API supports: newest | name | trust. 'active' has no server-side
+      // equivalent — fall back to default (reputation) and sort client-side
+      // over loaded results.
+      const params = new URLSearchParams();
+      params.set('limit', String(PAGE_SIZE));
+      params.set('offset', String(fetchOffset));
+      if (effectiveSort === 'newest') params.set('sort', 'newest');
+
+      const res = await fetch(`/api/agents?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         const newAgents = data.agents || [];
