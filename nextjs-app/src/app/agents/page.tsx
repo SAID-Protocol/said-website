@@ -178,9 +178,6 @@ function AgentsContent() {
     return 0;
   });
 
-  const verifiedAgents = sortedAgents.filter(a => a.isVerified);
-  const unverifiedAgents = sortedAgents.filter(a => !a.isVerified);
-
   return (
     <div className="min-h-screen flex flex-col relative">
       <AsciiBackground agentThemed />
@@ -260,30 +257,11 @@ function AgentsContent() {
               </div>
             </div>
 
-            {/* Verified Agents */}
-            {verifiedAgents.length > 0 && (
-              <section className="mb-12">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <path d="m9 11 3 3L22 4"/>
-                  </svg>
-                  Verified Agents
-                </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {verifiedAgents.map(agent => (
-                    <AgentCard key={agent.wallet} agent={agent} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* All Agents */}
-            {unverifiedAgents.length > 0 && (
+            {/* Agents */}
+            {sortedAgents.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold mb-4">All Agents</h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {unverifiedAgents.map(agent => (
+                  {sortedAgents.map(agent => (
                     <AgentCard key={agent.wallet} agent={agent} />
                   ))}
                 </div>

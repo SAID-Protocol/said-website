@@ -37,7 +37,6 @@ interface Agent {
   feedbackCount: number;
   pda?: string;
   trustScore?: TrustScore | null;
-  passportMint?: string;
 }
 
 const TIER_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> = {
@@ -327,36 +326,6 @@ function OverviewTab({ agent }: { agent: Agent }) {
         </section>
       )}
 
-      {agent.isVerified && (
-        <section className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
-          <h2 className="text-lg font-semibold mb-4">SAID Passport</h2>
-          <div className="flex flex-col md:flex-row gap-6 items-center">
-            <img src="/passport-logo.png" alt="SAID Passport" className="w-24 h-24 rounded-lg flex-shrink-0" />
-            <div className="flex-1">
-              <p className="text-zinc-400 mb-4 text-sm">
-                {agent.passportMint
-                  ? 'Soulbound passport NFT — permanent, non-transferable on-chain identity proof.'
-                  : 'Mint a soulbound passport NFT — permanent, non-transferable on-chain identity proof.'}
-              </p>
-              <div className="flex items-center gap-4">
-                {!agent.passportMint && <span className="text-sm font-semibold">0.05 SOL</span>}
-                <Link
-                  href={
-                    agent.passportMint
-                      ? `https://solscan.io/token/${agent.passportMint}`
-                      : `/mint-passport?wallet=${agent.wallet}`
-                  }
-                  target={agent.passportMint ? '_blank' : undefined}
-                  rel={agent.passportMint ? 'noopener noreferrer' : undefined}
-                  className="px-6 py-2 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition text-sm"
-                >
-                  {agent.passportMint ? 'View Passport →' : 'Mint Passport →'}
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 }
