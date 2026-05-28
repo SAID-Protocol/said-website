@@ -23,10 +23,6 @@ export default function CreateAgentPage() {
   const [website, setWebsite] = useState('');
   const [wallet, setWallet] = useState('');
   const [skills, setSkills] = useState('');
-  const [generatedWallet, setGeneratedWallet] = useState<{ publicKey: string; secretKey: string } | null>(null);
-  const [showPrivateKey, setShowPrivateKey] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [walletDownloaded, setWalletDownloaded] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState(false);
 
@@ -45,25 +41,8 @@ export default function CreateAgentPage() {
     }
   };
 
-  const downloadWallet = () => {
-    if (!generatedWallet) return;
-    
-    // Create wallet.json in the format the CLI expects
-    const walletJson = JSON.stringify([...Buffer.from(generatedWallet.secretKey, 'base64')], null, 2);
-    const blob = new Blob([walletJson], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'wallet.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    setWalletDownloaded(true);
-  };
-
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,7 +56,7 @@ export default function CreateAgentPage() {
     setLoading(true);
     
     try {
-      let agentWallet = wallet || generatedWallet?.publicKey;
+      let agentWallet = wallet;
       let platformAgentId: string | null = null;
 
       // If generating a new custodial wallet, create via Platform API first
@@ -165,8 +144,6 @@ export default function CreateAgentPage() {
     if (step === 'register' || step === 'create') setStep('choose');
   };
 
-  const finalWallet = wallet || generatedWallet?.publicKey || '';
-
   return (
     <div className="min-h-screen flex flex-col bg-black relative">
       <AsciiBackground />
@@ -227,7 +204,7 @@ export default function CreateAgentPage() {
             
             <div className="mt-8 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
               <p className="text-zinc-400 text-sm">
-                <strong className="text-zinc-300">What happens next?</strong> After pre-registering here, you'll use the CLI to go on-chain and optionally get verified.
+                <strong className="text-zinc-300">What happens next?</strong> We'll create a custodial wallet for your agent, register it on-chain, and give you an API key. No CLI needed.
               </p>
             </div>
           </>
@@ -320,7 +297,7 @@ export default function CreateAgentPage() {
                 disabled={loading || !name || !wallet}
                 className="w-full py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Registering...' : authenticated ? 'Pre-Register Agent' : 'Log In to Continue'}
+                {loading ? 'Registering...' : authenticated ? 'Register Agent' : 'Log In to Continue'}
               </button>
             </form>
           </>
@@ -413,7 +390,7 @@ export default function CreateAgentPage() {
           </>
         )}
         
-        {/* Step 3: Success + CLI Instructions */}
+        {/* Step 3: Success */}
         {step === 'success' && (
           <div className="py-4">
             <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-6">
@@ -422,74 +399,10 @@ export default function CreateAgentPage() {
               </svg>
             </div>
             
-            <h1 className="text-3xl font-bold mb-2 text-center">Agent Pre-Registered!</h1>
-            <p className="text-zinc-400 mb-8 text-center">Your agent is pending. Complete the steps below to go on-chain.</p>
+            <h1 className="text-3xl font-bold mb-2 text-center">Agent Created & Verified!</h1>
+            <p className="text-zinc-400 mb-8 text-center">Your agent is live on the SAID Protocol. Copy the API key below to connect it to your app.</p>
             
-            {/* CLI Instructions */}
-            <div className="p-5 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl mb-6">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="4 17 10 11 4 5"/>
-                  <line x1="12" y1="19" x2="20" y2="19"/>
-                </svg>
-                Next: Register On-Chain via CLI
-              </h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-zinc-400 text-sm">1. Fund your wallet (~0.01 SOL)</span>
-                    <button 
-                      onClick={() => copyToClipboard(finalWallet)}
-                      className="text-xs text-zinc-500 hover:text-white transition"
-                    >
-                      Copy address
-                    </button>
-                  </div>
-                  <code className="block p-3 bg-zinc-950 rounded text-sm font-mono text-zinc-300 overflow-x-auto">
-                    {finalWallet}
-                  </code>
-                </div>
-                
-                <div>
-                  <span className="text-zinc-400 text-sm mb-2 block">2. Register on Solana</span>
-                  <div className="relative">
-                    <code className="block p-3 bg-zinc-950 rounded text-sm font-mono text-green-400 overflow-x-auto">
-                      npx said register -k wallet.json
-                    </code>
-                    <button 
-                      onClick={() => copyToClipboard('npx said register -k wallet.json')}
-                      className="absolute right-2 top-2 p-1.5 text-zinc-500 hover:text-white transition"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                
-                <div>
-                  <span className="text-zinc-400 text-sm mb-2 block">3. Get verified (optional, 0.01 SOL)</span>
-                  <div className="relative">
-                    <code className="block p-3 bg-zinc-950 rounded text-sm font-mono text-green-400 overflow-x-auto">
-                      npx said verify -k wallet.json
-                    </code>
-                    <button 
-                      onClick={() => copyToClipboard('npx said verify -k wallet.json')}
-                      className="absolute right-2 top-2 p-1.5 text-zinc-500 hover:text-white transition"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* API Key for SeekerClaw integration */}
+            {/* API Key */}
             {apiKey && (
               <div className="p-5 bg-zinc-800/50 backdrop-blur-md border border-zinc-700 rounded-xl mb-6">
                 <h3 className="font-semibold mb-2 flex items-center gap-2 text-zinc-300">
@@ -498,7 +411,7 @@ export default function CreateAgentPage() {
                   </svg>
                   Your API Key
                 </h3>
-                <p className="text-zinc-400 text-sm mb-3">Copy this key into the SeekerClaw app to connect your agent.</p>
+                <p className="text-zinc-400 text-sm mb-3">Use this key to let your agent sign transactions through SAID rails. Your agent never needs a private key — just this API key.</p>
                 <div className="flex gap-2">
                   <code className="flex-1 p-3 bg-zinc-950 rounded text-sm font-mono text-zinc-300 overflow-x-auto">
                     {apiKey}
@@ -512,6 +425,13 @@ export default function CreateAgentPage() {
                 </div>
               </div>
             )}
+
+            {/* Security note */}
+            <div className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg mb-6">
+              <p className="text-zinc-400 text-sm">
+                <strong className="text-zinc-300">🔒 Security:</strong> Your agent's wallet is managed by SAID. The API key can be rotated anytime from My Agents. Your private keys never leave our infrastructure.
+              </p>
+            </div>
 
             <div className="flex gap-4">
               <Link
