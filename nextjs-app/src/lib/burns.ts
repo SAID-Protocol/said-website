@@ -191,7 +191,7 @@ async function fetchTreasuryWithdrawnLamports(apiKey: string): Promise<number | 
   let withdrawn = 0;
   let before: string | undefined;
   try {
-    for (let page = 0; page < 20; page++) {
+    for (let page = 0; page < 60; page++) {
       const url = new URL(`https://api-mainnet.helius-rpc.com/v0/addresses/${TREASURY_WALLET}/transactions`);
       url.searchParams.set('api-key', apiKey);
       url.searchParams.set('limit', String(PAGE_LIMIT));
