@@ -1,26 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { BurnsPayload } from '@/lib/burns';
 
 const TOTAL_SUPPLY = 1_000_000_000;
-
-type EventType = 'burn' | 'buyback';
-
-type BurnEvent = {
-  signature: string;
-  blockTime: number;
-  type: EventType;
-  amount: number;
-};
-
-type BurnsResponse = {
-  totalBurned: number;
-  totalBoughtBack: number;
-  burnCount: number;
-  buybackCount: number;
-  events: BurnEvent[];
-  updatedAt: number;
-};
 
 const Icons = {
   flame: (
@@ -49,6 +32,13 @@ const Icons = {
       <path d="M3 10h18" />
     </svg>
   ),
+  wallet: (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0 0 4h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5" />
+      <path d="M3 5v14" />
+      <circle cx="17" cy="13" r="1.25" fill="currentColor" />
+    </svg>
+  ),
   external: (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M15 3h6v6" />
@@ -65,11 +55,14 @@ function formatTokenAmount(n: number): string {
 }
 
 function formatDate(blockTime: number): string {
-  return new Date(blockTime * 1000).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  const d = new Date(blockTime * 1000);
+  const date = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  const time = d.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
   });
+  return `${date}, ${time}`;
 }
 
 function shortSig(sig: string): string {
@@ -81,62 +74,53 @@ function StatCard({
   label,
   value,
   sub,
+  href,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   sub?: string;
+  href?: string;
 }) {
-  return (
-    <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6">
+  const inner = (
+    <>
       <div className="flex items-center gap-2 text-zinc-400 mb-3">
         <span className="text-white">{icon}</span>
-        <span className="text-sm uppercase tracking-wider">{label}</span>
+        <span className="text-xs uppercase tracking-wider whitespace-nowrap">{label}</span>
       </div>
-      <div className="text-3xl md:text-4xl font-bold text-white">{value}</div>
-      {sub ? <div className="text-sm text-zinc-500 mt-1">{sub}</div> : null}
-    </div>
+      <div className="text-2xl md:text-3xl font-bold text-white whitespace-nowrap">{value}</div>
+      {sub ? <div className="text-xs text-zinc-500 mt-1">{sub}</div> : null}
+    </>
   );
+  const baseClass = 'bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-6';
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`${baseClass} block hover:bg-white/10 transition-colors`}
+      >
+        {inner}
+      </a>
+    );
+  }
+  return <div className={baseClass}>{inner}</div>;
 }
 
 const VISIBLE_STEP = 10;
 
-export default function BuybackBurnSection() {
-  const [data, setData] = useState<BurnsResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function BuybackBurnSection({ initialData }: { initialData: BurnsPayload }) {
   const [visibleCount, setVisibleCount] = useState(VISIBLE_STEP);
 
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/api/burns')
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`API returned ${res.status}`);
-        return (await res.json()) as BurnsResponse;
-      })
-      .then((d) => {
-        if (!cancelled) setData(d);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        console.error('Failed to load burn data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load data');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const allEvents = data?.events ?? [];
+  const data = initialData;
+  const error = data.error ?? null;
   const visibleEvents = useMemo(
-    () => allEvents.slice(0, visibleCount),
-    [allEvents, visibleCount],
+    () => data.events.slice(0, visibleCount),
+    [data.events, visibleCount],
   );
-  const hasMore = allEvents.length > visibleCount;
-  const burnedPctSupply = data ? (data.totalBurned / TOTAL_SUPPLY) * 100 : 0;
+  const hasMore = data.events.length > visibleCount;
+  const burnedPctSupply = (data.totalBurned / TOTAL_SUPPLY) * 100;
 
   return (
     <section className="py-20 px-4">
@@ -151,24 +135,39 @@ export default function BuybackBurnSection() {
         </p>
 
         {/* Stats */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <StatCard
             icon={Icons.flame}
             label="Total Burned"
-            value={loading || !data ? '—' : `${formatTokenAmount(data.totalBurned)} SAID`}
-            sub={loading || !data ? undefined : `${burnedPctSupply.toFixed(4)}% of supply`}
+            value={error ? '—' : `${formatTokenAmount(data.totalBurned)} SAID`}
+            sub={error ? undefined : `${burnedPctSupply.toFixed(4)}% of supply`}
           />
           <StatCard
             icon={Icons.cart}
-            label="Total Bought Back"
-            value={loading || !data ? '—' : `${formatTokenAmount(data.totalBoughtBack)} SAID`}
-            sub={loading || !data ? undefined : `${data.buybackCount} buyback ${data.buybackCount === 1 ? 'tx' : 'txs'}`}
+            label="Bought Back"
+            value={error ? '—' : `${formatTokenAmount(data.totalBoughtBack)} SAID`}
+            sub={error ? undefined : `${data.buybackCount} buyback ${data.buybackCount === 1 ? 'tx' : 'txs'}`}
           />
           <StatCard
             icon={Icons.chart}
             label="Burns Executed"
-            value={loading || !data ? '—' : `${data.burnCount}`}
-            sub={loading || !data ? undefined : 'Weekly cadence'}
+            value={error ? '—' : `${data.burnCount}`}
+            sub={error ? undefined : 'Weekly cadence'}
+          />
+          <StatCard
+            icon={Icons.wallet}
+            label="Platform Revenue"
+            value={
+              data.treasuryRevenueSol !== null
+                ? `${data.treasuryRevenueSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL`
+                : '—'
+            }
+            sub={
+              data.treasuryBalanceSol !== null
+                ? `${data.treasuryBalanceSol.toLocaleString(undefined, { maximumFractionDigits: 2 })} SOL in treasury · View on Solscan`
+                : 'View on Solscan'
+            }
+            href="https://solscan.io/account/2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH"
           />
         </div>
 
@@ -188,7 +187,9 @@ export default function BuybackBurnSection() {
                 </div>
                 <div className="bg-white/5 border border-white/10 rounded-lg p-4">
                   <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Funded By</div>
-                  <div className="text-white font-semibold">Treasury creator rewards</div>
+                  <div className="text-white font-semibold text-sm">
+                    20% platform revenue + 10% creator rewards
+                  </div>
                 </div>
               </div>
             </div>
@@ -206,9 +207,7 @@ export default function BuybackBurnSection() {
               <div className="col-span-3 text-right">Tx</div>
             </div>
 
-            {loading ? (
-              <div className="px-6 py-10 text-center text-zinc-500 text-sm">Loading…</div>
-            ) : error ? (
+            {error ? (
               <div className="px-6 py-10 text-center text-zinc-500 text-sm">
                 Couldn&apos;t load on-chain data. Try again later.
               </div>
