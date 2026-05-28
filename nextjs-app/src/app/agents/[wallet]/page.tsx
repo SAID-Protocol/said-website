@@ -29,6 +29,7 @@ interface Agent {
   isVerified: boolean;
   registeredAt: string;
   lastActivity?: string;
+  lastActiveAt?: string;
   twitter?: string;
   website?: string;
   image?: string;
@@ -37,6 +38,35 @@ interface Agent {
   feedbackCount: number;
   pda?: string;
   trustScore?: TrustScore | null;
+  registrationSource?: string | null;
+  mcpEndpoint?: string | null;
+  a2aEndpoint?: string | null;
+  serviceTypes?: string[];
+  activityCount?: number;
+  metadataUri?: string | null;
+}
+
+interface LeaderboardEntry {
+  wallet: string;
+  rank: number;
+  reputationScore: number;
+}
+
+interface SourcePlatform {
+  key: string;
+  label: string;
+  icon: string;
+  href?: string;
+}
+
+function matchSource(agent: Agent): SourcePlatform | null {
+  const src = agent.registrationSource ?? '';
+  const desc = agent.description ?? '';
+  if (src === 'spawnr') return { key: 'spawnr', label: 'Spawnr', icon: '/platforms/spawnr.png', href: 'https://spawnr.io' };
+  if (src === 'clawpump' || desc.includes('clawpump.tech')) return { key: 'clawpump', label: 'Claw Pump', icon: '/clawpump-logo.png', href: 'https://clawpump.tech' };
+  if (src === 'said-hosting' || desc.includes('said-hosting') || desc.includes('host.saidprotocol')) return { key: 'said-hosting', label: 'SAID Hosted', icon: '/platforms/said-hosting.png', href: 'https://host.saidprotocol.com' };
+  if (src === 'atelier' || desc.includes('atelier')) return { key: 'atelier', label: 'Atelier', icon: '/platforms/atelier.jpg' };
+  return null;
 }
 
 const TIER_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> = {
@@ -56,7 +86,13 @@ function timeAgo(dateStr?: string): string {
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
-  return `${Math.floor(diff / 2592000)}mo ago`;
+  if (diff < 31536000) return `${Math.floor(diff / 2592000)}mo ago`;
+  return `${Math.floor(diff / 31536000)}y ago`;
+}
+
+function formatAbsolute(dateStr?: string): string {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleString();
 }
 
 function isActive(lastActivity?: string): boolean {
@@ -82,6 +118,7 @@ export default function AgentPage() {
   const wallet = params.wallet as string;
 
   const [agent, setAgent] = useState<Agent | null>(null);
+  const [rank, setRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<Tab>('overview');
@@ -102,6 +139,19 @@ export default function AgentPage() {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
+    // Look up rank on the all-time leaderboard. Only meaningful if the agent
+    // is high enough to be in the top N.
+    fetch('/api/leaderboard?limit=200')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        const lb: LeaderboardEntry[] = data.leaderboard ?? [];
+        const entry = lb.find((e) => e.wallet === wallet);
+        if (entry) setRank(entry.rank);
+      })
+      .catch(() => {});
+
     return () => {
       cancelled = true;
     };
@@ -145,7 +195,7 @@ export default function AgentPage() {
     <Shell>
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
         <HeaderSection agent={agent} />
-        <StatusBadgesRow agent={agent} />
+        <StatusBadgesRow agent={agent} rank={rank} />
 
         <div className="grid lg:grid-cols-3 gap-6 mt-8">
           {/* Main column */}
@@ -176,9 +226,9 @@ function HeaderSection({ agent }: { agent: Agent }) {
   return (
     <div className="flex flex-col sm:flex-row items-start gap-6 mb-6">
       <img
-        src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
+        src={agent.image || `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
         alt={agent.name || 'Agent'}
-        className="w-20 h-20 rounded-2xl flex-shrink-0"
+        className="w-20 h-20 rounded-2xl flex-shrink-0 object-cover bg-zinc-900"
       />
       <div className="flex-1 min-w-0">
         <div className="flex flex-wrap items-center gap-3 mb-2">
@@ -222,14 +272,33 @@ function HeaderSection({ agent }: { agent: Agent }) {
               Website
             </a>
           )}
+          <SourceBadge agent={agent} />
         </div>
       </div>
     </div>
   );
 }
 
-function StatusBadgesRow({ agent }: { agent: Agent }) {
-  const active = isActive(agent.lastActivity);
+function SourceBadge({ agent }: { agent: Agent }) {
+  const src = matchSource(agent);
+  if (!src) return null;
+  const inner = (
+    <>
+      <img src={src.icon} alt={src.label} className="w-3.5 h-3.5 rounded-full" />
+      <span className="text-zinc-300">Launched on {src.label}</span>
+    </>
+  );
+  const className = 'px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm hover:border-zinc-600 transition flex items-center gap-2';
+  return src.href ? (
+    <a href={src.href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>
+  ) : (
+    <span className={className}>{inner}</span>
+  );
+}
+
+function StatusBadgesRow({ agent, rank }: { agent: Agent; rank: number | null }) {
+  const lastActive = agent.lastActivity ?? agent.lastActiveAt;
+  const active = isActive(lastActive);
   const tier = agent.trustScore?.tier ?? 'unverified';
   const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unverified;
   const sourceCount = agent.trustScore?.sources?.length ?? 0;
@@ -244,6 +313,14 @@ function StatusBadgesRow({ agent }: { agent: Agent }) {
         <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-green-400' : 'bg-zinc-500'}`} />
         {active ? 'Active' : 'Inactive'}
       </span>
+      {rank !== null && (
+        <Link
+          href="/leaderboard"
+          className="px-2.5 py-1 rounded-full border bg-amber-500/10 border-amber-500/30 text-amber-300 font-medium uppercase tracking-wide hover:bg-amber-500/20 transition"
+        >
+          Rank #{rank}
+        </Link>
+      )}
       {agent.trustScore && agent.trustScore.score > 0 && (
         <span className={`px-2.5 py-1 rounded-full border ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} font-medium uppercase tracking-wide`}>
           {tierStyles.label} · {agent.trustScore.score}
@@ -254,9 +331,9 @@ function StatusBadgesRow({ agent }: { agent: Agent }) {
           {sourceCount} verified {sourceCount === 1 ? 'source' : 'sources'}
         </span>
       )}
-      {agent.lastActivity && (
+      {lastActive && (
         <span className="px-2.5 py-1 rounded-full border bg-zinc-800/50 border-zinc-700/50 text-zinc-400">
-          Last active {timeAgo(agent.lastActivity)}
+          Last active {timeAgo(lastActive)}
         </span>
       )}
     </div>
@@ -297,20 +374,15 @@ function TabBar({
 }
 
 function OverviewTab({ agent }: { agent: Agent }) {
+  const hasServices = Boolean(agent.mcpEndpoint || agent.a2aEndpoint || (agent.serviceTypes?.length ?? 0) > 0);
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatTile label="Reputation" value={agent.reputationScore?.toFixed(1) ?? '0'} />
         <StatTile label="Feedback" value={String(agent.feedbackCount ?? 0)} />
-        <StatTile label="Skills" value={String(agent.skills?.length ?? 0)} />
-        <StatTile
-          label="Registered"
-          value={
-            agent.registeredAt
-              ? new Date(agent.registeredAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-              : '—'
-          }
-        />
+        <StatTile label="Activity" value={String(agent.activityCount ?? 0)} />
+        <StatTile label="Registered" value={timeAgo(agent.registeredAt)} />
       </div>
 
       {agent.skills && agent.skills.length > 0 && (
@@ -326,6 +398,28 @@ function OverviewTab({ agent }: { agent: Agent }) {
         </section>
       )}
 
+      {hasServices && (
+        <section>
+          <h2 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">Services</h2>
+          <div className="space-y-2">
+            {agent.mcpEndpoint && (
+              <EndpointRow protocol="MCP" url={agent.mcpEndpoint} />
+            )}
+            {agent.a2aEndpoint && (
+              <EndpointRow protocol="A2A" url={agent.a2aEndpoint} />
+            )}
+            {agent.serviceTypes && agent.serviceTypes.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {agent.serviceTypes.map((t) => (
+                  <span key={t} className="px-2.5 py-0.5 text-xs bg-white/5 border border-white/10 rounded-full text-zinc-300">
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
@@ -354,13 +448,35 @@ function FeedbackTab({ agent }: { agent: Agent }) {
 }
 
 function IdentityTab({ agent }: { agent: Agent }) {
+  const lastActive = agent.lastActivity ?? agent.lastActiveAt;
   return (
     <div className="space-y-4">
       <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl space-y-3">
         <Row label="Wallet" value={agent.wallet} mono />
         {agent.pda && <Row label="Identity PDA" value={agent.pda} mono />}
-        <Row label="Registered" value={agent.registeredAt ? new Date(agent.registeredAt).toLocaleString() : '—'} />
-        {agent.lastActivity && <Row label="Last Activity" value={new Date(agent.lastActivity).toLocaleString()} />}
+        <Row
+          label="Registered"
+          value={agent.registeredAt ? `${timeAgo(agent.registeredAt)} · ${formatAbsolute(agent.registeredAt)}` : '—'}
+        />
+        {lastActive && (
+          <Row
+            label="Last Activity"
+            value={`${timeAgo(lastActive)} · ${formatAbsolute(lastActive)}`}
+          />
+        )}
+        {agent.metadataUri && (
+          <div className="pt-2">
+            <span className="text-zinc-400 text-xs uppercase tracking-wider block mb-1">AgentCard</span>
+            <a
+              href={agent.metadataUri}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-blue-400 hover:underline font-mono break-all"
+            >
+              {agent.metadataUri}
+            </a>
+          </div>
+        )}
         <div className="flex flex-wrap gap-3 pt-2">
           <a
             href={`https://solscan.io/account/${agent.wallet}`}
@@ -377,7 +493,7 @@ function IdentityTab({ agent }: { agent: Agent }) {
               rel="noopener noreferrer"
               className="text-xs text-blue-400 hover:underline"
             >
-              View PDA on Solscan →
+              View registration on Solscan →
             </a>
           )}
         </div>
@@ -402,6 +518,24 @@ function StatTile({ label, value }: { label: string; value: string }) {
     <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl text-center">
       <div className="text-2xl font-bold">{value}</div>
       <div className="text-zinc-400 text-xs uppercase tracking-wider mt-1">{label}</div>
+    </div>
+  );
+}
+
+function EndpointRow({ protocol, url }: { protocol: string; url: string }) {
+  return (
+    <div className="flex items-center gap-3 p-3 bg-zinc-950/50 border border-zinc-800/60 rounded-lg">
+      <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white rounded">
+        {protocol}
+      </span>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-zinc-300 hover:text-white transition text-xs font-mono break-all min-w-0 flex-1"
+      >
+        {url}
+      </a>
     </div>
   );
 }
