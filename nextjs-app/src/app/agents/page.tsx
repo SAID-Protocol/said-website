@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense, useRef } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -46,61 +46,84 @@ const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> 
 const PAGE_SIZE = 50;
 
 function AgentsContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Hydrate state from URL once at mount; future URL changes won't re-init.
+  const initialSearch = searchParams.get('search') ?? '';
+  const initialSortRaw = searchParams.get('sort');
+  const initialSort: 'reputation' | 'newest' | 'active' =
+    initialSortRaw === 'newest' || initialSortRaw === 'active' ? initialSortRaw : 'reputation';
+
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>('reputation');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>(initialSort);
   const [totalAgents, setTotalAgents] = useState(0);
   const [verifiedCount, setVerifiedCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
+  const mountedRef = useRef(false);
 
-  useEffect(() => {
-    // Initialize search from URL params
-    const urlSearch = searchParams.get('search');
-    if (urlSearch) {
-      setSearchQuery(urlSearch);
-    }
-    // Fetch stats for accurate counts
+  const fetchStats = () => {
     fetch('https://api.saidprotocol.com/api/stats')
-      .then(r => r.json())
-      .then(data => {
+      .then((r) => r.json())
+      .then((data) => {
         if (data.totalAgents) setTotalAgents(data.totalAgents);
         if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
       })
       .catch(() => {});
-    // Fetch first batch of agents
+  };
+
+  // One-time init: fetch first batch, set up visibility-gated polling + SSE.
+  // Intentionally no deps — URL changes shouldn't tear this down.
+  useEffect(() => {
+    fetchStats();
     fetchAgents(0, true);
-    // Poll stats every 30s
+
     const interval = setInterval(() => {
-      fetch('https://api.saidprotocol.com/api/stats')
-        .then(r => r.json())
-        .then(data => {
-          if (data.totalAgents) setTotalAgents(data.totalAgents);
-          if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
-        })
-        .catch(() => {});
+      // Don't burn requests while the tab is in the background.
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchStats();
+      }
     }, 30000);
-    // SSE: real-time updates when agents register
+
     let es: EventSource | null = null;
     try {
       es = new EventSource('https://api.saidprotocol.com/api/events');
+      // Refresh the agent list when something new arrives. Stats will catch
+      // up on the next 30s tick — no need for a duplicate stats fetch here.
       es.onmessage = () => {
         fetchAgents(0, true);
-        fetch('https://api.saidprotocol.com/api/stats')
-          .then(r => r.json())
-          .then(data => {
-            if (data.totalAgents) setTotalAgents(data.totalAgents);
-            if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
-          })
-          .catch(() => {});
       };
-      es.onerror = () => { es?.close(); es = null; };
+      es.onerror = () => {
+        es?.close();
+        es = null;
+      };
     } catch {}
-    return () => { clearInterval(interval); es?.close(); };
-  }, [searchParams]);
+
+    return () => {
+      clearInterval(interval);
+      es?.close();
+    };
+  }, []);
+
+  // Keep the URL in sync with searchQuery + sortBy so refresh / share-link
+  // round-trips cleanly. Skip the very first run so we don't clobber a URL
+  // the user just landed on.
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    if (sortBy !== 'reputation') params.set('sort', sortBy);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [searchQuery, sortBy, router, pathname]);
 
   const fetchAgents = async (fetchOffset: number, reset: boolean = false) => {
     try {
@@ -268,8 +291,13 @@ function AgentsContent() {
             )}
 
             {/* Load More */}
-            {hasMore && !searchQuery && (
-              <div className="text-center mt-10">
+            {hasMore && (
+              <div className="text-center mt-10 space-y-2">
+                {searchQuery && (
+                  <p className="text-xs text-zinc-500">
+                    Searching {agents.length.toLocaleString()} loaded agents. Not finding it? Load more.
+                  </p>
+                )}
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
