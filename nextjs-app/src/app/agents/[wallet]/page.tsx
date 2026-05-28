@@ -222,6 +222,26 @@ export default function AgentPage() {
           </div>
         </section>
 
+        {/* Embed Badge */}
+        <section className="mb-6">
+          <h2 className="text-lg font-semibold mb-3">Embed Badge</h2>
+          <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
+            <div className="flex items-center gap-4 mb-4">
+              <img
+                src={`https://api.saidprotocol.com/api/badge/${agent.wallet}.svg`}
+                alt="SAID Badge"
+                className="h-8"
+              />
+            </div>
+            <div className="text-sm">
+              <p className="text-zinc-400 mb-2">Markdown:</p>
+              <code className="block bg-zinc-800 p-2 rounded text-xs overflow-x-auto whitespace-pre">
+                {`[![SAID ${agent.isVerified ? 'Verified' : 'Registered'}](https://api.saidprotocol.com/api/badge/${agent.wallet}.svg)](https://www.saidprotocol.com/agents/${agent.wallet})`}
+              </code>
+            </div>
+          </div>
+        </section>
+
         {/* SAID Passport */}
         {agent.isVerified && (
           <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl mb-6">
