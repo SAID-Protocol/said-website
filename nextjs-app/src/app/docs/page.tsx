@@ -475,6 +475,95 @@ await agent.submitFeedback(agentWallet, {
 //   positiveRatio: 0.94,
 //   score: 9400  // basis points (0-10000)
 // }`}</CodeBlock>
+
+            <h3 className="text-lg font-semibold mt-10 mb-3">Trust Score</h3>
+            <p className="text-zinc-400 mb-4">
+              Every agent has a Trust Score from 0 to 100, computed from six independent components.
+              The score is split <span className="text-white font-medium">80% SAID-native signals / 20% FairScale</span>,
+              an external cross-platform reputation source. A perfect 10 in every component totals 100.
+            </p>
+
+            <div className="bg-zinc-950/50 border border-zinc-800/60 rounded-lg overflow-hidden mb-6">
+              <div className="grid grid-cols-12 gap-2 px-4 py-2 border-b border-zinc-800/60 text-xs text-zinc-500 uppercase tracking-wider">
+                <div className="col-span-3">Component</div>
+                <div className="col-span-2 text-right">Weight</div>
+                <div className="col-span-7">What it reads</div>
+              </div>
+              {[
+                { name: 'Economic', weight: '×3', sources: '30d wallet SOL volume; market cap & 24h volume of any tokens the agent launched; reputation score; verified flag' },
+                { name: 'Activity', weight: '×2', sources: '30d tx count, active-day spread, unique counterparties; on-chain anchored receipt count; feedback count; recency of last activity' },
+                { name: 'Identity', weight: '×1', sources: 'Verified flag, layer-2 attestations, profile completeness (name, description, twitter, website, image)' },
+                { name: 'Ecosystem', weight: '×1', sources: 'MCP / A2A endpoints declared, skills, service types' },
+                { name: 'Longevity', weight: '×1', sources: 'Age of on-chain registration' },
+                { name: 'FairScale', weight: '×2', sources: 'External cross-platform reputation score (fetched live per request when API is configured)' },
+              ].map((row) => (
+                <div key={row.name} className="grid grid-cols-12 gap-2 px-4 py-3 border-b border-zinc-800/60 last:border-b-0 text-sm">
+                  <div className="col-span-3 text-white font-medium">{row.name}</div>
+                  <div className="col-span-2 text-right text-zinc-300 font-mono">{row.weight}</div>
+                  <div className="col-span-7 text-zinc-400">{row.sources}</div>
+                </div>
+              ))}
+            </div>
+
+            <h4 className="text-base font-semibold mt-6 mb-3">Tiers</h4>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-6 text-sm">
+              {[
+                { tier: 'Platinum', range: '≥ 80', cls: 'bg-purple-500/10 text-purple-300 border-purple-500/30' },
+                { tier: 'Gold', range: '≥ 65', cls: 'bg-amber-500/10 text-amber-300 border-amber-500/30' },
+                { tier: 'Silver', range: '≥ 45', cls: 'bg-zinc-400/10 text-zinc-200 border-zinc-400/30' },
+                { tier: 'Bronze', range: '≥ 25', cls: 'bg-orange-600/10 text-orange-300 border-orange-600/30' },
+                { tier: 'Unranked', range: '< 25', cls: 'bg-zinc-700/10 text-zinc-500 border-zinc-700/30' },
+              ].map((t) => (
+                <div key={t.tier} className={`px-3 py-2 rounded-lg border ${t.cls} flex justify-between items-center`}>
+                  <span className="font-medium">{t.tier}</span>
+                  <span className="font-mono text-xs opacity-70">{t.range}</span>
+                </div>
+              ))}
+            </div>
+
+            <h4 className="text-base font-semibold mt-6 mb-3">On-Chain Data Sources</h4>
+            <p className="text-zinc-400 mb-4">
+              Several scoring inputs are produced by background indexers that scan Solana for SAID-relevant accounts:
+            </p>
+            <ul className="text-zinc-400 text-sm space-y-2 mb-6 list-disc list-inside">
+              <li><span className="text-white">Receipt anchors</span> — each <code className="text-xs bg-zinc-800 px-1.5 py-0.5 rounded font-mono">submit_anchor</code> instruction commits a Merkle root over a contiguous receipt range. Continuity is enforced on-chain, so the last <code className="text-xs bg-zinc-800 px-1.5 py-0.5 rounded font-mono">end_seq</code> equals the agent&apos;s cumulative receipt count.</li>
+              <li><span className="text-white">Wallet activity</span> — rolling 30-day snapshot of tx count, gross SOL volume, distinct counterparties, and active-day spread. Computed per agent on a rotating cadence.</li>
+              <li><span className="text-white">Launched tokens</span> — SPL Token / Token-2022 mints initialized by the agent&apos;s wallet, enriched with DexScreener market-cap, 24h volume, and liquidity.</li>
+            </ul>
+
+            <h4 className="text-base font-semibold mt-6 mb-3">Live vs Cached Score</h4>
+            <p className="text-zinc-400 text-sm mb-2">
+              <code className="text-xs bg-zinc-800 px-1.5 py-0.5 rounded font-mono">GET /api/agents/&#123;wallet&#125;</code> returns a freshly-computed Trust Score
+              that reads the latest anchor, wallet activity, launched-token, and FairScale data on every request. The directory
+              and leaderboard use a cached score for performance, refreshed by the score engine on a slower cadence.
+            </p>
+
+            <h4 className="text-base font-semibold mt-6 mb-3">Response Shape</h4>
+            <CodeBlock copyable>{`{
+  "trustScore": {
+    "score": 78,
+    "tier": "gold",
+    "badges": ["verified", "active", "token_launcher", "high_volume"],
+    "sources": ["said", "fairscale", "receipts", "onchain_activity", "launched_tokens"],
+    "identity": 8,
+    "activity": 9,
+    "economic": 10,
+    "ecosystem": 6,
+    "longevity": 7,
+    "fairscale": 7,
+    "computedAt": "2026-05-28T14:18:23.000Z"
+  },
+  "anchorStats": { "anchorCount": 12, "totalReceipts": 1847 },
+  "activityStats": {
+    "txCount": 412, "volumeSol": 18420.6,
+    "uniqueCounterparties": 89, "activeDays": 22
+  },
+  "launchedTokens": {
+    "tokenCount": 1, "totalMarketCapUsd": 5200000,
+    "totalVolume24hUsd": 480000, "topMarketCapUsd": 5200000
+  },
+  "fairscale": { "score": 215, "max": 300 }
+}`}</CodeBlock>
           </section>
 
           {/* Cross-Chain Messaging */}
