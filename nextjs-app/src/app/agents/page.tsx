@@ -68,7 +68,7 @@ function AgentsContent() {
   const mountedRef = useRef(false);
 
   const fetchStats = () => {
-    fetch('https://api.saidprotocol.com/api/stats')
+    fetch('/api/stats')
       .then((r) => r.json())
       .then((data) => {
         if (data.totalAgents) setTotalAgents(data.totalAgents);
@@ -130,7 +130,7 @@ function AgentsContent() {
       if (reset) setLoading(true);
       else setLoadingMore(true);
       
-      const res = await fetch(`https://api.saidprotocol.com/api/agents?limit=${PAGE_SIZE}&offset=${fetchOffset}`);
+      const res = await fetch(`/api/agents?limit=${PAGE_SIZE}&offset=${fetchOffset}`);
       if (res.ok) {
         const data = await res.json();
         const newAgents = data.agents || [];

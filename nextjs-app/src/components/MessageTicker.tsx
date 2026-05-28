@@ -55,7 +55,7 @@ export default function MessageTicker() {
   useEffect(() => {
     async function fetchReal() {
       try {
-        const res = await fetch('https://api.saidprotocol.com/api/messages/recent');
+        const res = await fetch('/api/messages/recent');
         if (!res.ok) return;
         const data = await res.json();
         if (Array.isArray(data) && data.length > 0) {

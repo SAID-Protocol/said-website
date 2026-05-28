@@ -23,7 +23,7 @@ export default function Home() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/stats');
+      const res = await fetch('/api/stats');
       const data = await res.json();
       setAgentCount(data.totalAgents?.toString() || '-');
       setVerifiedCount(data.verifiedAgents?.toString() || '-');

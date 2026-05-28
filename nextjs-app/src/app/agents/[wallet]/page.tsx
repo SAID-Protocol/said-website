@@ -90,7 +90,7 @@ export default function AgentPage() {
   useEffect(() => {
     if (!wallet) return;
     let cancelled = false;
-    fetch(`https://api.saidprotocol.com/api/agents/${wallet}`)
+    fetch(`/api/agents/${wallet}`)
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error('Agent not found'))))
       .then((data) => {
         if (cancelled) return;
