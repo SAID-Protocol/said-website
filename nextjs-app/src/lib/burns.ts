@@ -191,7 +191,7 @@ async function fetchTreasuryWithdrawnLamports(apiKey: string): Promise<number | 
   let withdrawn = 0;
   let before: string | undefined;
   try {
-    for (let page = 0; page < 50; page++) {
+    for (let page = 0; page < 20; page++) {
       const url = new URL(`https://api-mainnet.helius-rpc.com/v0/addresses/${TREASURY_WALLET}/transactions`);
       url.searchParams.set('api-key', apiKey);
       url.searchParams.set('limit', String(PAGE_LIMIT));
@@ -272,10 +272,16 @@ export async function fetchBurnsData(): Promise<BurnsPayload> {
     .sort((a, b) => b.blockTime - a.blockTime)
     .slice(0, MAX_VISIBLE_EVENTS);
 
-  const treasuryRevenueSol =
-    treasuryBalanceSol !== null && treasuryWithdrawnLamports !== null
-      ? treasuryBalanceSol + treasuryWithdrawnLamports / LAMPORTS_PER_SOL
-      : null;
+  // If the withdrawal fetch failed transiently (Helius rate limit, etc.),
+  // fall back to the previously cached revenue figure rather than blanking
+  // it out. The on-chain reality only ever grows, so a slightly stale
+  // number is far better than a dash.
+  let treasuryRevenueSol: number | null = null;
+  if (treasuryBalanceSol !== null && treasuryWithdrawnLamports !== null) {
+    treasuryRevenueSol = treasuryBalanceSol + treasuryWithdrawnLamports / LAMPORTS_PER_SOL;
+  } else if (cached?.payload.treasuryRevenueSol != null) {
+    treasuryRevenueSol = cached.payload.treasuryRevenueSol;
+  }
 
   const payload: BurnsPayload = {
     totalBurned: burns.reduce((s, e) => s + e.amount, 0),
