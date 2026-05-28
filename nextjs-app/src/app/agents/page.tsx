@@ -125,31 +125,42 @@ function AgentsContent() {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }, [searchQuery, sortBy, router, pathname]);
 
-  // Re-fetch from offset 0 when the sort changes — API does the sort
-  // server-side for reputation/newest, so we can't just resort what's loaded.
+  // Re-fetch from offset 0 when sort or search changes — API does both
+  // server-side, so we can't just refilter/resort what's loaded. Debounce
+  // the search trigger so we don't fire a request on every keystroke.
   const initialSortRef = useRef(true);
   useEffect(() => {
     if (initialSortRef.current) {
       initialSortRef.current = false;
       return;
     }
-    fetchAgents(0, true, sortBy);
+    const t = setTimeout(() => {
+      fetchAgents(0, true, sortBy, searchQuery);
+    }, searchQuery ? 300 : 0);
+    return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy]);
+  }, [sortBy, searchQuery]);
 
-  const fetchAgents = async (fetchOffset: number, reset: boolean = false, sortOverride?: typeof sortBy) => {
+  const fetchAgents = async (
+    fetchOffset: number,
+    reset: boolean = false,
+    sortOverride?: typeof sortBy,
+    searchOverride?: string,
+  ) => {
     try {
       if (reset) setLoading(true);
       else setLoadingMore(true);
 
       const effectiveSort = sortOverride ?? sortBy;
-      // API supports: newest | name | trust. 'active' has no server-side
-      // equivalent — fall back to default (reputation) and sort client-side
-      // over loaded results.
+      const effectiveSearch = (searchOverride ?? searchQuery).trim();
+      // API supports: search, sort=newest|name|trust. 'active' sort has no
+      // server-side equivalent — falls back to default (reputation) and we
+      // sort client-side over loaded results.
       const params = new URLSearchParams();
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String(fetchOffset));
       if (effectiveSort === 'newest') params.set('sort', 'newest');
+      if (effectiveSearch) params.set('search', effectiveSearch);
 
       const res = await fetch(`/api/agents?${params.toString()}`);
       if (res.ok) {
@@ -292,11 +303,6 @@ function AgentsContent() {
             {/* Load More */}
             {hasMore && (
               <div className="text-center mt-10 space-y-2">
-                {searchQuery && (
-                  <p className="text-xs text-zinc-500">
-                    Searching {agents.length.toLocaleString()} loaded agents. Not finding it? Load more.
-                  </p>
-                )}
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
