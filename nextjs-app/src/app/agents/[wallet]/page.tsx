@@ -74,7 +74,7 @@ const TIER_COLORS: Record<string, { bg: string; text: string; border: string; la
   gold: { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/30', label: 'Gold' },
   silver: { bg: 'bg-zinc-400/10', text: 'text-zinc-200', border: 'border-zinc-400/30', label: 'Silver' },
   bronze: { bg: 'bg-orange-600/10', text: 'text-orange-300', border: 'border-orange-600/30', label: 'Bronze' },
-  unverified: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30', label: 'Unverified' },
+  unranked: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30', label: 'Unranked' },
 };
 
 type Tab = 'overview' | 'feedback' | 'identity';
@@ -299,8 +299,8 @@ function SourceBadge({ agent }: { agent: Agent }) {
 function StatusBadgesRow({ agent, rank }: { agent: Agent; rank: number | null }) {
   const lastActive = agent.lastActivity ?? agent.lastActiveAt;
   const active = isActive(lastActive);
-  const tier = agent.trustScore?.tier ?? 'unverified';
-  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unverified;
+  const tier = agent.trustScore?.tier ?? 'unranked';
+  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unranked;
   const sourceCount = agent.trustScore?.sources?.length ?? 0;
 
   return (
@@ -564,7 +564,7 @@ function TrustScoreCard({ score }: { score: TrustScore | null }) {
     );
   }
 
-  const tierStyles = TIER_COLORS[score.tier] ?? TIER_COLORS.unverified;
+  const tierStyles = TIER_COLORS[score.tier] ?? TIER_COLORS.unranked;
 
   return (
     <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">

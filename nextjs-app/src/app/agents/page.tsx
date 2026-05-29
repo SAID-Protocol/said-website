@@ -40,7 +40,7 @@ const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> 
   gold: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
   silver: { bg: 'bg-zinc-400/10', text: 'text-zinc-300', border: 'border-zinc-400/30' },
   bronze: { bg: 'bg-orange-600/10', text: 'text-orange-400', border: 'border-orange-600/30' },
-  unverified: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30' },
+  unranked: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30' },
 };
 
 const PAGE_SIZE = 50;
@@ -449,11 +449,11 @@ function AgentCard({ agent }: { agent: Agent }) {
           </div>
           <div className="flex items-center gap-3 text-[10px] text-zinc-500">
             {agent.trustScore && agent.trustScore.score > 0 ? (
-              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${TIER_COLORS[agent.trustScore.tier]?.bg || TIER_COLORS.unverified.bg} ${TIER_COLORS[agent.trustScore.tier]?.border || TIER_COLORS.unverified.border} border`} title={`Trust Score: ${agent.trustScore.score}/100 (${agent.trustScore.sources.join(' + ')})`}>
-                <span className={`font-bold text-[11px] ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unverified.text}`}>
+              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${TIER_COLORS[agent.trustScore.tier]?.bg || TIER_COLORS.unranked.bg} ${TIER_COLORS[agent.trustScore.tier]?.border || TIER_COLORS.unranked.border} border`} title={`Trust Score: ${agent.trustScore.score}/100 (${agent.trustScore.sources.join(' + ')})`}>
+                <span className={`font-bold text-[11px] ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unranked.text}`}>
                   {agent.trustScore.score}
                 </span>
-                <span className={`text-[9px] uppercase font-medium ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unverified.text}`}>
+                <span className={`text-[9px] uppercase font-medium ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unranked.text}`}>
                   {agent.trustScore.tier}
                 </span>
               </div>

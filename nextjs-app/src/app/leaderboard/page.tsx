@@ -34,7 +34,7 @@ const TIER_COLORS: Record<string, { bg: string; text: string; border: string; ri
   gold: { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/30', ring: 'ring-amber-500/40' },
   silver: { bg: 'bg-zinc-400/10', text: 'text-zinc-200', border: 'border-zinc-400/30', ring: 'ring-zinc-400/40' },
   bronze: { bg: 'bg-orange-600/10', text: 'text-orange-300', border: 'border-orange-600/30', ring: 'ring-orange-600/40' },
-  unverified: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30', ring: 'ring-zinc-700/30' },
+  unranked: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30', ring: 'ring-zinc-700/30' },
 };
 
 export default function LeaderboardPage() {
@@ -198,8 +198,8 @@ function sortLabel(sortKey: SortKey): string {
 }
 
 function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: SortKey }) {
-  const tier = agent.trustScore?.tier ?? 'unverified';
-  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unverified;
+  const tier = agent.trustScore?.tier ?? 'unranked';
+  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unranked;
   const rankBadge = rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd';
 
   return (
@@ -245,8 +245,8 @@ function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sort
 }
 
 function Row({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: SortKey }) {
-  const tier = agent.trustScore?.tier ?? 'unverified';
-  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unverified;
+  const tier = agent.trustScore?.tier ?? 'unranked';
+  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unranked;
 
   return (
     <Link
