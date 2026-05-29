@@ -54,7 +54,7 @@ export default function LeaderboardPage() {
     try {
       if (reset) setLoading(true);
       else setLoadingMore(true);
-      const res = await fetch(`/api/agents?limit=${PAGE_SIZE}&offset=${fetchOffset}`);
+      const res = await fetch(`/api/agents?limit=${PAGE_SIZE}&offset=${fetchOffset}&verified=true`);
       if (!res.ok) return;
       const data = await res.json();
       const list: Agent[] = data.agents || [];
