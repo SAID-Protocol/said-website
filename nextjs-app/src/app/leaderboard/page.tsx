@@ -198,12 +198,12 @@ function sortLabel(sortKey: SortKey): string {
 }
 
 function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: SortKey }) {
-  // Map old 'unverified' tier label (pre-alignment cached rows) to 'unranked'
-  // so we don't render a confusing badge next to a verified agent.
+  // Map stale 'unverified' tier (pre-alignment cached rows) to 'unranked'.
+  // Verification status is shown separately via the green check next to
+  // the agent's name; this badge is purely the trust-score tier.
   const rawTier = agent.trustScore?.tier;
   const tier = !rawTier || rawTier === 'unverified' ? 'unranked' : rawTier;
   const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unranked;
-  const showTierBadge = Boolean(rawTier) && tier !== 'unranked';
   const rankBadge = rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd';
 
   return (
@@ -215,11 +215,9 @@ function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sort
         <span className={`text-xs uppercase tracking-wider font-bold ${tierStyles.text}`}>
           {rankBadge}
         </span>
-        {showTierBadge && (
-          <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
-            {tier}
-          </span>
-        )}
+        <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
+          {tier}
+        </span>
       </div>
       <div className="flex items-center gap-3 mb-4">
         <img
@@ -252,7 +250,6 @@ function Row({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: So
   const rawTier = agent.trustScore?.tier;
   const tier = !rawTier || rawTier === 'unverified' ? 'unranked' : rawTier;
   const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unranked;
-  const showTierBadge = Boolean(rawTier) && tier !== 'unranked';
 
   return (
     <Link
@@ -280,11 +277,9 @@ function Row({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: So
         </div>
       </div>
       <div className="hidden sm:flex col-span-3 justify-center">
-        {showTierBadge && (
-          <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
-            {tier}
-          </span>
-        )}
+        <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
+          {tier}
+        </span>
       </div>
       <div className="col-span-5 sm:col-span-3 text-right">
         <span className="font-mono text-base font-semibold">{sortValue(agent, sortKey)}</span>
