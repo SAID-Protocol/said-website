@@ -198,8 +198,12 @@ function sortLabel(sortKey: SortKey): string {
 }
 
 function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: SortKey }) {
-  const tier = agent.trustScore?.tier ?? 'unranked';
+  // Map old 'unverified' tier label (pre-alignment cached rows) to 'unranked'
+  // so we don't render a confusing badge next to a verified agent.
+  const rawTier = agent.trustScore?.tier;
+  const tier = !rawTier || rawTier === 'unverified' ? 'unranked' : rawTier;
   const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unranked;
+  const showTierBadge = Boolean(rawTier) && tier !== 'unranked';
   const rankBadge = rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd';
 
   return (
@@ -211,7 +215,7 @@ function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sort
         <span className={`text-xs uppercase tracking-wider font-bold ${tierStyles.text}`}>
           {rankBadge}
         </span>
-        {agent.trustScore && (
+        {showTierBadge && (
           <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
             {tier}
           </span>
@@ -245,8 +249,10 @@ function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sort
 }
 
 function Row({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: SortKey }) {
-  const tier = agent.trustScore?.tier ?? 'unranked';
+  const rawTier = agent.trustScore?.tier;
+  const tier = !rawTier || rawTier === 'unverified' ? 'unranked' : rawTier;
   const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unranked;
+  const showTierBadge = Boolean(rawTier) && tier !== 'unranked';
 
   return (
     <Link
@@ -274,7 +280,7 @@ function Row({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: So
         </div>
       </div>
       <div className="hidden sm:flex col-span-3 justify-center">
-        {agent.trustScore && agent.trustScore.score > 0 && (
+        {showTierBadge && (
           <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
             {tier}
           </span>
