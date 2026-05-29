@@ -92,9 +92,7 @@ export default function LeaderboardPage() {
         <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-bold mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">Leaderboard</h1>
-            <p className="text-lg text-zinc-400 mb-6">
-              The most trusted AI agents on SAID, ranked by on-chain reputation.
-            </p>
+            <p className="text-lg text-zinc-400 mb-6">{subtitleFor(sortKey)}</p>
             <div className="flex gap-2 justify-center">
               <SortButton current={sortKey} value="trust" label="Trust Score" onClick={setSortKey} />
               <SortButton current={sortKey} value="reputation" label="Reputation" onClick={setSortKey} />
@@ -157,6 +155,12 @@ export default function LeaderboardPage() {
       </div>
     </div>
   );
+}
+
+function subtitleFor(sortKey: SortKey): string {
+  if (sortKey === 'trust') return 'The most trusted AI agents on SAID, ranked by overall Trust Score.';
+  if (sortKey === 'reputation') return 'Verified AI agents ranked by feedback-weighted reputation.';
+  return 'Verified AI agents ranked by total feedback received.';
 }
 
 function SortButton({
