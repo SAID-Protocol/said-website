@@ -6,18 +6,25 @@ import Link from 'next/link';
 interface PreviewAgent {
   wallet: string;
   name: string;
-  reputationScore: number;
-  feedbackCount: number;
   isVerified: boolean;
+  trustScore: number;
+  tier: string;
   rank: number;
 }
 
-function tierFor(score: number): { label: string; classes: string } {
-  if (score >= 80) return { label: 'Platinum', classes: 'bg-purple-500/10 text-purple-300 border-purple-500/30' };
-  if (score >= 65) return { label: 'Gold', classes: 'bg-amber-500/10 text-amber-300 border-amber-500/30' };
-  if (score >= 45) return { label: 'Silver', classes: 'bg-zinc-400/10 text-zinc-200 border-zinc-400/30' };
-  if (score >= 25) return { label: 'Bronze', classes: 'bg-orange-600/10 text-orange-300 border-orange-600/30' };
-  return { label: 'Unranked', classes: 'bg-zinc-700/10 text-zinc-500 border-zinc-700/30' };
+const TIER_CLASSES: Record<string, string> = {
+  platinum: 'bg-purple-500/10 text-purple-300 border-purple-500/30',
+  gold: 'bg-amber-500/10 text-amber-300 border-amber-500/30',
+  silver: 'bg-zinc-400/10 text-zinc-200 border-zinc-400/30',
+  bronze: 'bg-orange-600/10 text-orange-300 border-orange-600/30',
+  unranked: 'bg-zinc-700/10 text-zinc-500 border-zinc-700/30',
+  unverified: 'bg-zinc-700/10 text-zinc-500 border-zinc-700/30',
+};
+
+function tierLabel(tier: string): string {
+  if (!tier) return 'Unranked';
+  if (tier === 'unverified') return 'Unranked';
+  return tier.charAt(0).toUpperCase() + tier.slice(1);
 }
 
 function shortWallet(wallet: string): string {
@@ -33,7 +40,7 @@ export default function LeaderboardPreview() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/api/leaderboard?limit=5');
+        const res = await fetch('/api/leaderboard-preview');
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled) setAgents(data.leaderboard || []);
@@ -73,7 +80,7 @@ export default function LeaderboardPreview() {
                 </div>
               ))
             : agents.map((agent, idx) => {
-                const tier = tierFor(agent.reputationScore);
+                const tierClasses = TIER_CLASSES[agent.tier] ?? TIER_CLASSES.unranked;
                 return (
                   <Link
                     key={agent.wallet}
@@ -92,12 +99,12 @@ export default function LeaderboardPreview() {
                       </div>
                       <div className="text-xs text-zinc-500 font-mono mt-0.5">{shortWallet(agent.wallet)}</div>
                     </div>
-                    <span className={`hidden sm:inline-block px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wider ${tier.classes}`}>
-                      {tier.label}
+                    <span className={`hidden sm:inline-block px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase tracking-wider ${tierClasses}`}>
+                      {tierLabel(agent.tier)}
                     </span>
                     <div className="text-right">
                       <div className="text-sm font-semibold text-white tabular-nums">
-                        {agent.reputationScore.toFixed(1)}
+                        {agent.trustScore.toFixed(0)}
                       </div>
                       <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Trust</div>
                     </div>
