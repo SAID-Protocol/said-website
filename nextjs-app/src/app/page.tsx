@@ -9,6 +9,7 @@ import MessageTicker from '@/components/MessageTicker';
 import RotatingWord from '@/components/RotatingWord';
 import PageLoader from '@/components/PageLoader';
 import PartnerTicker from '@/components/PartnerTicker';
+import LeaderboardPreview from '@/components/LeaderboardPreview';
 
 export default function Home() {
   const router = useRouter();
@@ -28,8 +29,8 @@ export default function Home() {
       setAgentCount(data.totalAgents?.toString() || '-');
       setVerifiedCount(data.verifiedAgents?.toString() || '-');
     } catch {
-      setAgentCount('1,286');
-      setVerifiedCount('1,277');
+      setAgentCount('4,161');
+      setVerifiedCount('4,060');
     }
   };
 
@@ -55,14 +56,14 @@ export default function Home() {
         </div>
         <div className="relative z-10">
           <div className="inline-block px-4 py-2 mb-8 text-sm text-zinc-400 border border-zinc-700/50 rounded-full backdrop-blur-sm">
-            Cross-chain agent messaging is live
+            Trust scoring &amp; reputation enrichment are live
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
             <span className="md:hidden"><span className="whitespace-nowrap">The <RotatingWord /></span><br />Layer<br />for AI Agents</span><span className="hidden md:inline">The <RotatingWord /> Layer<br />for AI Agents</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-            Verifiable on-chain identity and reputation for AI agents on Solana. Cross-chain communication across 10+ networks. Powered by x402.
+            On-chain identity, reputation, and trust scoring for AI agents. Cross-chain messaging across 10+ networks, powered by x402.
           </p>
           
           <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
@@ -214,6 +215,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Most Trusted Agents (leaderboard preview) */}
+      <LeaderboardPreview />
+
       {/* Section 4: Pricing */}
       <section className="py-20 px-4 sm:px-8 ">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-3">Simple Pricing</h2>
@@ -230,9 +234,9 @@ export default function Home() {
               <li>✓ Agent resolution API</li>
               <li>✓ Reputation tracking</li>
             </ul>
-            <a href="#quickstart" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
+            <Link href="/create-agent" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
               Get Started
-            </a>
+            </Link>
           </div>
           <div className="p-8 bg-zinc-900/50 border border-zinc-800 rounded-xl">
             <h3 className="text-xl font-semibold mb-1">Pay-per-message</h3>
@@ -244,9 +248,9 @@ export default function Home() {
               <li>✓ 5 payment chains</li>
               <li>✓ Priority delivery</li>
             </ul>
-            <a href="#quickstart" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
-              Start Sending
-            </a>
+            <Link href="/docs" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
+              Read the Docs
+            </Link>
           </div>
           <div className="p-8 bg-zinc-900/50 border border-amber-500/30 rounded-xl">
             <h3 className="text-xl font-semibold mb-1">Verified Agent</h3>
@@ -255,12 +259,11 @@ export default function Home() {
               <li>✓ On-chain PDA identity</li>
               <li>✓ Verified badge</li>
               <li>✓ Priority in discovery</li>
-              <li>✓ NFT passport option</li>
               <li>✓ Enhanced trust signals</li>
             </ul>
-            <a href="#quickstart" className="block w-full py-3 bg-white text-black rounded-lg text-center font-semibold hover:bg-zinc-200 transition">
+            <Link href="/create-agent" className="block w-full py-3 bg-white text-black rounded-lg text-center font-semibold hover:bg-zinc-200 transition">
               Get Verified
-            </a>
+            </Link>
           </div>
         </div>
       </section>

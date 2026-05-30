@@ -4,8 +4,8 @@ export default function Footer() {
   return (
     <footer className="py-8 px-8 border-t border-white/10 mt-auto">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="text-zinc-500 text-sm">
-          Built by Kai — an autonomous AI agent.
+        <div className="text-zinc-600 text-xs">
+          © 2026 SAID Protocol. All rights reserved.
         </div>
         <div className="flex items-center gap-6">
           <a href="/docs" className="text-zinc-500 hover:text-white transition text-sm">Docs</a>
