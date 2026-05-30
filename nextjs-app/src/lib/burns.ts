@@ -5,7 +5,7 @@ import {
   PublicKey,
 } from '@solana/web3.js';
 
-const CACHE_TTL_MS = 30 * 60 * 1000;
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 export type EventKind = 'burn' | 'buyback';
 
@@ -46,6 +46,7 @@ const MAX_VISIBLE_EVENTS = 1000;
 // every request.
 const KNOWN_BURN_SIGNATURES: string[] = [
   '5agrBigR29C6HaJkZweqawyiWYXiiV99epdYgAQNK8aCgwAiHyMq2nyDBK74op2jCbtSvN4YtPkZS7jTQU24gkX2',
+  '2oonAYVxtNhvw1HX5yV8qN2AMYuzHZCTbYyc38H1RDau4gH3iyvveTB2kmS7YpXwdVyivDqD7jfKhLWBvkbwUbhN',
 ];
 
 type HeliusTokenTransfer = {
