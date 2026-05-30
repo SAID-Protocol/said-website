@@ -3,9 +3,8 @@ import { NextResponse } from 'next/server';
 const UPSTREAM_BASE = 'https://api.saidprotocol.com';
 const LIMIT = 2000;
 const TOP_N = 5;
-const REVALIDATE_SECONDS = 300;
 
-export const revalidate = REVALIDATE_SECONDS;
+export const revalidate = 300;
 
 interface TrustScore {
   score: number;
@@ -33,7 +32,7 @@ interface PreviewEntry {
 export async function GET() {
   try {
     const res = await fetch(`${UPSTREAM_BASE}/api/agents?limit=${LIMIT}&verified=true`, {
-      next: { revalidate: REVALIDATE_SECONDS },
+      next: { revalidate: 300 },
       headers: { accept: 'application/json' },
     });
     if (!res.ok) {
@@ -56,7 +55,7 @@ export async function GET() {
       { leaderboard: ranked },
       {
         headers: {
-          'Cache-Control': `public, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=60`,
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
         },
       },
     );
