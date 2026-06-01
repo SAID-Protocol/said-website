@@ -42,6 +42,7 @@ export default function Footer() {
             <div className="flex flex-col gap-2">
               <Link href="/agents" className="text-[13px] text-zinc-500 hover:text-white transition">Agent Directory</Link>
               <Link href="/token" className="text-[13px] text-zinc-500 hover:text-white transition">$SAID Token</Link>
+              <Link href="/blog" className="text-[13px] text-zinc-500 hover:text-white transition">Blog</Link>
               <Link href="/docs" className="text-[13px] text-zinc-500 hover:text-white transition">Docs</Link>
               <Link href="/#quickstart" className="text-[13px] text-zinc-500 hover:text-white transition">Quick Start</Link>
             </div>
