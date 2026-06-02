@@ -65,6 +65,7 @@ function matchSource(agent: Agent): SourcePlatform | null {
   if (src === 'spawnr') return { key: 'spawnr', label: 'Spawnr', icon: '/platforms/spawnr.png', href: 'https://spawnr.io' };
   if (src === 'clawpump' || desc.includes('clawpump.tech')) return { key: 'clawpump', label: 'Claw Pump', icon: '/clawpump-logo.png', href: 'https://clawpump.tech' };
   if (src === 'said-hosting' || desc.includes('said-hosting') || desc.includes('host.saidprotocol')) return { key: 'said-hosting', label: 'SAID Hosted', icon: '/platforms/said-hosting.png', href: 'https://host.saidprotocol.com' };
+  if (src === 'xona-orbit' || desc.includes('xona-orbit') || desc.includes('xona.orbit')) return { key: 'xona-orbit', label: 'Xona Orbit', icon: '/platforms/xona-orbit.png', href: 'https://xona-orbit.com' };
   if (src === 'atelier' || desc.includes('atelier')) return { key: 'atelier', label: 'Atelier', icon: '/platforms/atelier.jpg' };
   return null;
 }
