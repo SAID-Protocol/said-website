@@ -7,6 +7,7 @@ const partners = [
   { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
   { name: 'FairScale', logo: '/platforms/fairscale.jpg', url: 'https://fairscale.xyz/' },
   { name: 'Xona Orbit', logo: '/platforms/xona-orbit.png', url: 'https://xona-orbit.com/' },
+  { name: 'Daemon', logo: '/platforms/daemon.jpg', url: 'https://www.daemonide.tech/' },
   { name: 'Metaplex', logo: '/platforms/metaplex.jpg', url: 'https://www.metaplex.com/' },
   { name: 'Privy', logo: '/platforms/privy.jpg', url: 'https://www.privy.io/' },
   { name: 'Juice', logo: '/platforms/juice.jpg', url: 'https://www.juiceeverything.com/' },
