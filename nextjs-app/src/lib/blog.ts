@@ -13,6 +13,8 @@ export interface PostMeta {
   excerpt: string;
   category: PostCategory;
   cover?: string;
+  /** object-position for the card cover image; defaults to 'center'. Use 'top' for tall images that crop badly. */
+  coverPosition?: 'top' | 'center';
   author?: string;
   /** Tweet IDs surfaced on the card / used for OG fallback */
   tweets?: string[];
@@ -38,6 +40,7 @@ function readPostFile(slug: string): Post | null {
     excerpt: data.excerpt ?? '',
     category: (data.category as PostCategory) ?? 'Announcements',
     cover: data.cover ?? undefined,
+    coverPosition: data.coverPosition === 'top' ? 'top' : undefined,
     author: data.author ?? 'SAID Protocol',
     tweets: Array.isArray(data.tweets) ? data.tweets.map(String) : undefined,
     content,

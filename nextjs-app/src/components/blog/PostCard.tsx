@@ -24,7 +24,9 @@ export default function PostCard({ post }: { post: PostMeta }) {
             alt={post.title}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover opacity-90 transition group-hover:opacity-100"
+            className={`object-cover opacity-90 transition group-hover:opacity-100 ${
+              post.coverPosition === 'top' ? 'object-top' : 'object-center'
+            }`}
           />
         </div>
       )}
