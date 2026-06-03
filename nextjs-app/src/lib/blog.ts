@@ -19,6 +19,8 @@ export interface PostMeta {
   author?: string;
   /** Tweet IDs surfaced on the card / used for OG fallback */
   tweets?: string[];
+  /** CSS object-position for cover image */
+  coverPosition?: string;
 }
 
 export interface Post extends PostMeta {
