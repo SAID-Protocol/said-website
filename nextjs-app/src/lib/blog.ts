@@ -4,6 +4,9 @@ import matter from 'gray-matter';
 
 const POSTS_DIR = path.join(process.cwd(), 'content', 'blog');
 
+/** Fallback thumbnail for posts that don't set their own `cover:`. */
+export const DEFAULT_COVER = '/blog-cover.jpg';
+
 export type PostCategory = 'Milestones' | 'Integrations' | 'Announcements' | 'Engineering';
 
 export interface PostMeta {
@@ -13,8 +16,6 @@ export interface PostMeta {
   excerpt: string;
   category: PostCategory;
   cover?: string;
-  /** object-position for the card cover image; defaults to 'center'. Use 'top' for tall images that crop badly. */
-  coverPosition?: 'top' | 'center';
   author?: string;
   /** Tweet IDs surfaced on the card / used for OG fallback */
   tweets?: string[];
@@ -39,8 +40,7 @@ function readPostFile(slug: string): Post | null {
     date: data.date ? new Date(data.date).toISOString().slice(0, 10) : '1970-01-01',
     excerpt: data.excerpt ?? '',
     category: (data.category as PostCategory) ?? 'Announcements',
-    cover: data.cover ?? undefined,
-    coverPosition: data.coverPosition === 'top' ? 'top' : undefined,
+    cover: data.cover ?? DEFAULT_COVER,
     author: data.author ?? 'SAID Protocol',
     tweets: Array.isArray(data.tweets) ? data.tweets.map(String) : undefined,
     content,
