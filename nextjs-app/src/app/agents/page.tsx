@@ -453,6 +453,12 @@ function AgentCard({ agent }: { agent: Agent }) {
                 <span className="text-zinc-400 text-[10px] font-medium">Xona Orbit</span>
               </div>
             )}
+            {(agent.registrationSource === 'kausa' || agent.skills?.includes('maze-routing')) && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Powered by Maze Pocket">
+                <img src="/platforms/kausa.png" alt="Maze Pocket" className="w-3.5 h-3.5 rounded-full" />
+                <span className="text-zinc-400 text-[10px] font-medium">Maze Pocket</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-3 text-[10px] text-zinc-500">
             {agent.trustScore && agent.trustScore.score > 0 ? (
