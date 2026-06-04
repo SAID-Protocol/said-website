@@ -33,6 +33,7 @@ interface Agent {
   lastActivity?: string;
   registrationSource?: string | null;
   website?: string | null;
+  image?: string | null;
   trustScore?: TrustScore | null;
 }
 
@@ -407,10 +408,15 @@ function AgentCard({ agent }: { agent: Agent }) {
       <div className="p-5">
         {/* Header: Avatar + Name + Verified */}
         <div className="flex items-start gap-3 mb-3">
-          <img 
-            src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
+          <img
+            src={agent.image || `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
             alt={agent.name || 'Agent'}
-            className="w-10 h-10 rounded-lg flex-shrink-0"
+            className="w-10 h-10 rounded-lg flex-shrink-0 object-cover bg-zinc-900"
+            onError={(e) => {
+              // Uploaded image failed to load — fall back to the generated avatar.
+              const fallback = `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`;
+              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+            }}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
