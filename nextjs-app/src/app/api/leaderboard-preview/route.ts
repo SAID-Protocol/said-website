@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 
 const UPSTREAM_BASE = 'https://api.saidprotocol.com';
-const LIMIT = 2000;
 const TOP_N = 5;
 
 export const revalidate = 300;
@@ -18,6 +17,7 @@ interface AgentLite {
   reputationScore?: number;
   feedbackCount?: number;
   trustScore?: TrustScore | null;
+  reputation?: { tier: string; compositeScore: number } | null;
 }
 
 interface PreviewEntry {
@@ -31,7 +31,10 @@ interface PreviewEntry {
 
 export async function GET() {
   try {
-    const res = await fetch(`${UPSTREAM_BASE}/api/agents?limit=${LIMIT}&verified=true`, {
+    // Reputation v0.8 leaderboard — already ranked by compositeScore upstream,
+    // so no client-side fetch-all-and-sort (which missed Xona, whose stored
+    // v0.6 reputationScore is 0 and so never appeared in the top-2000 fetch).
+    const res = await fetch(`${UPSTREAM_BASE}/api/agents/top?by=reputation&limit=${TOP_N}&verified=true`, {
       next: { revalidate: 300 },
       headers: { accept: 'application/json' },
     });
@@ -40,15 +43,13 @@ export async function GET() {
     }
     const data = (await res.json()) as { agents?: AgentLite[] };
     const ranked = (data.agents ?? [])
-      .filter((a) => (a.trustScore?.score ?? 0) > 0)
-      .sort((a, b) => (b.trustScore?.score ?? 0) - (a.trustScore?.score ?? 0))
       .slice(0, TOP_N)
       .map<PreviewEntry>((a, idx) => ({
         wallet: a.wallet,
         name: a.name,
         isVerified: a.isVerified,
-        trustScore: a.trustScore?.score ?? 0,
-        tier: a.trustScore?.tier ?? 'unranked',
+        trustScore: a.trustScore?.score ?? Math.round((a.reputation?.compositeScore ?? 0) * 100),
+        tier: a.reputation?.tier ?? a.trustScore?.tier ?? 'unranked',
         rank: idx + 1,
       }));
     return NextResponse.json(
