@@ -154,9 +154,32 @@ function AgentsContent() {
 
       const effectiveSort = sortOverride ?? sortBy;
       const effectiveSearch = (searchOverride ?? searchQuery).trim();
-      // API supports: search, sort=newest|name|trust. 'active' sort has no
-      // server-side equivalent — falls back to default (reputation) and we
-      // sort client-side over loaded results.
+
+      // "Top Reputation" (no active search) → the v0.8-ranked leaderboard,
+      // which orders by ReputationPosterior (composite) rather than the stored
+      // v0.6 reputationScore. Top-N, not paginated. Falls back to the directory
+      // endpoint on any failure so the view can never break.
+      if (effectiveSort === 'reputation' && !effectiveSearch) {
+        try {
+          const topRes = await fetch('/api/agents/top?by=reputation&limit=100');
+          if (topRes.ok) {
+            const topData = await topRes.json();
+            const topAgents = topData.agents || [];
+            if (topAgents.length > 0) {
+              setAgents(topAgents);
+              setOffset(topAgents.length);
+              setHasMore(false);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('Top agents fetch failed, falling back to directory:', e);
+        }
+      }
+
+      // Directory listing (newest / search / reputation fallback). Supports
+      // search + sort=newest server-side; 'active' falls back to default and
+      // is sorted client-side over loaded results.
       const params = new URLSearchParams();
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String(fetchOffset));
