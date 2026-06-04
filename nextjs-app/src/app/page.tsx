@@ -10,6 +10,7 @@ import MessageTicker from '@/components/MessageTicker';
 import RotatingWord from '@/components/RotatingWord';
 import PageLoader from '@/components/PageLoader';
 import PartnerTicker from '@/components/PartnerTicker';
+import LeaderboardPreview from '@/components/LeaderboardPreview';
 
 export default function Home() {
   const router = useRouter();
@@ -214,6 +215,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Most Trusted Agents (leaderboard preview) */}
+      <LeaderboardPreview />
 
       {/* Section 4: Pricing */}
       <section className="py-20 px-4 sm:px-8 ">
