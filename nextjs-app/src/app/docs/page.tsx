@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AsciiBackground from '@/components/AsciiBackground';
@@ -180,6 +180,24 @@ function ContractBox({ label, address }: { label: string; address: string }) {
 }
 
 export default function DocsPage() {
+  const footerSentinelRef = useRef<HTMLDivElement | null>(null);
+  const [footerInView, setFooterInView] = useState(false);
+
+  // Hide the fixed sidebar when the footer scrolls into view so the two
+  // don't fight for the same screen space. Observe a sentinel sitting just
+  // above the footer rather than the footer itself — that gives us a small
+  // safety margin so the sidebar fades before the overlap actually happens.
+  useEffect(() => {
+    const node = footerSentinelRef.current;
+    if (!node || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => setFooterInView(entries[0]?.isIntersecting ?? false),
+      { rootMargin: '0px 0px 0px 0px', threshold: 0 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   const scrollToSection = (id: string) => {
     if (id === 'introduction') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -198,10 +216,16 @@ export default function DocsPage() {
       <AsciiBackground agentThemed />
       <div className="relative z-10">
       <Navbar />
-      
+
       <div className="relative pt-28 pb-16">
-        {/* Sidebar — positioned to the left of centered content */}
-        <aside className="hidden xl:block fixed top-28 left-[max(1rem,calc(50%-448px-14rem-2rem))] w-52">
+        {/* Sidebar — positioned to the left of centered content. Fades out
+            when the footer enters the viewport so it doesn't get overlapped. */}
+        <aside
+          aria-hidden={footerInView}
+          className={`hidden xl:block fixed top-28 left-[max(1rem,calc(50%-448px-14rem-2rem))] w-52 transition-opacity duration-200 ${
+            footerInView ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
           <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800/60 rounded-xl p-4">
             <div className="text-xs text-zinc-500 uppercase tracking-wider mb-4">Documentation</div>
             <nav className="space-y-1">
@@ -1048,6 +1072,8 @@ const agents = await client.discover();`}</CodeBlock>
           </main>
       </div>
 
+      {/* Sentinel observed to fade the sidebar before the footer overlaps. */}
+      <div ref={footerSentinelRef} aria-hidden="true" />
       <Footer />
     </div></div>
   );

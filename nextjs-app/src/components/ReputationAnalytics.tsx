@@ -49,7 +49,7 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
 
   const fetchFeedback = async () => {
     try {
-      const res = await fetch(`https://api.saidprotocol.com/api/agents/${wallet}/feedback`);
+      const res = await fetch(`/api/agents/${wallet}/feedback`);
       if (res.ok) {
         const data = await res.json();
         setFeedback(data.feedback || []);

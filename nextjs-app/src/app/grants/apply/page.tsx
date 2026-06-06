@@ -180,7 +180,6 @@ export default function GrantsApplyPage() {
                 <button type="submit" disabled={loading} className="w-full px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition disabled:opacity-50 disabled:cursor-not-allowed">
                   {loading ? 'Submitting...' : 'Submit Application'}
                 </button>
-                <p className="text-zinc-500 text-sm text-center mt-4">Applications open when $SAID launches</p>
               </div>
             </form>
           </div>

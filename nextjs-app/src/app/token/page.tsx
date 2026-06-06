@@ -211,7 +211,6 @@ export default async function TokenPage() {
                 >
                   Apply for a Grant
                 </a>
-                <p className="text-zinc-500 text-sm mt-3">Applications open when $SAID launches</p>
               </div>
             </div>
           </section>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense, useRef } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -32,6 +32,8 @@ interface Agent {
   feedbackCount?: number;
   lastActivity?: string;
   registrationSource?: string | null;
+  website?: string | null;
+  image?: string | null;
   trustScore?: TrustScore | null;
 }
 
@@ -46,68 +48,146 @@ const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> 
 const PAGE_SIZE = 50;
 
 function AgentsContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  // Hydrate state from URL once at mount; future URL changes won't re-init.
+  const initialSearch = searchParams.get('search') ?? '';
+  const initialSortRaw = searchParams.get('sort');
+  const initialSort: 'reputation' | 'newest' | 'active' =
+    initialSortRaw === 'newest' || initialSortRaw === 'active' ? initialSortRaw : 'reputation';
+
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>('reputation');
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>(initialSort);
   const [totalAgents, setTotalAgents] = useState(0);
   const [verifiedCount, setVerifiedCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
+  const mountedRef = useRef(false);
 
-  useEffect(() => {
-    // Initialize search from URL params
-    const urlSearch = searchParams.get('search');
-    if (urlSearch) {
-      setSearchQuery(urlSearch);
-    }
-    // Fetch stats for accurate counts
-    fetch('https://api.saidprotocol.com/api/stats')
-      .then(r => r.json())
-      .then(data => {
+  const fetchStats = () => {
+    fetch('/api/stats')
+      .then((r) => r.json())
+      .then((data) => {
         if (data.totalAgents) setTotalAgents(data.totalAgents);
         if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
       })
       .catch(() => {});
-    // Fetch first batch of agents
+  };
+
+  // One-time init: fetch first batch, set up visibility-gated polling + SSE.
+  // Intentionally no deps — URL changes shouldn't tear this down.
+  useEffect(() => {
+    fetchStats();
     fetchAgents(0, true);
-    // Poll stats every 30s
+
     const interval = setInterval(() => {
-      fetch('https://api.saidprotocol.com/api/stats')
-        .then(r => r.json())
-        .then(data => {
-          if (data.totalAgents) setTotalAgents(data.totalAgents);
-          if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
-        })
-        .catch(() => {});
+      // Don't burn requests while the tab is in the background.
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        fetchStats();
+      }
     }, 30000);
-    // SSE: real-time updates when agents register
+
     let es: EventSource | null = null;
     try {
       es = new EventSource('https://api.saidprotocol.com/api/events');
+      // Refresh the agent list when something new arrives. Stats will catch
+      // up on the next 30s tick — no need for a duplicate stats fetch here.
       es.onmessage = () => {
         fetchAgents(0, true);
-        fetch('https://api.saidprotocol.com/api/stats')
-          .then(r => r.json())
-          .then(data => {
-            if (data.totalAgents) setTotalAgents(data.totalAgents);
-            if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
-          })
-          .catch(() => {});
       };
-      es.onerror = () => { es?.close(); es = null; };
+      es.onerror = () => {
+        es?.close();
+        es = null;
+      };
     } catch {}
-    return () => { clearInterval(interval); es?.close(); };
-  }, [searchParams]);
 
-  const fetchAgents = async (fetchOffset: number, reset: boolean = false) => {
+    return () => {
+      clearInterval(interval);
+      es?.close();
+    };
+  }, []);
+
+  // Keep the URL in sync with searchQuery + sortBy so refresh / share-link
+  // round-trips cleanly. Skip the very first run so we don't clobber a URL
+  // the user just landed on.
+  useEffect(() => {
+    if (!mountedRef.current) {
+      mountedRef.current = true;
+      return;
+    }
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    if (sortBy !== 'reputation') params.set('sort', sortBy);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [searchQuery, sortBy, router, pathname]);
+
+  // Re-fetch from offset 0 when sort or search changes — API does both
+  // server-side, so we can't just refilter/resort what's loaded. Debounce
+  // the search trigger so we don't fire a request on every keystroke.
+  const initialSortRef = useRef(true);
+  useEffect(() => {
+    if (initialSortRef.current) {
+      initialSortRef.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      fetchAgents(0, true, sortBy, searchQuery);
+    }, searchQuery ? 300 : 0);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, searchQuery]);
+
+  const fetchAgents = async (
+    fetchOffset: number,
+    reset: boolean = false,
+    sortOverride?: typeof sortBy,
+    searchOverride?: string,
+  ) => {
     try {
       if (reset) setLoading(true);
       else setLoadingMore(true);
-      
-      const res = await fetch(`https://api.saidprotocol.com/api/agents?limit=${PAGE_SIZE}&offset=${fetchOffset}`);
+
+      const effectiveSort = sortOverride ?? sortBy;
+      const effectiveSearch = (searchOverride ?? searchQuery).trim();
+
+      // "Top Reputation" (no active search) → the v0.8-ranked leaderboard,
+      // which orders by ReputationPosterior (composite) rather than the stored
+      // v0.6 reputationScore. Top-N, not paginated. Falls back to the directory
+      // endpoint on any failure so the view can never break.
+      if (effectiveSort === 'reputation' && !effectiveSearch) {
+        try {
+          const topRes = await fetch('/api/agents/top?by=reputation&limit=100');
+          if (topRes.ok) {
+            const topData = await topRes.json();
+            const topAgents = topData.agents || [];
+            if (topAgents.length > 0) {
+              setAgents(topAgents);
+              setOffset(topAgents.length);
+              setHasMore(false);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error('Top agents fetch failed, falling back to directory:', e);
+        }
+      }
+
+      // Directory listing (newest / search / reputation fallback). Supports
+      // search + sort=newest server-side; 'active' falls back to default and
+      // is sorted client-side over loaded results.
+      const params = new URLSearchParams();
+      params.set('limit', String(PAGE_SIZE));
+      params.set('offset', String(fetchOffset));
+      if (effectiveSort === 'newest') params.set('sort', 'newest');
+      if (effectiveSearch) params.set('search', effectiveSearch);
+
+      const res = await fetch(`/api/agents?${params.toString()}`);
       if (res.ok) {
         const data = await res.json();
         const newAgents = data.agents || [];
@@ -154,9 +234,6 @@ function AgentsContent() {
     }
     return 0;
   });
-
-  const verifiedAgents = sortedAgents.filter(a => a.isVerified);
-  const unverifiedAgents = sortedAgents.filter(a => !a.isVerified);
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -237,30 +314,11 @@ function AgentsContent() {
               </div>
             </div>
 
-            {/* Verified Agents */}
-            {verifiedAgents.length > 0 && (
-              <section className="mb-12">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-green-400">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <path d="m9 11 3 3L22 4"/>
-                  </svg>
-                  Verified Agents
-                </h2>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {verifiedAgents.map(agent => (
-                    <AgentCard key={agent.wallet} agent={agent} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* All Agents */}
-            {unverifiedAgents.length > 0 && (
+            {/* Agents */}
+            {sortedAgents.length > 0 && (
               <section>
-                <h2 className="text-xl font-semibold mb-4">All Agents</h2>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {unverifiedAgents.map(agent => (
+                  {sortedAgents.map(agent => (
                     <AgentCard key={agent.wallet} agent={agent} />
                   ))}
                 </div>
@@ -268,8 +326,8 @@ function AgentsContent() {
             )}
 
             {/* Load More */}
-            {hasMore && !searchQuery && (
-              <div className="text-center mt-10">
+            {hasMore && (
+              <div className="text-center mt-10 space-y-2">
                 <button
                   onClick={loadMore}
                   disabled={loadingMore}
@@ -350,10 +408,15 @@ function AgentCard({ agent }: { agent: Agent }) {
       <div className="p-5">
         {/* Header: Avatar + Name + Verified */}
         <div className="flex items-start gap-3 mb-3">
-          <img 
-            src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
+          <img
+            src={agent.image || `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
             alt={agent.name || 'Agent'}
-            className="w-10 h-10 rounded-lg flex-shrink-0"
+            className="w-10 h-10 rounded-lg flex-shrink-0 object-cover bg-zinc-900"
+            onError={(e) => {
+              // Uploaded image failed to load — fall back to the generated avatar.
+              const fallback = `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`;
+              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
+            }}
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
@@ -411,6 +474,18 @@ function AgentCard({ agent }: { agent: Agent }) {
               <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Atelier">
                 <img src="/platforms/atelier.jpg" alt="Atelier" className="w-3.5 h-3.5 rounded-full" />
                 <span className="text-zinc-400 text-[10px] font-medium">Atelier</span>
+              </div>
+            )}
+            {(agent.registrationSource === 'xona-orbit' || agent.website?.includes('orbit-agents.com') || agent.website?.includes('xona-agent.com') || agent.website?.includes('xona-orbit')) && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Xona Orbit">
+                <img src="/platforms/xona-orbit.png" alt="Xona Orbit" className="w-3.5 h-3.5 rounded-full" />
+                <span className="text-zinc-400 text-[10px] font-medium">Xona Orbit</span>
+              </div>
+            )}
+            {(agent.registrationSource === 'kausa' || agent.skills?.includes('maze-routing')) && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Powered by KausaOS">
+                <img src="/platforms/kausa.png" alt="KausaOS" className="w-3.5 h-3.5 rounded-full" />
+                <span className="text-zinc-400 text-[10px] font-medium">KausaOS</span>
               </div>
             )}
           </div>
