@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import Navbar from '@/components/Navbar';
@@ -117,6 +118,19 @@ export default async function BlogPostPage({
 
           <h1 className="mb-3 text-4xl font-bold leading-tight">{post.title}</h1>
           {post.excerpt && <p className="mb-8 text-lg text-zinc-400">{post.excerpt}</p>}
+
+          {post.cover && (
+            <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950">
+              <Image
+                src={post.cover}
+                alt={post.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+                className={`object-cover ${post.coverPosition === 'top' ? 'object-top' : 'object-center'}`}
+              />
+            </div>
+          )}
 
           <div className="prose prose-invert prose-zinc max-w-none border-t border-zinc-800 pt-8 prose-headings:font-semibold prose-a:text-white prose-a:underline-offset-4">
             <MDXRemote source={post.content} components={mdxComponents} />
