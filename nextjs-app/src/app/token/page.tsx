@@ -6,7 +6,10 @@ import CopyButton from '@/components/CopyButton';
 import MarketCap from '@/components/MarketCap';
 import { fetchBurnsData } from '@/lib/burns';
 
-export const dynamic = 'force-dynamic';
+// ISR: regenerate at most every 6h. Burns are ~weekly so this is fresh enough,
+// and it caps Helius enhanced-tx usage instead of re-scanning on every request.
+// (Live market cap is a client component hitting DexScreener, unaffected by this.)
+export const revalidate = 21600;
 
 const Icons = {
   token: (
