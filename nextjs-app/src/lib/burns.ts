@@ -5,7 +5,11 @@ import {
   PublicKey,
 } from '@solana/web3.js';
 
-const CACHE_TTL_MS = 5 * 60 * 1000;
+// Burns/buybacks happen ~weekly, so a long TTL is safe and keeps Helius usage
+// bounded regardless of traffic. Each scan walks up to ~160 paginated Helius
+// enhanced-tx calls, so a short TTL (and force-dynamic callers) previously
+// drained the plan in days.
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
 export type EventKind = 'burn' | 'buyback';
 
