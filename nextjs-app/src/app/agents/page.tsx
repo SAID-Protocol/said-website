@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AsciiBackground from '@/components/AsciiBackground';
+import TrustBadge from '@/components/TrustBadge';
 
 interface TrustScore {
   score: number;
@@ -178,13 +179,14 @@ function AgentsContent() {
         }
       }
 
-      // Directory listing (newest / search / reputation fallback). Supports
-      // search + sort=newest server-side; 'active' falls back to default and
-      // is sorted client-side over loaded results.
+      // Directory listing (newest / active / search / reputation fallback).
+      // search + sort=newest + sort=active are all handled server-side, so the
+      // loaded order is authoritative and we don't re-sort on the client.
       const params = new URLSearchParams();
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String(fetchOffset));
       if (effectiveSort === 'newest') params.set('sort', 'newest');
+      if (effectiveSort === 'active') params.set('sort', 'active');
       if (effectiveSearch) params.set('search', effectiveSearch);
 
       const res = await fetch(`/api/agents?${params.toString()}`);
@@ -221,19 +223,15 @@ function AgentsContent() {
     );
   });
 
-  // Sort agents based on selected option
-  const sortedAgents = [...filteredAgents].sort((a, b) => {
-    if (sortBy === 'reputation') {
-      return (b.reputationScore || 0) - (a.reputationScore || 0);
-    } else if (sortBy === 'newest') {
-      return new Date(b.registeredAt).getTime() - new Date(a.registeredAt).getTime();
-    } else if (sortBy === 'active') {
-      const aTime = a.lastActivity ? new Date(a.lastActivity).getTime() : 0;
-      const bTime = b.lastActivity ? new Date(b.lastActivity).getTime() : 0;
-      return bTime - aTime;
-    }
-    return 0;
-  });
+  // Order is set server-side (sort=newest/active, default reputation), so we
+  // keep the API order here and only apply the client-side search filter.
+  // Note: 'active' = lastActiveAt desc, nulls last — handled by the API.
+  const sortedAgents = filteredAgents;
+
+  // Top 3 (by reputation, no active search) get the new SAID passport badge in a
+  // podium — #1 featured, #2/#3 beneath — and are lifted out of the grid below.
+  const showPodium = sortBy === 'reputation' && !searchQuery.trim() && sortedAgents.length >= 3;
+  const gridAgents = showPodium ? sortedAgents.slice(3) : sortedAgents;
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -314,11 +312,26 @@ function AgentsContent() {
               </div>
             </div>
 
+            {/* Top 3 — podium with the new SAID passport badge */}
+            {showPodium && (
+              <section className="mb-12">
+                <div className="flex items-baseline gap-2 mb-4">
+                  <h2 className="text-lg font-semibold">Top Reputation</h2>
+                  <span className="text-xs text-zinc-500">— the most trusted agents on SAID</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <PodiumCard agent={sortedAgents[0]} rank={1} />
+                  <PodiumCard agent={sortedAgents[1]} rank={2} />
+                  <PodiumCard agent={sortedAgents[2]} rank={3} />
+                </div>
+              </section>
+            )}
+
             {/* Agents */}
-            {sortedAgents.length > 0 && (
+            {gridAgents.length > 0 && (
               <section>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {sortedAgents.map(agent => (
+                  {gridAgents.map(agent => (
                     <AgentCard key={agent.wallet} agent={agent} />
                   ))}
                 </div>
@@ -394,6 +407,29 @@ function timeAgoShort(dateStr: string): string {
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
   return `${Math.floor(diff / 2592000)}mo ago`;
+}
+
+const RANK_STYLE: Record<number, { chip: string; glow: string }> = {
+  1: { chip: 'bg-amber-400/15 text-amber-300 border-amber-400/40', glow: 'shadow-[0_0_50px_-12px_rgba(251,191,36,0.45)]' },
+  2: { chip: 'bg-zinc-300/15 text-zinc-200 border-zinc-300/40', glow: '' },
+  3: { chip: 'bg-orange-500/15 text-orange-300 border-orange-500/40', glow: '' },
+};
+
+// Featured top-3 agent — wraps the SAID passport badge with a rank chip. Rendered
+// as an equal 3-up row by the parent; #1 carries a gold glow, #2/#3 silver/bronze.
+function PodiumCard({ agent, rank }: { agent: Agent; rank: number }) {
+  const r = RANK_STYLE[rank] ?? RANK_STYLE[3];
+  return (
+    <Link
+      href={`/agents/${agent.wallet}`}
+      className={`group relative block rounded-2xl transition-transform duration-300 hover:-translate-y-0.5 ${r.glow}`}
+    >
+      <span className={`absolute -top-2.5 left-3 z-10 px-2.5 py-0.5 text-[11px] font-bold rounded-full border backdrop-blur-md ${r.chip}`}>
+        #{rank}
+      </span>
+      <TrustBadge agent={agent} />
+    </Link>
+  );
 }
 
 function AgentCard({ agent }: { agent: Agent }) {
