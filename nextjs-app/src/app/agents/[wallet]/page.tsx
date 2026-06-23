@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AsciiBackground from '@/components/AsciiBackground';
 import ReputationAnalytics from '@/components/ReputationAnalytics';
+import CopyButton from '@/components/CopyButton';
 
 interface TrustScore {
   score: number;
@@ -196,10 +197,18 @@ export default function AgentPage() {
   return (
     <Shell>
       <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
-        <HeaderSection agent={agent} />
-        <StatusBadgesRow agent={agent} rank={rank} />
+        {/* Top row: identity on the left, Trust Score as the hero on the right */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <HeaderSection agent={agent} />
+            <StatusBadgesRow agent={agent} rank={rank} />
+          </div>
+          <aside className="lg:col-span-1">
+            <TrustScoreCard score={agent.trustScore ?? null} />
+          </aside>
+        </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mt-8">
+        <div className="grid lg:grid-cols-3 gap-6 mt-4">
           {/* Main column */}
           <div className="lg:col-span-2 space-y-6">
             <TabBar
@@ -212,9 +221,9 @@ export default function AgentPage() {
             {activeTab === 'identity' && <IdentityTab agent={agent} />}
           </div>
 
-          {/* Sidebar */}
-          <aside className="lg:col-span-1 space-y-6">
-            <TrustScoreCard score={agent.trustScore ?? null} />
+          {/* Sidebar — offset down on desktop so the cards align with the tab
+              content (below the tab-underline divider), not the tab row itself. */}
+          <aside className="lg:col-span-1 space-y-6 lg:mt-16">
             <OnChainIdentityCard agent={agent} />
             <EmbedBadgeCard agent={agent} />
           </aside>
@@ -301,8 +310,6 @@ function SourceBadge({ agent }: { agent: Agent }) {
 function StatusBadgesRow({ agent, rank }: { agent: Agent; rank: number | null }) {
   const lastActive = agent.lastActivity ?? agent.lastActiveAt;
   const active = isActive(lastActive);
-  const tier = agent.trustScore?.tier ?? 'unverified';
-  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unverified;
   const sourceCount = agent.trustScore?.sources?.length ?? 0;
 
   return (
@@ -322,11 +329,6 @@ function StatusBadgesRow({ agent, rank }: { agent: Agent; rank: number | null })
         >
           Rank #{rank}
         </Link>
-      )}
-      {agent.trustScore && agent.trustScore.score > 0 && (
-        <span className={`px-2.5 py-1 rounded-full border ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} font-medium uppercase tracking-wide`}>
-          {tierStyles.label} · {agent.trustScore.score}
-        </span>
       )}
       {sourceCount > 0 && (
         <span className="px-2.5 py-1 rounded-full border bg-zinc-800/50 border-zinc-700/50 text-zinc-400">
@@ -386,6 +388,10 @@ function OverviewTab({ agent }: { agent: Agent }) {
         <StatTile label="Activity" value={String(agent.activityCount ?? 0)} />
         <StatTile label="Registered" value={timeAgo(agent.registeredAt)} />
       </div>
+
+      {agent.trustScore && agent.trustScore.score > 0 && (
+        <TrustBreakdown score={agent.trustScore} />
+      )}
 
       {agent.skills && agent.skills.length > 0 && (
         <section>
@@ -453,9 +459,9 @@ function IdentityTab({ agent }: { agent: Agent }) {
   const lastActive = agent.lastActivity ?? agent.lastActiveAt;
   return (
     <div className="space-y-4">
+      {/* Wallet + PDA live in the always-visible On-Chain Identity sidebar card;
+          this tab holds the registration record / metadata. */}
       <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl space-y-3">
-        <Row label="Wallet" value={agent.wallet} mono />
-        {agent.pda && <Row label="Identity PDA" value={agent.pda} mono />}
         <Row
           label="Registered"
           value={agent.registeredAt ? `${timeAgo(agent.registeredAt)} · ${formatAbsolute(agent.registeredAt)}` : '—'}
@@ -479,26 +485,6 @@ function IdentityTab({ agent }: { agent: Agent }) {
             </a>
           </div>
         )}
-        <div className="flex flex-wrap gap-3 pt-2">
-          <a
-            href={`https://solscan.io/account/${agent.wallet}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-blue-400 hover:underline"
-          >
-            View wallet on Solscan →
-          </a>
-          {agent.pda && (
-            <a
-              href={`https://solscan.io/account/${agent.pda}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-blue-400 hover:underline"
-            >
-              View registration on Solscan →
-            </a>
-          )}
-        </div>
       </div>
     </div>
   );
@@ -512,6 +498,57 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
         {value}
       </code>
     </div>
+  );
+}
+
+// Round to 1 decimal and drop trailing zeros: 8.9999→"9", 3.5→"3.5", 7.3→"7.3".
+const fmtDim = (v: number) => String(Math.round(v * 10) / 10);
+
+// Axis-agnostic breakdown row: label + value/max + a bar filled to value/max.
+type BreakdownDim = { label: string; value: number; max: number };
+
+function TrustBreakdown({ score }: { score: TrustScore }) {
+  // PLACEHOLDER DATA — the legacy v0.6 pillars (each 0–10) while the reputation
+  // model is being finalized. The rendering below is axis-agnostic: to switch to
+  // the real reputation axes, just repoint `dims` (label/value/max) — no layout
+  // changes needed.
+  const dims: BreakdownDim[] = [
+    { label: 'Identity', value: score.identity, max: 10 },
+    { label: 'Activity', value: score.activity, max: 10 },
+    { label: 'Economic', value: score.economic, max: 10 },
+    { label: 'Ecosystem', value: score.ecosystem, max: 10 },
+    { label: 'Longevity', value: score.longevity, max: 10 },
+    // FairScale arrives already on the 0–10 scale (e.g. Xona ~1.6), so no rescale.
+    { label: 'Fairscale', value: score.fairscale, max: 10 },
+  ];
+  const color = TIER_SOLID[score.tier] ?? TIER_SOLID.unverified;
+
+  return (
+    <section>
+      <h2 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">Trust Breakdown</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3.5">
+        {dims.map((d) => {
+          const pct = d.max > 0 ? Math.max(0, Math.min(100, (d.value / d.max) * 100)) : 0;
+          return (
+            <div key={d.label}>
+              <div className="flex items-baseline justify-between mb-1.5">
+                <span className="text-zinc-300 text-xs">{d.label}</span>
+                <span className="text-[11px] font-mono text-zinc-300">
+                  {fmtDim(d.value)}
+                  <span className="text-zinc-600">/{d.max}</span>
+                </span>
+              </div>
+              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-[width] duration-500"
+                  style={{ width: `${pct}%`, backgroundColor: color, opacity: 0.85 }}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -542,19 +579,40 @@ function EndpointRow({ protocol, url }: { protocol: string; url: string }) {
   );
 }
 
-function TrustScoreCard({ score }: { score: TrustScore | null }) {
-  const rows = useMemo(() => {
-    if (!score) return [];
-    return [
-      { label: 'Identity', value: score.identity },
-      { label: 'Activity', value: score.activity },
-      { label: 'Economic', value: score.economic },
-      { label: 'Ecosystem', value: score.ecosystem },
-      { label: 'Longevity', value: score.longevity },
-      { label: 'Fairscale', value: score.fairscale },
-    ];
-  }, [score]);
+const TIER_SOLID: Record<string, string> = {
+  platinum: '#C084FC',
+  gold: '#FBBF24',
+  silver: '#A1A1AA',
+  bronze: '#FB923C',
+  unverified: '#71717A',
+};
 
+function ScoreGauge({ score, color }: { score: number; color: string }) {
+  const r = 34;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, score)) / 100;
+  return (
+    <svg width="88" height="88" viewBox="0 0 88 88" className="flex-shrink-0">
+      <circle cx="44" cy="44" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+      <circle
+        cx="44"
+        cy="44"
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth="6"
+        strokeLinecap="round"
+        strokeDasharray={c}
+        strokeDashoffset={c * (1 - pct)}
+        transform="rotate(-90 44 44)"
+      />
+      <text x="44" y="42" textAnchor="middle" dominantBaseline="middle" fontSize="26" fontWeight="800" fill="#f4f4f5" fontFamily="Inter, system-ui, sans-serif">{score}</text>
+      <text x="44" y="60" textAnchor="middle" fontSize="9" fontWeight="600" letterSpacing="0.08em" fill="#71717a" fontFamily="Inter, system-ui, sans-serif">/ 100</text>
+    </svg>
+  );
+}
+
+function TrustScoreCard({ score }: { score: TrustScore | null }) {
   if (!score || score.score === 0) {
     return (
       <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
@@ -567,37 +625,28 @@ function TrustScoreCard({ score }: { score: TrustScore | null }) {
   }
 
   const tierStyles = TIER_COLORS[score.tier] ?? TIER_COLORS.unverified;
+  const color = TIER_SOLID[score.tier] ?? TIER_SOLID.unverified;
+  const sources = score.sources ?? [];
 
   return (
     <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
-      <div className="flex items-baseline justify-between mb-1">
-        <h3 className="text-sm uppercase tracking-wider text-zinc-500">Trust Score</h3>
-        <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
-          {tierStyles.label}
-        </span>
-      </div>
-      <div className="text-4xl font-bold mb-4">{score.score}<span className="text-base font-normal text-zinc-500">/100</span></div>
-      <div className="space-y-2.5">
-        {rows.map((r) => (
-          <div key={r.label}>
-            <div className="flex justify-between text-[11px] mb-1">
-              <span className="text-zinc-400">{r.label}</span>
-              <span className="text-zinc-300 font-mono">{r.value}</span>
-            </div>
-            <div className="h-1 bg-zinc-800 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-white/50"
-                style={{ width: `${Math.max(0, Math.min(100, r.value))}%` }}
-              />
-            </div>
+      <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-4">Trust Score</h3>
+      <div className="flex items-center gap-4">
+        <ScoreGauge score={score.score} color={color} />
+        <div className="min-w-0">
+          <div className={`text-lg font-bold leading-tight ${tierStyles.text}`}>{tierStyles.label}</div>
+          <div className="text-xs text-zinc-500 mt-1">
+            {sources.length > 0
+              ? `Verified across ${sources.length} ${sources.length === 1 ? 'source' : 'sources'}`
+              : 'On-chain verified'}
           </div>
-        ))}
+        </div>
       </div>
-      {score.sources && score.sources.length > 0 && (
+      {sources.length > 0 && (
         <div className="mt-4 pt-4 border-t border-zinc-800/60">
           <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Verified Sources</div>
           <div className="flex flex-wrap gap-1.5">
-            {score.sources.map((s) => (
+            {sources.map((s) => (
               <span key={s} className="text-[10px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-zinc-300">
                 {s}
               </span>
@@ -609,47 +658,99 @@ function TrustScoreCard({ score }: { score: TrustScore | null }) {
   );
 }
 
-function OnChainIdentityCard({ agent }: { agent: Agent }) {
+function IdField({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
-      <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">On-Chain Identity</h3>
-      <div className="space-y-3 text-xs">
-        <div>
-          <div className="text-zinc-500 mb-1">Wallet</div>
-          <code className="block bg-zinc-800 px-2 py-1 rounded font-mono break-all">{agent.wallet}</code>
-        </div>
-        {agent.pda && (
-          <div>
-            <div className="text-zinc-500 mb-1">Identity PDA</div>
-            <code className="block bg-zinc-800 px-2 py-1 rounded font-mono break-all">{agent.pda}</code>
-          </div>
-        )}
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-zinc-500 text-[10px] uppercase tracking-wider">{label}</span>
         <a
-          href={`https://solscan.io/account/${agent.wallet}`}
+          href={href}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-blue-400 hover:underline"
+          className="text-[10px] text-blue-400 hover:underline"
         >
-          View on Solscan →
+          Solscan →
         </a>
+      </div>
+      <div className="flex items-center gap-1 bg-zinc-800 rounded-lg pl-2.5 pr-1 py-1">
+        <code className="block flex-1 min-w-0 text-[11px] font-mono truncate text-zinc-300">{value}</code>
+        <CopyButton text={value} />
       </div>
     </div>
   );
 }
 
+function OnChainIdentityCard({ agent }: { agent: Agent }) {
+  return (
+    <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
+      <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">On-Chain Identity</h3>
+      <div className="space-y-3">
+        <IdField label="Wallet" value={agent.wallet} href={`https://solscan.io/account/${agent.wallet}`} />
+        {agent.pda && (
+          <IdField label="Identity PDA" value={agent.pda} href={`https://solscan.io/account/${agent.pda}`} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+const EMBED_FORMATS = ['Markdown', 'HTML', 'URL'] as const;
+type EmbedFormat = (typeof EMBED_FORMATS)[number];
+
 function EmbedBadgeCard({ agent }: { agent: Agent }) {
+  const [format, setFormat] = useState<EmbedFormat>('Markdown');
+
+  const badgeUrl = `https://api.saidprotocol.com/api/badge/${agent.wallet}.svg`;
+  const profileUrl = `https://www.saidprotocol.com/agents/${agent.wallet}`;
+  const label = `SAID ${agent.isVerified ? 'Verified' : 'Registered'}`;
+
+  const snippets: Record<EmbedFormat, string> = {
+    Markdown: `[![${label}](${badgeUrl})](${profileUrl})`,
+    HTML: `<a href="${profileUrl}"><img src="${badgeUrl}" alt="${label}" width="348"></a>`,
+    URL: badgeUrl,
+  };
+  const snippet = snippets[format];
+
   return (
     <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
       <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">Embed Badge</h3>
-      <img
-        src={`https://api.saidprotocol.com/api/badge/${agent.wallet}.svg`}
-        alt="SAID Badge"
-        className="h-8 mb-3"
-      />
-      <p className="text-zinc-500 text-[10px] uppercase tracking-wider mb-1">Markdown</p>
-      <code className="block bg-zinc-800 p-2 rounded text-[10px] overflow-x-auto whitespace-pre">
-        {`[![SAID ${agent.isVerified ? 'Verified' : 'Registered'}](https://api.saidprotocol.com/api/badge/${agent.wallet}.svg)](https://www.saidprotocol.com/agents/${agent.wallet})`}
-      </code>
+
+      {/* Live preview — exactly what gets embedded */}
+      <a
+        href={badgeUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block mb-3 rounded-xl overflow-hidden ring-1 ring-white/[0.06] transition hover:ring-white/20"
+      >
+        <img src={badgeUrl} alt={label} className="block w-full h-auto" />
+      </a>
+
+      <p className="text-zinc-400 text-xs leading-relaxed mb-3">
+        Show off this agent&apos;s verified SAID badge on your site, README, or docs. It updates live as the trust score changes.
+      </p>
+
+      {/* Format toggle */}
+      <div className="flex gap-0.5 mb-2 p-0.5 bg-zinc-900/70 border border-zinc-800/60 rounded-lg">
+        {EMBED_FORMATS.map((f) => (
+          <button
+            key={f}
+            onClick={() => setFormat(f)}
+            className={`flex-1 text-[11px] font-medium py-1 rounded-md transition ${
+              format === f ? 'bg-zinc-700/70 text-white' : 'text-zinc-500 hover:text-zinc-300'
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      {/* Snippet + copy */}
+      <div className="flex items-start gap-1 bg-zinc-800 rounded-lg p-2">
+        <code className="block flex-1 min-w-0 text-[10px] leading-relaxed overflow-x-auto whitespace-pre text-zinc-300">
+          {snippet}
+        </code>
+        <CopyButton text={snippet} />
+      </div>
     </div>
   );
 }
