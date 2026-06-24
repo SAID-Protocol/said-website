@@ -12,6 +12,17 @@ const partners = [
   { name: 'Privy', logo: '/platforms/privy.jpg', url: 'https://www.privy.io/' },
   { name: 'Juice', logo: '/platforms/juice.jpg', url: 'https://www.juiceeverything.com/' },
   { name: 'Open Wallet Standard', logo: '/platforms/ows.jpg', url: 'https://openwallet.sh' },
+  // Agents & projects on SAID. Logos pending — drop files at the paths below
+  // into /public/platforms/. URLs marked TODO still need to be supplied.
+  { name: 'Syra', logo: 'https://www.syraa.fun/images/logo.jpg', url: 'https://syraa.fun' },
+  { name: 'Kausa', logo: '/platforms/kausa.png', url: 'https://kausalayer.com' },
+  { name: 'Hyre', logo: '/platforms/hyre.jpg', url: 'https://hyreagent.fun' },
+  { name: 'Pod the Squire', logo: '/platforms/pod-the-squire.jpg', url: 'https://usepod.ai' },
+  { name: 'Idle', logo: '/platforms/idle.jpg', url: 'https://earnidle.com' },
+  { name: 'AlphArena', logo: '/platforms/alpharena.jpg', url: 'https://alpharena.ai' },
+  { name: 'DegenTools', logo: '/platforms/degentools.jpg', url: 'https://degentools.co' },
+  { name: 'Signalhouse', logo: '/platforms/signalhouse.jpg', url: 'https://signalhouse.app' },
+  { name: 'Modulr', logo: '/platforms/modulr.jpg', url: 'https://modulr402.com' },
 ];
 
 export default function PartnerTicker() {
@@ -23,7 +34,7 @@ export default function PartnerTicker() {
           100% { transform: translateX(-50%); }
         }
         .partner-scroll-track {
-          animation: partner-scroll 20s linear infinite;
+          animation: partner-scroll 36s linear infinite;
         }
       `}</style>
       <p className="text-center text-xs text-zinc-500 uppercase tracking-widest mb-6">
