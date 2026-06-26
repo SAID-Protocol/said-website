@@ -3,7 +3,7 @@
   "description": "The official SAID Protocol assistant — answers questions about registering, verifying, reputation and the Trust Score, the SAID Passport, grants, and integrating SAID. Runs on Pod (usepod.ai).",
   "website": "https://www.saidprotocol.com",
   "twitter": "saidinfra",
-  "image": "https://www.saidprotocol.com/logo-dark.png",
+  "image": "https://www.saidprotocol.com/agent-avatar.png",
   "skills": ["support", "documentation", "onboarding"],
   "serviceTypes": ["ASSISTANT"]
 }
