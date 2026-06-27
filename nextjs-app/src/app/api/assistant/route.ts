@@ -40,7 +40,7 @@ async function loadDocs(): Promise<string> {
   if (docsCache) return docsCache;
   const pub = path.join(process.cwd(), 'public');
   const parts: string[] = [];
-  for (const file of ['skill.md', 'INTEGRATION.md']) {
+  for (const file of ['skill.md', 'INTEGRATION.md', 'reputation.md']) {
     try {
       parts.push(`### ${file}\n\n${await readFile(path.join(pub, file), 'utf8')}`);
     } catch {
@@ -51,19 +51,56 @@ async function loadDocs(): Promise<string> {
   return docsCache;
 }
 
-function systemPrompt(docs: string): string {
+// Live top-reputation agents, injected so the bot knows the current leaderboard.
+// Dynamic, so cached with a short TTL rather than forever; on any failure we fall
+// back to the last good value (or empty) and never block the response.
+let lbCache: { text: string; at: number } | null = null;
+const LB_TTL_MS = 5 * 60_000;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadLeaderboard(): Promise<string> {
+  if (lbCache && Date.now() - lbCache.at < LB_TTL_MS) return lbCache.text;
+  try {
+    const res = await fetch('https://api.saidprotocol.com/api/agents/top?by=reputation&limit=10', {
+      headers: { accept: 'application/json' },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return lbCache?.text ?? '';
+    const data = await res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const agents: any[] = Array.isArray(data) ? data : data.agents ?? data.leaderboard ?? [];
+    const lines = agents.slice(0, 10).map((a, i) => {
+      const score = a.reputationScore ?? a.trustScore?.score;
+      const tier = a.trustScore?.tier ? `, ${a.trustScore.tier}` : '';
+      const verified = a.isVerified ? ' (verified)' : '';
+      const shown = typeof score === 'number' ? score.toFixed(1) : '?';
+      return `${i + 1}. ${a.name ?? 'Unnamed'} — score ${shown}${tier}${verified}`;
+    });
+    if (!lines.length) return lbCache?.text ?? '';
+    lbCache = { text: lines.join('\n'), at: Date.now() };
+    return lbCache.text;
+  } catch {
+    return lbCache?.text ?? '';
+  }
+}
+
+function systemPrompt(docs: string, leaderboard: string): string {
   return `You are the **SAID Assistant**, a SAID-verified AI agent embedded on the SAID Protocol website (saidprotocol.com).
 
 SAID is on-chain identity, reputation, and trust infrastructure for AI agents on Solana, plus a cross-chain agent-to-agent (A2A) messaging layer.
 
-Your job: help visitors register an agent, get verified, understand reputation/trust scoring, activity heartbeats, SAID Passports, the Grants program, the $SAID token, and integrate SAID into their own agents or platforms.
+Your job: help visitors register an agent, get verified, understand reputation/trust scoring (how the score and tiers work, what drives a high score), the leaderboard, activity heartbeats, SAID Passports, the Grants program, the $SAID token, and integrate SAID into their own agents or platforms.
 
 Rules:
 - Answer ONLY from the SAID knowledge base below. If something isn't covered, say you're not certain and point to the docs or @saidinfra — never invent prices, addresses, endpoints, or features.
+- For "who are the top agents / who's #1 / highest reputation" questions, use the LIVE LEADERBOARD below — it's the current truth. Explain *why* agents rank high using the reputation model (the five axes, hard-to-fake on-chain activity), not guesses about specific agents.
+- Never reveal exact reputation weights, thresholds, or the precise formula — those are kept private as an anti-gaming measure. Explain reputation conceptually (the axes and what directionally matters) only.
 - This is a small chat bubble, not a docs page. Keep answers SHORT — 2–4 sentences or a few short bullets — and lead with the direct answer. Do NOT use markdown headings (#, ##) or long multi-section responses; a brief bullet list or one short code snippet is fine only when it genuinely helps.
 - Be concrete with exact figures (register is free, ~0.002 SOL rent; verify is 0.01 SOL; passport 0.05 SOL; grants 1–5 SOL/mo) and real commands/links.
 - If asked something unrelated to SAID, briefly steer back.
 - You genuinely are a SAID-verified agent — own that, but stay helpful and grounded, never salesy.
+
+=== LIVE LEADERBOARD (current top agents by reputation, refreshed periodically) ===
+${leaderboard || '(leaderboard temporarily unavailable — describe how ranking works instead)'}
 
 === SAID KNOWLEDGE BASE ===
 ${docs}`;
@@ -114,6 +151,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const leaderboard = await loadLeaderboard();
+
   try {
     const res = await fetch(`${baseUrl.replace(/\/$/, '')}/chat/completions`, {
       method: 'POST',
@@ -122,7 +161,7 @@ export async function POST(req: NextRequest) {
         model,
         temperature: 0.3,
         max_tokens: 700,
-        messages: [{ role: 'system', content: systemPrompt(docs) }, ...history],
+        messages: [{ role: 'system', content: systemPrompt(docs, leaderboard) }, ...history],
       }),
     });
 
