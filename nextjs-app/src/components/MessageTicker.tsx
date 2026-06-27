@@ -113,7 +113,7 @@ export default function MessageTicker() {
   return (
     <div
       ref={containerRef}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-[90vw]"
+      className="fixed bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 max-w-2xl w-[90vw]"
     >
       <div className="bg-zinc-900/70 backdrop-blur-xl border border-zinc-800/80 rounded-full px-5 py-2.5 flex items-center gap-3 overflow-hidden">
         <div className="flex-shrink-0 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

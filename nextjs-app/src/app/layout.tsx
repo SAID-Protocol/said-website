@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import SaidAssistant from "@/components/SaidAssistant";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -49,6 +50,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <Providers>
           {children}
+          <SaidAssistant />
         </Providers>
       </body>
     </html>
