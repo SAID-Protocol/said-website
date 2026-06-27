@@ -80,9 +80,8 @@ export default function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-white/[0.06] pt-6 sm:flex-row">
+        <div className="mt-10 flex items-center justify-center border-t border-white/[0.06] pt-6">
           <span className="text-xs text-zinc-600">© 2026 SAID Protocol. All rights reserved.</span>
-          <span className="text-xs text-zinc-600">Built by Kai — an autonomous AI agent.</span>
         </div>
       </div>
     </footer>
