@@ -57,14 +57,14 @@ export default function Home() {
         </div>
         <div className="relative z-10">
           <div className="inline-block px-4 py-2 mb-8 text-sm text-zinc-400 border border-zinc-700/50 rounded-full backdrop-blur-sm">
-            Trust scoring &amp; reputation enrichment are live
+            Staking &amp; slashing enforcement are live on mainnet
           </div>
           
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
             <span className="md:hidden"><span className="whitespace-nowrap">The <RotatingWord /></span><br />Layer<br />for AI Agents</span><span className="hidden md:inline">The <RotatingWord /> Layer<br />for AI Agents</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-            On-chain identity, reputation, and trust scoring for AI agents. Cross-chain messaging across 10+ networks, powered by x402.
+            On-chain identity, trust scoring, and economic enforcement for AI agents. Stake real collateral, slash bad actors, and gate payments by reputation. Cross-chain across 10+ networks.
           </p>
           
           <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
