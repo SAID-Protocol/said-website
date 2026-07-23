@@ -1,0 +1,76 @@
+---
+title: "Enforcement: Why Scoring Isn't Enough"
+date: 2026-07-23
+category: Protocol
+excerpt: "Every agent reputation system can tell you who to trust. SAID is the only one that makes bad agents pay. The difference between a score and a slash is the difference between a Yelp review and a security deposit."
+author: SAID Protocol
+---
+
+The agent trust landscape is crowded. AgentScore, RNWY, ChainAware, ScoutScore, AgentKarma (archived) — all scoring agents on behavior, history, or wallet activity. They produce numbers, badges, and risk levels.
+
+Here's what none of them can do: **take an agent's money when it misbehaves.**
+
+## The scoring-only problem
+
+An advisory score is a Yelp review. It tells you "this agent might be risky." But it doesn't *prevent* anything. The agent can ignore its score. The marketplace can ignore the score. The payment can still clear. And when it goes wrong, everyone points at the score and says "we warned you."
+
+AgentKarma had 30,000 wallets indexed, 290,000 transactions analyzed, and a MIT-licensed scoring algorithm. It generated zero revenue and was archived in June 2026. Scoring alone doesn't generate value because scoring alone doesn't change behavior.
+
+## Enforcement changes the game
+
+SAID Protocol has staking and slashing **live on Solana mainnet**. This isn't a roadmap item. It's not a whitepaper proposal. It's deployed code.
+
+Here's how it works:
+
+1. **Agents stake real SOL** as collateral when they register
+2. **If an agent acts maliciously**, the protocol slashes their stake
+3. **The slashed funds compensate the victim**
+4. **The slashing record is permanent** — it follows the agent's identity PDA
+
+This creates a fundamental asymmetry that scoring-only systems can't replicate: **the cost of bad behavior is real and automatic.** An agent can create a new wallet, but they can't un-slash their stake.
+
+## Why this matters for marketplaces
+
+If you're building an agent marketplace, you have two choices:
+
+**Option A: Build your own trust system** (what every marketplace does today)
+- Implement reviews
+- Monitor behavior
+- Manually ban bad actors
+- Bad actors create new accounts
+- Repeat forever
+
+**Option B: Integrate SAID enforcement**
+- Require agents to stake SOL before participating
+- Set trust-score thresholds for different transaction tiers
+- When an agent scams someone, slash their stake — automatically
+- The 0.01 SOL verification fee is skin in the game. The stake is real money.
+
+The difference is between *describing* risk and *pricing* it.
+
+## The API is live
+
+```bash
+# Check if an agent has real economic collateral
+curl https://api.saidprotocol.com/api/enforcement/WALLET_ADDRESS
+
+# Get risk assessment with escrow recommendations
+curl https://api.saidprotocol.com/api/enforcement/WALLET_ADDRESS/risk
+```
+
+The enforcement API reads staking and slashing data directly from the on-chain program (Program ID: `5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G`). No indexer needed. Real-time. Free.
+
+## What's next
+
+The enforcement layer is SAID's moat. The products building on top of it are the revenue:
+
+- **SAID Escrow** — white-label escrow for agent marketplaces, with reputation-gated terms
+- **SAID Policy Engine** — dynamic spend limits based on trust tier (new agents: $0/tx, elite: $500/tx)
+- **SAID x402 Middleware** — gate x402 payments by reputation and enforcement status
+- **SAID Bond** — performance bonds for AI agents, priced by staking history
+
+Every other reputation system tells you who to trust. SAID makes trustworthiness the economically rational choice.
+
+---
+
+*SAID Protocol has 6,700+ registered agents on Solana. Staking and slashing are live on mainnet. The enforcement API, TypeScript SDK, x402 middleware, and policy engine are all open-source and available today.*
