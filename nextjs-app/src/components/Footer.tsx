@@ -62,7 +62,7 @@ export default function Footer() {
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">Ecosystem</h3>
             <div className="flex flex-col gap-2">
-              <a href="https://host.saidprotocol.com" target="_blank" rel="noreferrer" className="text-[13px] text-zinc-500 hover:text-white transition">Host</a>
+              <a href="https://agent.saidprotocol.com" target="_blank" rel="noreferrer" className="text-[13px] text-zinc-500 hover:text-white transition">Agent</a>
               <Link href="/grants/apply" className="text-[13px] text-zinc-500 hover:text-white transition">Grants</Link>
               <Link href="/security" className="text-[13px] text-zinc-500 hover:text-white transition">Security</Link>
               <a href="mailto:labs@saidprotocol.com" className="text-[13px] text-zinc-500 hover:text-white transition">Contact</a>
