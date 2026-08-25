@@ -3,6 +3,7 @@ import SaidFooter from "@/components/said/SaidFooter";
 import HeroMark from "@/components/said/HeroMark";
 import DotSeam from "@/components/said/DotSeam";
 import CtaDots from "@/components/said/CtaDots";
+import EcosystemTicker from "@/components/said/EcosystemTicker";
 import Link from "next/link";
 
 async function getStats() {
@@ -55,6 +56,8 @@ export default async function Home() {
           <div className="l">PER TRUST SCREEN</div>
         </div>
       </div>
+
+      <EcosystemTicker />
 
       <DotSeam style={{ marginTop: "clamp(40px,7vh,72px)" }} />
 
