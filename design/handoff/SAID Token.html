@@ -1,0 +1,287 @@
+<!-- @dsCard group="Pages" name="$SAID Token" subtitle="Token page: burns, treasury, streaming grants" -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>$SAID Token · SAID Protocol</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#efece4; --ink:#101010; --dim:#5c5a54; --faint:#a09d95;
+    --line:rgba(16,16,16,.12); --navbg:rgba(246,244,239,.85);
+  }
+  html[data-theme="dark"]{
+    --bg:#101010; --card:#191917; --ink:#f2f0ec; --dim:#a3a09a; --faint:#6b6963;
+    --line:rgba(255,255,255,.12); --navbg:rgba(16,16,16,.8);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{background:var(--bg);color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  body,nav,.cellgrid .cell,.btn,.navcta,.themebtn,.band,.ctaCard{transition:background-color .5s,color .5s,border-color .5s}
+  ::selection{background:var(--ink);color:var(--bg)}
+  a{color:inherit;text-decoration:none}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+
+  nav{position:sticky;top:0;z-index:10;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+    padding:14px clamp(20px,4vw,48px);background:var(--navbg);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .logo{font-weight:700;font-size:15px;letter-spacing:.02em;display:flex;align-items:center;gap:10px;position:relative}
+  .logo img{height:26px;width:26px;display:block}
+  .logo .lw{position:absolute;left:0;opacity:0;transition:opacity .5s}
+  .logo .lb{opacity:1;transition:opacity .5s}
+  html[data-theme="dark"] .logo .lb{opacity:0}
+  html[data-theme="dark"] .logo .lw{opacity:1}
+  .navlinks{display:flex;gap:30px;font-size:13.5px;color:var(--dim);justify-self:center}
+  .navlinks a:hover{color:var(--ink)}
+  .navlinks a.on{color:var(--ink)}
+  .navright{display:flex;align-items:center;gap:14px;justify-self:end}
+  .navcta{padding:9px 18px;background:var(--ink);color:var(--bg);border-radius:99px;font-size:13px;font-weight:500}
+  .navcta:hover{opacity:.75}
+  .themebtn{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;position:relative;color:var(--ink)}
+  .themebtn:hover{border-color:var(--ink)}
+  .themebtn svg{position:absolute;transition:opacity .4s,transform .5s}
+  .themebtn .sun{opacity:1}.themebtn .moon{opacity:0;transform:rotate(-60deg)}
+  html[data-theme="dark"] .themebtn .sun{opacity:0;transform:rotate(60deg)}
+  html[data-theme="dark"] .themebtn .moon{opacity:1;transform:rotate(0)}
+
+  .hero{max-width:1280px;margin:0 auto;padding:clamp(48px,8vh,90px) clamp(20px,4vw,48px) 0}
+  .kick{font-size:12px;letter-spacing:.16em;color:var(--faint)}
+  .hero h1{margin-top:16px;font-size:clamp(34px,4.6vw,64px);font-weight:500;letter-spacing:-.03em;line-height:1.05}
+  .hero .lede{margin-top:18px;font-size:16px;line-height:1.65;color:var(--dim);max-width:52ch}
+  .addr{display:flex;align-items:center;gap:14px;margin-top:28px;border:1px solid var(--line);border-radius:14px;
+    padding:14px 18px;max-width:640px;flex-wrap:wrap}
+  .addr .l{font-size:11px;letter-spacing:.14em;color:var(--faint);white-space:nowrap}
+  .addr code{font-size:12.5px;word-break:break-all;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+  .copy{font-size:11px;letter-spacing:.06em;color:var(--faint);background:none;border:1px solid var(--line);
+    border-radius:99px;padding:5px 12px;cursor:pointer;font-family:inherit;margin-left:auto}
+  .copy:hover{color:var(--ink);border-color:var(--ink)}
+
+  .dotdiv{display:block;width:100%;max-width:1280px;margin:0 auto;height:64px}
+
+  .sect{max-width:1280px;margin:0 auto;padding:clamp(40px,7vh,72px) clamp(20px,4vw,48px)}
+  .sect .no{font-size:13px;color:var(--faint);letter-spacing:.04em}
+  .sect h2{margin-top:12px;font-size:clamp(26px,3.2vw,42px);font-weight:500;letter-spacing:-.03em;max-width:22ch}
+  .sect .sub{margin-top:12px;font-size:15px;line-height:1.7;color:var(--dim);max-width:56ch}
+  .sect .sub b{color:var(--ink);font-weight:500}
+
+  .burnrow{margin-top:clamp(28px,4vh,44px);display:grid;grid-template-columns:repeat(3,1fr)}
+  .burn{padding:0 26px;border-left:1px solid var(--line)}
+  .burn:first-child{border-left:0;padding-left:0}
+  .burn .n{font-size:clamp(28px,3.2vw,44px);font-weight:500;letter-spacing:-.03em}
+  .burn .l{margin-top:8px;font-size:11.5px;letter-spacing:.16em;color:var(--faint)}
+  .burnnote{margin-top:26px;font-size:13px;color:var(--faint);line-height:1.7;max-width:60ch}
+  .burnnote a{color:var(--dim);border-bottom:1px solid var(--line)}
+  .burnnote a:hover{color:var(--ink);border-color:var(--ink)}
+
+  .cellgrid{margin-top:clamp(28px,4vh,44px);display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+    border:1px solid var(--line);border-radius:20px;overflow:hidden}
+  .cell{background:var(--bg);padding:32px 30px}
+  .cell .pct{font-size:clamp(30px,3.4vw,46px);font-weight:500;letter-spacing:-.03em}
+  .cell h4{margin-top:10px;font-size:15px;font-weight:600}
+  .cell p{margin-top:8px;font-size:13.5px;line-height:1.65;color:var(--dim);max-width:40ch}
+
+  .band{background:var(--card)}
+  .bandInner{max-width:1280px;margin:0 auto;padding:clamp(56px,9vh,100px) clamp(20px,4vw,48px)}
+  .gsteps{margin-top:clamp(28px,4vh,44px);display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(20px,3vw,40px)}
+  .gstep .gno{font-size:12px;letter-spacing:.1em;color:var(--faint)}
+  .gstep h4{margin-top:10px;font-size:16px;font-weight:600}
+  .gstep p{margin-top:8px;font-size:13.5px;line-height:1.65;color:var(--dim)}
+  .gfacts{margin-top:clamp(28px,4vh,40px);display:flex;gap:12px;flex-wrap:wrap}
+  .pill{border:1px solid var(--line);border-radius:99px;padding:9px 18px;font-size:13px;color:var(--dim)}
+  .pill b{color:var(--ink);font-weight:500;margin-right:8px}
+  .btn{display:inline-block;margin-top:32px;padding:14px 30px;border-radius:99px;font-size:14px;font-weight:500;
+    background:var(--ink);color:var(--bg)}
+  .btn:hover{opacity:.8}
+
+  .why{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(24px,4vw,56px);margin-top:clamp(28px,4vh,44px)}
+  .why h4{font-size:16px;font-weight:600}
+  .why p{margin-top:8px;font-size:14px;line-height:1.7;color:var(--dim)}
+
+  .cta{padding:clamp(24px,4vw,48px);max-width:1440px;margin:0 auto}
+  .ctaCard{position:relative;background:var(--ink);color:var(--bg);border-radius:32px;overflow:hidden;
+    padding:clamp(70px,10vh,120px) clamp(24px,4vw,64px);text-align:center;
+    transform:scale(.94) translateY(30px);opacity:.6;transition:transform .9s cubic-bezier(.16,1,.3,1),opacity .9s,background-color .5s,color .5s}
+  .ctaCard.in{transform:none;opacity:1}
+  .ctaCard>*:not(#ctadots):not(.plus){position:relative}
+  .ctaCard .plus{position:absolute;font-size:22px;font-weight:300;opacity:.45;font-family:Helvetica,sans-serif}
+  .plus.tl{top:22px;left:28px}.plus.tr{top:22px;right:28px}.plus.bl{bottom:18px;left:28px}.plus.br{bottom:18px;right:28px}
+  #ctadots{position:absolute;inset:0;width:100%;height:100%}
+  .ctaCard h2{font-size:clamp(28px,3.6vw,48px);font-weight:500;letter-spacing:-.03em}
+  .ctaCard p{margin:16px auto 0;max-width:44ch;font-size:15px;line-height:1.65;opacity:.65}
+  .ctaCard .btn{background:var(--bg);color:var(--ink);margin-top:28px}
+
+  footer{border-top:1px solid var(--line);padding:26px clamp(20px,4vw,48px);display:flex;
+    justify-content:space-between;gap:20px;font-size:12.5px;color:var(--faint);flex-wrap:wrap}
+  footer .links{display:flex;gap:22px}
+  footer a:hover{color:var(--ink)}
+
+  .rv{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+  .rv.in{opacity:1;transform:none}
+  @media (max-width:860px){
+    .burnrow,.why,.gsteps{grid-template-columns:1fr}
+    .cellgrid{grid-template-columns:1fr}
+    .burn{border-left:0;border-top:1px solid var(--line);padding:18px 0}
+    .burn:first-child{border-top:0}
+    .gsteps{gap:28px}
+    .navlinks{display:none}
+  }
+</style>
+
+<nav>
+  <a class="logo" href="SAID Home.html"><img class="lb" src="assets/logo-black.png" alt=""><img class="lw" src="assets/logo-white.png" alt=""><span>SAID</span></a>
+  <div class="navlinks"><a href="SAID Directory.html">Directory</a><a href="SAID Docs.html">Docs</a><a class="on" href="#">$SAID</a><a href="SAID Agent.html">Agent</a></div>
+  <div class="navright"><button class="themebtn" title="Toggle dark mode" onclick="toggleTheme()"><svg class="sun" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3.2"></circle><line x1="8" y1="0.8" x2="8" y2="2.6"></line><line x1="8" y1="13.4" x2="8" y2="15.2"></line><line x1="0.8" y1="8" x2="2.6" y2="8"></line><line x1="13.4" y1="8" x2="15.2" y2="8"></line><line x1="2.9" y1="2.9" x2="4.2" y2="4.2"></line><line x1="11.8" y1="11.8" x2="13.1" y2="13.1"></line><line x1="2.9" y1="13.1" x2="4.2" y2="11.8"></line><line x1="11.8" y1="4.2" x2="13.1" y2="2.9"></line></svg><svg class="moon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 9.8A6 6 0 0 1 6.2 2.5a6 6 0 1 0 7.3 7.3Z"></path></svg></button><a class="navcta" href="SAID Create Agent.html">Register an agent</a></div>
+</nav>
+
+<div class="hero">
+  <div class="kick">THE TOKEN · SOLANA</div>
+  <h1>$SAID</h1>
+  <p class="lede">Funding the AI agent ecosystem through streaming grants and sustainable treasury growth.</p>
+  <div class="addr"><span class="l">TOKEN ADDRESS</span><code>4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump</code><button class="copy">COPY</button></div>
+</div>
+
+<canvas class="dotdiv" style="margin-top:clamp(32px,5vh,56px)"></canvas>
+
+<div class="sect">
+  <div class="no mono rv">01 / BUYBACKS &amp; BURNS</div>
+  <h2 class="rv">Bought back weekly. Burned forever.</h2>
+  <p class="sub rv">A portion of treasury revenue buys $SAID off the open market and burns it, reducing circulating supply over time. <b>Funded by 20% of platform revenue plus 10% of creator rewards.</b> Day and amount announced on X ahead of each burn.</p>
+  <div class="burnrow rv">
+    <div class="burn"><div class="n" data-live="burned">—</div><div class="l">TOTAL BURNED</div></div>
+    <div class="burn"><div class="n" data-live="bought">—</div><div class="l">BOUGHT BACK</div></div>
+    <div class="burn"><div class="n" data-live="count">—</div><div class="l">BURNS EXECUTED</div></div>
+  </div>
+  <p class="burnnote rv">Live figures load from the treasury. <a href="https://solscan.io/account/2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH">Platform revenue on Solscan ↗</a></p>
+</div>
+
+<canvas class="dotdiv"></canvas>
+
+<div class="sect">
+  <div class="no mono rv">02 / TREASURY MECHANICS</div>
+  <h2 class="rv">A treasury built to outlast the chart.</h2>
+  <p class="sub rv">Funded by the initial <b>30% dev buy</b> and ongoing creator rewards from trading volume.</p>
+  <div class="cellgrid rv">
+    <div class="cell"><div class="pct">15%</div><h4>Locked for 1 year</h4><p>Long-term commitment. Cannot be sold or moved for 12 months.</p></div>
+    <div class="cell"><div class="pct">15%</div><h4>Liquid treasury</h4><p>Immediate deployment for grants, LP provision, and development.</p></div>
+    <div class="cell" style="grid-column:1/-1"><h4>Ongoing creator rewards</h4><p style="max-width:64ch">Trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.</p></div>
+  </div>
+</div>
+
+<div class="band"><div class="bandInner">
+  <div class="no mono rv">03 / GRANTS PROGRAM</div>
+  <h2 class="rv">Streamed, not lump sum.</h2>
+  <p class="sub rv">Operational funding for verified AI agents. Streaming protects the treasury and ensures agents deliver consistent value.</p>
+  <div class="gsteps rv">
+    <div class="gstep"><div class="gno mono">1</div><h4>Get verified</h4><p>Register your agent and get the verified badge (0.01 SOL).</p></div>
+    <div class="gstep"><div class="gno mono">2</div><h4>Apply</h4><p>Describe your agent, what it does, and your funding needs.</p></div>
+    <div class="gstep"><div class="gno mono">3</div><h4>Review</h4><p>Selection based on quality, impact, and feasibility. Applications are free.</p></div>
+    <div class="gstep"><div class="gno mono">4</div><h4>Stream activated</h4><p>SOL vests continuously over the grant period. Cancelable if delivery stops.</p></div>
+  </div>
+  <div class="gfacts rv">
+    <span class="pill"><b>1–5 SOL/mo</b>Typical grant</span>
+    <span class="pill"><b>3–6 months</b>Duration</span>
+    <span class="pill"><b>Merit-based</b>No pay-to-win</span>
+  </div>
+  <a class="btn rv" href="SAID Grants.html">Apply for a grant</a>
+</div></div>
+
+<div class="sect">
+  <div class="no mono rv">04 / WHY THIS MATTERS</div>
+  <div class="why rv">
+    <div><h4>Lower barriers</h4><p>Operational funding removes financial friction. Build great agents without worrying about gas fees and RPC costs.</p></div>
+    <div><h4>Self-sustaining</h4><p>More trading, bigger treasury, more funded agents, more adoption. The flywheel compounds.</p></div>
+    <div><h4>Merit-based</h4><p>Applications are free. Selection is based on quality, impact, and what you're building.</p></div>
+  </div>
+</div>
+
+<div class="cta">
+  <div class="ctaCard" id="ctaCard">
+    <canvas id="ctadots"></canvas>
+    <span class="plus tl">+</span><span class="plus tr">+</span><span class="plus bl">+</span><span class="plus br">+</span>
+    <h2>Build on the treasury.</h2>
+    <p>Verified agents can apply for streaming grants today. Free to apply, streamed on approval.</p>
+    <a class="btn" href="SAID Grants.html">Apply for a grant</a>
+  </div>
+</div>
+
+<footer>
+  <span>© 2026 SAID Protocol</span>
+  <span class="links"><a href="SAID Home.html">Protocol</a><a href="SAID Docs.html">Docs</a><a href="SAID Agent.html">Agent</a><a href="#">X</a><a href="#">Discord</a></span>
+</footer>
+
+<script>
+function applyTheme(v){if(v==='dark')document.documentElement.dataset.theme='dark';else delete document.documentElement.dataset.theme}
+function toggleTheme(){const v=document.documentElement.dataset.theme==='dark'?'light':'dark';localStorage.setItem('said-theme',v);applyTheme(v)}
+applyTheme(localStorage.getItem('said-theme'));
+document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',()=>{
+const host=b.parentElement;const t=[...host.childNodes].filter(n=>n!==b&&n.nodeName==='CODE').map(n=>n.textContent).join('').trim();
+navigator.clipboard.writeText(t);b.textContent='COPIED';setTimeout(()=>b.textContent='COPY',1200)}));
+// reveals
+const rvEls=[...document.querySelectorAll('.rv,.ctaCard')];
+function reveal(){for(let i=rvEls.length-1;i>=0;i--){const el=rvEls[i];
+if(el.getBoundingClientRect().top<innerHeight*.88){el.classList.add('in');rvEls.splice(i,1)}}}
+addEventListener('scroll',reveal,{passive:true});addEventListener('load',reveal);reveal();
+// noise engine
+const G3=[[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+const P=[151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
+const perm=new Array(512).fill(0).map((_,i)=>P[i&255]);
+function n3(x,y,z){const F=1/3,Gc=1/6,s=(x+y+z)*F,i=Math.floor(x+s),j=Math.floor(y+s),k=Math.floor(z+s),
+t=(i+j+k)*Gc,x0=x-(i-t),y0=y-(j-t),z0=z-(k-t);let i1,j1,k1,i2,j2,k2;
+if(x0>=y0){if(y0>=z0){i1=1;j1=0;k1=0;i2=1;j2=1;k2=0}else if(x0>=z0){i1=1;j1=0;k1=0;i2=1;j2=0;k2=1}else{i1=0;j1=0;k1=1;i2=1;j2=0;k2=1}}
+else{if(y0<z0){i1=0;j1=0;k1=1;i2=0;j2=1;k2=1}else if(x0<z0){i1=0;j1=1;k1=0;i2=0;j2=1;k2=1}else{i1=0;j1=1;k1=0;i2=1;j2=1;k2=0}}
+const x1=x0-i1+Gc,y1=y0-j1+Gc,z1=z0-k1+Gc,x2=x0-i2+2*Gc,y2=y0-j2+2*Gc,z2=z0-k2+2*Gc,
+x3=x0-1+3*Gc,y3=y0-1+3*Gc,z3=z0-1+3*Gc,ii=i&255,jj=j&255,kk=k&255;
+let n=0,t0=.6-x0*x0-y0*y0-z0*z0;
+if(t0>=0){t0*=t0;const g=G3[perm[ii+perm[jj+perm[kk]]]%12];n+=t0*t0*(g[0]*x0+g[1]*y0+g[2]*z0)}
+let t1=.6-x1*x1-y1*y1-z1*z1;
+if(t1>=0){t1*=t1;const g=G3[perm[ii+i1+perm[jj+j1+perm[kk+k1]]]%12];n+=t1*t1*(g[0]*x1+g[1]*y1+g[2]*z1)}
+let t2=.6-x2*x2-y2*y2-z2*z2;
+if(t2>=0){t2*=t2;const g=G3[perm[ii+i2+perm[jj+j2+perm[kk+k2]]]%12];n+=t2*t2*(g[0]*x2+g[1]*y2+g[2]*z2)}
+let t3=.6-x3*x3-y3*y3-z3*z3;
+if(t3>=0){t3*=t3;const g=G3[perm[ii+1+perm[jj+1+perm[kk+1]]]%12];n+=t3*t3*(g[0]*x3+g[1]*y3+g[2]*z3)}
+return 32*n}
+const dpr=Math.min(2,devicePixelRatio||1);
+// dot seams
+const divs=[...document.querySelectorAll('canvas.dotdiv')].map(c=>({c,x:c.getContext('2d')}));
+let dt=Math.random()*10;
+function dsize(){for(const d of divs){const r=d.c.getBoundingClientRect();
+d.c.width=Math.round(r.width*dpr);d.c.height=Math.round(64*dpr)}}
+addEventListener('resize',dsize);dsize();
+(function drender(){requestAnimationFrame(drender);
+dt+=.012;
+const dark=document.documentElement.dataset.theme==='dark';
+divs.forEach((d,di)=>{
+const r=d.c.getBoundingClientRect();
+if(r.width===0||r.bottom<0||r.top>innerHeight)return;
+if(d.c.width===0)dsize();
+const Wd=d.c.width,Hd=d.c.height,SPD=11*dpr;
+const cols=Math.ceil(Wd/SPD),rows=Math.ceil(Hd/SPD);
+d.x.clearRect(0,0,Wd,Hd);
+for(let rr=0;rr<rows;rr++)for(let cc=0;cc<cols;cc++){
+const n=n3(cc/cols*3+di*7,rr/rows*1.2,dt*.15);
+const v=Math.min(1,Math.max(0,(n+1)*.5));
+const ey=1-Math.abs((rr+0.5)/rows*2-1);
+const ex=Math.min(1,Math.min(cc,cols-1-cc)/(cols*.18));
+const a=(.05+v*.3)*ey*ex;
+if(a<.02)continue;
+d.x.beginPath();d.x.arc(cc*SPD+SPD/2,rr*SPD+SPD/2,(0.5+v*1.5)*dpr,0,Math.PI*2);
+d.x.fillStyle=`hsla(40,${dark?4:6}%,${dark?Math.round(30+v*50):Math.round(64-v*50)}%,${a})`;
+d.x.fill()}})
+})();
+// CTA ambient dots
+const ccv=document.getElementById('ctadots'),ccx=ccv.getContext('2d');
+let cW=0,cH=0,ct=0;
+function csize(){const r=ccv.getBoundingClientRect();cW=ccv.width=Math.round(r.width*dpr);cH=ccv.height=Math.round(r.height*dpr)}
+addEventListener('resize',csize);csize();
+(function crender(){requestAnimationFrame(crender);
+const r=ccv.getBoundingClientRect();if(r.bottom<0||r.top>innerHeight)return;
+if(cW===0)csize();
+ct+=.012;const SP2=16*dpr;
+const cols=Math.ceil(cW/SP2),rows=Math.ceil(cH/SP2);
+const dark=document.documentElement.dataset.theme==='dark';
+ccx.clearRect(0,0,cW,cH);
+for(let rr=0;rr<rows;rr++)for(let cc=0;cc<cols;cc++){
+const n=n3(cc/cols*2.2,rr/rows*2.2,ct*.14);
+const v=Math.min(1,Math.max(0,(n+1)*.5));
+ccx.beginPath();ccx.arc(cc*SP2,rr*SP2,(0.5+v*1.4)*dpr,0,Math.PI*2);
+ccx.fillStyle=dark?`hsla(40,6%,20%,${.04+v*.12})`:`hsla(40,10%,90%,${.04+v*.12})`;
+ccx.fill()}
+})();
+</script>
