@@ -34,9 +34,9 @@ const shortWallet = (w: string) => `${w.slice(0, 4)}…${w.slice(-4)}`;
 // Tier tints for the champion-card dot fields: hue + saturation carry the
 // tier; lightness/alpha adapt to the card's effective background.
 const TIER_TINT: Record<string, { h: number; s: number }> = {
-  platinum: { h: 220, s: 14 },
+  platinum: { h: 252, s: 36 },
   gold: { h: 42, s: 72 },
-  silver: { h: 214, s: 12 },
+  silver: { h: 214, s: 16 },
   bronze: { h: 24, s: 62 },
 };
 
@@ -70,9 +70,10 @@ function ChampDots({ tier, inverted }: { tier: string; inverted?: boolean }) {
       // effective background flips with both rank and theme.
       const dark = document.documentElement.dataset.theme === 'dark';
       const bgIsDark = inverted ? !dark : dark;
-      const l = bgIsDark ? 66 : 46;
-      const baseA = inverted ? 0.07 : 0.1;
-      const ampA = inverted ? 0.18 : 0.26;
+      // light backgrounds swallow faint dots — go darker and denser there
+      const l = bgIsDark ? 66 : 40;
+      const baseA = bgIsDark ? 0.07 : 0.12;
+      const ampA = bgIsDark ? 0.18 : 0.3;
       x!.clearRect(0, 0, w, h);
       for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) {
         const v = (Math.sin(cc * 0.7 + tt) + Math.cos(rr * 0.9 + tt * 1.3) + 2) / 4;
