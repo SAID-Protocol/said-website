@@ -22,7 +22,9 @@ html {
 }
 
 html, body {
-  overflow-x: hidden;
+  /* clip, not hidden: overflow-x:hidden makes body a scroll container and
+     silently breaks position:sticky (docs sidebar, said nav) */
+  overflow-x: clip;
 }
 
 body {
