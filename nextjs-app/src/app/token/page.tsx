@@ -79,7 +79,7 @@ export default async function TokenPage() {
         <p className="sub rv">Funded by the initial <b>30% dev buy</b> and ongoing creator rewards from trading volume.</p>
         <div className="cellgrid rv tk">
           <div className="cell"><div className="pct">15%</div><h4>Locked for 1 year</h4><p>Long-term commitment. Cannot be sold or moved for 12 months.</p></div>
-          <div className="cell"><div className="pct">15%</div><h4>Liquid treasury</h4><p>Immediate deployment for grants, LP provision, and development.</p></div>
+          <div className="cell"><div className="pct">10%</div><h4>Liquid treasury</h4><p>Immediate deployment for grants, LP provision, and development.</p></div>
           <div className="cell" style={{ gridColumn: '1/-1' }}>
             <h4>Ongoing creator rewards</h4>
             <p style={{ maxWidth: '64ch' }}>Trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.</p>
