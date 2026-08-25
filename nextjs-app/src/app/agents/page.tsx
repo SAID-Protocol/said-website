@@ -327,7 +327,7 @@ function DirectoryInner() {
         .said-dir .dstats .n{font-size:clamp(24px,2.8vw,38px);font-weight:500;letter-spacing:-.03em}
         .said-dir .dstats .l{margin-top:6px;font-size:11px;letter-spacing:.16em;color:var(--faint)}
         .said-dir .top3{max-width:1280px;margin:clamp(24px,3vh,36px) auto 0;padding:0 clamp(20px,4vw,48px);display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-        .said-dir .champ{position:relative;border-radius:24px;padding:30px 28px 26px;overflow:hidden;border:1px solid var(--line);background:var(--card)}
+        .said-dir .champ{position:relative;border-radius:24px;padding:30px 28px 26px;overflow:hidden;border:1px solid var(--line);background:var(--card);display:flex;flex-direction:column}
         .said-dir .champ.first{background:var(--ink);color:var(--bg);border-color:var(--ink)}
         .said-dir .champ canvas{position:absolute;inset:0;width:100%;height:100%}
         .said-dir .champ>*:not(canvas){position:relative}
@@ -336,9 +336,9 @@ function DirectoryInner() {
         .said-dir .champ .crown{position:absolute;top:24px;right:26px;font-size:20px;font-weight:300;opacity:.4;font-family:Helvetica,sans-serif}
         .said-dir .champ h4{margin-top:16px;font-size:clamp(18px,1.8vw,22px);font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
         .said-dir .champ.first .vbadge{background:var(--bg);color:var(--ink)}
-        .said-dir .champ .desc{margin-top:8px;font-size:13px;line-height:1.6;color:var(--dim);min-height:42px;max-width:34ch}
+        .said-dir .champ .desc{margin-top:8px;margin-bottom:22px;font-size:13px;line-height:1.6;color:var(--dim);min-height:42px;max-width:34ch}
         .said-dir .champ.first .desc{color:inherit;opacity:.6}
-        .said-dir .champ .foot{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between}
+        .said-dir .champ .foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between}
         .said-dir .champ.first .foot{border-top-color:rgba(128,128,128,.35)}
         .said-dir .champ .sc{font-size:clamp(24px,2.4vw,32px);font-weight:500;letter-spacing:-.03em}
         .said-dir .champ .sc i{font-style:normal;font-size:12px;font-weight:400;color:var(--faint);margin-left:4px;letter-spacing:0}
