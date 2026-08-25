@@ -15,8 +15,17 @@ export default function SaidFx() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // reveals — rect-based so fast jumps can't skip them
-    const rvEls = [...document.querySelectorAll<HTMLElement>(".rv,.ctaCard")];
+    // reveals — rect-based so fast jumps can't skip them. Elements can arrive
+    // late (client pages render after data fetches), so a MutationObserver
+    // keeps the watch list current.
+    const seen = new Set<HTMLElement>();
+    let rvEls: HTMLElement[] = [];
+    function collect() {
+      document.querySelectorAll<HTMLElement>(".rv,.ctaCard").forEach((el) => {
+        if (!seen.has(el)) { seen.add(el); rvEls.push(el); }
+      });
+    }
+    collect();
     function reveal() {
       for (let i = rvEls.length - 1; i >= 0; i--) {
         const el = rvEls[i];
@@ -26,10 +35,16 @@ export default function SaidFx() {
         }
       }
     }
+    const mo = new MutationObserver(() => { collect(); reveal(); countCheck(); });
+    mo.observe(document.body, { childList: true, subtree: true });
 
     // stats count-up — same rect-based trigger
     const fmt = (n: number) => n.toLocaleString("en-US");
-    const cuEls = [...document.querySelectorAll<HTMLElement>("[data-count]")];
+    const cuSeen = new Set<HTMLElement>();
+    let cuEls: HTMLElement[] = [];
+    document.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
+      cuSeen.add(el); cuEls.push(el);
+    });
     function countCheck() {
       for (let i = cuEls.length - 1; i >= 0; i--) {
         const el = cuEls[i];
@@ -72,6 +87,7 @@ export default function SaidFx() {
     });
 
     return () => {
+      mo.disconnect();
       removeEventListener("scroll", onScroll);
       copies.forEach((b, i) => b.removeEventListener("click", handlers[i]));
     };

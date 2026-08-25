@@ -1,126 +1,96 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import SaidNav from '@/components/said/SaidNav';
+import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
+import CtaDots from '@/components/said/CtaDots';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import AsciiBackground from '@/components/AsciiBackground';
-import TrustBadge from '@/components/TrustBadge';
-
-interface TrustScore {
-  score: number;
-  tier: string;
-  badges: string[];
-  sources: string[];
-  identity: number;
-  activity: number;
-  economic: number;
-  ecosystem: number;
-  longevity: number;
-  fairscale: number;
-  computedAt: string;
-}
-
-interface Agent {
-  wallet: string;
-  name: string;
-  description: string;
-  isVerified: boolean;
-  registeredAt: string;
-  skills?: string[];
-  reputationScore?: number;
-  feedbackCount?: number;
-  lastActivity?: string;
-  registrationSource?: string | null;
-  website?: string | null;
-  image?: string | null;
-  trustScore?: TrustScore | null;
-}
-
-const TIER_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  platinum: { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
-  gold: { bg: 'bg-amber-500/10', text: 'text-amber-400', border: 'border-amber-500/30' },
-  silver: { bg: 'bg-zinc-400/10', text: 'text-zinc-300', border: 'border-zinc-400/30' },
-  bronze: { bg: 'bg-orange-600/10', text: 'text-orange-400', border: 'border-orange-600/30' },
-  unverified: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30' },
-};
 
 const PAGE_SIZE = 50;
 
-function AgentsContent() {
+interface Agent {
+  wallet: string;
+  name?: string;
+  description?: string;
+  image?: string;
+  isVerified?: boolean;
+  registeredAt?: string;
+  activityCount?: number;
+  skills?: string[];
+  reputationScore?: number;
+  trustScore?: { score?: number; tier?: string };
+}
+
+type SortBy = 'reputation' | 'newest' | 'active';
+
+const score = (a: Agent) => a.trustScore?.score ?? a.reputationScore ?? 0;
+const tier = (a: Agent) => (a.trustScore?.tier || 'unranked').toUpperCase();
+const initials = (a: Agent) =>
+  (a.name || a.wallet).split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
+const shortWallet = (w: string) => `${w.slice(0, 4)}…${w.slice(-4)}`;
+
+/** Sine-shimmer dots inside the #1 champion card (from the handoff). */
+function ChampDots() {
+  const ref = useRef<HTMLCanvasElement | null>(null);
+  useEffect(() => {
+    const c = ref.current;
+    if (!c) return;
+    const x = c.getContext('2d');
+    if (!x) return;
+    const dp = Math.min(2, devicePixelRatio || 1);
+    let w = 0, h = 0, tt = Math.random() * 10, raf = 0;
+    function sz() {
+      const r = c!.getBoundingClientRect();
+      w = c!.width = Math.round(r.width * dp);
+      h = c!.height = Math.round(r.height * dp);
+    }
+    addEventListener('resize', sz);
+    sz();
+    (function rn() {
+      raf = requestAnimationFrame(rn);
+      const r = c!.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > innerHeight) return;
+      if (w === 0) sz();
+      tt += 0.012;
+      const SP = 15 * dp;
+      const cols = Math.ceil(w / SP), rows = Math.ceil(h / SP);
+      x!.clearRect(0, 0, w, h);
+      for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) {
+        const v = (Math.sin(cc * 0.7 + tt) + Math.cos(rr * 0.9 + tt * 1.3) + 2) / 4;
+        x!.beginPath();
+        x!.arc(cc * SP, rr * SP, (0.4 + v * 1.2) * dp, 0, Math.PI * 2);
+        x!.fillStyle = `hsla(40,10%,90%,${0.03 + v * 0.09})`;
+        x!.fill();
+      }
+    })();
+    return () => { cancelAnimationFrame(raf); removeEventListener('resize', sz); };
+  }, []);
+  return <canvas ref={ref} aria-hidden="true" />;
+}
+
+function DirectoryInner() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  // Hydrate state from URL once at mount; future URL changes won't re-init.
   const initialSearch = searchParams.get('search') ?? '';
   const initialSortRaw = searchParams.get('sort');
-  const initialSort: 'reputation' | 'newest' | 'active' =
+  const initialSort: SortBy =
     initialSortRaw === 'newest' || initialSortRaw === 'active' ? initialSortRaw : 'reputation';
 
   const [agents, setAgents] = useState<Agent[]>([]);
+  const [top3, setTop3] = useState<Agent[]>([]);
+  const [stats, setStats] = useState<{ total: number; verified: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [sortBy, setSortBy] = useState<SortBy>(initialSort);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(initialSearch);
-  const [sortBy, setSortBy] = useState<'reputation' | 'newest' | 'active'>(initialSort);
-  const [totalAgents, setTotalAgents] = useState(0);
-  const [verifiedCount, setVerifiedCount] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
-  const mountedRef = useRef(false);
 
-  const fetchStats = () => {
-    fetch('/api/stats')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.totalAgents) setTotalAgents(data.totalAgents);
-        if (data.verifiedAgents) setVerifiedCount(data.verifiedAgents);
-      })
-      .catch(() => {});
-  };
-
-  // One-time init: fetch first batch, set up visibility-gated polling + SSE.
-  // Intentionally no deps — URL changes shouldn't tear this down.
+  // Keep the URL in sync so refresh / share-link preserves the view
   useEffect(() => {
-    fetchStats();
-    fetchAgents(0, true);
-
-    const interval = setInterval(() => {
-      // Don't burn requests while the tab is in the background.
-      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-        fetchStats();
-      }
-    }, 30000);
-
-    let es: EventSource | null = null;
-    try {
-      es = new EventSource('https://api.saidprotocol.com/api/events');
-      // Refresh the agent list when something new arrives. Stats will catch
-      // up on the next 30s tick — no need for a duplicate stats fetch here.
-      es.onmessage = () => {
-        fetchAgents(0, true);
-      };
-      es.onerror = () => {
-        es?.close();
-        es = null;
-      };
-    } catch {}
-
-    return () => {
-      clearInterval(interval);
-      es?.close();
-    };
-  }, []);
-
-  // Keep the URL in sync with searchQuery + sortBy so refresh / share-link
-  // round-trips cleanly. Skip the very first run so we don't clobber a URL
-  // the user just landed on.
-  useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true;
-      return;
-    }
     const params = new URLSearchParams();
     if (searchQuery) params.set('search', searchQuery);
     if (sortBy !== 'reputation') params.set('sort', sortBy);
@@ -128,15 +98,21 @@ function AgentsContent() {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }, [searchQuery, sortBy, router, pathname]);
 
-  // Re-fetch from offset 0 when sort or search changes — API does both
-  // server-side, so we can't just refilter/resort what's loaded. Debounce
-  // the search trigger so we don't fire a request on every keystroke.
-  const initialSortRef = useRef(true);
+  // stats band + top-3 spotlight
   useEffect(() => {
-    if (initialSortRef.current) {
-      initialSortRef.current = false;
-      return;
-    }
+    fetch('/api/stats')
+      .then((r) => r.json())
+      .then((d) => d?.totalAgents && setStats({ total: d.totalAgents, verified: d.verifiedAgents }))
+      .catch(() => {});
+    fetch('/api/agents/top?by=reputation&limit=3')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d?.agents?.length && setTop3(d.agents.slice(0, 3)))
+      .catch(() => {});
+  }, []);
+
+  // Re-fetch from offset 0 when sort or search changes — API does both
+  // server-side. Debounced so we don't fire on every keystroke.
+  useEffect(() => {
     const t = setTimeout(() => {
       fetchAgents(0, true, sortBy, searchQuery);
     }, searchQuery ? 300 : 0);
@@ -146,8 +122,8 @@ function AgentsContent() {
 
   const fetchAgents = async (
     fetchOffset: number,
-    reset: boolean = false,
-    sortOverride?: typeof sortBy,
+    reset = false,
+    sortOverride?: SortBy,
     searchOverride?: string,
   ) => {
     try {
@@ -157,10 +133,8 @@ function AgentsContent() {
       const effectiveSort = sortOverride ?? sortBy;
       const effectiveSearch = (searchOverride ?? searchQuery).trim();
 
-      // "Top Reputation" (no active search) → the v0.8-ranked leaderboard,
-      // which orders by ReputationPosterior (composite) rather than the stored
-      // v0.6 reputationScore. Top-N, not paginated. Falls back to the directory
-      // endpoint on any failure so the view can never break.
+      // "Top reputation" (no search) → the v0.8-ranked leaderboard endpoint,
+      // falling back to the directory endpoint on any failure.
       if (effectiveSort === 'reputation' && !effectiveSearch) {
         try {
           const topRes = await fetch('/api/agents/top?by=reputation&limit=100');
@@ -179,9 +153,6 @@ function AgentsContent() {
         }
       }
 
-      // Directory listing (newest / active / search / reputation fallback).
-      // search + sort=newest + sort=active are all handled server-side, so the
-      // loaded order is authoritative and we don't re-sort on the client.
       const params = new URLSearchParams();
       params.set('limit', String(PAGE_SIZE));
       params.set('offset', String(fetchOffset));
@@ -193,11 +164,7 @@ function AgentsContent() {
       if (res.ok) {
         const data = await res.json();
         const newAgents = data.agents || [];
-        if (reset) {
-          setAgents(newAgents);
-        } else {
-          setAgents(prev => [...prev, ...newAgents]);
-        }
+        setAgents((prev) => (reset ? newAgents : [...prev, ...newAgents]));
         setOffset(fetchOffset + newAgents.length);
         setHasMore(newAgents.length === PAGE_SIZE);
       }
@@ -209,346 +176,212 @@ function AgentsContent() {
     }
   };
 
-  const loadMore = () => {
-    fetchAgents(offset, false);
-  };
+  const q = searchQuery.toLowerCase();
+  const shown = agents.filter(
+    (a) =>
+      a.name?.toLowerCase().includes(q) ||
+      a.description?.toLowerCase().includes(q) ||
+      a.wallet.toLowerCase().includes(q) ||
+      a.skills?.some((s) => s.toLowerCase().includes(q)),
+  );
 
-  const filteredAgents = agents.filter(agent => {
-    const query = searchQuery.toLowerCase();
-    return (
-      agent.name?.toLowerCase().includes(query) ||
-      agent.description?.toLowerCase().includes(query) ||
-      agent.wallet.toLowerCase().includes(query) ||
-      agent.skills?.some(skill => skill.toLowerCase().includes(query))
-    );
-  });
-
-  // Order is set server-side (sort=newest/active, default reputation), so we
-  // keep the API order here and only apply the client-side search filter.
-  // Note: 'active' = lastActiveAt desc, nulls last — handled by the API.
-  const sortedAgents = filteredAgents;
-
-  // Top 3 (by reputation, no active search) get the new SAID passport badge in a
-  // podium — #1 featured, #2/#3 beneath — and are lifted out of the grid below.
-  const showPodium = sortBy === 'reputation' && !searchQuery.trim() && sortedAgents.length >= 3;
-  const gridAgents = showPodium ? sortedAgents.slice(3) : sortedAgents;
+  const MEDALS = ['01', '02', '03'];
 
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <AsciiBackground agentThemed />
-      <div className="relative z-10">
-      <Navbar />
-      
-      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">Agent Directory</h1>
-          <p className="text-xl text-zinc-400 mb-8">Discover verified AI agents on Solana</p>
-          
-          {/* Search */}
-          <div className="max-w-xl mx-auto mb-6">
-            <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
-              </svg>
-              <input
-                type="text"
-                placeholder="Search agents by name, description, or wallet..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-zinc-900/50 border border-zinc-700/50 rounded-xl focus:outline-none focus:border-zinc-500 transition backdrop-blur-sm text-white placeholder-zinc-500"
-              />
-            </div>
-          </div>
+    <div className="said-page said-dir">
+      <SaidNav />
 
-          {/* Sort toggles */}
-          <div className="flex gap-2 justify-center">
-            <button
-              onClick={() => setSortBy('reputation')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'reputation' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white border border-zinc-700/50 backdrop-blur-sm'}`}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
-              </svg>
-              Top Reputation
-            </button>
-            <button
-              onClick={() => setSortBy('newest')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'newest' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white border border-zinc-700/50 backdrop-blur-sm'}`}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-              </svg>
-              Newest
-            </button>
-            <button
-              onClick={() => setSortBy('active')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${sortBy === 'active' ? 'bg-white text-black' : 'bg-zinc-900/50 text-zinc-400 hover:text-white border border-zinc-700/50 backdrop-blur-sm'}`}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-              </svg>
-              Most Active
-            </button>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-20">
-            <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin"></div>
-            <p className="mt-4 text-zinc-400">Loading agents...</p>
-          </div>
-        ) : (
-          <>
-            {/* Stats */}
-            <div className="flex justify-center gap-8 mb-12 text-sm">
-              <div className="text-center">
-                <div className="text-2xl font-bold">{totalAgents.toLocaleString()}</div>
-                <div className="text-zinc-400">Total Agents</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">{verifiedCount.toLocaleString()}</div>
-                <div className="text-zinc-400">Verified</div>
-              </div>
-            </div>
-
-            {/* Top 3 — podium with the new SAID passport badge */}
-            {showPodium && (
-              <section className="mb-12">
-                <div className="flex items-baseline gap-2 mb-4">
-                  <h2 className="text-lg font-semibold">Top Reputation</h2>
-                  <span className="text-xs text-zinc-500">— the most trusted agents on SAID</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <PodiumCard agent={sortedAgents[0]} rank={1} />
-                  <PodiumCard agent={sortedAgents[1]} rank={2} />
-                  <PodiumCard agent={sortedAgents[2]} rank={3} />
-                </div>
-              </section>
-            )}
-
-            {/* Agents */}
-            {gridAgents.length > 0 && (
-              <section>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {gridAgents.map(agent => (
-                    <AgentCard key={agent.wallet} agent={agent} />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Load More */}
-            {hasMore && (
-              <div className="text-center mt-10 space-y-2">
-                <button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  className="px-8 py-3 bg-zinc-900/50 border border-zinc-700/50 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loadingMore ? (
-                    <span className="flex items-center gap-2">
-                      <span className="inline-block w-4 h-4 border-2 border-zinc-600 border-t-white rounded-full animate-spin"></span>
-                      Loading...
-                    </span>
-                  ) : (
-                    `Load More · ${agents.length.toLocaleString()} of ${totalAgents.toLocaleString()} shown`
-                  )}
-                </button>
-              </div>
-            )}
-
-            {filteredAgents.length === 0 && (
-              <div className="text-center py-20">
-                <svg className="mx-auto mb-4 text-zinc-600" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="11" cy="11" r="8"/>
-                  <path d="m21 21-4.35-4.35"/>
-                </svg>
-                <p className="text-zinc-400">No agents found matching your search.</p>
-              </div>
-            )}
-          </>
-        )}
-      </main>
-
-      <Footer />
+      <div className="hero">
+        <div className="kick">THE REGISTRY · LIVE ON SOLANA</div>
+        <h1>Agent Directory</h1>
+        <p className="lede">
+          Every registered agent, its verification status, and its reputation. Earned
+          on-chain, visible to anyone.
+        </p>
       </div>
+
+      <div className="dstats">
+        <div className="stat"><div className="n">{stats ? stats.total.toLocaleString('en-US') : '—'}</div><div className="l">AGENTS</div></div>
+        <div className="stat"><div className="n">{stats ? stats.verified.toLocaleString('en-US') : '—'}</div><div className="l">VERIFIED</div></div>
+        <div className="stat"><div className="n">10</div><div className="l">CHAINS</div></div>
+        <div className="stat"><div className="n">0.001<span style={{ color: 'var(--faint)' }}> USDC</span></div><div className="l">PER TRUST SCREEN</div></div>
+      </div>
+
+      <DotSeam style={{ marginTop: 'clamp(24px,3vh,36px)' }} />
+
+      {top3.length === 3 && (
+        <>
+          <div className="sect" style={{ paddingBottom: 0, paddingTop: 0 }}>
+            <div className="no mono rv">MOST TRUSTED · EARNED ON-CHAIN</div>
+          </div>
+          <div className="top3">
+            {top3.map((a, i) => (
+              <div key={a.wallet} className={`champ rv${i === 0 ? ' first' : ''}`}>
+                {i === 0 && (<><ChampDots /><span className="crown">+</span></>)}
+                <span className="medal mono">{MEDALS[i]} · {tier(a)}</span>
+                <h4>{a.name || shortWallet(a.wallet)}{a.isVerified && <span className="vbadge">✓</span>}</h4>
+                <p className="desc">{a.description || 'Registered agent on the SAID registry.'}</p>
+                <div className="foot">
+                  <span className="sc">{score(a).toFixed(1)}<i>/ 100</i></span>
+                  <span className="tierl mono">{(a.activityCount ?? 0).toLocaleString('en-US')} ACTIONS</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      <div className="tools">
+        <div className="search">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.4">
+            <circle cx="6.5" cy="6.5" r="5" /><line x1="10.5" y1="10.5" x2="14" y2="14" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by name or wallet"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="tabs">
+          {(
+            [['reputation', 'Top reputation'], ['newest', 'Newest'], ['active', 'Most active']] as Array<[SortBy, string]>
+          ).map(([key, label]) => (
+            <button key={key} className={`tab${sortBy === key ? ' on' : ''}`} onClick={() => setSortBy(key)}>
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="list">
+        <div className="thead">
+          <span>#</span><span></span><span>AGENT</span><span>DESCRIPTION</span><span>WALLET</span><span>TRUST</span><span>TIER</span><span style={{ textAlign: 'right' }}>ACTIONS</span>
+        </div>
+        <div>
+          {loading ? (
+            <div className="empty mono">LOADING THE REGISTRY…</div>
+          ) : shown.length === 0 ? (
+            <div className="empty mono">NO AGENTS MATCH THAT SEARCH.</div>
+          ) : (
+            shown.map((a, i) => (
+              <Link href={`/agents/${a.wallet}`} key={a.wallet} className="row">
+                <span className="rank mono">{String(i + 1).padStart(2, '0')}</span>
+                <span className="av">
+                  {a.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={a.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ) : initials(a)}
+                </span>
+                <span className="name"><span>{a.name || shortWallet(a.wallet)}</span>{a.isVerified && <span className="vbadge">✓</span>}</span>
+                <span className="desc">{a.description || ''}</span>
+                <span className="wallet">{shortWallet(a.wallet)}</span>
+                <span className="meterrow">
+                  <span className="meter"><i style={{ width: `${Math.min(100, score(a))}%` }} /></span>
+                  <span className="score">{score(a).toFixed(1)}</span>
+                </span>
+                <span className="tierchip">{tier(a)}</span>
+                <span className="acts mono">{(a.activityCount ?? 0).toLocaleString('en-US')}</span>
+              </Link>
+            ))
+          )}
+        </div>
+      </div>
+      <div className="count">
+        {!loading && `${shown.length.toLocaleString('en-US')} AGENTS SHOWN`}
+      </div>
+      {hasMore && !loading && (
+        <div style={{ maxWidth: 1280, margin: '26px auto 0', padding: '0 clamp(20px,4vw,48px)' }}>
+          <button className="btn" onClick={() => fetchAgents(offset, false)} disabled={loadingMore}>
+            {loadingMore ? 'Loading…' : 'Load more'}
+          </button>
+        </div>
+      )}
+
+      <div className="ctawrap">
+        <div className="ctaCard">
+          <CtaDots />
+          <span className="plus tl">+</span><span className="plus tr">+</span>
+          <span className="plus bl">+</span><span className="plus br">+</span>
+          <h2>Get listed.</h2>
+          <p>Registration is free and takes one command. Verification is 0.1 SOL, once.</p>
+          <Link className="btn" href="/create-agent">Register an agent</Link>
+        </div>
+      </div>
+
+      <SaidFooter />
+
+      <style>{`
+        .said-dir .tools{max-width:1280px;margin:clamp(28px,4vh,40px) auto 0;padding:0 clamp(20px,4vw,48px);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+        .said-dir .search{flex:1;min-width:220px;position:relative}
+        .said-dir .search input{padding-left:42px;border-radius:99px}
+        .said-dir .search svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--faint)}
+        .said-dir .tabs{display:flex;gap:8px}
+        .said-dir .tab{padding:10px 18px;border-radius:99px;border:1px solid var(--line);background:none;color:var(--dim);font-size:13px;font-family:inherit;cursor:pointer}
+        .said-dir .tab:hover{border-color:var(--ink);color:var(--ink)}
+        .said-dir .tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+        .said-dir .list{max-width:1280px;margin:clamp(20px,3vh,32px) auto 0;padding:0 clamp(20px,4vw,48px)}
+        .said-dir .dstats{max-width:1280px;margin:clamp(28px,4vh,40px) auto 0;padding:0 clamp(20px,4vw,48px);display:grid;grid-template-columns:repeat(4,1fr)}
+        .said-dir .dstats .stat{padding:0 26px;border-left:1px solid var(--line)}
+        .said-dir .dstats .stat:first-child{border-left:0;padding-left:0}
+        .said-dir .dstats .n{font-size:clamp(24px,2.8vw,38px);font-weight:500;letter-spacing:-.03em}
+        .said-dir .dstats .l{margin-top:6px;font-size:11px;letter-spacing:.16em;color:var(--faint)}
+        .said-dir .top3{max-width:1280px;margin:clamp(24px,3vh,36px) auto 0;padding:0 clamp(20px,4vw,48px);display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+        .said-dir .champ{position:relative;border-radius:24px;padding:30px 28px 26px;overflow:hidden;border:1px solid var(--line);background:var(--card)}
+        .said-dir .champ.first{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+        .said-dir .champ canvas{position:absolute;inset:0;width:100%;height:100%}
+        .said-dir .champ>*:not(canvas){position:relative}
+        .said-dir .champ .medal{font-size:11px;letter-spacing:.18em;color:var(--faint)}
+        .said-dir .champ.first .medal{color:inherit;opacity:.55}
+        .said-dir .champ .crown{position:absolute;top:24px;right:26px;font-size:20px;font-weight:300;opacity:.4;font-family:Helvetica,sans-serif}
+        .said-dir .champ h4{margin-top:16px;font-size:clamp(18px,1.8vw,22px);font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:9px}
+        .said-dir .champ.first .vbadge{background:var(--bg);color:var(--ink)}
+        .said-dir .champ .desc{margin-top:8px;font-size:13px;line-height:1.6;color:var(--dim);min-height:42px;max-width:34ch}
+        .said-dir .champ.first .desc{color:inherit;opacity:.6}
+        .said-dir .champ .foot{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between}
+        .said-dir .champ.first .foot{border-top-color:rgba(128,128,128,.35)}
+        .said-dir .champ .sc{font-size:clamp(24px,2.4vw,32px);font-weight:500;letter-spacing:-.03em}
+        .said-dir .champ .sc i{font-style:normal;font-size:12px;font-weight:400;color:var(--faint);margin-left:4px;letter-spacing:0}
+        .said-dir .champ.first .sc i{color:inherit;opacity:.5}
+        .said-dir .champ .tierl{font-size:11px;letter-spacing:.16em;color:var(--faint)}
+        .said-dir .champ.first .tierl{color:inherit;opacity:.55}
+        .said-dir .thead,.said-dir .row{display:grid;grid-template-columns:44px 44px 1.7fr 1.2fr 1fr .8fr .8fr .7fr;gap:14px;align-items:center;padding:14px 18px}
+        .said-dir .thead{font-size:10.5px;letter-spacing:.16em;color:var(--faint);border-bottom:1px solid var(--line)}
+        .said-dir .row{border-bottom:1px solid var(--line);font-size:14px}
+        .said-dir .row:hover{background:var(--card)}
+        .said-dir .row .av{width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;overflow:hidden}
+        .said-dir .row .desc{font-size:12.5px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .said-dir .row .meterrow{display:flex;align-items:center;gap:8px}
+        .said-dir .row .meter{flex:1;max-width:64px;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+        .said-dir .row .meter i{display:block;height:100%;background:var(--ink);border-radius:2px}
+        .said-dir .row .rank{font-size:12px;color:var(--faint)}
+        .said-dir .row .name{font-weight:600;display:flex;align-items:center;gap:8px;min-width:0}
+        .said-dir .row .name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .said-dir .vbadge{flex:none;width:15px;height:15px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:9px}
+        .said-dir .row .wallet{font-size:12px;color:var(--faint);font-family:ui-monospace,"SF Mono",Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .said-dir .row .score{font-weight:500}
+        .said-dir .tierchip{font-size:11px;letter-spacing:.1em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:4px 12px;text-align:center;white-space:nowrap;justify-self:start}
+        .said-dir .row .acts{font-size:12.5px;color:var(--dim);text-align:right}
+        .said-dir .count{max-width:1280px;margin:14px auto 0;padding:0 clamp(20px,4vw,48px);font-size:12px;color:var(--faint);letter-spacing:.06em}
+        .said-dir .empty{padding:40px 18px;font-size:12px;letter-spacing:.1em;color:var(--faint)}
+        @media (max-width:860px){
+          .said-dir .thead{display:none}
+          .said-dir .row{grid-template-columns:44px 1fr auto;gap:10px}
+          .said-dir .row .rank,.said-dir .row .wallet,.said-dir .row .acts,.said-dir .row .desc,.said-dir .row .meterrow{display:none}
+          .said-dir .top3{grid-template-columns:1fr}
+          .said-dir .dstats{grid-template-columns:1fr 1fr;gap:18px 0}
+          .said-dir .dstats .stat{padding:0 18px}
+          .said-dir .dstats .stat:nth-child(odd){border-left:0;padding-left:0}
+        }
+      `}</style>
     </div>
   );
 }
 
-export default function AgentsPage() {
+export default function DirectoryPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex flex-col relative">
-        <AsciiBackground agentThemed />
-        <div className="relative z-10">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin"></div>
-            <p className="mt-4 text-zinc-400">Loading agents...</p>
-          </div>
-        </main>
-        <Footer />
-        </div>
-      </div>
-    }>
-      <AgentsContent />
+    <Suspense fallback={null}>
+      <DirectoryInner />
     </Suspense>
-  );
-}
-
-function timeAgoShort(dateStr: string): string {
-  if (!dateStr) return '';
-  const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60) return 'just now';
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)}d ago`;
-  return `${Math.floor(diff / 2592000)}mo ago`;
-}
-
-const RANK_STYLE: Record<number, { chip: string; glow: string }> = {
-  1: { chip: 'bg-amber-400/15 text-amber-300 border-amber-400/40', glow: 'shadow-[0_0_50px_-12px_rgba(251,191,36,0.45)]' },
-  2: { chip: 'bg-zinc-300/15 text-zinc-200 border-zinc-300/40', glow: '' },
-  3: { chip: 'bg-orange-500/15 text-orange-300 border-orange-500/40', glow: '' },
-};
-
-// Featured top-3 agent — wraps the SAID passport badge with a rank chip. Rendered
-// as an equal 3-up row by the parent; #1 carries a gold glow, #2/#3 silver/bronze.
-function PodiumCard({ agent, rank }: { agent: Agent; rank: number }) {
-  const r = RANK_STYLE[rank] ?? RANK_STYLE[3];
-  return (
-    <Link
-      href={`/agents/${agent.wallet}`}
-      className={`group relative block rounded-2xl transition-transform duration-300 hover:-translate-y-0.5 ${r.glow}`}
-    >
-      <span className={`absolute -top-2.5 left-3 z-10 px-2.5 py-0.5 text-[11px] font-bold rounded-full border backdrop-blur-md ${r.chip}`}>
-        #{rank}
-      </span>
-      <TrustBadge agent={agent} />
-    </Link>
-  );
-}
-
-function AgentCard({ agent }: { agent: Agent }) {
-  return (
-    <Link 
-      href={`/agents/${agent.wallet}`}
-      className="group block relative overflow-hidden rounded-xl bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 hover:border-zinc-600/80 transition-all duration-300 hover:shadow-lg hover:shadow-white/[0.02] hover:-translate-y-0.5"
-    >
-      {/* Top highlight line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-      
-      <div className="p-5">
-        {/* Header: Avatar + Name + Verified */}
-        <div className="flex items-start gap-3 mb-3">
-          <img
-            src={agent.image || `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
-            alt={agent.name || 'Agent'}
-            className="w-10 h-10 rounded-lg flex-shrink-0 object-cover bg-zinc-900"
-            onError={(e) => {
-              // Uploaded image failed to load — fall back to the generated avatar.
-              const fallback = `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`;
-              if (e.currentTarget.src !== fallback) e.currentTarget.src = fallback;
-            }}
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-sm truncate">{agent.name || 'Unnamed Agent'}</h3>
-              {agent.isVerified && (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 text-green-400">
-                  <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-                </svg>
-              )}
-            </div>
-            <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}…{agent.wallet.slice(-4)}</p>
-          </div>
-        </div>
-
-        {/* Description */}
-        <p className="text-zinc-400 text-xs leading-relaxed mb-4 line-clamp-2">{agent.description || 'No description provided.'}</p>
-
-        {/* Skills / Tags */}
-        {agent.skills && agent.skills.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {agent.skills.slice(0, 3).map(skill => (
-              <span key={skill} className="px-2 py-0.5 text-[10px] font-medium text-zinc-400 bg-white/5 border border-white/10 rounded-full">
-                {skill}
-              </span>
-            ))}
-            {agent.skills.length > 3 && (
-              <span className="px-2 py-0.5 text-[10px] text-zinc-500">+{agent.skills.length - 3}</span>
-            )}
-          </div>
-        )}
-
-        {/* Footer: Platform + Meta */}
-        <div className="flex items-center justify-between pt-3 border-t border-white/5">
-          <div className="flex items-center gap-2">
-            {agent.registrationSource === 'spawnr' && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Spawnr.io">
-                <img src="/platforms/spawnr.png" alt="Spawnr" className="w-3.5 h-3.5 rounded-full" />
-                <span className="text-zinc-400 text-[10px] font-medium">Spawnr</span>
-              </div>
-            )}
-            {(agent.registrationSource === 'clawpump' || agent.description?.includes('clawpump.tech')) && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Claw Pump">
-                <img src="/clawpump-logo.png" alt="Claw Pump" className="w-3.5 h-3.5 rounded-full" />
-                <span className="text-zinc-400 text-[10px] font-medium">Claw Pump</span>
-              </div>
-            )}
-            {(agent.registrationSource === 'said-hosting' || agent.description?.includes('said-hosting') || agent.description?.includes('host.saidprotocol')) && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Hosted on SAID">
-                <img src="/platforms/said-hosting.png" alt="SAID" className="w-3.5 h-3.5 rounded-full" />
-                <span className="text-zinc-400 text-[10px] font-medium">SAID Hosted</span>
-              </div>
-            )}
-            {(agent.registrationSource === 'atelier' || agent.description?.includes('atelier')) && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Atelier">
-                <img src="/platforms/atelier.jpg" alt="Atelier" className="w-3.5 h-3.5 rounded-full" />
-                <span className="text-zinc-400 text-[10px] font-medium">Atelier</span>
-              </div>
-            )}
-            {(agent.registrationSource === 'xona-orbit' || agent.website?.includes('orbit-agents.com') || agent.website?.includes('xona-agent.com') || agent.website?.includes('xona-orbit')) && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Launched on Xona Orbit">
-                <img src="/platforms/xona-orbit.png" alt="Xona Orbit" className="w-3.5 h-3.5 rounded-full" />
-                <span className="text-zinc-400 text-[10px] font-medium">Xona Orbit</span>
-              </div>
-            )}
-            {(agent.registrationSource === 'kausa' || agent.skills?.includes('maze-routing')) && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 border border-white/10 rounded-full" title="Powered by KausaOS">
-                <img src="/platforms/kausa.png" alt="KausaOS" className="w-3.5 h-3.5 rounded-full" />
-                <span className="text-zinc-400 text-[10px] font-medium">KausaOS</span>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-3 text-[10px] text-zinc-500">
-            {agent.trustScore && agent.trustScore.score > 0 ? (
-              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${TIER_COLORS[agent.trustScore.tier]?.bg || TIER_COLORS.unverified.bg} ${TIER_COLORS[agent.trustScore.tier]?.border || TIER_COLORS.unverified.border} border`} title={`Trust Score: ${agent.trustScore.score}/100 (${agent.trustScore.sources.join(' + ')})`}>
-                <span className={`font-bold text-[11px] ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unverified.text}`}>
-                  {agent.trustScore.score}
-                </span>
-                <span className={`text-[9px] uppercase font-medium ${TIER_COLORS[agent.trustScore.tier]?.text || TIER_COLORS.unverified.text}`}>
-                  {agent.trustScore.tier}
-                </span>
-              </div>
-            ) : agent.reputationScore != null && agent.reputationScore > 0 ? (
-              <div className="flex items-center gap-1" title="Reputation Score">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-                {agent.reputationScore}
-              </div>
-            ) : null}
-            {agent.registeredAt && (
-              <span title={new Date(agent.registeredAt).toLocaleDateString()}>
-                {timeAgoShort(agent.registeredAt)}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </Link>
   );
 }
