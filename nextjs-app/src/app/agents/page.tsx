@@ -31,17 +31,8 @@ const initials = (a: Agent) =>
   (a.name || a.wallet).split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
 const shortWallet = (w: string) => `${w.slice(0, 4)}…${w.slice(-4)}`;
 
-// Tier tints for the champion-card dot fields: hue + saturation carry the
-// tier; lightness/alpha adapt to the card's effective background.
-const TIER_TINT: Record<string, { h: number; s: number }> = {
-  platinum: { h: 252, s: 36 },
-  gold: { h: 42, s: 72 },
-  silver: { h: 214, s: 16 },
-  bronze: { h: 24, s: 62 },
-};
-
-/** Shimmering tier-tinted dot field inside a champion card. */
-function ChampDots({ tier, inverted }: { tier: string; inverted?: boolean }) {
+/** Neutral shimmering dot field inside the #1 champion card. */
+function ChampDots({ inverted }: { inverted?: boolean }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
   useEffect(() => {
     const c = ref.current;
@@ -49,7 +40,6 @@ function ChampDots({ tier, inverted }: { tier: string; inverted?: boolean }) {
     const x = c.getContext('2d');
     if (!x) return;
     const dp = Math.min(2, devicePixelRatio || 1);
-    const { h: hue, s: sat } = TIER_TINT[tier.toLowerCase()] ?? { h: 40, s: 6 };
     let w = 0, h = 0, tt = Math.random() * 10, raf = 0;
     function sz() {
       const r = c!.getBoundingClientRect();
@@ -70,21 +60,18 @@ function ChampDots({ tier, inverted }: { tier: string; inverted?: boolean }) {
       // effective background flips with both rank and theme.
       const dark = document.documentElement.dataset.theme === 'dark';
       const bgIsDark = inverted ? !dark : dark;
-      // light backgrounds swallow faint dots — go darker and denser there
-      const l = bgIsDark ? 66 : 40;
-      const baseA = bgIsDark ? 0.07 : 0.12;
-      const ampA = bgIsDark ? 0.18 : 0.3;
+      const l = bgIsDark ? 68 : 44;
       x!.clearRect(0, 0, w, h);
       for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) {
         const v = (Math.sin(cc * 0.7 + tt) + Math.cos(rr * 0.9 + tt * 1.3) + 2) / 4;
         x!.beginPath();
         x!.arc(cc * SP, rr * SP, (0.4 + v * 1.2) * dp, 0, Math.PI * 2);
-        x!.fillStyle = `hsla(${hue},${sat}%,${l}%,${baseA + v * ampA})`;
+        x!.fillStyle = `hsla(40,${bgIsDark ? 8 : 6}%,${l}%,${0.03 + v * 0.09})`;
         x!.fill();
       }
     })();
     return () => { cancelAnimationFrame(raf); removeEventListener('resize', sz); };
-  }, [tier, inverted]);
+  }, [inverted]);
   return <canvas ref={ref} aria-hidden="true" />;
 }
 
@@ -234,9 +221,8 @@ function DirectoryInner() {
           </div>
           <div className="top3">
             {top3.map((a, i) => (
-              <div key={a.wallet} className={`champ rv${i === 0 ? ' first' : ''}`}>
-                <ChampDots tier={tier(a)} inverted={i === 0} />
-                {i === 0 && <span className="crown">+</span>}
+              <div key={a.wallet} className={`champ rv t-${tier(a).toLowerCase()}${i === 0 ? ' first' : ''}`}>
+                {i === 0 && (<><ChampDots inverted /><span className="crown">+</span></>)}
                 <span className="medal mono">{MEDALS[i]} · {tier(a)}</span>
                 <h4>{a.name || shortWallet(a.wallet)}{a.isVerified && <span className="vbadge">✓</span>}</h4>
                 <p className="desc">{a.description || 'Registered agent on the SAID registry.'}</p>
@@ -359,7 +345,20 @@ function DirectoryInner() {
         .said-dir .champ.first .desc{color:inherit;opacity:.6}
         .said-dir .champ .foot{margin-top:auto;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between}
         .said-dir .champ.first .foot{border-top-color:rgba(128,128,128,.35)}
-        .said-dir .champ .sc{font-size:clamp(24px,2.4vw,32px);font-weight:500;letter-spacing:-.03em}
+        /* tier aura — glow color per tier, resolved against the card's
+           effective background (first card inverts, themes flip both) */
+        .said-dir .champ{--glow:var(--glow-l)}
+        html[data-theme="dark"] .said-dir .champ{--glow:var(--glow-d)}
+        .said-dir .champ.first{--glow:var(--glow-d)}
+        html[data-theme="dark"] .said-dir .champ.first{--glow:var(--glow-l)}
+        .said-dir .champ.t-platinum{--glow-l:hsla(252,60%,50%,.32);--glow-d:hsla(252,85%,72%,.42)}
+        .said-dir .champ.t-gold{--glow-l:hsla(42,85%,45%,.34);--glow-d:hsla(45,90%,62%,.42)}
+        .said-dir .champ.t-silver{--glow-l:hsla(214,32%,48%,.3);--glow-d:hsla(214,45%,76%,.36)}
+        .said-dir .champ.t-bronze{--glow-l:hsla(24,75%,42%,.32);--glow-d:hsla(26,80%,60%,.4)}
+        .said-dir .champ.t-unranked{--glow-l:transparent;--glow-d:transparent}
+        .said-dir .champ .sc{font-size:clamp(24px,2.4vw,32px);font-weight:500;letter-spacing:-.03em;position:relative;z-index:0}
+        .said-dir .champ .sc::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:180px;height:96px;border-radius:50%;background:radial-gradient(closest-side,var(--glow),transparent 72%);filter:blur(12px);pointer-events:none;z-index:-1;animation:auraPulse 3.6s ease-in-out infinite}
+        @keyframes auraPulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.14)}}
         .said-dir .champ .sc i{font-style:normal;font-size:12px;font-weight:400;color:var(--faint);margin-left:4px;letter-spacing:0}
         .said-dir .champ.first .sc i{color:inherit;opacity:.5}
         .said-dir .champ .tierl{font-size:11px;letter-spacing:.16em;color:var(--faint)}
