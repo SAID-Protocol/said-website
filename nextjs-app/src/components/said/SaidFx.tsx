@@ -77,8 +77,16 @@ export default function SaidFx() {
     const copies = [...document.querySelectorAll<HTMLButtonElement>(".copy")];
     const handlers = copies.map((b) => {
       const h = () => {
-        const code = b.parentElement?.querySelector("code");
-        navigator.clipboard.writeText(code ? code.textContent!.trim() : "");
+        const host = b.parentElement;
+        const code = host?.querySelector("code");
+        let text = code?.textContent?.trim();
+        if (!text && host) {
+          // no <code> child (docs <pre> blocks) — copy the host minus buttons
+          const clone = host.cloneNode(true) as HTMLElement;
+          clone.querySelectorAll("button").forEach((x) => x.remove());
+          text = clone.textContent?.trim() ?? "";
+        }
+        navigator.clipboard.writeText(text ?? "");
         b.textContent = "COPIED";
         setTimeout(() => { b.textContent = "COPY"; }, 1200);
       };

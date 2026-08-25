@@ -5,8 +5,8 @@ import { noise3D, isDark, clampDpr } from "@/lib/simplex";
 
 let seamIndex = 0;
 
-/** 64px noise-dot canvas strip between sections — `.dotdiv` in the handoff. */
-export default function DotSeam({ style }: { style?: React.CSSProperties }) {
+/** Noise-dot canvas strip between sections — `.dotdiv` in the handoff. */
+export default function DotSeam({ style, height = 64 }: { style?: React.CSSProperties; height?: number }) {
   const ref = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function DotSeam({ style }: { style?: React.CSSProperties }) {
     function size() {
       const r = c!.getBoundingClientRect();
       c!.width = Math.round(r.width * dpr);
-      c!.height = Math.round(64 * dpr);
+      c!.height = Math.round(height * dpr);
     }
     addEventListener("resize", size);
     size();
