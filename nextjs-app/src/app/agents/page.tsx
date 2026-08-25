@@ -238,7 +238,7 @@ function DirectoryInner() {
                 <h4>{a.name || shortWallet(a.wallet)}{a.isVerified && <span className="vbadge">✓</span>}</h4>
                 <p className="desc">{a.description || 'Registered agent on the SAID registry.'}</p>
                 <div className="foot">
-                  <span className="sc">{score(a).toFixed(1)}<i>/ 100</i></span>
+                  <span className="sc"><span className="scn">{score(a).toFixed(1)}</span><i>/ 100</i></span>
                   {champStat(a) && <span className="tierl mono">{champStat(a)}</span>}
                 </div>
               </div>
@@ -367,8 +367,9 @@ function DirectoryInner() {
         .said-dir .champ.t-silver{--glow-l:hsla(214,32%,48%,.3);--glow-d:hsla(214,45%,76%,.36)}
         .said-dir .champ.t-bronze{--glow-l:hsla(24,75%,42%,.32);--glow-d:hsla(26,80%,60%,.4)}
         .said-dir .champ.t-unranked{--glow-l:transparent;--glow-d:transparent}
-        .said-dir .champ .sc{font-size:clamp(24px,2.4vw,32px);font-weight:500;letter-spacing:-.03em;position:relative;z-index:0}
-        .said-dir .champ .sc::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:180px;height:96px;border-radius:50%;background:radial-gradient(closest-side,var(--glow),transparent 72%);filter:blur(12px);pointer-events:none;z-index:-1;animation:auraPulse 3.6s ease-in-out infinite}
+        .said-dir .champ .sc{font-size:clamp(24px,2.4vw,32px);font-weight:500;letter-spacing:-.03em}
+        .said-dir .champ .scn{position:relative;z-index:0;display:inline-block}
+        .said-dir .champ .scn::before{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:150px;height:92px;border-radius:50%;background:radial-gradient(closest-side,var(--glow),transparent 72%);filter:blur(12px);pointer-events:none;z-index:-1;animation:auraPulse 3.6s ease-in-out infinite}
         @keyframes auraPulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.14)}}
         .said-dir .champ .sc i{font-style:normal;font-size:12px;font-weight:400;color:var(--faint);margin-left:4px;letter-spacing:0}
         .said-dir .champ.first .sc i{color:inherit;opacity:.5}
