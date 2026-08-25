@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import AsciiBackground from '@/components/AsciiBackground';
-import PostCard from '@/components/blog/PostCard';
+import Link from 'next/link';
+import SaidNav from '@/components/said/SaidNav';
+import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
 import { getAllPosts } from '@/lib/blog';
 
 const TITLE = 'Blog — SAID Protocol';
@@ -23,34 +23,56 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title: TITLE, description: DESCRIPTION },
 };
 
+function fmtDate(iso: string): string {
+  return new Date(iso + 'T00:00:00Z')
+    .toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })
+    .toUpperCase();
+}
+
 export default function BlogIndexPage() {
   const posts = getAllPosts();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <AsciiBackground />
+    <div className="said-page said-blog">
+      <SaidNav />
 
-      <main className="relative z-10 mx-auto w-full max-w-6xl flex-1 px-4 pb-16 pt-28 sm:px-8 sm:pt-32">
-        <header className="mb-12">
-          <h1 className="text-4xl font-bold sm:text-5xl">Blog</h1>
-          <p className="mt-3 max-w-2xl text-lg text-zinc-400">
-            Milestones, integrations, and the engineering behind verifiable identity for AI agents.
-          </p>
-        </header>
+      <div className="hero">
+        <div className="kick">NOTES FROM THE REGISTRY</div>
+        <h1>Blog</h1>
+        <p className="lede">Protocol updates, burns, grants, and what agents are building.</p>
+      </div>
 
+      <DotSeam style={{ marginTop: 'clamp(28px,4vh,44px)' }} />
+
+      <div className="posts">
         {posts.length === 0 ? (
-          <p className="text-zinc-500">No posts yet. Check back soon.</p>
+          <p style={{ color: 'var(--faint)' }}>No posts yet. Check back soon.</p>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <PostCard key={post.slug} post={post} />
-            ))}
-          </div>
+          posts.map((post) => (
+            <div className="post rv" key={post.slug}>
+              <span className="date mono">{fmtDate(post.date)}</span>
+              <div>
+                <h3><Link href={`/blog/${post.slug}`}>{post.title}</Link></h3>
+                <p>{post.excerpt}</p>
+                <span className="tag">{post.category.toUpperCase()}</span>
+              </div>
+            </div>
+          ))
         )}
-      </main>
+      </div>
 
-      <Footer />
+      <SaidFooter />
+
+      <style>{`
+        .said-blog .posts{max-width:900px;margin:0 auto;padding:clamp(28px,4vh,44px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+        .said-blog .post{display:grid;grid-template-columns:150px 1fr;gap:clamp(20px,3vw,44px);padding:clamp(26px,4vh,38px) 0;border-top:1px solid var(--line)}
+        .said-blog .post .date{font-size:12px;letter-spacing:.1em;color:var(--faint);padding-top:5px}
+        .said-blog .post h3{font-size:clamp(19px,2.2vw,26px);font-weight:500;letter-spacing:-.02em;line-height:1.25}
+        .said-blog .post h3 a:hover{color:var(--dim)}
+        .said-blog .post p{margin-top:8px;font-size:14px;line-height:1.65;color:var(--dim);max-width:56ch}
+        .said-blog .post .tag{display:inline-block;margin-top:12px;font-size:11px;letter-spacing:.14em;color:var(--faint)}
+        @media (max-width:700px){.said-blog .post{grid-template-columns:1fr;gap:8px}}
+      `}</style>
     </div>
   );
 }
