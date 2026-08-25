@@ -39,7 +39,7 @@ export default function BlogIndexPage() {
       <div className="hero">
         <div className="kick">NOTES FROM THE REGISTRY</div>
         <h1>Blog</h1>
-        <p className="lede">Protocol updates, burns, grants, and what agents are building.</p>
+        <p className="lede">Protocol updates, grants, and what agents are building.</p>
       </div>
 
       <DotSeam style={{ marginTop: 'clamp(28px,4vh,44px)' }} />

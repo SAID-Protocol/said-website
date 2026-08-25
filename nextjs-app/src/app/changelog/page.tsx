@@ -55,7 +55,7 @@ export default function ChangelogPage() {
       <div className="hero">
         <div className="kick">WHAT SHIPPED · NEWEST FIRST</div>
         <h1>Changelog</h1>
-        <p className="lede">Every protocol release, burn, and platform update.</p>
+        <p className="lede">Every protocol release and platform update.</p>
       </div>
 
       <DotSeam style={{ marginTop: 'clamp(28px,4vh,44px)' }} />

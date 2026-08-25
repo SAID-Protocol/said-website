@@ -4,34 +4,11 @@ import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
 import MarketCap from '@/components/MarketCap';
-import { fetchBurnsData } from '@/lib/burns';
-
-// ISR: regenerate at most every 6h. Burns are ~weekly so this is fresh enough,
-// and it caps Helius enhanced-tx usage instead of re-scanning on every request.
-// (Live market cap is a client component hitting DexScreener, unaffected.)
-export const revalidate = 21600;
 
 const TOKEN_ADDRESS = '4rWuWZei2iFNHYpnz5wjMeSvimsJcj5EgpSNvNS1pump';
 const TREASURY = '2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH';
 
-function compact(n: number): string {
-  if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
-  if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
-  return n.toLocaleString('en-US');
-}
-
-export default async function TokenPage() {
-  let burned = '—', bought = '—', count = '—';
-  try {
-    const d = await fetchBurnsData();
-    if (!d.error) {
-      burned = compact(d.totalBurned ?? 0);
-      bought = compact(d.totalBoughtBack ?? 0);
-      count = String(d.burnCount ?? 0);
-    }
-  } catch {}
-
+export default function TokenPage() {
   return (
     <div className="said-page said-token">
       <SaidNav />
@@ -51,30 +28,7 @@ export default async function TokenPage() {
       <DotSeam style={{ marginTop: 'clamp(32px,5vh,56px)' }} />
 
       <div className="sect">
-        <div className="no mono rv">01 / BUYBACKS &amp; BURNS</div>
-        <h2 className="rv">Bought back weekly. Burned forever.</h2>
-        <p className="sub rv">
-          A portion of treasury revenue buys $SAID off the open market and burns it, reducing
-          circulating supply over time. <b>Funded by 20% of platform revenue plus 10% of
-          creator rewards.</b> Day and amount announced on X ahead of each burn.
-        </p>
-        <div className="burnrow rv">
-          <div className="burn"><div className="n">{burned}</div><div className="l">TOTAL BURNED</div></div>
-          <div className="burn"><div className="n">{bought}</div><div className="l">BOUGHT BACK</div></div>
-          <div className="burn"><div className="n">{count}</div><div className="l">BURNS EXECUTED</div></div>
-        </div>
-        <p className="burnnote rv">
-          Live figures load from the treasury.{' '}
-          <a href={`https://solscan.io/account/${TREASURY}`} target="_blank" rel="noopener noreferrer">
-            Platform revenue on Solscan ↗
-          </a>
-        </p>
-      </div>
-
-      <DotSeam />
-
-      <div className="sect">
-        <div className="no mono rv">02 / TREASURY MECHANICS</div>
+        <div className="no mono rv">01 / TREASURY MECHANICS</div>
         <h2 className="rv">A treasury built to outlast the chart.</h2>
         <p className="sub rv">Funded by the initial <b>30% dev buy</b> and ongoing creator rewards from trading volume.</p>
         <div className="cellgrid rv tk">
@@ -85,11 +39,16 @@ export default async function TokenPage() {
             <p style={{ maxWidth: '64ch' }}>Trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.</p>
           </div>
         </div>
+        <p className="burnnote rv">
+          <a href={`https://solscan.io/account/${TREASURY}`} target="_blank" rel="noopener noreferrer">
+            Platform revenue on Solscan ↗
+          </a>
+        </p>
       </div>
 
       <div className="band">
         <div className="bandInner">
-          <div className="no mono rv">03 / GRANTS PROGRAM</div>
+          <div className="no mono rv">02 / GRANTS PROGRAM</div>
           <h2 className="rv bandH2">Streamed, not lump sum.</h2>
           <p className="sub rv bandSub">
             Operational funding for verified AI agents. Streaming protects the treasury and
@@ -111,7 +70,7 @@ export default async function TokenPage() {
       </div>
 
       <div className="sect">
-        <div className="no mono rv">04 / WHY THIS MATTERS</div>
+        <div className="no mono rv">03 / WHY THIS MATTERS</div>
         <div className="why rv">
           <div><h4>Lower barriers</h4><p>Operational funding removes financial friction. Build great agents without worrying about gas fees and RPC costs.</p></div>
           <div><h4>Self-sustaining</h4><p>More trading, bigger treasury, more funded agents, more adoption. The flywheel compounds.</p></div>
