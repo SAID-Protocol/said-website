@@ -310,27 +310,6 @@ await fetch('https://api.saidprotocol.com/api/feedback', {
           <p className="text-zinc-400 mb-6">Platforms building with SAID Protocol</p>
           
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Spawnr.io */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <div className="flex items-start gap-4 mb-4">
-                <img 
-                  src="/platforms/spawnr.png" 
-                  alt="Spawnr.io" 
-                  className="w-12 h-12 rounded-lg"
-                />
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Spawnr.io</h3>
-                  <p className="text-sm text-zinc-400 mb-3">AI agent launch platform with token deployment and bonding curves</p>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded">✓ SAID Integrated</span>
-                  </div>
-                </div>
-              </div>
-              <a href="https://spawnr.io" target="_blank" className="text-sm text-blue-400 hover:text-blue-300 transition">
-                Visit spawnr.io →
-              </a>
-            </div>
-
             {/* Torch Market */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
               <div className="flex items-start gap-4 mb-4">
