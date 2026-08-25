@@ -18,6 +18,7 @@ interface Agent {
   isVerified?: boolean;
   registeredAt?: string;
   activityCount?: number;
+  feedbackCount?: number;
   skills?: string[];
   reputationScore?: number;
   trustScore?: { score?: number; tier?: string };
@@ -26,6 +27,16 @@ interface Agent {
 type SortBy = 'reputation' | 'newest' | 'active';
 
 const score = (a: Agent) => a.trustScore?.score ?? a.reputationScore ?? 0;
+
+// Champion-card footer stat: prefer actions, fall back to on-chain feedback
+// signals, show nothing when both are zero ("0 ACTIONS" undercuts the card).
+const champStat = (a: Agent): string | null => {
+  const n = (v: number, word: string) =>
+    `${v.toLocaleString('en-US')} ${word}${v === 1 ? '' : 'S'}`;
+  if (a.activityCount) return n(a.activityCount, 'ACTION');
+  if (a.feedbackCount) return n(a.feedbackCount, 'SIGNAL');
+  return null;
+};
 const tier = (a: Agent) => (a.trustScore?.tier || 'unranked').toUpperCase();
 const initials = (a: Agent) =>
   (a.name || a.wallet).split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
@@ -228,7 +239,7 @@ function DirectoryInner() {
                 <p className="desc">{a.description || 'Registered agent on the SAID registry.'}</p>
                 <div className="foot">
                   <span className="sc">{score(a).toFixed(1)}<i>/ 100</i></span>
-                  <span className="tierl mono">{(a.activityCount ?? 0).toLocaleString('en-US')} ACTIONS</span>
+                  {champStat(a) && <span className="tierl mono">{champStat(a)}</span>}
                 </div>
               </div>
             ))}
@@ -351,8 +362,8 @@ function DirectoryInner() {
         html[data-theme="dark"] .said-dir .champ{--glow:var(--glow-d)}
         .said-dir .champ.first{--glow:var(--glow-d)}
         html[data-theme="dark"] .said-dir .champ.first{--glow:var(--glow-l)}
-        .said-dir .champ.t-platinum{--glow-l:hsla(252,60%,50%,.32);--glow-d:hsla(252,85%,72%,.42)}
-        .said-dir .champ.t-gold{--glow-l:hsla(42,85%,45%,.34);--glow-d:hsla(45,90%,62%,.42)}
+        .said-dir .champ.t-platinum{--glow-l:hsla(252,78%,54%,.46);--glow-d:hsla(252,85%,72%,.42)}
+        .said-dir .champ.t-gold{--glow-l:hsla(42,85%,45%,.38);--glow-d:hsla(45,90%,62%,.42)}
         .said-dir .champ.t-silver{--glow-l:hsla(214,32%,48%,.3);--glow-d:hsla(214,45%,76%,.36)}
         .said-dir .champ.t-bronze{--glow-l:hsla(24,75%,42%,.32);--glow-d:hsla(26,80%,60%,.4)}
         .said-dir .champ.t-unranked{--glow-l:transparent;--glow-d:transparent}
