@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
+import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
 import { API_URL, HOSTING_URL } from '@/lib/api';
 
@@ -221,8 +223,11 @@ export default function MyAgentsPage() {
         <Link className="btn fill" href="/create-agent">Register an agent</Link>
       </div>
 
+      <DotSeam style={{ marginBottom: 'clamp(20px,3vh,30px)' }} />
+
       {agents.length === 0 ? (
         <div className="emptycard">
+          <ShimmerDots />
           <h3>No agents yet</h3>
           <p>Register your first agent to get an on-chain identity and an API key.</p>
           <Link className="btn fill" style={{ marginTop: 22 }} href="/create-agent">Register an agent</Link>
@@ -237,6 +242,9 @@ export default function MyAgentsPage() {
               : '—';
             return (
               <div key={agent.id} className={`agentcard${agent.source === 'hosted' ? ' hosted' : ''}`}>
+                {/* live-wallet agents get the breathing field — same signal as
+                    the trust card: this one is active */}
+                {(agent.source === 'hosted' || key) && <ShimmerDots />}
                 <div className="ahead">
                   <span className="aav">{(agent.name || '?')[0].toUpperCase()}</span>
                   <div style={{ minWidth: 0, flex: 1 }}>
@@ -312,11 +320,13 @@ const mineStyles = `
   .said-mine .minehead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(24px,4vh,36px)}
   .said-mine .minehead h1{margin-top:12px;font-size:clamp(28px,3.4vw,42px);font-weight:500;letter-spacing:-.03em}
   .said-mine .seclabel{font-size:10.5px;letter-spacing:.16em;color:var(--faint)}
-  .said-mine .emptycard{border:1px solid var(--line);border-radius:20px;padding:64px 30px;text-align:center;background:var(--card)}
+  .said-mine .emptycard{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:20px;padding:64px 30px;text-align:center;background:var(--card)}
+  .said-mine .emptycard>*:not(canvas){position:relative}
   .said-mine .emptycard h3{font-size:18px;font-weight:500}
   .said-mine .emptycard p{margin:10px auto 0;font-size:14px;color:var(--dim);max-width:40ch;line-height:1.65}
   .said-mine .agentlist{display:grid;gap:14px}
-  .said-mine .agentcard{border:1px solid var(--line);border-radius:18px;padding:22px 24px;background:var(--card)}
+  .said-mine .agentcard{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:18px;padding:22px 24px;background:var(--card)}
+  .said-mine .agentcard>*:not(canvas){position:relative}
   .said-mine .agentcard.hosted{border-color:var(--ink)}
   .said-mine .ahead{display:flex;gap:16px;align-items:flex-start}
   .said-mine .aav{width:44px;height:44px;flex:none;border-radius:12px;border:1px solid var(--line);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600}

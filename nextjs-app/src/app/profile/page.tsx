@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
 import { API_URL } from '@/lib/api';
@@ -261,6 +262,11 @@ export default function ProfilePage() {
       <SaidNav />
 
       <main className="mewrap">
+        <div className="mehead">
+          <div className="kick">YOUR ACCOUNT</div>
+        </div>
+        <DotSeam style={{ marginBottom: 'clamp(20px,3vh,30px)' }} />
+
         <div className="megrid">
           {/* Identity card */}
           <div className="card usercard">
@@ -379,6 +385,7 @@ export default function ProfilePage() {
 
 const meStyles = `
   .said-me .mewrap{max-width:1180px;margin:0 auto;padding:clamp(32px,5vh,52px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .said-me .mehead .kick{font-size:12px;letter-spacing:.16em;color:var(--faint)}
   .said-me .megrid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:clamp(20px,3vw,32px);align-items:start}
   .said-me .mecol{display:grid;gap:16px;min-width:0}
   .said-me .card{border:1px solid var(--line);border-radius:18px;padding:24px 26px;background:var(--card);min-width:0}
