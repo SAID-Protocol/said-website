@@ -81,7 +81,11 @@ export function useAuth() {
       setLoading(false);
       loginInProgress.current = false;
     }
-  }, [user]);
+    // getAccessToken is deliberately excluded: Privy gives it a fresh identity
+    // each render, which would rebuild this callback (and re-fire the
+    // auto-login effect) on every pass.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, scheduleRetry]);
 
   // Auto-login when Privy is ready and user is authenticated
   // Only attempt ONCE per session to prevent infinite loops

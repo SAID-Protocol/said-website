@@ -55,7 +55,7 @@ export default function DotSeam({ style, height = 64 }: { style?: React.CSSPrope
       cancelAnimationFrame(raf);
       removeEventListener("resize", size);
     };
-  }, []);
+  }, [height]);
 
   return <canvas ref={ref} className="dotdiv" style={style} aria-hidden="true" />;
 }

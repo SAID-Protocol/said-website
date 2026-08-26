@@ -19,7 +19,7 @@ export default function SaidFx() {
     // late (client pages render after data fetches), so a MutationObserver
     // keeps the watch list current.
     const seen = new Set<HTMLElement>();
-    let rvEls: HTMLElement[] = [];
+    const rvEls: HTMLElement[] = [];
     function collect() {
       document.querySelectorAll<HTMLElement>(".rv,.ctaCard").forEach((el) => {
         if (!seen.has(el)) { seen.add(el); rvEls.push(el); }
@@ -41,7 +41,7 @@ export default function SaidFx() {
     // stats count-up — same rect-based trigger
     const fmt = (n: number) => n.toLocaleString("en-US");
     const cuSeen = new Set<HTMLElement>();
-    let cuEls: HTMLElement[] = [];
+    const cuEls: HTMLElement[] = [];
     document.querySelectorAll<HTMLElement>("[data-count]").forEach((el) => {
       cuSeen.add(el); cuEls.push(el);
     });
