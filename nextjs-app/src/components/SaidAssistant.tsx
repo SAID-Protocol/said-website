@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -17,33 +18,19 @@ const SUGGESTIONS = ['How do I register?', 'What is the Trust Score?', 'How do g
 /** Renders an assistant message as markdown — links, bold, inline/block code, lists. */
 function Markdown({ children }: { children: string }) {
   return (
-    <div className="space-y-1.5 [&_a]:break-words">
+    <div className="md">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a: (props) => (
-            <a {...props} target="_blank" rel="noopener noreferrer" className="text-blue-400 underline underline-offset-2 hover:text-blue-300" />
-          ),
-          h1: (props) => <h1 {...props} className="text-[13px] font-bold text-white mt-1 first:mt-0" />,
-          h2: (props) => <h2 {...props} className="text-[13px] font-semibold text-white mt-1 first:mt-0" />,
-          h3: (props) => <h3 {...props} className="text-xs font-semibold uppercase tracking-wide text-zinc-400 mt-1 first:mt-0" />,
-          hr: () => <hr className="border-zinc-800 my-1" />,
-          p: (props) => <p {...props} className="first:mt-0 last:mb-0" />,
-          ul: (props) => <ul {...props} className="list-disc pl-4 space-y-0.5" />,
-          ol: (props) => <ol {...props} className="list-decimal pl-4 space-y-0.5" />,
-          strong: (props) => <strong {...props} className="font-semibold text-white" />,
+          a: (props) => <a {...props} target="_blank" rel="noopener noreferrer" />,
           pre: ({ children }) => <>{children}</>,
           code: ({ className, children, ...props }) => {
             const text = String(children ?? '');
             const isBlock = (className?.includes('language-') ?? false) || text.includes('\n');
             return isBlock ? (
-              <code {...props} className="block whitespace-pre overflow-x-auto rounded-lg bg-black/60 p-2.5 font-mono text-[12px] ring-1 ring-zinc-800">
-                {children}
-              </code>
+              <code {...props} className="block">{children}</code>
             ) : (
-              <code {...props} className="rounded bg-white/10 px-1 py-0.5 font-mono text-[12px]">
-                {children}
-              </code>
+              <code {...props}>{children}</code>
             );
           },
         }}
@@ -70,6 +57,14 @@ export default function SaidAssistant() {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  // Escape closes the panel — it's a modal-ish surface over the page.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    addEventListener('keydown', onKey);
+    return () => removeEventListener('keydown', onKey);
+  }, [open]);
+
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
@@ -93,116 +88,71 @@ export default function SaidAssistant() {
   }
 
   return (
-    <div className="fixed bottom-6 left-6 z-[60] flex flex-col items-start gap-3">
+    <div className="said-assistant">
       {/* Chat panel */}
-      <div
-        className={`flex w-[360px] max-w-[calc(100vw-3rem)] origin-bottom-left flex-col overflow-hidden rounded-2xl border border-zinc-800 bg-black/95 shadow-2xl shadow-black/60 backdrop-blur-xl transition-all duration-200 ${
-          open
-            ? 'pointer-events-auto h-[480px] max-h-[70vh] scale-100 opacity-100'
-            : 'pointer-events-none h-0 scale-95 opacity-0'
-        }`}
-        aria-hidden={!open}
-      >
-        {/* Header */}
-        <div className="flex items-center gap-2.5 border-b border-zinc-800 px-4 py-3">
-          <img src="/logo-dark.png" alt="SAID" width={20} height={20} className="block" />
-          <div className="flex-1 leading-tight">
-            <div className="flex items-center gap-1.5 text-sm font-semibold text-white">
+      <div className={`sa-panel${open ? ' open' : ''}`} aria-hidden={!open}>
+        <div className="sa-head">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="lb" src="/logo-black.png" alt="" width={20} height={20} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="lw" src="/logo-white.png" alt="" width={20} height={20} />
+          <div className="sa-title">
+            <div className="sa-name">
               SAID Assistant
-              {/* Verified on-chain: a registered + verified SAID agent
-                  (8GReKrDQyvCjFcQ3HASeLtS4gsTw6H6x3Ck2GhDq8Veb). Links to its profile. */}
-              <a
-                href="https://www.saidprotocol.com/agents/8GReKrDQyvCjFcQ3HASeLtS4gsTw6H6x3Ck2GhDq8Veb"
-                target="_blank"
-                rel="noopener noreferrer"
+              {/* Verified on-chain: a registered + verified SAID agent. Links to its profile. */}
+              <Link
+                className="sa-verified mono"
+                href="/agents/8GReKrDQyvCjFcQ3HASeLtS4gsTw6H6x3Ck2GhDq8Veb"
                 title="Verified SAID agent — view on-chain profile"
-                className="inline-flex items-center gap-1 text-[10px] font-medium text-zinc-400 transition-colors hover:text-emerald-400"
+                onClick={() => setOpen(false)}
               >
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <path d="M9 12l2 2 4-4" />
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
-                </svg>
-                Verified
-              </a>
+                <span className="sa-check">✓</span> VERIFIED
+              </Link>
             </div>
-            <div className="text-[11px] text-zinc-500">Trained on the SAID docs</div>
+            <div className="sa-sub">Trained on the SAID docs</div>
           </div>
-          <button
-            onClick={() => setOpen(false)}
-            aria-label="Close assistant"
-            className="rounded-full p-1 text-zinc-500 transition hover:bg-zinc-900 hover:text-zinc-200"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <button className="sa-close" onClick={() => setOpen(false)} aria-label="Close assistant">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
         </div>
 
-        {/* Messages */}
-        <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        <div className="sa-msgs" ref={scrollRef}>
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div
-                className={`max-w-[85%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed ${
-                  m.role === 'user'
-                    ? 'whitespace-pre-wrap bg-white text-black'
-                    : 'bg-zinc-900 text-zinc-200 ring-1 ring-zinc-800'
-                }`}
-              >
+            <div key={i} className={`sa-row ${m.role}`}>
+              <div className="sa-bubble">
                 {m.role === 'user' ? m.content : <Markdown>{m.content}</Markdown>}
               </div>
             </div>
           ))}
           {loading && (
-            <div className="flex justify-start">
-              <div className="flex gap-1 rounded-2xl bg-zinc-900 px-3.5 py-3 ring-1 ring-zinc-800">
+            <div className="sa-row assistant">
+              <div className="sa-bubble sa-typing">
                 {[0, 150, 300].map((d) => (
-                  <span
-                    key={d}
-                    className="h-1.5 w-1.5 animate-bounce rounded-full bg-zinc-500"
-                    style={{ animationDelay: `${d}ms` }}
-                  />
+                  <span key={d} style={{ animationDelay: `${d}ms` }} />
                 ))}
               </div>
             </div>
           )}
           {messages.length === 1 && !loading && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="sa-suggest">
               {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => send(s)}
-                  className="rounded-full border border-zinc-800 bg-zinc-900/60 px-2.5 py-1 text-[11px] text-zinc-400 transition hover:border-zinc-600 hover:text-white"
-                >
-                  {s}
-                </button>
+                <button key={s} onClick={() => send(s)}>{s}</button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Input */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            send(input);
-          }}
-          className="flex items-center gap-2 border-t border-zinc-800 p-3"
-        >
+        <form className="sa-form" onSubmit={(e) => { e.preventDefault(); send(input); }}>
           <input
             ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about SAID…"
-            className="flex-1 rounded-full border border-zinc-800 bg-zinc-900/60 px-3.5 py-2 text-[13px] text-white placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none"
           />
-          <button
-            type="submit"
-            disabled={!input.trim() || loading}
-            aria-label="Send"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-black transition hover:bg-zinc-200 disabled:opacity-40"
-          >
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <button type="submit" disabled={!input.trim() || loading} aria-label="Send">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M5 12h14M13 6l6 6-6 6" />
             </svg>
           </button>
@@ -210,20 +160,94 @@ export default function SaidAssistant() {
       </div>
 
       {/* Launcher */}
-      <button
-        onClick={() => setOpen((o) => !o)}
-        aria-label={open ? 'Close SAID assistant' : 'Open SAID assistant'}
-        className="group flex items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-950/90 px-4 py-3 shadow-xl shadow-black/40 backdrop-blur-xl transition hover:border-zinc-600 hover:bg-zinc-900"
-      >
-        <span className="relative flex">
-          <img src="/logo-dark.png" alt="SAID" width={22} height={22} className="block" />
-          <span className="absolute -right-1 -top-1 flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500/70" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-          </span>
+      <button className="sa-launch" onClick={() => setOpen((o) => !o)} aria-label={open ? 'Close SAID assistant' : 'Open SAID assistant'}>
+        <span className="sa-mark">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="lb" src="/logo-black.png" alt="" width={20} height={20} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="lw" src="/logo-white.png" alt="" width={20} height={20} />
+          <span className="sa-live" />
         </span>
-        <span className="text-sm font-medium text-white">{open ? 'Close' : 'Ask SAID'}</span>
+        <span className="sa-launch-label">{open ? 'Close' : 'Ask SAID'}</span>
       </button>
+
+      <style>{`
+        .said-assistant{position:fixed;bottom:24px;left:24px;z-index:60;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+
+        /* logo swaps with theme, like the nav mark */
+        .said-assistant .lw{display:none}
+        html[data-theme="dark"] .said-assistant .lb{display:none}
+        html[data-theme="dark"] .said-assistant .lw{display:block}
+
+        .said-assistant .sa-panel{
+          display:flex;flex-direction:column;overflow:hidden;
+          width:380px;max-width:calc(100vw - 48px);
+          background:var(--bg);border:1px solid var(--line);border-radius:20px;
+          box-shadow:0 24px 70px rgba(0,0,0,.18);
+          transform-origin:bottom left;
+          transition:height .22s cubic-bezier(.16,1,.3,1),opacity .18s,transform .22s cubic-bezier(.16,1,.3,1),background-color .5s,border-color .5s;
+          height:0;opacity:0;transform:scale(.96);pointer-events:none;
+        }
+        .said-assistant .sa-panel.open{height:500px;max-height:70vh;opacity:1;transform:none;pointer-events:auto}
+
+        .said-assistant .sa-head{display:flex;align-items:center;gap:11px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--card);transition:background-color .5s,border-color .5s}
+        .said-assistant .sa-title{flex:1;min-width:0;line-height:1.3}
+        .said-assistant .sa-name{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600;letter-spacing:-.01em}
+        .said-assistant .sa-verified{display:inline-flex;align-items:center;gap:5px;font-size:9px;letter-spacing:.12em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:3px 8px;text-decoration:none}
+        .said-assistant .sa-verified:hover{color:var(--good);border-color:var(--good)}
+        .said-assistant .sa-check{color:var(--good);font-size:9px}
+        .said-assistant .sa-sub{margin-top:3px;font-size:11px;color:var(--faint)}
+        .said-assistant .sa-close{background:none;border:0;padding:5px;border-radius:50%;color:var(--faint);cursor:pointer;display:flex}
+        .said-assistant .sa-close:hover{color:var(--ink)}
+
+        .said-assistant .sa-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+        .said-assistant .sa-row{display:flex}
+        .said-assistant .sa-row.user{justify-content:flex-end}
+        .said-assistant .sa-row.assistant{justify-content:flex-start}
+        .said-assistant .sa-bubble{max-width:86%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.6}
+        .said-assistant .sa-row.user .sa-bubble{background:var(--ink);color:var(--bg);white-space:pre-wrap;border-bottom-right-radius:6px}
+        .said-assistant .sa-row.assistant .sa-bubble{background:var(--card);color:var(--ink);border:1px solid var(--line);border-bottom-left-radius:6px}
+
+        .said-assistant .sa-typing{display:flex;gap:5px;padding:14px}
+        .said-assistant .sa-typing span{width:5px;height:5px;border-radius:50%;background:var(--faint);animation:sa-bounce 1.1s infinite}
+        @keyframes sa-bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+
+        .said-assistant .sa-suggest{display:flex;flex-wrap:wrap;gap:6px;padding-top:2px}
+        .said-assistant .sa-suggest button{font-size:11.5px;color:var(--dim);background:none;border:1px solid var(--line);border-radius:99px;padding:6px 12px;cursor:pointer;font-family:inherit}
+        .said-assistant .sa-suggest button:hover{color:var(--ink);border-color:var(--ink)}
+
+        .said-assistant .sa-form{display:flex;align-items:center;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--card);transition:background-color .5s,border-color .5s}
+        .said-assistant .sa-form input{flex:1;min-width:0;padding:9px 14px;border:1px solid var(--line);border-radius:99px;background:var(--bg);color:var(--ink);font-size:13px;font-family:inherit;outline:none}
+        .said-assistant .sa-form input::placeholder{color:var(--faint)}
+        .said-assistant .sa-form input:focus{border-color:var(--ink)}
+        .said-assistant .sa-form button{flex:none;width:32px;height:32px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .2s}
+        .said-assistant .sa-form button:disabled{opacity:.35;cursor:default}
+
+        .said-assistant .sa-launch{display:flex;align-items:center;gap:10px;padding:11px 18px 11px 14px;border-radius:99px;border:1px solid var(--line);background:var(--bg);cursor:pointer;font-family:inherit;box-shadow:0 10px 30px rgba(0,0,0,.10);transition:border-color .3s,background-color .5s}
+        .said-assistant .sa-launch:hover{border-color:var(--ink)}
+        .said-assistant .sa-mark{position:relative;display:flex}
+        .said-assistant .sa-live{position:absolute;top:-2px;right:-3px;width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 2px var(--bg)}
+        .said-assistant .sa-launch-label{font-size:13.5px;font-weight:500;color:var(--ink)}
+
+        /* markdown inside assistant bubbles */
+        .said-assistant .md > :first-child{margin-top:0}
+        .said-assistant .md > :last-child{margin-bottom:0}
+        .said-assistant .md p{margin:6px 0}
+        .said-assistant .md a{color:var(--ink);text-decoration:underline;text-underline-offset:2px;word-break:break-word}
+        .said-assistant .md h1,.said-assistant .md h2{font-size:13px;font-weight:600;margin:8px 0 4px}
+        .said-assistant .md h3{font-size:10.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:8px 0 4px}
+        .said-assistant .md ul,.said-assistant .md ol{margin:6px 0;padding-left:18px}
+        .said-assistant .md li{margin:3px 0}
+        .said-assistant .md strong{font-weight:600}
+        .said-assistant .md hr{border:0;border-top:1px solid var(--line);margin:8px 0}
+        .said-assistant .md code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11.5px;background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px}
+        .said-assistant .md code.block{display:block;white-space:pre;overflow-x:auto;padding:10px 12px;border-radius:10px;margin:8px 0}
+
+        @media (max-width:640px){
+          .said-assistant{bottom:16px;left:16px}
+          .said-assistant .sa-panel{width:calc(100vw - 32px)}
+        }
+      `}</style>
     </div>
   );
 }
