@@ -10,10 +10,11 @@
  * Use UPSTREAM_URL only for things CORS doesn't apply to (images) or for
  * documentation text.
  */
-const API_URL = '/api/said';
+const API_URL = '/api/said';          // → api.saidprotocol.com (protocol)
+const HOSTING_URL = '/api/hosting';   // → app.saidprotocol.com (hosting)
 const UPSTREAM_URL = 'https://api.saidprotocol.com';
 
-export { API_URL, UPSTREAM_URL };
+export { API_URL, HOSTING_URL, UPSTREAM_URL };
 
 /**
  * Fetch with exponential backoff. Stops retrying on 429/5xx after maxRetries.

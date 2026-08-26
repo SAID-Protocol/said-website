@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
-import { API_URL } from '@/lib/api';
+import { API_URL, HOSTING_URL } from '@/lib/api';
 
 type Mode = 'have' | 'new';
 
@@ -42,7 +42,7 @@ export default function CreateAgentPage() {
       // New custodial wallet → create via Platform API first
       if (agentWallet === 'new') {
         const privyToken = await privyAccessToken();
-        const createRes = await fetch('https://app.saidprotocol.com/api/agents/create-with-wallet', {
+        const createRes = await fetch(`${HOSTING_URL}/api/agents/create-with-wallet`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${privyToken}`,

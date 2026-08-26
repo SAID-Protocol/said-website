@@ -1,8 +1,8 @@
 import { NextRequest } from 'next/server';
 import { forwardTo, type ProxyCtx } from '@/lib/upstream-proxy';
 
-/** Same-origin passthrough to the protocol API. See lib/upstream-proxy.ts. */
-const UPSTREAM = 'https://api.saidprotocol.com';
+/** Same-origin passthrough to the hosting API. See lib/upstream-proxy.ts. */
+const UPSTREAM = 'https://app.saidprotocol.com';
 
 export const dynamic = 'force-dynamic';
 
