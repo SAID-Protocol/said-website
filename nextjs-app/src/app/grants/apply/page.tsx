@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
 import SaidNav from '@/components/said/SaidNav';
@@ -24,11 +24,16 @@ export default function GrantsApplyPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Prompt for login once on arrival. `login` gets a fresh identity on every
+  // render, so it must stay out of the dep array (and behind a ref) or the
+  // effect re-fires forever — "Maximum update depth exceeded".
+  const loginPrompted = useRef(false);
   useEffect(() => {
-    if (ready && !authenticated) {
+    if (ready && !authenticated && !loginPrompted.current) {
+      loginPrompted.current = true;
       login();
     }
-  }, [ready, authenticated, login]);
+  }, [ready, authenticated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
