@@ -8,6 +8,8 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const loginAttempted = useRef(false);
   const loginInProgress = useRef(false);
+  const attempts = useRef(0);
+  const MAX_ATTEMPTS = 3;
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -18,8 +20,17 @@ export function useAuth() {
     setLoading(false);
   }, []);
 
+  // Re-arm the auto-login effect after a failure, with backoff and a cap so a
+  // persistently failing API can't turn into a request loop.
+  const scheduleRetry = useCallback(() => {
+    if (attempts.current >= MAX_ATTEMPTS) return;
+    const delay = 1500 * attempts.current; // 1.5s, 3s, …
+    setTimeout(() => { loginAttempted.current = false; }, delay);
+  }, []);
+
   const loginToBackend = useCallback(async () => {
     if (!user || loginInProgress.current) return;
+    attempts.current += 1;
 
     loginInProgress.current = true;
     setLoading(true);
@@ -48,7 +59,10 @@ export function useAuth() {
       
       if (!res.ok) {
         console.error('Backend login error:', data);
-        // Don't clear token on failure — keep whatever we had
+        // Don't clear token on failure — keep whatever we had, but allow a
+        // retry: a single failure must not leave the session dead for the
+        // whole visit (it used to strand OnboardingGuard on its spinner).
+        scheduleRetry();
         return;
       }
 
@@ -61,7 +75,8 @@ export function useAuth() {
       }
     } catch (err) {
       console.error('Backend login failed:', err);
-      // Don't clear existing token on network error
+      // Don't clear existing token on network error — but do retry.
+      scheduleRetry();
     } finally {
       setLoading(false);
       loginInProgress.current = false;

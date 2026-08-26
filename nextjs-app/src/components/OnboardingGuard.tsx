@@ -12,6 +12,16 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
   const [checking, setChecking] = useState(true);
   const [checkAttempted, setCheckAttempted] = useState(false);
 
+  // Failsafe: never trap the user behind the spinner. If the backend session
+  // hasn't arrived shortly after Privy authenticates (login-privy failed, is
+  // slow, or the API is down), let them through logged-in-but-sessionless
+  // rather than showing a spinner forever.
+  useEffect(() => {
+    if (!authenticated || !checking) return;
+    const t = setTimeout(() => setChecking(false), 6000);
+    return () => clearTimeout(t);
+  }, [authenticated, checking]);
+
   useEffect(() => {
     async function checkProfile() {
       // If not authenticated, no need to check
@@ -98,8 +108,20 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
   if (authenticated && checking) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'var(--bg)',
+          color: 'var(--faint)',
+          fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
+          fontSize: 11,
+          letterSpacing: '.16em',
+        }}
+      >
+        SIGNING IN…
       </div>
     );
   }
