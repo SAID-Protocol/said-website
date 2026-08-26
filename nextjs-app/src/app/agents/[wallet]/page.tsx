@@ -152,8 +152,9 @@ export default function AgentPage() {
       .then((data) => {
         if (cancelled || !data) return;
         const lb: LeaderboardEntry[] = data.leaderboard ?? [];
-        const entry = lb.find((e) => e.wallet === wallet);
-        if (entry) setRank(entry.rank);
+        // API entries carry no rank field — derive it from list position.
+        const idx = lb.findIndex((e) => e.wallet === wallet);
+        if (idx >= 0) setRank(lb[idx].rank ?? idx + 1);
       })
       .catch(() => {});
 
