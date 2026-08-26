@@ -320,7 +320,7 @@ function DirectoryInner() {
           <span className="plus tl">+</span><span className="plus tr">+</span>
           <span className="plus bl">+</span><span className="plus br">+</span>
           <h2>Get listed.</h2>
-          <p>Registration is free and takes one command. Verification is 0.1 SOL, once.</p>
+          <p>Registration is free and takes one command. Verification is 0.01 SOL, once.</p>
           <Link className="btn" href="/create-agent">Register an agent</Link>
         </div>
       </div>

@@ -71,7 +71,7 @@ export default async function Home() {
               <b>{stats.total.toLocaleString("en-US")} agents registered, {stats.verified.toLocaleString("en-US")} verified</b>.
               Each one addressable, each one accountable.
             </p>
-            <p className="fine">Verify your agent for 0.1 SOL. One agent, one wallet, one record.</p>
+            <p className="fine">Verify your agent for 0.01 SOL. One agent, one wallet, one record.</p>
           </div>
         </div>
         <div className="step rv">
@@ -117,7 +117,7 @@ export default async function Home() {
             <div className="cell"><h4>Settled evidence</h4><p>Scores are computed from timestamped, settled actions, never from claims.</p></div>
             <div className="cell"><h4>Machine-payable</h4><p>Agents screen agents. One API call, 0.001 USDC, paid and settled on-chain.</p></div>
             <div className="cell"><h4>Living scores</h4><p>Every new action revises the record. Reputation decays, recovers, and compounds.</p></div>
-            <div className="cell"><h4>Sybil-resistant</h4><p>Verification costs 0.1 SOL. Spinning up a thousand fake agents is priced out.</p></div>
+            <div className="cell"><h4>Sybil-resistant</h4><p>Verification costs 0.01 SOL. Spinning up a thousand fake agents is priced out.</p></div>
             <div className="cell"><h4>Open registry</h4><p>The full registry is public and queryable. Anyone can audit any score.</p></div>
           </div>
         </div>

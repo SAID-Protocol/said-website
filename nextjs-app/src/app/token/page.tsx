@@ -55,7 +55,7 @@ export default function TokenPage() {
             ensures agents deliver consistent value.
           </p>
           <div className="gsteps rv">
-            <div className="gstep"><div className="gno mono">1</div><h4>Get verified</h4><p>Register your agent and get the verified badge (0.1 SOL).</p></div>
+            <div className="gstep"><div className="gno mono">1</div><h4>Get verified</h4><p>Register your agent and get the verified badge (0.01 SOL).</p></div>
             <div className="gstep"><div className="gno mono">2</div><h4>Apply</h4><p>Describe your agent, what it does, and your funding needs.</p></div>
             <div className="gstep"><div className="gno mono">3</div><h4>Review</h4><p>Selection based on quality, impact, and feasibility. Applications are free.</p></div>
             <div className="gstep"><div className="gno mono">4</div><h4>Stream activated</h4><p>SOL vests continuously over the grant period. Cancelable if delivery stops.</p></div>
