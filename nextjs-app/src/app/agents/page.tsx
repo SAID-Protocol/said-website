@@ -1,11 +1,12 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
+import ShimmerDots from '@/components/said/ShimmerDots';
 import Link from 'next/link';
 
 const PAGE_SIZE = 50;
@@ -41,50 +42,6 @@ const tier = (a: Agent) => (a.trustScore?.tier || 'unranked').toUpperCase();
 const initials = (a: Agent) =>
   (a.name || a.wallet).split(' ').map((x) => x[0]).slice(0, 2).join('').toUpperCase();
 const shortWallet = (w: string) => `${w.slice(0, 4)}…${w.slice(-4)}`;
-
-/** Neutral shimmering dot field inside the #1 champion card. */
-function ChampDots({ inverted }: { inverted?: boolean }) {
-  const ref = useRef<HTMLCanvasElement | null>(null);
-  useEffect(() => {
-    const c = ref.current;
-    if (!c) return;
-    const x = c.getContext('2d');
-    if (!x) return;
-    const dp = Math.min(2, devicePixelRatio || 1);
-    let w = 0, h = 0, tt = Math.random() * 10, raf = 0;
-    function sz() {
-      const r = c!.getBoundingClientRect();
-      w = c!.width = Math.round(r.width * dp);
-      h = c!.height = Math.round(r.height * dp);
-    }
-    addEventListener('resize', sz);
-    sz();
-    (function rn() {
-      raf = requestAnimationFrame(rn);
-      const r = c!.getBoundingClientRect();
-      if (r.bottom < 0 || r.top > innerHeight) return;
-      if (w === 0) sz();
-      tt += 0.012;
-      const SP = 15 * dp;
-      const cols = Math.ceil(w / SP), rows = Math.ceil(h / SP);
-      // .first sits on var(--ink), the others on var(--card) — so the
-      // effective background flips with both rank and theme.
-      const dark = document.documentElement.dataset.theme === 'dark';
-      const bgIsDark = inverted ? !dark : dark;
-      const l = bgIsDark ? 68 : 44;
-      x!.clearRect(0, 0, w, h);
-      for (let rr = 0; rr < rows; rr++) for (let cc = 0; cc < cols; cc++) {
-        const v = (Math.sin(cc * 0.7 + tt) + Math.cos(rr * 0.9 + tt * 1.3) + 2) / 4;
-        x!.beginPath();
-        x!.arc(cc * SP, rr * SP, (0.4 + v * 1.2) * dp, 0, Math.PI * 2);
-        x!.fillStyle = `hsla(40,${bgIsDark ? 8 : 6}%,${l}%,${0.03 + v * 0.09})`;
-        x!.fill();
-      }
-    })();
-    return () => { cancelAnimationFrame(raf); removeEventListener('resize', sz); };
-  }, [inverted]);
-  return <canvas ref={ref} aria-hidden="true" />;
-}
 
 function DirectoryInner() {
   const router = useRouter();
@@ -233,7 +190,7 @@ function DirectoryInner() {
           <div className="top3">
             {top3.map((a, i) => (
               <div key={a.wallet} className={`champ rv t-${tier(a).toLowerCase()}${i === 0 ? ' first' : ''}`}>
-                {i === 0 && (<><ChampDots inverted /><span className="crown">+</span></>)}
+                {i === 0 && (<><ShimmerDots inverted /><span className="crown">+</span></>)}
                 <span className="medal mono">{MEDALS[i]} · {tier(a)}</span>
                 <h4>{a.name || shortWallet(a.wallet)}{a.isVerified && <span className="vbadge">✓</span>}</h4>
                 <p className="desc">{a.description || 'Registered agent on the SAID registry.'}</p>

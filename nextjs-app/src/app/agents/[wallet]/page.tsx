@@ -5,6 +5,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
+import ShimmerDots from '@/components/said/ShimmerDots';
 import ReputationAnalytics from '@/components/ReputationAnalytics';
 
 interface TrustScore {
@@ -196,6 +198,8 @@ export default function AgentPage() {
             <TrustScoreCard score={agent.trustScore ?? null} />
           </aside>
         </div>
+
+        <DotSeam style={{ marginTop: 'clamp(20px,3vh,32px)' }} />
 
         <div className="maingrid">
           <div>
@@ -469,7 +473,8 @@ function TrustScoreCard({ score }: { score: TrustScore | null }) {
   const sources = score.sources ?? [];
 
   return (
-    <div className="card">
+    <div className="card trustcard">
+      <ShimmerDots />
       <h3 className="seclabel mono">TRUST SCORE</h3>
       <div className="scorerow">
         <ScoreGauge score={score.score} color={color} />
@@ -588,6 +593,9 @@ const agentStyles = `
   .said-agent .topgrid>*,.said-agent .maingrid>*{min-width:0}
   .said-agent .sidecol{display:grid;gap:16px}
   .said-agent .card{min-width:0;overflow:hidden}
+  .said-agent .trustcard{position:relative}
+  .said-agent .trustcard>*:not(canvas){position:relative}
+  .said-agent .maingrid{margin-top:clamp(20px,3vh,30px)}
   .said-agent .head{display:flex;gap:22px;align-items:flex-start;margin-bottom:18px}
   .said-agent .avatar{width:76px;height:76px;border-radius:20px;object-fit:cover;background:var(--card);border:1px solid var(--line);flex-shrink:0}
   .said-agent .namerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
