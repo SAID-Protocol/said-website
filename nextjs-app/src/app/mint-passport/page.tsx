@@ -5,6 +5,7 @@ import { Connection, Transaction, VersionedTransaction } from '@solana/web3.js';
 import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import Footer from '@/components/Footer';
+import { API_URL } from '@/lib/api';
 
 export default function MintPassportPage() {
   const [agentWallet, setAgentWallet] = useState('');
@@ -26,7 +27,7 @@ export default function MintPassportPage() {
     setError('');
 
     try {
-      const res = await fetch(`https://api.saidprotocol.com/api/verify/${agentWallet}`);
+      const res = await fetch(`${API_URL}/api/verify/${agentWallet}`);
       const data = await res.json();
 
       if (!res.ok || !data.registered) {
@@ -78,7 +79,7 @@ export default function MintPassportPage() {
       }
 
       setMintStatus('building');
-      const res = await fetch(`https://api.saidprotocol.com/api/passport/${agentWallet}/prepare`, { method: 'POST' });
+      const res = await fetch(`${API_URL}/api/passport/${agentWallet}/prepare`, { method: 'POST' });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to prepare transaction');
 
@@ -92,7 +93,7 @@ export default function MintPassportPage() {
       setMintStatus('confirming');
       
       // Broadcast via API proxy (uses server's private QuickNode RPC)
-      const broadcastRes = await fetch('https://api.saidprotocol.com/api/passport/broadcast', {
+      const broadcastRes = await fetch(`${API_URL}/api/passport/broadcast`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -119,7 +120,7 @@ export default function MintPassportPage() {
 
   const finalize = async (txHash: string, mintAddress: string) => {
     try {
-      const res = await fetch(`https://api.saidprotocol.com/api/passport/${agentWallet}/finalize`, {
+      const res = await fetch(`${API_URL}/api/passport/${agentWallet}/finalize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ txHash, mintAddress }),

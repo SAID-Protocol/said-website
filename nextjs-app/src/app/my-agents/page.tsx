@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import AsciiBackground from '@/components/AsciiBackground';
 import { useAuth } from '@/hooks/useAuth';
+import { API_URL } from '@/lib/api';
 
 type AgentSource = 'hosted' | 'protocol';
 
@@ -149,7 +150,7 @@ export default function MyAgentsPage() {
 
     // Fetch protocol agents (api.saidprotocol.com — on-chain registry)
     try {
-      const protocolRes = await fetch('https://api.saidprotocol.com/api/agents?mine=true', {
+      const protocolRes = await fetch(`${API_URL}/api/agents?mine=true`, {
         headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
       if (protocolRes.ok) {

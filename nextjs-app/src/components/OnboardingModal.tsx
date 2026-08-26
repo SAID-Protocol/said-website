@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { API_URL } from '@/lib/api';
 
 interface OnboardingModalProps {
   onComplete: (data: { username: string; displayName: string; avatar?: string }) => void;
@@ -27,7 +28,7 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
 
     setChecking(true);
     try {
-      const res = await fetch(`https://api.saidprotocol.com/auth/check-username?username=${encodeURIComponent(value)}`);
+      const res = await fetch(`${API_URL}/auth/check-username?username=${encodeURIComponent(value)}`);
       const data = await res.json();
       
       if (!data.available) {

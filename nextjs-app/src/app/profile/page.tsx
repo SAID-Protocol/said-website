@@ -7,6 +7,7 @@ import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
+import { API_URL } from '@/lib/api';
 
 interface ApiKeyEntry {
   agentId: string;
@@ -60,7 +61,7 @@ export default function ProfilePage() {
   const fetchUserProfile = async () => {
     if (!sessionToken) return;
     try {
-      const res = await fetch('https://api.saidprotocol.com/auth/me', {
+      const res = await fetch(`${API_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
       if (res.ok) {
@@ -80,7 +81,7 @@ export default function ProfilePage() {
   const fetchAgentStats = async () => {
     if (!sessionToken) return;
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents', {
+      const res = await fetch(`${API_URL}/api/agents`, {
         headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
       if (res.ok) {
@@ -100,7 +101,7 @@ export default function ProfilePage() {
 
         const keys = await Promise.all(agents.map(async (agent) => {
           try {
-            const keyRes = await fetch(`https://api.saidprotocol.com/api/agents/${agent.id}/api-key`, {
+            const keyRes = await fetch(`${API_URL}/api/agents/${agent.id}/api-key`, {
               headers: { 'Authorization': `Bearer ${sessionToken}` },
             });
             if (keyRes.ok) {
@@ -122,7 +123,7 @@ export default function ProfilePage() {
   const rotateProfileKey = async (agentId: string) => {
     if (!sessionToken) return;
     try {
-      const res = await fetch(`https://api.saidprotocol.com/api/agents/${agentId}/rotate-key`, {
+      const res = await fetch(`${API_URL}/api/agents/${agentId}/rotate-key`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
@@ -147,7 +148,7 @@ export default function ProfilePage() {
     setSaving(true);
     setSaveSuccess(false);
     try {
-      const res = await fetch('https://api.saidprotocol.com/auth/me', {
+      const res = await fetch(`${API_URL}/auth/me`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +197,7 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onload = async (event) => {
         const base64 = event.target?.result as string;
-        const res = await fetch('https://api.saidprotocol.com/auth/me', {
+        const res = await fetch(`${API_URL}/auth/me`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

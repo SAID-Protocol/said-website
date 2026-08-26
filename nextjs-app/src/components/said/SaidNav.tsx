@@ -6,6 +6,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import ThemeToggle from "@/components/said/ThemeToggle";
+import { API_URL } from '@/lib/api';
 
 const LINKS: Array<[string, string, boolean?]> = [
   ["Directory", "/agents"],
@@ -25,7 +26,7 @@ export default function SaidNav() {
 
   useEffect(() => {
     if (!authenticated || !sessionToken) return;
-    fetch("https://api.saidprotocol.com/auth/me", {
+    fetch(`${API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${sessionToken}` },
     })
       .then((r) => (r.ok ? r.json() : null))

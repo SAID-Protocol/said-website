@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
+import { API_URL } from '@/lib/api';
 
 type Mode = 'have' | 'new';
 
@@ -59,7 +60,7 @@ export default function CreateAgentPage() {
       }
 
       // Register on Protocol API
-      const res = await fetch('https://api.saidprotocol.com/api/register/pending', {
+      const res = await fetch(`${API_URL}/api/register/pending`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -75,7 +76,7 @@ export default function CreateAgentPage() {
 
       // Link agent to the user's account
       if (sessionToken && agentWallet) {
-        await fetch('https://api.saidprotocol.com/users/me/agents', {
+        await fetch(`${API_URL}/users/me/agents`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ export default function CreateAgentPage() {
       // Try to fetch the API key for this agent
       if (sessionToken && agentWallet) {
         try {
-          const agentsRes = await fetch('https://api.saidprotocol.com/api/agents', {
+          const agentsRes = await fetch(`${API_URL}/api/agents`, {
             headers: { 'Authorization': `Bearer ${sessionToken}` },
           });
           if (agentsRes.ok) {
@@ -98,7 +99,7 @@ export default function CreateAgentPage() {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const match = Array.isArray(agents) ? agents.find((a: any) => a.walletAddress === agentWallet) : null;
             if (match?.id) {
-              const keyRes = await fetch(`https://api.saidprotocol.com/api/agents/${match.id}/api-key`, {
+              const keyRes = await fetch(`${API_URL}/api/agents/${match.id}/api-key`, {
                 headers: { 'Authorization': `Bearer ${sessionToken}` },
               });
               if (keyRes.ok) {

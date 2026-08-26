@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { API_URL } from '@/lib/api';
 
 export default function Navbar() {
   const { login, logout, authenticated, user } = usePrivy();
@@ -45,7 +46,7 @@ export default function Navbar() {
   const fetchUserProfile = async () => {
     if (!sessionToken) return;
     try {
-      const res = await fetch('https://api.saidprotocol.com/auth/me', {
+      const res = await fetch(`${API_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
       if (res.ok) {

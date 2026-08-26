@@ -6,6 +6,7 @@ import Link from 'next/link';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
+import { API_URL } from '@/lib/api';
 
 export default function GrantsApplyPage() {
   const { authenticated, login, ready } = usePrivy();
@@ -43,7 +44,7 @@ export default function GrantsApplyPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/grants/apply', {
+      const res = await fetch(`${API_URL}/api/grants/apply`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
