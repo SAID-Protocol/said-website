@@ -8,6 +8,7 @@ import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchMyAgents, fetchAgentKey, rotateAgentKey } from '@/lib/my-agents';
 import { API_URL } from '@/lib/api';
 
 interface ApiKeyEntry {
@@ -19,7 +20,7 @@ interface ApiKeyEntry {
 
 export default function ProfilePage() {
   const { authenticated, user, login } = usePrivy();
-  const { sessionToken } = useAuth();
+  const { sessionToken, privyAccessToken } = useAuth();
   const [agentCount, setAgentCount] = useState(0);
   const [verifiedCount, setVerifiedCount] = useState(0);
   const [feedbackGiven] = useState(0);
@@ -82,57 +83,45 @@ export default function ProfilePage() {
   const fetchAgentStats = async () => {
     if (!sessionToken) return;
     try {
-      const res = await fetch(`${API_URL}/api/agents`, {
-        headers: { 'Authorization': `Bearer ${sessionToken}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const agents: any[] = Array.isArray(data) ? data : (data.agents || []);
-        setAgentCount(agents.length);
-        setVerifiedCount(agents.filter((a) => a.isVerified).length);
+      const privyToken = privyAccessToken ? await privyAccessToken() : null;
+      const agents = await fetchMyAgents(sessionToken, privyToken);
 
-        if (agents.length > 0) {
-          const oldest = agents.reduce((old, current) =>
-            new Date(current.registeredAt) < new Date(old.registeredAt) ? current : old
-          );
-          const date = new Date(oldest.registeredAt);
-          setMemberSince(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }));
-        }
+      setAgentCount(agents.length);
+      setVerifiedCount(agents.filter((a) => a.isVerified).length);
 
-        const keys = await Promise.all(agents.map(async (agent) => {
-          try {
-            const keyRes = await fetch(`${API_URL}/api/agents/${agent.id}/api-key`, {
-              headers: { 'Authorization': `Bearer ${sessionToken}` },
-            });
-            if (keyRes.ok) {
-              const keyData = await keyRes.json();
-              if (keyData.gatewayToken) {
-                return { agentId: agent.id, agentName: agent.name || 'Agent', key: keyData.gatewayToken, revealed: false };
-              }
-            }
-          } catch {}
-          return null;
-        }));
-        setApiKeys(keys.filter(Boolean) as ApiKeyEntry[]);
+      // "Member since" = the oldest agent registration we can see.
+      const dated = agents.map((a) => a.registeredAt).filter(Boolean) as string[];
+      if (dated.length > 0) {
+        const oldest = dated.reduce((a, b) => (new Date(a) < new Date(b) ? a : b));
+        setMemberSince(
+          new Date(oldest).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        );
       }
+
+      // Keys live on the hosting API only, and only hosted agents have one.
+      const entries = await Promise.all(
+        agents
+          .filter((a) => a.source === 'hosted')
+          .map(async (agent) => {
+            const key = agent.gatewayToken ?? (await fetchAgentKey(agent.id, privyToken));
+            return key
+              ? { agentId: agent.id, agentName: agent.name, key, revealed: false }
+              : null;
+          })
+      );
+      setApiKeys(entries.filter(Boolean) as ApiKeyEntry[]);
     } catch (err) {
       console.error('Failed to fetch agent stats:', err);
     }
   };
 
   const rotateProfileKey = async (agentId: string) => {
-    if (!sessionToken) return;
-    try {
-      const res = await fetch(`${API_URL}/api/agents/${agentId}/rotate-key`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${sessionToken}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setApiKeys((prev) => prev.map((k) => (k.agentId === agentId ? { ...k, key: data.gatewayToken } : k)));
-      }
-    } catch {}
+    if (!confirm('This will invalidate the old API key. Any integrations using it will stop working. Continue?')) return;
+    const privyToken = privyAccessToken ? await privyAccessToken() : null;
+    const rotated = await rotateAgentKey(agentId, privyToken);
+    if (rotated) {
+      setApiKeys((prev) => prev.map((k) => (k.agentId === agentId ? { ...k, key: rotated } : k)));
+    }
   };
 
   const handleEditClick = () => {

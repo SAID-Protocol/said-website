@@ -8,26 +8,13 @@ import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
-import { API_URL, HOSTING_URL } from '@/lib/api';
-
-type AgentSource = 'hosted' | 'protocol';
-
-interface Agent {
-  id: string;
-  wallet: string;
-  name: string;
-  description?: string;
-  isVerified: boolean;
-  twitter?: string;
-  gatewayToken?: string;
-  source: AgentSource;
-  hasApiKey?: boolean;
-}
+import { HOSTING_URL } from '@/lib/api';
+import { fetchMyAgents, fetchAgentKey, rotateAgentKey, type MyAgent } from '@/lib/my-agents';
 
 export default function MyAgentsPage() {
   const { authenticated, login } = usePrivy();
   const { sessionToken, privyAccessToken, loading: authLoading } = useAuth();
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<MyAgent[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [rotatingId, setRotatingId] = useState<string | null>(null);
@@ -36,21 +23,9 @@ export default function MyAgentsPage() {
 
   const fetchApiKey = async (agentId: string) => {
     if (apiKeys[agentId]) return;
-    try {
-      const privyToken = privyAccessToken ? await privyAccessToken() : null;
-      if (!privyToken) return;
-      const res = await fetch(`${HOSTING_URL}/api/agents/${agentId}/api-key`, {
-        headers: { 'Authorization': `Bearer ${privyToken}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.gatewayToken) {
-          setApiKeys((prev) => ({ ...prev, [agentId]: data.gatewayToken }));
-        }
-      }
-    } catch (err) {
-      console.error('[fetchApiKey] Error', err);
-    }
+    const privyToken = privyAccessToken ? await privyAccessToken() : null;
+    const key = await fetchAgentKey(agentId, privyToken);
+    if (key) setApiKeys((prev) => ({ ...prev, [agentId]: key }));
   };
 
   const generateWallet = async (agentId: string) => {
@@ -83,18 +58,9 @@ export default function MyAgentsPage() {
   const rotateKey = async (agentId: string) => {
     if (!confirm('This will invalidate the old API key. Any integrations using it will stop working. Continue?')) return;
     setRotatingId(agentId);
-    try {
-      const privyToken = privyAccessToken ? await privyAccessToken() : null;
-      if (!privyToken) return;
-      const res = await fetch(`${HOSTING_URL}/api/agents/${agentId}/rotate-key`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${privyToken}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setApiKeys((prev) => ({ ...prev, [agentId]: data.gatewayToken }));
-      }
-    } catch {}
+    const privyToken = privyAccessToken ? await privyAccessToken() : null;
+    const rotated = await rotateAgentKey(agentId, privyToken);
+    if (rotated) setApiKeys((prev) => ({ ...prev, [agentId]: rotated }));
     setRotatingId(null);
   };
 
@@ -106,81 +72,20 @@ export default function MyAgentsPage() {
 
   useEffect(() => {
     if (sessionToken) {
-      fetchMyAgents();
+      loadAgents();
     } else {
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionToken]);
 
-  const fetchMyAgents = async () => {
-    if (!sessionToken) return;
-
-    const hostedAgents: Agent[] = [];
-    const protocolAgents: Agent[] = [];
-
-    // Hosted agents (hosting API)
-    try {
-      const privyToken = privyAccessToken ? await privyAccessToken() : null;
-      if (privyToken) {
-        const hostingRes = await fetch(`${HOSTING_URL}/api/agents`, {
-          headers: { 'Authorization': `Bearer ${privyToken}` },
-        });
-        if (hostingRes.ok) {
-          const hostingData = await hostingRes.json();
-          const list = Array.isArray(hostingData) ? hostingData : [];
-          for (const a of list) {
-            if (a.gatewayToken) {
-              setApiKeys((prev) => ({ ...prev, [a.id]: a.gatewayToken }));
-            }
-            hostedAgents.push({
-              id: a.id,
-              wallet: a.walletAddress || a.wallet || '',
-              name: a.name || 'Unnamed',
-              description: a.description,
-              isVerified: a.isVerified ?? false,
-              twitter: a.twitter,
-              gatewayToken: a.gatewayToken,
-              source: 'hosted',
-              hasApiKey: true,
-            });
-          }
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch hosted agents:', err);
+  const loadAgents = async () => {
+    const privyToken = privyAccessToken ? await privyAccessToken() : null;
+    const list = await fetchMyAgents(sessionToken, privyToken);
+    for (const a of list) {
+      if (a.gatewayToken) setApiKeys((prev) => ({ ...prev, [a.id]: a.gatewayToken as string }));
     }
-
-    // Protocol agents (on-chain registry), deduplicated against hosted
-    try {
-      const protocolRes = await fetch(`${API_URL}/api/agents?mine=true`, {
-        headers: { 'Authorization': `Bearer ${sessionToken}` },
-      });
-      if (protocolRes.ok) {
-        const protocolData = await protocolRes.json();
-        const list = Array.isArray(protocolData) ? protocolData : (protocolData.agents || []);
-        const hostedIds = new Set(hostedAgents.map((a) => a.id));
-        const hostedWallets = new Set(hostedAgents.map((a) => a.wallet));
-        for (const a of list) {
-          const wallet = a.wallet || a.walletAddress || '';
-          if (hostedIds.has(a.id) || hostedWallets.has(wallet)) continue;
-          protocolAgents.push({
-            id: a.id,
-            wallet,
-            name: a.name || 'Unnamed',
-            description: a.description,
-            isVerified: a.isVerified ?? false,
-            twitter: a.twitter,
-            source: 'protocol',
-            hasApiKey: false,
-          });
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch protocol agents:', err);
-    }
-
-    setAgents([...hostedAgents, ...protocolAgents]);
+    setAgents(list);
     setLoading(false);
   };
 
