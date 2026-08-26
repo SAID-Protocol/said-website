@@ -240,7 +240,7 @@ function verifyWebhook(body, signature, secret) {
             <h2>$SAID Token</h2>
             <p>The $SAID token funds the agent ecosystem through streaming grants and performance rewards.</p>
             <h3>Treasury Mechanics</h3>
-            <p><b>30% dev buy</b>: 15% locked for 1 year (long-term commitment), 10% liquid for grants, LP, and development. <b>Creator rewards</b>: trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.</p>
+            <p><b>Dev buy</b>: 15% of supply locked for 1 year (long-term commitment), 10% liquid for grants, LP, and development. <b>Creator rewards</b>: trading volume generates creator rewards which flow to the treasury, funding ongoing development, agent grants, and ecosystem growth.</p>
             <h3>Streaming Grants</h3>
             <p>Grants are streamed over time, not given as lump sums. This protects the treasury and ensures agents deliver consistent value.</p>
             <div className="pills"><span className="pill"><b>1-5 SOL/mo</b>Typical grant</span><span className="pill"><b>3-6 months</b>Duration</span><span className="pill"><b>Cancelable</b>If agent stops delivering</span></div>

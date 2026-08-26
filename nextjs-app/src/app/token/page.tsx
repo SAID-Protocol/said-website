@@ -30,7 +30,7 @@ export default function TokenPage() {
       <div className="sect">
         <div className="no mono rv">01 / TREASURY MECHANICS</div>
         <h2 className="rv">A treasury built to outlast the chart.</h2>
-        <p className="sub rv">Funded by the initial <b>30% dev buy</b> and ongoing creator rewards from trading volume.</p>
+        <p className="sub rv">Funded by the initial <b>dev buy</b> and ongoing creator rewards from trading volume.</p>
         <div className="cellgrid rv tk">
           <div className="cell"><div className="pct">15%</div><h4>Locked for 1 year</h4><p>Long-term commitment. Cannot be sold or moved for 12 months.</p></div>
           <div className="cell"><div className="pct">10%</div><h4>Liquid treasury</h4><p>Immediate deployment for grants, LP provision, and development.</p></div>
