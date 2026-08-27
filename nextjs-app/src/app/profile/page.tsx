@@ -277,15 +277,15 @@ export default function ProfilePage() {
     <div className="said-page said-me">
 
       <main className="mewrap">
-        <div className="mehead">
-          <div className="kick">YOUR ACCOUNT</div>
-        </div>
         <DotSeam style={{ marginBottom: 'clamp(20px,3vh,30px)' }} />
 
         <div className="megrid">
           {/* Identity card */}
           <div className="card usercard">
             <ShimmerDots />
+            {/* label belongs to the card it titles — it read as an orphaned
+                page header when it sat above the grid */}
+            <div className="kick mono">YOUR ACCOUNT</div>
             <button className="avatarbtn" onClick={() => fileInputRef.current?.click()} title="Change photo">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -400,7 +400,7 @@ export default function ProfilePage() {
 
 const meStyles = `
   .said-me .mewrap{max-width:1180px;margin:0 auto;padding:clamp(32px,5vh,52px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
-  .said-me .mehead .kick{font-size:12px;letter-spacing:.16em;color:var(--faint)}
+  .said-me .usercard .kick{font-size:10px;letter-spacing:.18em;color:var(--faint);margin-bottom:16px}
   .said-me .megrid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:clamp(20px,3vw,32px);align-items:start}
   .said-me .mecol{display:grid;gap:16px;min-width:0}
   .said-me .card{border:1px solid var(--line);border-radius:18px;padding:24px 26px;background:var(--card);min-width:0}
