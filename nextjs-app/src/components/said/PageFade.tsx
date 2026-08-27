@@ -5,14 +5,18 @@ import { usePathname } from 'next/navigation';
 /**
  * Cross-fades page content on route change.
  *
- * App Router swaps routes with no transition at all, which reads as a hard
- * cut — especially jarring here because most pages open on a large heading
- * against a flat ground. Keying a wrapper on the pathname remounts it per
- * route, replaying a short fade-and-rise.
+ * App Router swaps routes with a hard cut, which is jarring when most pages
+ * open on a large heading against a flat ground. Keying this wrapper on the
+ * pathname remounts it per route, replaying the animation.
  *
- * Deliberately cheap: opacity + a few pixels of translate, ~380ms, and it
- * respects prefers-reduced-motion. No layout properties are animated, so it
- * can't cause reflow jank on heavy pages like the directory.
+ * Important: the animation is applied to the page wrapper's CHILDREN, not to
+ * this element. Every page renders its own <SaidNav/>, so animating opacity
+ * here would fade the sticky navbar on every navigation — and a descendant
+ * cannot opt out of an ancestor's opacity. Targeting siblings instead leaves
+ * the nav untouched while the content transitions under it.
+ *
+ * Deliberately cheap: opacity plus a few pixels of translate, ~380ms, and it
+ * respects prefers-reduced-motion. No layout properties are animated.
  */
 export default function PageFade({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -21,7 +25,8 @@ export default function PageFade({ children }: { children: React.ReactNode }) {
     <div key={pathname} className="page-fade">
       {children}
       <style>{`
-        .page-fade {
+        /* children of the page wrapper, excluding the sticky nav */
+        .page-fade > * > *:not(nav) {
           animation: pageFade .38s cubic-bezier(.16,1,.3,1) both;
         }
         @keyframes pageFade {
@@ -29,7 +34,7 @@ export default function PageFade({ children }: { children: React.ReactNode }) {
           to   { opacity: 1; transform: none; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .page-fade { animation: none; }
+          .page-fade > * > *:not(nav) { animation: none; }
         }
       `}</style>
     </div>
