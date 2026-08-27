@@ -6,6 +6,7 @@ import Link from 'next/link';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
+import AgentAvatar from '@/components/said/AgentAvatar';
 import ReputationAnalytics from '@/components/ReputationAnalytics';
 
 interface TrustScore {
@@ -230,12 +231,9 @@ export default function AgentPage() {
 function HeaderSection({ agent }: { agent: Agent }) {
   return (
     <div className="head">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        className="avatar"
-        src={agent.image || `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
-        alt={agent.name || 'Agent'}
-      />
+      <span className="avatar">
+        <AgentAvatar wallet={agent.wallet} image={agent.image} name={agent.name} rounded="20px" />
+      </span>
       <div style={{ minWidth: 0, flex: 1 }}>
         <div className="namerow">
           <h1>{agent.name || 'Unnamed Agent'}</h1>
@@ -596,7 +594,7 @@ const agentStyles = `
   .said-agent .trustcard>*:not(canvas){position:relative}
   .said-agent .maingrid{margin-top:clamp(20px,3vh,30px)}
   .said-agent .head{display:flex;gap:22px;align-items:flex-start;margin-bottom:18px}
-  .said-agent .avatar{width:76px;height:76px;border-radius:20px;object-fit:cover;background:var(--card);border:1px solid var(--line);flex-shrink:0}
+  .said-agent .avatar{width:76px;height:76px;border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--line);flex-shrink:0;display:block}
   .said-agent .namerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .said-agent .namerow h1{font-size:clamp(24px,2.8vw,34px);font-weight:500;letter-spacing:-.02em}
   .said-agent .vbadge{flex:none;width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:10px}

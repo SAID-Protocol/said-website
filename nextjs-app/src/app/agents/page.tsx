@@ -6,6 +6,7 @@ import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
 import ShimmerDots from '@/components/said/ShimmerDots';
+import AgentAvatar from '@/components/said/AgentAvatar';
 import Link from 'next/link';
 
 const PAGE_SIZE = 50;
@@ -239,10 +240,7 @@ function DirectoryInner() {
               <Link href={`/agents/${a.wallet}`} key={a.wallet} className="row">
                 <span className="rank mono">{String(i + 1).padStart(2, '0')}</span>
                 <span className="av">
-                  {a.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={a.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                  ) : initials(a)}
+                  <AgentAvatar wallet={a.wallet} image={a.image} name={a.name} />
                 </span>
                 <span className="name"><span>{a.name || shortWallet(a.wallet)}</span>{a.isVerified && <span className="vbadge">✓</span>}</span>
                 <span className="desc">{a.description || ''}</span>
