@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import ThemeToggle from "@/components/said/ThemeToggle";
 import { API_URL } from '@/lib/api';
+import { clearCache } from '@/lib/cache';
 
 const LINKS: Array<[string, string, boolean?]> = [
   ["Directory", "/agents"],
@@ -67,7 +68,7 @@ export default function SaidNav() {
             My Agents
           </Link>
           <button
-            onClick={() => { logout(); setMenuOpen(false); }}
+            onClick={() => { clearCache(); logout(); setMenuOpen(false); }}
             style={{ display: "block", width: "100%", textAlign: "left", padding: "12px 16px", color: "var(--dim)", background: "none", border: "none", borderTop: "1px solid var(--line)", cursor: "pointer", font: "inherit" }}
           >
             Log Out

@@ -9,7 +9,18 @@ import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchMyAgents, fetchAgentKey, rotateAgentKey } from '@/lib/my-agents';
+import { readCache, writeCache } from '@/lib/cache';
 import { API_URL } from '@/lib/api';
+
+interface CachedProfile {
+  displayName: string;
+  username: string;
+  avatarUrl: string;
+  agentCount: number;
+  verifiedCount: number;
+  memberSince: string;
+  apiKeys: Array<{ agentId: string; agentName: string; key: string }>;
+}
 
 interface ApiKeyEntry {
   agentId: string;
@@ -47,11 +58,21 @@ export default function ProfilePage() {
   const email = user?.email?.address;
 
   useEffect(() => {
-    if (sessionToken) {
-      loadProfileData();
-    } else {
+    if (!sessionToken) { setLoading(false); return; }
+
+    // Paint last-known data on the first frame, then revalidate behind it.
+    const cached = readCache<CachedProfile>('profile', sessionToken);
+    if (cached) {
+      setDisplayName(cached.displayName);
+      setUsername(cached.username);
+      setAvatarUrl(cached.avatarUrl);
+      setAgentCount(cached.agentCount);
+      setVerifiedCount(cached.verifiedCount);
+      setMemberSince(cached.memberSince);
+      setApiKeys(cached.apiKeys.map((k) => ({ ...k, revealed: false })));
       setLoading(false);
     }
+    loadProfileData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionToken]);
 
@@ -59,6 +80,15 @@ export default function ProfilePage() {
     await Promise.all([fetchUserProfile(), fetchAgentStats()]);
     setLoading(false);
   };
+
+  // Snapshot whatever is currently rendered so the next visit paints instantly.
+  useEffect(() => {
+    if (!sessionToken || loading || !displayName) return;
+    writeCache<CachedProfile>('profile', sessionToken, {
+      displayName, username, avatarUrl, agentCount, verifiedCount, memberSince,
+      apiKeys: apiKeys.map(({ agentId, agentName, key }) => ({ agentId, agentName, key })),
+    });
+  }, [sessionToken, loading, displayName, username, avatarUrl, agentCount, verifiedCount, memberSince, apiKeys]);
 
   const fetchUserProfile = async () => {
     if (!sessionToken) return;

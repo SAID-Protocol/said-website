@@ -10,6 +10,7 @@ import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
 import { HOSTING_URL } from '@/lib/api';
 import { fetchMyAgents, fetchAgentKey, rotateAgentKey, type MyAgent } from '@/lib/my-agents';
+import { readCache, writeCache } from '@/lib/cache';
 
 export default function MyAgentsPage() {
   const { authenticated, login } = usePrivy();
@@ -71,11 +72,18 @@ export default function MyAgentsPage() {
   };
 
   useEffect(() => {
-    if (sessionToken) {
-      loadAgents();
-    } else {
+    if (!sessionToken) { setLoading(false); return; }
+
+    // Paint last-known agents on the first frame, then revalidate behind it.
+    const cached = readCache<MyAgent[]>('my-agents', sessionToken);
+    if (cached?.length) {
+      setAgents(cached);
+      for (const a of cached) {
+        if (a.gatewayToken) setApiKeys((prev) => ({ ...prev, [a.id]: a.gatewayToken as string }));
+      }
       setLoading(false);
     }
+    loadAgents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionToken]);
 
@@ -86,6 +94,7 @@ export default function MyAgentsPage() {
       if (a.gatewayToken) setApiKeys((prev) => ({ ...prev, [a.id]: a.gatewayToken as string }));
     }
     setAgents(list);
+    writeCache('my-agents', sessionToken, list);
     setLoading(false);
   };
 

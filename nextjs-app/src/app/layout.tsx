@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./providers";
 import SaidAssistant from "@/components/SaidAssistant";
 import SaidFx from "@/components/said/SaidFx";
+import PageFade from "@/components/said/PageFade";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -59,7 +60,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased`}>
         <Providers>
           <SaidFx />
-          {children}
+          <PageFade>{children}</PageFade>
           <SaidAssistant />
         </Providers>
       </body>
