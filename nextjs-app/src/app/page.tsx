@@ -93,7 +93,7 @@ export default async function Home() {
               <b>machine-payable, built for agents checking agents</b>. 0.001 USDC per
               query, settled on-chain.
             </p>
-            <p className="fine">GET /api/screen · api.saidprotocol.com</p>
+            <p className="fine"><Link href="/docs#screen">Read the trust screen docs →</Link></p>
           </div>
         </div>
       </div>

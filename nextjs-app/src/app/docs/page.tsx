@@ -15,6 +15,7 @@ const SECTIONS: Array<[string, string]> = [
   ['verification', 'Verification'],
   ['passport', 'Passport API'],
   ['reputation', 'Reputation'],
+  ['screen', 'Trust Screen'],
   ['xchain', 'Cross-Chain A2A'],
   ['x402', 'x402 Payments'],
   ['webhooks', 'Webhooks'],
@@ -140,6 +141,51 @@ await agent.submitFeedback(agentWallet, {
 //   positiveRatio: 0.94,
 //   score: 9400  // basis points (0-10000)
 // }`}</span></pre>
+          </section>
+
+
+          <section id="screen">
+            <h2>Trust Screen</h2>
+            <p>One call answers the question an agent actually has before it pays someone: <b>should I trust this counterparty?</b> It returns an <b>allow / review / caution</b> verdict for any Solana agent or wallet, alongside SAID&apos;s computed per-axis reputation and an EigenTrust score.</p>
+            <h3>Request</h3>
+            <pre><Copy />curl &quot;https://api.saidprotocol.com/api/screen?wallet=WALLET_ADDRESS&quot;</pre>
+            <h3>What it returns</h3>
+            <p>A verdict plus the reputation behind it, scored on five axes:</p>
+            <div className="eps">
+              <div className="ep"><span className="m mono">VERDICT</span><code>allow · review · caution</code><span className="d">The screen&apos;s answer for this counterparty</span></div>
+              <div className="ep"><span className="m mono">AXIS</span><code>delivery</code><span className="d">Whether the agent completes what it takes on</span></div>
+              <div className="ep"><span className="m mono">AXIS</span><code>payments</code><span className="d">Settlement behaviour on-chain</span></div>
+              <div className="ep"><span className="m mono">AXIS</span><code>validation</code><span className="d">Verification and attestation standing</span></div>
+              <div className="ep"><span className="m mono">AXIS</span><code>identity</code><span className="d">Strength of the registered on-chain identity</span></div>
+              <div className="ep"><span className="m mono">AXIS</span><code>community</code><span className="d">Standing across the wider ecosystem</span></div>
+              <div className="ep"><span className="m mono">SCORE</span><code>eigentrust</code><span className="d">Trust propagated through the agent graph</span></div>
+            </div>
+            <h3>Paying for a call</h3>
+            <p>The endpoint is machine-payable over <b>x402</b>: no accounts, no API keys. An unpaid request returns <b>402 Payment Required</b> with the payment terms in the response header; your client signs a USDC transfer and retries. Each call costs <b>0.001 USDC</b>.</p>
+            <div className="pills"><span className="pill"><b>0.001 USDC</b>Per screen</span><span className="pill"><b>402</b>Unpaid response</span><span className="pill"><b>No key</b>Just sign</span></div>
+            <h3>Payment rails</h3>
+            <p>The same call settles on any of these:</p>
+            <div className="eps">
+              <div className="ep"><span className="m mono">SOLANA</span><code>mainnet-beta</code><span className="d">USDC · EPjFWdd5…TDt1v</span></div>
+              <div className="ep"><span className="m mono">BASE</span><code>eip155:8453</code><span className="d">USDC · 0x833589fC…2913</span></div>
+              <div className="ep"><span className="m mono">POLYGON</span><code>eip155:137</code><span className="d">USDC · 0x3c499c54…3359</span></div>
+              <div className="ep"><span className="m mono">AVALANCHE</span><code>eip155:43114</code><span className="d">USDC · 0xB97EF9Ef…8a6E</span></div>
+              <div className="ep"><span className="m mono">SEI</span><code>eip155:1329</code><span className="d">USDC · 0xe15fC38F…2392</span></div>
+            </div>
+            <h3>Code example</h3>
+            <pre><Copy />{`import { fetchWithPayment } from "@x402/fetch";
+import { createSvmPaymentAdapter } from "@x402/svm";
+
+const adapter = createSvmPaymentAdapter(wallet);
+
+const res = await fetchWithPayment(
+  \`https://api.saidprotocol.com/api/screen?wallet=\${counterparty}\`,
+  { method: "GET" },
+  adapter
+);
+
+const screen = await res.json();`}</pre>
+            <div className="callout"><span className="t">BUILT FOR AGENTS</span><p>Screening is designed to be called by software, not read by a person: an agent checks a counterparty before it moves funds, and pays for the check itself.</p></div>
           </section>
 
           <section id="xchain">
