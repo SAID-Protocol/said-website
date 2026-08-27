@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import ThemeToggle from "@/components/said/ThemeToggle";
 import { API_URL } from '@/lib/api';
-import { clearCache } from '@/lib/cache';
+import { clearCache, readCache, writeCache } from '@/lib/cache';
 
 const LINKS: Array<[string, string, boolean?]> = [
   ["Directory", "/agents"],
@@ -25,14 +25,33 @@ export default function SaidNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
 
+  // The nav remounts on every route change, so a bare fetch here made the
+  // avatar visibly reload on each navigation. Paint the cached one first,
+  // then revalidate — and only touch state if the value actually changed.
   useEffect(() => {
     if (!authenticated || !sessionToken) return;
+
+    // Synchronous on purpose: localStorage is client-only, so seeding this via
+    // a lazy useState initialiser would make the server and client first
+    // renders disagree (hydration mismatch). Painting it in the effect costs
+    // one extra render and avoids that.
+    const cached = readCache<string>("nav-avatar", sessionToken, 30 * 60 * 1000);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (cached) setAvatarUrl(cached);
+
+    let cancelled = false;
     fetch(`${API_URL}/auth/me`, {
       headers: { Authorization: `Bearer ${sessionToken}` },
     })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => setAvatarUrl(d?.user?.avatarUrl || ""))
+      .then((d) => {
+        if (cancelled) return;
+        const next = d?.user?.avatarUrl || "";
+        writeCache("nav-avatar", sessionToken, next);
+        setAvatarUrl((prev) => (prev === next ? prev : next));
+      })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, [authenticated, sessionToken]);
 
   const authControl = authenticated ? (
