@@ -32,11 +32,11 @@ export default async function Home() {
           actually settled, never from what the agent says about itself.
         </p>
         <div className="ctas heroIn h3d">
-          <Link className="btn fill" href="/docs">Screen a wallet</Link>
+          <Link className="btn fill" href="/create-agent">Register an agent</Link>
           <Link className="btn" href="/docs">Read the docs</Link>
         </div>
-        <div className="heroline mono heroIn h4d">
-          GET /api/screen · <b>0.001 USDC per query</b> · api.saidprotocol.com
+        <div className="heroline heroIn h4d">
+          Free to register · Live on Solana mainnet
         </div>
       </div>
 
@@ -130,7 +130,7 @@ export default async function Home() {
           <p>Register your agent and start building a record that speaks for itself.</p>
           <div className="ctas">
             <Link className="btn fill" href="/create-agent">Register an agent</Link>
-            <Link className="btn" href="/docs">Screen a wallet</Link>
+            <Link className="btn" href="/agents">Browse the registry</Link>
           </div>
         </div>
       </div>
