@@ -141,20 +141,12 @@ export default function SaidNav() {
         </div>
       </nav>
       {mobileOpen && (
-        <div
-          style={{
-            position: "sticky", top: 63, zIndex: 9, background: "var(--navbg)",
-            backdropFilter: "blur(12px)", borderBottom: "1px solid var(--line)",
-            padding: "8px clamp(20px,4vw,48px) 16px", display: "flex", flexDirection: "column",
-            gap: 4, fontSize: 14.5,
-          }}
-          className="said-mobile-menu"
-        >
+        <div className="said-mobile-menu">
           {LINKS.map(([label, href, ext]) =>
             ext ? (
-              <a key={label} href={href} target="_blank" rel="noopener noreferrer" style={{ padding: "10px 0", color: "var(--dim)" }}>{label}</a>
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer">{label}</a>
             ) : (
-              <Link key={label} href={href} onClick={() => setMobileOpen(false)} style={{ padding: "10px 0", color: "var(--dim)" }}>{label}</Link>
+              <Link key={label} href={href} onClick={() => setMobileOpen(false)}>{label}</Link>
             )
           )}
 
@@ -191,18 +183,32 @@ export default function SaidNav() {
           .navright { gap: 10px; }
         }
 
+        /* Overlays the page rather than pushing it down: fixed, full-height,
+           starting under the nav (which keeps a higher z-index). */
+        .said-mobile-menu {
+          position: fixed; inset: 0; z-index: 9;
+          padding: 88px 22px 32px;
+          background: var(--bg);
+          display: flex; flex-direction: column; gap: 2px;
+          font-size: 17px; overflow-y: auto;
+          animation: menuIn .22s cubic-bezier(.16,1,.3,1) both;
+        }
+        @keyframes menuIn { from { opacity: 0 } to { opacity: 1 } }
+        .said-mobile-menu > a {
+          padding: 14px 0; color: var(--ink); font-weight: 500;
+          border-bottom: 1px solid var(--line);
+        }
         .said-mobile-actions {
-          display: flex; flex-direction: column; gap: 4px;
-          margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--line);
+          display: flex; flex-direction: column; gap: 2px; margin-top: 22px;
         }
         .said-mobile-actions a,
         .said-mobile-actions button {
-          padding: 10px 0; color: var(--dim); background: none; border: 0;
-          font: inherit; font-size: 14.5px; text-align: left; cursor: pointer;
+          padding: 13px 0; color: var(--dim); background: none; border: 0;
+          font: inherit; font-size: 15px; text-align: left; cursor: pointer;
         }
         .said-mobile-actions .navcta {
-          margin-top: 8px; text-align: center; padding: 12px 18px;
-          color: var(--bg); background: var(--ink);
+          margin-top: 14px; text-align: center; padding: 15px 18px;
+          color: var(--bg); background: var(--ink); font-size: 15px;
         }
       `}</style>
     </>
