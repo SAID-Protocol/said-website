@@ -15,7 +15,7 @@ import SaidNav from '@/components/said/SaidNav';
  * so they're skipped to avoid rendering two navbars. Remove them from this
  * list as each page is ported.
  */
-const LEGACY_NAV_ROUTES = ['/leaderboard', '/mint-passport', '/admin'];
+const LEGACY_NAV_ROUTES = ['/mint-passport', '/admin'];
 
 export default function SiteNav() {
   const pathname = usePathname();

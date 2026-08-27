@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import AsciiBackground from '@/components/AsciiBackground';
+import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
+import ShimmerDots from '@/components/said/ShimmerDots';
 
 interface TrustScore {
   score: number;
@@ -29,13 +29,29 @@ type SortKey = 'trust' | 'reputation' | 'feedback';
 const PAGE_SIZE = 100;
 const VISIBLE_STEP = 25;
 
-const TIER_COLORS: Record<string, { bg: string; text: string; border: string; ring: string }> = {
-  platinum: { bg: 'bg-purple-500/10', text: 'text-purple-300', border: 'border-purple-500/30', ring: 'ring-purple-500/40' },
-  gold: { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/30', ring: 'ring-amber-500/40' },
-  silver: { bg: 'bg-zinc-400/10', text: 'text-zinc-200', border: 'border-zinc-400/30', ring: 'ring-zinc-400/40' },
-  bronze: { bg: 'bg-orange-600/10', text: 'text-orange-300', border: 'border-orange-600/30', ring: 'ring-orange-600/40' },
-  unverified: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30', ring: 'ring-zinc-700/30' },
+// Tier accents — same values as the directory champion auras and the
+// agent-profile gauge, so a tier looks the same everywhere on the site.
+const TIER_SOLID: Record<string, string> = {
+  platinum: '#a78bfa',
+  gold: '#d9a514',
+  silver: '#8fa3bb',
+  bronze: '#c2703d',
+  unverified: '#8a8a8a',
 };
+
+const shortWallet = (w: string) => `${w.slice(0, 4)}…${w.slice(-4)}`;
+
+function sortValue(agent: Agent, sortKey: SortKey): string {
+  if (sortKey === 'trust') return String(agent.trustScore?.score ?? 0);
+  if (sortKey === 'reputation') return agent.reputationScore?.toFixed(1) ?? '0';
+  return String(agent.feedbackCount ?? 0);
+}
+
+function sortLabel(sortKey: SortKey): string {
+  if (sortKey === 'trust') return 'TRUST';
+  if (sortKey === 'reputation') return 'REPUTATION';
+  return 'FEEDBACK';
+}
 
 export default function LeaderboardPage() {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -48,6 +64,7 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     fetchPage(0, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchPage(fetchOffset: number, reset: boolean) {
@@ -75,7 +92,7 @@ export default function LeaderboardPage() {
       reputation: (a, b) => (b.reputationScore ?? 0) - (a.reputationScore ?? 0),
       feedback: (a, b) => (b.feedbackCount ?? 0) - (a.feedbackCount ?? 0),
     };
-    // Drop unscored agents from the leaderboard for the trust sort
+    // Unscored agents aren't ranked on the trust sort
     const filtered =
       sortKey === 'trust' ? agents.filter((a) => (a.trustScore?.score ?? 0) > 0) : agents;
     return [...filtered].sort(sortFn[sortKey]);
@@ -85,205 +102,164 @@ export default function LeaderboardPage() {
   const rest = ranked.slice(3, visibleCount);
 
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <AsciiBackground agentThemed />
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar />
-        <main className="flex-1 max-w-5xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
-          <div className="text-center mb-10">
-            <h1 className="text-4xl font-bold mb-3 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">Leaderboard</h1>
-            <p className="text-lg text-zinc-400 mb-6">
-              The most trusted AI agents on SAID, ranked by on-chain reputation.
-            </p>
-            <div className="flex gap-2 justify-center">
-              <SortButton current={sortKey} value="trust" label="Trust Score" onClick={setSortKey} />
-              <SortButton current={sortKey} value="reputation" label="Reputation" onClick={setSortKey} />
-              <SortButton current={sortKey} value="feedback" label="Feedback" onClick={setSortKey} />
-            </div>
-          </div>
+    <div className="said-page said-lb">
+      <div className="hero">
+        <div className="kick">RANKED BY ON-CHAIN REPUTATION</div>
+        <h1>Leaderboard</h1>
+        <p className="lede">The most trusted AI agents on SAID, ranked by what they&apos;ve actually done.</p>
+      </div>
 
-          {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
-              <p className="mt-4 text-zinc-400">Loading leaderboard...</p>
-            </div>
-          ) : ranked.length === 0 ? (
-            <div className="text-center py-20 text-zinc-500">
-              No agents to rank yet.
-            </div>
-          ) : (
-            <>
-              {podium.length > 0 && (
-                <div className="grid sm:grid-cols-3 gap-4 mb-10">
-                  {podium.map((a, i) => (
-                    <PodiumCard key={a.wallet} agent={a} rank={i + 1} sortKey={sortKey} />
-                  ))}
-                </div>
-              )}
-
-              {rest.length > 0 && (
-                <div className="bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl overflow-hidden">
-                  {rest.map((a, i) => (
-                    <Row key={a.wallet} agent={a} rank={i + 4} sortKey={sortKey} />
-                  ))}
-                </div>
-              )}
-
-              <div className="text-center mt-8 space-y-3">
-                {visibleCount < ranked.length && (
-                  <button
-                    onClick={() => setVisibleCount((c) => c + VISIBLE_STEP)}
-                    className="px-6 py-2.5 bg-zinc-900/50 border border-zinc-700/50 rounded-xl text-sm font-medium text-zinc-300 hover:text-white hover:border-zinc-500 transition backdrop-blur-sm"
-                  >
-                    Show more
-                  </button>
-                )}
-                {hasMore && (
-                  <div>
-                    <button
-                      onClick={() => fetchPage(offset, false)}
-                      disabled={loadingMore}
-                      className="px-6 py-2.5 bg-zinc-900/50 border border-zinc-700/50 rounded-xl text-sm font-medium text-zinc-400 hover:text-white hover:border-zinc-500 transition backdrop-blur-sm disabled:opacity-50"
-                    >
-                      {loadingMore ? 'Loading...' : `Load more agents (${agents.length} ranked so far)`}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
+      <div className="tools">
+        <div className="tabs">
+          {([['trust', 'Trust score'], ['reputation', 'Reputation'], ['feedback', 'Feedback']] as Array<[SortKey, string]>).map(
+            ([key, label]) => (
+              <button key={key} className={`tab${sortKey === key ? ' on' : ''}`} onClick={() => setSortKey(key)}>
+                {label}
+              </button>
+            )
           )}
-        </main>
-        <Footer />
+        </div>
+        {!loading && ranked.length > 0 && (
+          <span className="count mono">{ranked.length.toLocaleString('en-US')} RANKED</span>
+        )}
       </div>
+
+      <DotSeam style={{ marginTop: 'clamp(20px,3vh,30px)' }} />
+
+      <div className="lbwrap">
+        {loading ? (
+          <p className="empty mono">LOADING THE LEADERBOARD…</p>
+        ) : ranked.length === 0 ? (
+          <p className="empty mono">NO AGENTS TO RANK YET.</p>
+        ) : (
+          <>
+            {podium.length > 0 && (
+              <div className="podium">
+                {podium.map((a, i) => {
+                  const tier = a.trustScore?.tier ?? 'unverified';
+                  const color = TIER_SOLID[tier] ?? TIER_SOLID.unverified;
+                  return (
+                    <Link
+                      key={a.wallet}
+                      href={`/agents/${a.wallet}`}
+                      className={`pcard${i === 0 ? ' first' : ''}`}
+                      style={{ ['--tier' as string]: color }}
+                    >
+                      {i === 0 && <ShimmerDots inverted />}
+                      <span className="prank mono">{String(i + 1).padStart(2, '0')} · {tier.toUpperCase()}</span>
+                      <span className="pname">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={`https://api.saidprotocol.com/api/avatar/${a.wallet}.svg`} alt="" />
+                        <span className="pnametext">
+                          <b>{a.name || 'Unnamed Agent'}</b>
+                          <i className="mono">{shortWallet(a.wallet)}</i>
+                        </span>
+                        {a.isVerified && <span className="vbadge">✓</span>}
+                      </span>
+                      <span className="pfoot">
+                        <span className="pscore">{sortValue(a, sortKey)}</span>
+                        <span className="plabel mono">{sortLabel(sortKey)}</span>
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            {rest.length > 0 && (
+              <div className="rows">
+                {rest.map((a, i) => {
+                  const tier = a.trustScore?.tier ?? 'unverified';
+                  const scored = (a.trustScore?.score ?? 0) > 0;
+                  return (
+                    <Link key={a.wallet} href={`/agents/${a.wallet}`} className="row">
+                      <span className="rank mono">{String(i + 4).padStart(2, '0')}</span>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img className="av" src={`https://api.saidprotocol.com/api/avatar/${a.wallet}.svg`} alt="" />
+                      <span className="name">
+                        <span>{a.name || 'Unnamed Agent'}</span>
+                        {a.isVerified && <span className="vbadge">✓</span>}
+                      </span>
+                      <span className="wallet mono">{shortWallet(a.wallet)}</span>
+                      <span className="tierchip" style={{ ['--tier' as string]: TIER_SOLID[tier] }}>
+                        {scored ? tier.toUpperCase() : '—'}
+                      </span>
+                      <span className="val">
+                        <b>{sortValue(a, sortKey)}</b>
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="more">
+              {visibleCount < ranked.length && (
+                <button className="btn" onClick={() => setVisibleCount((c) => c + VISIBLE_STEP)}>Show more</button>
+              )}
+              {hasMore && (
+                <button className="btn" onClick={() => fetchPage(offset, false)} disabled={loadingMore}>
+                  {loadingMore ? 'Loading…' : `Load more (${agents.length} loaded)`}
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      <SaidFooter />
+
+      <style>{`
+        .said-lb .tools{max-width:1000px;margin:clamp(24px,4vh,36px) auto 0;padding:0 clamp(20px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+        .said-lb .tabs{display:flex;gap:8px;flex-wrap:wrap}
+        .said-lb .tab{padding:10px 18px;border-radius:99px;border:1px solid var(--line);background:none;color:var(--dim);font-size:13px;font-family:inherit;cursor:pointer}
+        .said-lb .tab:hover{border-color:var(--ink);color:var(--ink)}
+        .said-lb .tab.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+        .said-lb .count{font-size:11px;letter-spacing:.14em;color:var(--faint)}
+        .said-lb .lbwrap{max-width:1000px;margin:0 auto;padding:clamp(20px,3vh,30px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+        .said-lb .empty{padding:60px 0;text-align:center;font-size:12px;letter-spacing:.12em;color:var(--faint)}
+
+        .said-lb .podium{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:clamp(20px,3vh,30px)}
+        .said-lb .pcard{position:relative;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:20px;padding:22px 22px 20px;background:var(--card);transition:border-color .3s}
+        .said-lb .pcard>*:not(canvas){position:relative}
+        .said-lb .pcard:hover{border-color:var(--ink)}
+        .said-lb .pcard.first{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+        .said-lb .prank{font-size:10px;letter-spacing:.16em;color:var(--tier)}
+        .said-lb .pname{display:flex;align-items:center;gap:11px;margin-top:16px}
+        .said-lb .pname img{width:38px;height:38px;border-radius:11px;flex:none;background:var(--bg)}
+        .said-lb .pnametext{display:flex;flex-direction:column;min-width:0}
+        .said-lb .pnametext b{font-size:15px;font-weight:600;letter-spacing:-.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .said-lb .pnametext i{font-style:normal;font-size:11px;color:var(--faint);margin-top:2px}
+        .said-lb .pcard.first .pnametext i{color:inherit;opacity:.55}
+        .said-lb .pfoot{display:flex;align-items:baseline;justify-content:space-between;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+        .said-lb .pcard.first .pfoot{border-top-color:rgba(128,128,128,.35)}
+        .said-lb .pscore{font-size:clamp(24px,2.6vw,32px);font-weight:500;letter-spacing:-.03em}
+        .said-lb .plabel{font-size:9.5px;letter-spacing:.14em;color:var(--faint)}
+        .said-lb .pcard.first .plabel{color:inherit;opacity:.55}
+        .said-lb .vbadge{flex:none;width:15px;height:15px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:9px}
+        .said-lb .pcard.first .vbadge{background:var(--bg);color:var(--ink)}
+
+        .said-lb .rows{border:1px solid var(--line);border-radius:16px;overflow:hidden}
+        .said-lb .row{display:grid;grid-template-columns:44px 34px 1.6fr 1fr .8fr .6fr;gap:14px;align-items:center;padding:12px 18px;border-top:1px solid var(--line);font-size:14px}
+        .said-lb .row:first-child{border-top:0}
+        .said-lb .row:hover{background:var(--card)}
+        .said-lb .row .rank{font-size:12px;color:var(--faint)}
+        .said-lb .row .av{width:30px;height:30px;border-radius:9px;background:var(--card)}
+        .said-lb .row .name{display:flex;align-items:center;gap:8px;min-width:0;font-weight:500}
+        .said-lb .row .name span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .said-lb .row .wallet{font-size:12px;color:var(--faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .said-lb .tierchip{font-size:9.5px;letter-spacing:.1em;color:var(--tier,var(--dim));border:1px solid var(--line);border-radius:99px;padding:4px 10px;text-align:center;justify-self:start;white-space:nowrap}
+        .said-lb .row .val{text-align:right;font-variant-numeric:tabular-nums}
+        .said-lb .row .val b{font-size:15px;font-weight:600}
+        .said-lb .more{display:flex;gap:10px;justify-content:center;margin-top:26px;flex-wrap:wrap}
+        .said-lb .more .btn:disabled{opacity:.5;cursor:default}
+
+        @media (max-width:860px){
+          .said-lb .podium{grid-template-columns:1fr}
+          .said-lb .row{grid-template-columns:34px 30px 1fr auto;gap:10px}
+          .said-lb .row .wallet,.said-lb .row .tierchip{display:none}
+        }
+      `}</style>
     </div>
-  );
-}
-
-function SortButton({
-  current,
-  value,
-  label,
-  onClick,
-}: {
-  current: SortKey;
-  value: SortKey;
-  label: string;
-  onClick: (v: SortKey) => void;
-}) {
-  const active = current === value;
-  return (
-    <button
-      onClick={() => onClick(value)}
-      className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-        active
-          ? 'bg-white text-black'
-          : 'bg-zinc-900/50 text-zinc-400 hover:text-white border border-zinc-700/50 backdrop-blur-sm'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function sortValue(agent: Agent, sortKey: SortKey): string {
-  if (sortKey === 'trust') return String(agent.trustScore?.score ?? 0);
-  if (sortKey === 'reputation') return agent.reputationScore?.toFixed(1) ?? '0';
-  return String(agent.feedbackCount ?? 0);
-}
-
-function sortLabel(sortKey: SortKey): string {
-  if (sortKey === 'trust') return 'Trust';
-  if (sortKey === 'reputation') return 'Reputation';
-  return 'Feedback';
-}
-
-function PodiumCard({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: SortKey }) {
-  const tier = agent.trustScore?.tier ?? 'unverified';
-  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unverified;
-  const rankBadge = rank === 1 ? '1st' : rank === 2 ? '2nd' : '3rd';
-
-  return (
-    <Link
-      href={`/agents/${agent.wallet}`}
-      className={`block rounded-xl bg-zinc-950/50 backdrop-blur-md border ${tierStyles.border} hover:border-white/30 transition p-5 ring-1 ${tierStyles.ring}`}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <span className={`text-xs uppercase tracking-wider font-bold ${tierStyles.text}`}>
-          {rankBadge}
-        </span>
-        {agent.trustScore && (
-          <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
-            {tier}
-          </span>
-        )}
-      </div>
-      <div className="flex items-center gap-3 mb-4">
-        <img
-          src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
-          alt={agent.name || 'Agent'}
-          className="w-12 h-12 rounded-lg flex-shrink-0"
-        />
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <h3 className="font-semibold truncate">{agent.name || 'Unnamed Agent'}</h3>
-            {agent.isVerified && (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 text-green-400">
-                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            )}
-          </div>
-          <p className="text-zinc-500 text-xs font-mono">{agent.wallet.slice(0, 4)}…{agent.wallet.slice(-4)}</p>
-        </div>
-      </div>
-      <div className="flex items-baseline justify-between">
-        <span className="text-xs uppercase tracking-wider text-zinc-500">{sortLabel(sortKey)}</span>
-        <span className="text-3xl font-bold">{sortValue(agent, sortKey)}</span>
-      </div>
-    </Link>
-  );
-}
-
-function Row({ agent, rank, sortKey }: { agent: Agent; rank: number; sortKey: SortKey }) {
-  const tier = agent.trustScore?.tier ?? 'unverified';
-  const tierStyles = TIER_COLORS[tier] ?? TIER_COLORS.unverified;
-
-  return (
-    <Link
-      href={`/agents/${agent.wallet}`}
-      className="grid grid-cols-12 gap-4 items-center px-5 py-3 border-b border-zinc-800/60 last:border-b-0 hover:bg-white/[0.02] transition"
-    >
-      <div className="col-span-1 text-zinc-500 font-mono text-sm">#{rank}</div>
-      <div className="col-span-6 sm:col-span-5 flex items-center gap-3 min-w-0">
-        <img
-          src={`https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
-          alt={agent.name || 'Agent'}
-          className="w-8 h-8 rounded-md flex-shrink-0"
-        />
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="font-medium text-sm truncate">{agent.name || 'Unnamed Agent'}</span>
-            {agent.isVerified && (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="flex-shrink-0 text-green-400">
-                <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-              </svg>
-            )}
-          </div>
-          <p className="text-zinc-500 text-[10px] font-mono">{agent.wallet.slice(0, 4)}…{agent.wallet.slice(-4)}</p>
-        </div>
-      </div>
-      <div className="hidden sm:flex col-span-3 justify-center">
-        {agent.trustScore && agent.trustScore.score > 0 && (
-          <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded-full ${tierStyles.bg} ${tierStyles.border} ${tierStyles.text} border`}>
-            {tier}
-          </span>
-        )}
-      </div>
-      <div className="col-span-5 sm:col-span-3 text-right">
-        <span className="font-mono text-base font-semibold">{sortValue(agent, sortKey)}</span>
-        <span className="text-[10px] uppercase tracking-wider text-zinc-500 ml-1">{sortLabel(sortKey)}</span>
-      </div>
-    </Link>
   );
 }
