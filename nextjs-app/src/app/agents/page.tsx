@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
@@ -162,7 +161,6 @@ function DirectoryInner() {
 
   return (
     <div className="said-page said-dir">
-      <SaidNav />
 
       <div className="hero">
         <div className="kick">THE REGISTRY · LIVE ON SOLANA</div>

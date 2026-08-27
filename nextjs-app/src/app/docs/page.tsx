@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
@@ -46,7 +45,6 @@ export default function DocsPage() {
 
   return (
     <div className="said-page said-docs">
-      <SaidNav />
 
       <div className="wrap">
         <aside className="docs-aside">

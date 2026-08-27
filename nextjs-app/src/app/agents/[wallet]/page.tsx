@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
@@ -110,7 +109,6 @@ const shortAddr = (v: string) => `${v.slice(0, 6)}…${v.slice(-6)}`;
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="said-page said-agent">
-      <SaidNav />
       {children}
       <SaidFooter />
       <style>{agentStyles}</style>

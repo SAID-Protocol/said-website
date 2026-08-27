@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import { API_URL, HOSTING_URL } from '@/lib/api';
 
@@ -121,7 +120,6 @@ export default function CreateAgentPage() {
   if (success) {
     return (
       <div className="said-page said-create">
-        <SaidNav />
         <div className="hero" style={{ textAlign: 'center' }}>
           <div className="kick">REGISTERED · ON-CHAIN</div>
           <h1>Agent created.</h1>
@@ -162,7 +160,6 @@ export default function CreateAgentPage() {
 
   return (
     <div className="said-page said-create">
-      <SaidNav />
 
       <div className="hero" style={{ textAlign: 'center' }}>
         <div className="kick">FREE · ONE STEP · ON-CHAIN</div>

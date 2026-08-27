@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import BlogIndex, { type IndexPost } from '@/components/blog/BlogIndex';
 import { getAllPosts } from '@/lib/blog';
@@ -36,7 +35,6 @@ export default function BlogIndexPage() {
 
   return (
     <div className="said-page said-blog">
-      <SaidNav />
 
       <div className="hero">
         <div className="kick">NOTES FROM THE REGISTRY</div>

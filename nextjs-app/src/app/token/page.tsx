@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
@@ -11,7 +10,6 @@ const TREASURY = '2XfHTeNWTjNwUmgoXaafYuqHcAAXj8F5Kjw2Bnzi4FxH';
 export default function TokenPage() {
   return (
     <div className="said-page said-token">
-      <SaidNav />
 
       <div className="hero">
         <div className="kick">THE TOKEN · SOLANA</div>

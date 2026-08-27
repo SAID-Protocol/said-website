@@ -3,7 +3,6 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
@@ -100,7 +99,6 @@ export default function MyAgentsPage() {
 
   const shell = (children: React.ReactNode) => (
     <div className="said-page said-mine">
-      <SaidNav />
       {children}
       <SaidFooter />
       <style>{mineStyles}</style>

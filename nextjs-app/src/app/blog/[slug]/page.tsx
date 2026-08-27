@@ -3,7 +3,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import { mdxComponents } from '@/components/blog/mdx';
 import { getPost } from '@/lib/blog';
@@ -86,7 +85,6 @@ export default async function BlogPostPage({
 
   return (
     <div className="said-page said-post">
-      <SaidNav />
 
       <script
         type="application/ld+json"

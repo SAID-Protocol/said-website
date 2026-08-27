@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 
@@ -13,7 +12,6 @@ const PROGRAM_ID = '5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G';
 export default function SecurityPage() {
   return (
     <div className="said-page said-sec">
-      <SaidNav />
 
       <div className="hero">
         <div className="kick">SECURITY &amp; PRIVACY</div>

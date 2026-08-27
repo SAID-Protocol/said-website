@@ -3,7 +3,6 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import ShimmerDots from '@/components/said/ShimmerDots';
@@ -249,7 +248,6 @@ export default function ProfilePage() {
   if (!authenticated) {
     return (
       <div className="said-page said-me">
-        <SaidNav />
         <div className="hero" style={{ textAlign: 'center', minHeight: '52vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div className="kick">YOUR ACCOUNT</div>
           <h1>Sign in to view your profile.</h1>
@@ -266,7 +264,6 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="said-page said-me">
-        <SaidNav />
         <div className="hero" style={{ textAlign: 'center', minHeight: '52vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <p className="mono" style={{ fontSize: 11, letterSpacing: '.16em', color: 'var(--faint)' }}>LOADING PROFILE…</p>
         </div>
@@ -278,7 +275,6 @@ export default function ProfilePage() {
 
   return (
     <div className="said-page said-me">
-      <SaidNav />
 
       <main className="mewrap">
         <div className="mehead">

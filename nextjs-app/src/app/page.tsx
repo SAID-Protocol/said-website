@@ -1,4 +1,3 @@
-import SaidNav from "@/components/said/SaidNav";
 import SaidFooter from "@/components/said/SaidFooter";
 import HeroMark from "@/components/said/HeroMark";
 import DotSeam from "@/components/said/DotSeam";
@@ -24,7 +23,6 @@ export default async function Home() {
 
   return (
     <div className="said-page said-home">
-      <SaidNav />
 
       <div className="hero home-hero">
         <HeroMark />

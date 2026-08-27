@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 
 export const metadata: Metadata = {
@@ -10,7 +9,6 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <div className="said-page">
-      <SaidNav />
       <div className="hero">
         <div className="kick">LEGAL · LAST UPDATED MARCH 23, 2026</div>
         <h1>Privacy Policy</h1>

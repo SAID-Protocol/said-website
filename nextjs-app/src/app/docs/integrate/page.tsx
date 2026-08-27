@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
@@ -17,7 +16,6 @@ function Copy() {
 export default function IntegratePage() {
   return (
     <div className="said-page said-int">
-      <SaidNav />
 
       <div className="hero">
         <Link href="/docs" className="backlink mono">← BACK TO DOCS</Link>

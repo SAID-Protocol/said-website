@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import CtaDots from '@/components/said/CtaDots';
@@ -209,7 +208,6 @@ export default function ChangelogPage() {
 
   return (
     <div className="said-page said-log">
-      <SaidNav />
 
       <div className="hero">
         <div className="kick">WHAT SHIPPED · NEWEST FIRST</div>

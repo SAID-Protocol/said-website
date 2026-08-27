@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import Link from 'next/link';
-import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
 import { API_URL } from '@/lib/api';
@@ -61,7 +60,6 @@ export default function GrantsApplyPage() {
   if (submitted) {
     return (
       <div className="said-page">
-        <SaidNav />
         <div className="hero" style={{ textAlign: 'center', minHeight: '55vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <div className="kick">APPLICATION SUBMITTED</div>
           <h1>Thanks for applying.</h1>
@@ -79,7 +77,6 @@ export default function GrantsApplyPage() {
 
   return (
     <div className="said-page said-grants">
-      <SaidNav />
 
       <div className="hero">
         <div className="kick">THE TREASURY · STREAMING GRANTS</div>
