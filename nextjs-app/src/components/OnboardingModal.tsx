@@ -72,85 +72,73 @@ export default function OnboardingModal({ onComplete }: OnboardingModalProps) {
   const canSubmit = username.length >= 3 && displayName.length >= 1 && !usernameError && !checking && !submitting;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl max-w-md w-full p-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
-        <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold mb-2">Welcome to SAID!</h2>
-          <p className="text-zinc-400">Let's set up your profile to get started</p>
+    <div className="said-onb">
+      <div className="onbcard">
+        <div className="onbhead">
+          <div className="kick mono">WELCOME TO SAID</div>
+          <h2>Set up your profile.</h2>
+          <p>Two details and you&apos;re in.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Username */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Username <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={handleUsernameChange}
-              placeholder="yourname"
-              autoFocus
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500 transition"
-            />
-            {usernameError && (
-              <p className="text-red-400 text-sm mt-1">{usernameError}</p>
-            )}
-            {checking && (
-              <p className="text-zinc-500 text-sm mt-1">Checking availability...</p>
-            )}
-            {!usernameError && username.length >= 3 && !checking && (
-              <p className="text-green-400 text-sm mt-1">✓ Available</p>
-            )}
-          </div>
+        <form onSubmit={handleSubmit}>
+          <label>USERNAME</label>
+          <input
+            type="text"
+            value={username}
+            onChange={handleUsernameChange}
+            placeholder="yourname"
+            autoFocus
+          />
+          {usernameError && <p className="msg bad">{usernameError}</p>}
+          {checking && <p className="msg">Checking availability…</p>}
+          {!usernameError && username.length >= 3 && !checking && (
+            <p className="msg ok">✓ Available</p>
+          )}
 
-          {/* Display Name */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Display Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Your Name"
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500 transition"
-            />
-          </div>
+          <label>DISPLAY NAME</label>
+          <input
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="Your name"
+          />
 
-          {/* Avatar URL (optional) */}
-          <div>
-            <label className="block text-sm font-medium mb-2">
-              Profile Picture <span className="text-zinc-500">(optional)</span>
-            </label>
-            <input
-              type="url"
-              value={avatar}
-              onChange={(e) => setAvatar(e.target.value)}
-              placeholder="https://..."
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500 transition"
-            />
-            <p className="text-zinc-500 text-xs mt-1">You can always add this later</p>
-          </div>
+          <label>PROFILE PICTURE <b>· optional</b></label>
+          <input
+            type="url"
+            value={avatar}
+            onChange={(e) => setAvatar(e.target.value)}
+            placeholder="https://…"
+          />
+          <p className="msg">You can always add this later.</p>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className={`w-full py-3 rounded-lg font-semibold transition ${
-              canSubmit
-                ? 'bg-white text-black hover:bg-zinc-200'
-                : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
-            }`}
-          >
-            {submitting ? 'Setting up...' : 'Complete Setup'}
+          <button type="submit" className="btn fill" disabled={!canSubmit}>
+            {submitting ? 'Setting up…' : 'Complete setup'}
           </button>
         </form>
 
-        <p className="text-center text-zinc-500 text-xs mt-4">
-          Your username will be public and cannot be changed
-        </p>
+        <p className="fine">Your username is public and can&apos;t be changed later.</p>
       </div>
+
+      <style>{`
+        .said-onb{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,16,16,.6);backdrop-filter:blur(8px)}
+        .said-onb .onbcard{width:100%;max-width:440px;max-height:92vh;overflow-y:auto;background:var(--bg);border:1px solid var(--line);border-radius:22px;padding:30px 30px 26px;animation:onbIn .3s cubic-bezier(.16,1,.3,1) both}
+        @keyframes onbIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+        .said-onb .onbhead{margin-bottom:6px}
+        .said-onb .kick{font-size:10px;letter-spacing:.18em;color:var(--faint)}
+        .said-onb h2{margin-top:12px;font-size:24px;font-weight:500;letter-spacing:-.02em}
+        .said-onb .onbhead p{margin-top:8px;font-size:14px;color:var(--dim)}
+        .said-onb label{display:block;font-size:11px;letter-spacing:.12em;color:var(--faint);margin:20px 0 8px}
+        .said-onb label b{color:var(--dim);font-weight:400}
+        .said-onb input{width:100%;padding:12px 15px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:14px;font-family:inherit;outline:none}
+        .said-onb input:focus{border-color:var(--ink)}
+        .said-onb .msg{margin-top:8px;font-size:12px;color:var(--faint)}
+        .said-onb .msg.bad{color:#c0392b}
+        .said-onb .msg.ok{color:var(--good)}
+        .said-onb .btn{width:100%;margin-top:26px;text-align:center;display:block;padding:14px 24px;border-radius:99px;font-size:14px;font-weight:500;background:var(--ink);color:var(--bg);border:1px solid var(--ink);cursor:pointer;font-family:inherit}
+        .said-onb .btn:disabled{opacity:.4;cursor:not-allowed}
+        .said-onb .fine{margin-top:16px;text-align:center;font-size:11.5px;color:var(--faint)}
+      `}</style>
     </div>
   );
 }

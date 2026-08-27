@@ -1,12 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
+import { UPSTREAM_URL } from '@/lib/api';
 
+// ⚠️ SECURITY: these are compiled into the client bundle and readable by
+// anyone who views source. They gate the UI only — the API's admin endpoints
+// are effectively public to whoever reads them. Moving grant review behind a
+// real server-side session is tracked separately; this restyle deliberately
+// did not change the auth mechanism.
 const ADMIN_SECRET = 'temp-link-2026';
 const ADMIN_PASSWORD = 'said-admin-2026';
-const API = 'https://api.saidprotocol.com';
 
 interface GrantApplication {
   id: string;
@@ -24,12 +29,6 @@ interface GrantApplication {
   createdAt: string;
 }
 
-const STATUS_STYLES: Record<string, string> = {
-  pending: 'bg-yellow-900/40 text-yellow-400 border-yellow-700/50',
-  approved: 'bg-green-900/40 text-green-400 border-green-700/50',
-  rejected: 'bg-red-900/40 text-red-400 border-red-700/50',
-};
-
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState('');
@@ -40,13 +39,12 @@ export default function AdminPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (sessionStorage.getItem('said-admin') === 'true') {
-      setAuthed(true);
-    }
+    if (sessionStorage.getItem('said-admin') === 'true') setAuthed(true);
   }, []);
 
   useEffect(() => {
     if (authed) fetchGrants();
+     
   }, [authed]);
 
   const handleLogin = () => {
@@ -62,7 +60,7 @@ export default function AdminPage() {
   const fetchGrants = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admin/grants?secret=${ADMIN_SECRET}`);
+      const res = await fetch(`${UPSTREAM_URL}/admin/grants?secret=${ADMIN_SECRET}`);
       const data = await res.json();
       setApplications(data.applications || []);
     } catch (err) {
@@ -75,7 +73,7 @@ export default function AdminPage() {
   const handleAction = async (id: string, action: 'approve' | 'reject') => {
     setActionLoading(id + action);
     try {
-      await fetch(`${API}/admin/grants/${id}/${action}`, {
+      await fetch(`${UPSTREAM_URL}/admin/grants/${id}/${action}`, {
         method: 'POST',
         headers: { 'x-admin-secret': ADMIN_SECRET, 'Content-Type': 'application/json' },
       });
@@ -89,124 +87,164 @@ export default function AdminPage() {
 
   if (!authed) {
     return (
-      <div className="min-h-screen bg-black text-white flex flex-col">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center">
-          <div className="w-full max-w-sm p-8 bg-gray-950 border border-gray-800 rounded-xl">
-            <h1 className="text-xl font-bold mb-6 text-center">Admin Access</h1>
+      <div className="said-page said-admin">
+        <div className="gate">
+          <div className="card">
+            <h1 className="seclabel mono">ADMIN ACCESS</h1>
+            <label>PASSWORD</label>
             <input
               type="password"
-              placeholder="Password"
+              placeholder="••••••••"
               value={password}
-              onChange={e => setPassword(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleLogin()}
-              className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 mb-3 focus:outline-none focus:border-gray-500"
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
             />
-            {pwError && <p className="text-red-400 text-sm mb-3">{pwError}</p>}
-            <button
-              onClick={handleLogin}
-              className="w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-gray-100 transition-colors"
-            >
+            {pwError && <p className="err">{pwError}</p>}
+            <button className="btn fill" style={{ width: '100%', marginTop: 18 }} onClick={handleLogin}>
               Enter
             </button>
           </div>
-        </main>
-        <Footer />
+        </div>
+        <SaidFooter />
+        <style>{adminStyles}</style>
       </div>
     );
   }
 
+  const pending = applications.filter((a) => a.status === 'pending').length;
+
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      <Navbar />
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold">Grant Applications</h1>
-            <p className="text-gray-500 mt-1">{applications.length} total · {applications.filter(a => a.status === 'pending').length} pending</p>
-          </div>
-          <button onClick={fetchGrants} className="text-sm text-gray-400 hover:text-white border border-gray-700 px-4 py-2 rounded-lg transition-colors">
-            Refresh
-          </button>
-        </div>
+    <div className="said-page said-admin">
+      <div className="hero">
+        <div className="kick">INTERNAL · GRANT REVIEW</div>
+        <h1>Grant applications</h1>
+        <p className="lede">
+          {applications.length} total · {pending} pending
+        </p>
+      </div>
 
+      <div className="tools">
+        <button className="btn" onClick={fetchGrants} disabled={loading}>
+          {loading ? 'Refreshing…' : 'Refresh'}
+        </button>
+      </div>
+
+      <DotSeam style={{ marginTop: 'clamp(20px,3vh,30px)' }} />
+
+      <div className="adminwrap">
         {loading ? (
-          <div className="text-center text-gray-500 py-20">Loading...</div>
+          <p className="empty mono">LOADING APPLICATIONS…</p>
         ) : applications.length === 0 ? (
-          <div className="text-center text-gray-500 py-20">No applications yet</div>
+          <p className="empty mono">NO APPLICATIONS YET.</p>
         ) : (
-          <div className="space-y-3">
-            {applications.map(app => (
-              <div key={app.id} className="bg-gray-950 border border-gray-800 rounded-xl overflow-hidden">
-                <div
-                  className="flex items-center gap-4 p-4 cursor-pointer hover:bg-gray-900/30 transition-colors"
-                  onClick={() => setExpanded(expanded === app.id ? null : app.id)}
-                >
-                  <div className="flex-1 grid grid-cols-5 gap-4 items-center text-sm">
-                    <div>
-                      <div className="font-semibold">{app.agentName}</div>
-                      <div className="text-gray-500 text-xs">{new Date(app.createdAt).toLocaleDateString()}</div>
-                    </div>
-                    <div className="text-gray-400 font-mono text-xs truncate">
-                      {app.walletAddress.slice(0, 8)}...{app.walletAddress.slice(-6)}
-                    </div>
-                    <div className="text-gray-400 text-xs">{app.twitter ? `@${app.twitter.replace('@', '')}` : '—'}</div>
-                    <div className="font-mono text-green-400 text-xs">${app.fundingAmount}</div>
-                    <span className={`inline-block px-2 py-1 rounded-full text-xs border font-medium ${STATUS_STYLES[app.status] || STATUS_STYLES.pending}`}>
-                      {app.status}
+          <div className="applist">
+            {applications.map((app) => {
+              const open = expanded === app.id;
+              return (
+                <div key={app.id} className={`app${open ? ' open' : ''}`}>
+                  <button className="apphead" onClick={() => setExpanded(open ? null : app.id)}>
+                    <span className="appname">
+                      <b>{app.agentName}</b>
+                      <i className="mono">{new Date(app.createdAt).toLocaleDateString()}</i>
                     </span>
-                  </div>
-                  <span className="text-gray-600 text-xs">{expanded === app.id ? '▲' : '▼'}</span>
-                </div>
+                    <span className="appwallet mono">
+                      {app.walletAddress.slice(0, 6)}…{app.walletAddress.slice(-6)}
+                    </span>
+                    <span className="apphandle">{app.twitter ? `@${app.twitter.replace('@', '')}` : '—'}</span>
+                    <span className="appamt mono">{app.fundingAmount} SOL/mo</span>
+                    <span className={`status ${app.status}`}>{app.status.toUpperCase()}</span>
+                    <span className="chev">{open ? '−' : '+'}</span>
+                  </button>
 
-                {expanded === app.id && (
-                  <div className="px-4 pb-4 border-t border-gray-800 pt-4">
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <div className="text-xs text-gray-500 uppercase mb-1">Description</div>
-                        <p className="text-sm text-gray-300">{app.description}</p>
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 uppercase mb-1">Use Case</div>
-                        <p className="text-sm text-gray-300">{app.useCase}</p>
-                      </div>
-                      <div>
-                        <div className="text-xs text-gray-500 uppercase mb-1">Milestones</div>
-                        <p className="text-sm text-gray-300 whitespace-pre-wrap">{app.milestones}</p>
-                      </div>
-                      {app.teamBackground && (
+                  {open && (
+                    <div className="appbody">
+                      <div className="fields">
                         <div>
-                          <div className="text-xs text-gray-500 uppercase mb-1">Team Background</div>
-                          <p className="text-sm text-gray-300">{app.teamBackground}</p>
+                          <span className="seclabel mono">WHAT IT DOES</span>
+                          <p>{app.description}</p>
+                        </div>
+                        <div>
+                          <span className="seclabel mono">USE OF FUNDS</span>
+                          <p>{app.useCase}</p>
+                        </div>
+                        <div>
+                          <span className="seclabel mono">MILESTONES</span>
+                          <p style={{ whiteSpace: 'pre-wrap' }}>{app.milestones}</p>
+                        </div>
+                        {app.teamBackground && (
+                          <div>
+                            <span className="seclabel mono">TEAM</span>
+                            <p>{app.teamBackground}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {app.status === 'pending' && (
+                        <div className="actions">
+                          <button
+                            className="btn fill"
+                            onClick={() => handleAction(app.id, 'approve')}
+                            disabled={!!actionLoading}
+                          >
+                            {actionLoading === app.id + 'approve' ? 'Approving…' : 'Approve'}
+                          </button>
+                          <button
+                            className="btn danger"
+                            onClick={() => handleAction(app.id, 'reject')}
+                            disabled={!!actionLoading}
+                          >
+                            {actionLoading === app.id + 'reject' ? 'Rejecting…' : 'Reject'}
+                          </button>
                         </div>
                       )}
                     </div>
-                    {app.status === 'pending' && (
-                      <div className="flex gap-3 mt-2">
-                        <button
-                          onClick={() => handleAction(app.id, 'approve')}
-                          disabled={!!actionLoading}
-                          className="px-5 py-2 bg-green-800 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                        >
-                          {actionLoading === app.id + 'approve' ? 'Approving...' : '✓ Approve'}
-                        </button>
-                        <button
-                          onClick={() => handleAction(app.id, 'reject')}
-                          disabled={!!actionLoading}
-                          className="px-5 py-2 bg-red-900 hover:bg-red-800 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
-                        >
-                          {actionLoading === app.id + 'reject' ? 'Rejecting...' : '✗ Reject'}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
-      </main>
-      <Footer />
+      </div>
+
+      <SaidFooter />
+      <style>{adminStyles}</style>
     </div>
   );
 }
+
+const adminStyles = `
+  .said-admin .gate{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+  .said-admin .gate .card{width:100%;max-width:360px;border:1px solid var(--line);border-radius:20px;padding:28px;background:var(--card)}
+  .said-admin .seclabel{font-size:10.5px;letter-spacing:.16em;color:var(--faint);display:block}
+  .said-admin .err{margin-top:10px;font-size:12.5px;color:#c0392b}
+  .said-admin .tools{max-width:1100px;margin:clamp(20px,3vh,28px) auto 0;padding:0 clamp(20px,4vw,48px);display:flex;justify-content:flex-end}
+  .said-admin .tools .btn{padding:10px 20px;font-size:13px}
+  .said-admin .adminwrap{max-width:1100px;margin:0 auto;padding:clamp(20px,3vh,30px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .said-admin .empty{padding:60px 0;text-align:center;font-size:12px;letter-spacing:.12em;color:var(--faint)}
+  .said-admin .applist{display:grid;gap:10px}
+  .said-admin .app{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
+  .said-admin .app.open{border-color:var(--ink)}
+  .said-admin .apphead{width:100%;display:grid;grid-template-columns:1.4fr 1fr .9fr .9fr auto 24px;gap:14px;align-items:center;padding:15px 18px;background:none;border:0;font:inherit;text-align:left;cursor:pointer;color:var(--ink)}
+  .said-admin .apphead:hover{background:var(--bg)}
+  .said-admin .appname{display:flex;flex-direction:column;min-width:0}
+  .said-admin .appname b{font-size:14.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .said-admin .appname i{font-style:normal;font-size:11px;color:var(--faint);margin-top:2px}
+  .said-admin .appwallet,.said-admin .apphandle,.said-admin .appamt{font-size:12px;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .said-admin .status{font-size:9.5px;letter-spacing:.12em;border:1px solid var(--line);border-radius:99px;padding:5px 11px;color:var(--dim);font-family:ui-monospace,"SF Mono",Menlo,monospace;white-space:nowrap}
+  .said-admin .status.approved{color:var(--good);border-color:var(--good)}
+  .said-admin .status.rejected{color:#c0392b;border-color:#c0392b}
+  .said-admin .chev{font-size:16px;color:var(--faint);text-align:center}
+  .said-admin .appbody{padding:4px 18px 20px;border-top:1px solid var(--line)}
+  .said-admin .fields{display:grid;grid-template-columns:1fr 1fr;gap:20px 26px;margin-top:18px}
+  .said-admin .fields p{margin-top:7px;font-size:13.5px;line-height:1.7;color:var(--dim)}
+  .said-admin .actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+  .said-admin .actions .btn{padding:11px 24px;font-size:13.5px}
+  .said-admin .btn.danger{border-color:#c0392b;color:#c0392b}
+  .said-admin .btn.danger:hover{background:#c0392b;color:var(--bg)}
+  .said-admin .btn:disabled{opacity:.5;cursor:default}
+  @media (max-width:860px){
+    .said-admin .apphead{grid-template-columns:1fr auto 24px;gap:10px}
+    .said-admin .appwallet,.said-admin .apphandle{display:none}
+    .said-admin .fields{grid-template-columns:1fr}
+  }
+`;

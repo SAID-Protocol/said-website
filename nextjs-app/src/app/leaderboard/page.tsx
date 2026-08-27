@@ -64,7 +64,7 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     fetchPage(0, true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   async function fetchPage(fetchOffset: number, reset: boolean) {
