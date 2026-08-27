@@ -125,7 +125,7 @@ export default function SaidNav() {
         </div>
         <div className="navright">
           <ThemeToggle />
-          <span style={{ display: "contents" }} className="nav-auth">{authControl}</span>
+          <span className="nav-auth">{authControl}</span>
           <Link className="navcta" href="/create-agent">Register an agent</Link>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -157,15 +157,52 @@ export default function SaidNav() {
               <Link key={label} href={href} onClick={() => setMobileOpen(false)} style={{ padding: "10px 0", color: "var(--dim)" }}>{label}</Link>
             )
           )}
+
+          {/* Auth + primary CTA live here on mobile — the nav bar itself only
+              has room for the mark, the theme toggle and this menu. */}
+          <div className="said-mobile-actions">
+            {authenticated ? (
+              <>
+                <Link href="/profile" onClick={() => setMobileOpen(false)}>My Profile</Link>
+                <Link href="/my-agents" onClick={() => setMobileOpen(false)}>My Agents</Link>
+                <button onClick={() => { clearCache(); logout(); setMobileOpen(false); }}>Log Out</button>
+              </>
+            ) : (
+              <button onClick={() => { login(); setMobileOpen(false); }}>Log In</button>
+            )}
+            <Link className="navcta" href="/create-agent" onClick={() => setMobileOpen(false)}>
+              Register an agent
+            </Link>
+          </div>
         </div>
       )}
-      <style jsx>{`
+      <style>{`
         .said-burger { display: none; }
+        @media (min-width: 861px) { .said-mobile-menu { display: none; } }
+
         @media (max-width: 860px) {
+          /* Two columns, not three — the middle nav links are hidden here, and
+             a 1fr middle column was squeezing the mark into the controls. */
+          nav.said { grid-template-columns: 1fr auto; padding-left: 20px; padding-right: 20px; }
           .said-burger { display: flex; }
+          /* the pill and the auth control move into the menu */
+          nav.said .navcta,
+          nav.said .nav-auth { display: none; }
+          .navright { gap: 10px; }
         }
-        @media (min-width: 861px) {
-          .said-mobile-menu { display: none; }
+
+        .said-mobile-actions {
+          display: flex; flex-direction: column; gap: 4px;
+          margin-top: 10px; padding-top: 14px; border-top: 1px solid var(--line);
+        }
+        .said-mobile-actions a,
+        .said-mobile-actions button {
+          padding: 10px 0; color: var(--dim); background: none; border: 0;
+          font: inherit; font-size: 14.5px; text-align: left; cursor: pointer;
+        }
+        .said-mobile-actions .navcta {
+          margin-top: 8px; text-align: center; padding: 12px 18px;
+          color: var(--bg); background: var(--ink);
         }
       `}</style>
     </>

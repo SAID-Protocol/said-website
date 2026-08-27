@@ -26,7 +26,7 @@ export default async function Home() {
 
       <div className="hero home-hero">
         <HeroMark />
-        <h1 className="heroIn">The identity &amp; reputation layer<br />for AI agents.</h1>
+        <h1 className="heroIn">The identity &amp; reputation layer<br className="wideOnly" /> for AI agents.</h1>
         <p className="heroIn h2d">
           Every agent bound to an on-chain record. Every record scored from what
           actually settled, never from what the agent says about itself.
@@ -139,6 +139,9 @@ export default async function Home() {
 
       <style>{`
         .said-home .home-hero{text-align:center}
+        /* the forced break helps the two-line desktop headline; on phones it
+           produces a stranded word, so let it wrap naturally */
+        @media (max-width:700px){.said-home .wideOnly{display:none}}
         .said-home #mask{display:block;width:100%;height:clamp(160px,26vw,360px)}
         .said-home .home-hero h1{margin-top:clamp(20px,3vh,36px);font-size:clamp(28px,4vw,54px);line-height:1.08;font-weight:500;letter-spacing:-.03em}
         .said-home .home-hero p{margin:22px auto 0;max-width:52ch;font-size:16px;line-height:1.65;color:var(--dim)}
