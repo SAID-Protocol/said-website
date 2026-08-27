@@ -446,5 +446,10 @@ const meStyles = `
     .said-me .megrid{grid-template-columns:1fr}
     .said-me .usercard{position:static}
     .said-me .tiles{grid-template-columns:1fr 1fr}
+    /* The leading seam separated the card from a page header that no longer
+       exists — on a phone it was just a gap under the nav. Drop it and pull
+       the card up. */
+    .said-me .mewrap{padding-top:14px}
+    .said-me .mewrap > .dotdiv:first-child{display:none}
   }
 `;
