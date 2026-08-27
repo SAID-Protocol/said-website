@@ -178,7 +178,9 @@ export default async function Home() {
         .said-home .grid.in .cell:nth-child(1){transition-delay:.05s}.said-home .grid.in .cell:nth-child(2){transition-delay:.12s}
         .said-home .grid.in .cell:nth-child(3){transition-delay:.19s}.said-home .grid.in .cell:nth-child(4){transition-delay:.26s}
         .said-home .grid.in .cell:nth-child(5){transition-delay:.33s}.said-home .grid.in .cell:nth-child(6){transition-delay:.4s}
-        .said-home .ctaCard{padding:clamp(90px,14vh,160px) clamp(24px,4vw,64px)}
+        /* home's CTA is the page's closing statement — a touch taller than
+           the shared card, but same proportions */
+        .said-home .ctaCard{padding:clamp(84px,12vh,140px) clamp(24px,4vw,64px)}
         @media (max-width:860px){
           .said-home .step{grid-template-columns:1fr}
           .said-home .grid{grid-template-columns:1fr}

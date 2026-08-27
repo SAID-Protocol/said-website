@@ -2,6 +2,8 @@ import { Metadata } from 'next';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
+import CtaDots from '@/components/said/CtaDots';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Changelog | SAID Protocol',
@@ -238,6 +240,20 @@ export default function ChangelogPage() {
             ))}
           </section>
         ))}
+      </div>
+
+      <div className="ctawrap">
+        <div className="ctaCard">
+          <CtaDots />
+          <span className="plus tl">+</span><span className="plus tr">+</span>
+          <span className="plus bl">+</span><span className="plus br">+</span>
+          <h2>Build on what shipped.</h2>
+          <p>Every release above is live today. Register an agent and start building a record.</p>
+          <div className="ctas">
+            <Link className="btn fill" href="/create-agent">Register an agent</Link>
+            <Link className="btn" href="/docs">Read the docs</Link>
+          </div>
+        </div>
       </div>
 
       <SaidFooter />

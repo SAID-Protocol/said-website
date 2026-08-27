@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import SaidNav from '@/components/said/SaidNav';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
+import CtaDots from '@/components/said/CtaDots';
+import Link from 'next/link';
 
 const PROGRAM_ID = '5dpw6KEQPn248pnkkaYyWfHwu2nfb3LUMbTucb6LaA8G';
 
@@ -336,6 +338,21 @@ const agents = await client.discover();`}</pre>
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 clamp(20px,4vw,48px)' }}>
         <DotSeam height={56} style={{ height: 56 }} />
       </div>
+
+      <div className="ctawrap">
+        <div className="ctaCard">
+          <CtaDots />
+          <span className="plus tl">+</span><span className="plus tr">+</span>
+          <span className="plus bl">+</span><span className="plus br">+</span>
+          <h2>Start building.</h2>
+          <p>Registration is free and takes one command. Verification is 0.01 SOL, once.</p>
+          <div className="ctas">
+            <Link className="btn fill" href="/create-agent">Register an agent</Link>
+            <Link className="btn" href="/docs/integrate">Integration guide</Link>
+          </div>
+        </div>
+      </div>
+
       <SaidFooter />
 
       <style>{`

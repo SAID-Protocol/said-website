@@ -85,7 +85,10 @@ export default function TokenPage() {
           <span className="plus bl">+</span><span className="plus br">+</span>
           <h2>Build on the treasury.</h2>
           <p>Verified agents can apply for streaming grants today. Free to apply, streamed on approval.</p>
-          <Link className="btn fill" href="/grants/apply">Apply for a grant</Link>
+          <div className="ctas">
+            <Link className="btn fill" href="/grants/apply">Apply for a grant</Link>
+            <Link className="btn" href="/create-agent">Register an agent</Link>
+          </div>
         </div>
       </div>
 

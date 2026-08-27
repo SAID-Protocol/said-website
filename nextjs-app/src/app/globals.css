@@ -235,6 +235,7 @@ html[data-theme="dark"] .themebtn .moon{opacity:1;transform:rotate(0)}
 .said-page .plus.tl{top:22px;left:28px}.said-page .plus.tr{top:22px;right:28px}.said-page .plus.bl{bottom:18px;left:28px}.said-page .plus.br{bottom:18px;right:28px}
 .said-page .ctaCard h2{font-size:clamp(28px,3.6vw,48px);font-weight:500;letter-spacing:-.03em}
 .said-page .ctaCard p{margin:16px auto 0;max-width:44ch;font-size:15px;line-height:1.65;opacity:.65}
+.said-page .ctaCard .ctas{display:flex;justify-content:center;gap:12px;margin-top:28px;flex-wrap:wrap}
 .said-page .ctaCard .btn{border-color:rgba(128,128,128,.4);color:var(--bg)}
 .said-page .ctaCard .btn:hover{border-color:var(--bg)}
 .said-page .ctaCard .btn.fill{background:var(--bg);color:var(--ink);border-color:var(--bg)}
