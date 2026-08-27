@@ -21,6 +21,7 @@ interface Agent {
   registeredAt: string;
   skills?: string[];
   image?: string;
+  twitter?: string;
   reputationScore?: number;
   feedbackCount?: number;
   trustScore?: TrustScore | null;
@@ -150,7 +151,7 @@ export default function LeaderboardPage() {
                       {i === 0 && <ShimmerDots inverted />}
                       <span className="prank mono">{String(i + 1).padStart(2, '0')} · {tier.toUpperCase()}</span>
                       <span className="pname">
-                        <span className="pav"><AgentAvatar wallet={a.wallet} image={a.image} name={a.name} rounded="11px" /></span>
+                        <span className="pav"><AgentAvatar wallet={a.wallet} image={a.image} twitter={a.twitter} name={a.name} rounded="11px" /></span>
                         <span className="pnametext">
                           <b>{a.name || 'Unnamed Agent'}</b>
                           <i className="mono">{shortWallet(a.wallet)}</i>
@@ -175,7 +176,7 @@ export default function LeaderboardPage() {
                   return (
                     <Link key={a.wallet} href={`/agents/${a.wallet}`} className="row">
                       <span className="rank mono">{String(i + 4).padStart(2, '0')}</span>
-                      <span className="av"><AgentAvatar wallet={a.wallet} image={a.image} name={a.name} rounded="9px" /></span>
+                      <span className="av"><AgentAvatar wallet={a.wallet} image={a.image} twitter={a.twitter} name={a.name} rounded="9px" /></span>
                       <span className="name">
                         <span>{a.name || 'Unnamed Agent'}</span>
                         {a.isVerified && <span className="vbadge">✓</span>}

@@ -16,6 +16,7 @@ interface Agent {
   name?: string;
   description?: string;
   image?: string;
+  twitter?: string;
   isVerified?: boolean;
   registeredAt?: string;
   activityCount?: number;
@@ -240,7 +241,7 @@ function DirectoryInner() {
               <Link href={`/agents/${a.wallet}`} key={a.wallet} className="row">
                 <span className="rank mono">{String(i + 1).padStart(2, '0')}</span>
                 <span className="av">
-                  <AgentAvatar wallet={a.wallet} image={a.image} name={a.name} />
+                  <AgentAvatar wallet={a.wallet} image={a.image} twitter={a.twitter} name={a.name} />
                 </span>
                 <span className="name"><span>{a.name || shortWallet(a.wallet)}</span>{a.isVerified && <span className="vbadge">✓</span>}</span>
                 <span className="desc">{a.description || ''}</span>

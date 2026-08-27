@@ -232,7 +232,7 @@ function HeaderSection({ agent }: { agent: Agent }) {
   return (
     <div className="head">
       <span className="avatar">
-        <AgentAvatar wallet={agent.wallet} image={agent.image} name={agent.name} rounded="20px" />
+        <AgentAvatar wallet={agent.wallet} image={agent.image} twitter={agent.twitter} name={agent.name} rounded="20px" />
       </span>
       <div style={{ minWidth: 0, flex: 1 }}>
         <div className="namerow">
