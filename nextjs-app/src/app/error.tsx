@@ -11,31 +11,29 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Page error:', error);
+    console.error(error);
   }, [error]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-8">
-      <div className="text-center">
-        <svg className="mx-auto mb-6 text-red-400" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <circle cx="12" cy="12" r="10"/>
-          <path d="M12 8v4"/>
-          <path d="M12 16h.01"/>
-        </svg>
-        <h1 className="text-3xl font-bold mb-2">Something went wrong</h1>
-        <p className="text-zinc-400 mb-6">An unexpected error occurred. Please try again.</p>
-        <div className="flex gap-4 justify-center">
-          <button
-            onClick={reset}
-            className="px-4 py-2 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition"
-          >
-            Try Again
-          </button>
-          <Link href="/" className="px-4 py-2 border border-zinc-700 rounded-lg font-medium hover:border-zinc-500 transition">
-            Go Home
-          </Link>
+    <div className="said-page said-err">
+      <div className="hero" style={{ textAlign: 'center' }}>
+        <div className="kick mono">SOMETHING WENT WRONG</div>
+        <h1>That didn&apos;t work.</h1>
+        <p className="lede" style={{ marginLeft: 'auto', marginRight: 'auto' }}>
+          An unexpected error occurred. Trying again usually clears it.
+        </p>
+        {error?.digest && <p className="digest mono">REF {error.digest}</p>}
+        <div className="ctas">
+          <button className="btn fill" onClick={reset}>Try again</button>
+          <Link className="btn" href="/">Go home</Link>
         </div>
       </div>
+      <style>{`
+        .said-err .hero{min-height:62vh;display:flex;flex-direction:column;justify-content:center}
+        .said-err .kick{font-size:11px;letter-spacing:.2em}
+        .said-err .digest{margin-top:18px;font-size:10.5px;letter-spacing:.12em;color:var(--faint)}
+        .said-err .ctas{display:flex;gap:12px;justify-content:center;margin-top:30px;flex-wrap:wrap}
+      `}</style>
     </div>
   );
 }

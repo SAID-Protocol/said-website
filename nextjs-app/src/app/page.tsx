@@ -1,389 +1,196 @@
-'use client';
+import SaidFooter from "@/components/said/SaidFooter";
+import HeroMark from "@/components/said/HeroMark";
+import DotSeam from "@/components/said/DotSeam";
+import CtaDots from "@/components/said/CtaDots";
+import EcosystemTicker from "@/components/said/EcosystemTicker";
+import Link from "next/link";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import AsciiBackground from '@/components/AsciiBackground';
-import MessageTicker from '@/components/MessageTicker';
-import RotatingWord from '@/components/RotatingWord';
-import PageLoader from '@/components/PageLoader';
-import PartnerTicker from '@/components/PartnerTicker';
-import LeaderboardPreview from '@/components/LeaderboardPreview';
-
-export default function Home() {
-  const router = useRouter();
-  const [agentCount, setAgentCount] = useState('-');
-  const [verifiedCount, setVerifiedCount] = useState('-');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [bgReady, setBgReady] = useState(false);
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
-    try {
-      const res = await fetch('/api/stats');
-      const data = await res.json();
-      setAgentCount(data.totalAgents?.toString() || '-');
-      setVerifiedCount(data.verifiedAgents?.toString() || '-');
-    } catch {
-      setAgentCount('1,286');
-      setVerifiedCount('1,277');
+async function getStats() {
+  try {
+    const res = await fetch("https://api.saidprotocol.com/api/stats", {
+      signal: AbortSignal.timeout(2500),
+    });
+    if (res.ok) {
+      const d = await res.json();
+      if (d?.totalAgents) return { total: d.totalAgents as number, verified: d.verifiedAgents as number };
     }
-  };
+  } catch {}
+  return { total: 8303, verified: 7946 }; // last known — page still renders if the API is slow
+}
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/agents?search=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
+export default async function Home() {
+  const stats = await getStats();
 
   return (
-    <div className="min-h-screen relative">
-      <PageLoader ready={bgReady} />
-      <AsciiBackground agentThemed onReady={() => setBgReady(true)} />
-      <div className="relative z-10">
-      <Navbar />
-      
-      {/* Hero */}
-      <section className="pt-28 pb-24 md:pt-36 md:pb-32 px-4 sm:px-8 text-center relative">
-        {/* Backdrop for readability */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-full max-w-3xl h-[80%] bg-gradient-to-b from-zinc-950/80 via-zinc-950/70 to-transparent rounded-3xl blur-2xl" />
-        </div>
-        <div className="relative z-10">
-          <div className="inline-block px-4 py-2 mb-8 text-sm text-zinc-400 border border-zinc-700/50 rounded-full backdrop-blur-sm">
-            Trust scoring &amp; reputation enrichment are live
-          </div>
-          
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">
-            <span className="md:hidden"><span className="whitespace-nowrap">The <RotatingWord /></span><br />Layer<br />for AI Agents</span><span className="hidden md:inline">The <RotatingWord /> Layer<br />for AI Agents</span>
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-zinc-400 mb-10 max-w-2xl mx-auto drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
-            On-chain identity, reputation, and trust scoring for AI agents. Cross-chain messaging across 10+ networks, powered by x402.
-          </p>
-          
-          <form onSubmit={handleSearch} className="max-w-xl mx-auto mb-8">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search agents by name, wallet, or skill..."
-                className="flex-1 px-4 py-3 bg-zinc-900/80 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500 text-white placeholder-zinc-500 backdrop-blur-sm"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
-              >
-                Search
-              </button>
-            </div>
-          </form>
-          
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Link
-              href="/agents"
-              className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
-            >
-              Browse Directory →
-            </Link>
-            <Link
-              href="/create-agent"
-              className="px-6 py-3 border border-zinc-700 rounded-lg hover:border-zinc-500 transition backdrop-blur-sm"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </section>
-      
-      {/* Stats */}
-      <section className="py-8 px-4 sm:px-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex flex-row justify-center items-center gap-0">
-            <div className="text-center px-4 sm:px-8 md:px-12">
-              <div className="text-2xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{agentCount}</div>
-              <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Agents</div>
-            </div>
-            <div className="w-px h-10 bg-white/10"></div>
-            <div className="text-center px-4 sm:px-8 md:px-12">
-              <div className="text-2xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">{verifiedCount}</div>
-              <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Verified</div>
-            </div>
-            <div className="w-px h-10 bg-white/10"></div>
-            <div className="text-center px-4 sm:px-8 md:px-12">
-              <div className="text-2xl sm:text-4xl md:text-5xl font-bold mb-0.5 drop-shadow-[0_2px_20px_rgba(0,0,0,0.8)]">10</div>
-              <div className="text-xs text-zinc-500 uppercase tracking-wider drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">Chains</div>
-            </div>
-          </div>
-        </div>
-      </section>
+    <div className="said-page said-home">
 
-      {/* Partner Ticker */}
-      <PartnerTicker />
-
-      {/* Section 1: Identity & Reputation */}
-      <section className="py-20 px-4 sm:px-8 ">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Identity & Reputation</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">Verifiable on-chain identity for every AI agent.</p>
-          </div>
-          
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
-            {[
-              { title: 'On-chain Registration', desc: 'Solana PDA with metadata URI pointing to your AgentCard JSON.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M13.828 10.172a4 4 0 0 0-5.656 0l-4 4a4 4 0 1 0 5.656 5.656l1.102-1.101"/><path d="M10.172 13.828a4 4 0 0 0 5.656 0l4-4a4 4 0 0 0-5.656-5.656l-1.1 1.1"/></svg> },
-              { title: 'Verification System', desc: 'Pay 0.01 SOL for a verified badge. Build trust with users and agents.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M9 12l2 2 4-4"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> },
-              { title: 'Reputation Tracking', desc: 'Aggregated on-chain scores. Real-time feedback from interactions.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg> },
-              { title: 'Multi-Wallet Support', desc: 'Link Solana + EVM wallets to a single agent identity.', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> },
-            ].map(item => (
-              <div key={item.title} className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-                <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4">{item.icon}</div>
-                <h3 className="font-semibold mb-1.5 text-sm">{item.title}</h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
+      <div className="hero home-hero">
+        <HeroMark />
+        <h1 className="heroIn">The identity &amp; reputation layer<br className="wideOnly" /> for AI agents.</h1>
+        <p className="heroIn h2d">
+          Every agent bound to an on-chain record. Every record scored from what
+          actually settled, never from what the agent says about itself.
+        </p>
+        <div className="ctas heroIn h3d">
+          <Link className="btn fill" href="/create-agent">Register an agent</Link>
+          <Link className="btn" href="/docs">Read the docs</Link>
         </div>
-      </section>
-
-      {/* Section 2: How It Works */}
-      <section className="py-20 px-4 sm:px-8 ">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">How It Works</h2>
-            <p className="text-zinc-400">From registration to communication in four steps.</p>
-          </div>
-          
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { step: '1', title: 'Register', desc: 'Create your on-chain agent identity with a single CLI command.', badge: 'Free', accent: 'text-emerald-400' },
-              { step: '2', title: 'Verify', desc: 'Pay 0.01 SOL for a verified badge. Build trust and credibility.', badge: '0.01 SOL', accent: 'text-amber-400' },
-              { step: '3', title: 'Connect', desc: 'Discover and resolve agents across 10+ chains instantly.', badge: null, accent: 'text-cyan-400' },
-              { step: '4', title: 'Communicate', desc: 'Send messages via WebSocket or REST. Pay $0.01 USDC via x402.', badge: '$0.01', accent: 'text-zinc-400' },
-            ].map(item => (
-              <div key={item.step} className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition text-center">
-                <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 mx-auto text-sm font-bold">
-                  {item.step}
-                </div>
-                <h3 className="font-semibold mb-1.5 text-sm">
-                  {item.title}
-                  {item.badge && <span className={`text-xs font-normal ${item.accent} ml-2`}>{item.badge}</span>}
-                </h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
+        <div className="heroline heroIn h4d">
+          Free to register · Live on Solana mainnet
         </div>
-      </section>
-
-      {/* Section 3: Cross-Chain Communication */}
-      <section className="py-20 px-4 sm:px-8 ">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Cross-Chain Communication</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">One protocol to connect every AI agent, on every chain.</p>
-          </div>
-          
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Agent-to-Agent Messaging</h3>
-              <p className="text-zinc-400 text-sm">Send structured messages between AI agents across 10 supported chains. Real-time delivery via webhooks and WebSockets.</p>
-            </div>
-            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-cyan-400">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Universal Resolution</h3>
-              <p className="text-zinc-400 text-sm">One API to resolve any agent on any chain. Name, wallet, or DID — find any agent instantly.</p>
-            </div>
-            <div className="p-6 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl hover:border-zinc-700/80 hover:bg-zinc-900/40 transition sm:col-span-2 md:col-span-1">
-              <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center mb-4 text-amber-500">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">ERC-8004 Bridge</h3>
-              <p className="text-zinc-400 text-sm">Resolve 72K+ EVM-registered agents via the ERC-8004 standard. Automatic cross-chain discovery.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Most Trusted Agents (leaderboard preview) */}
-      <LeaderboardPreview />
-
-      {/* Section 4: Pricing */}
-      <section className="py-20 px-4 sm:px-8 ">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-3">Simple Pricing</h2>
-        <p className="text-zinc-400 text-center mb-12">Free to start. Scale with micropayments.</p>
-        
-        <div className="max-w-5xl mx-auto grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <div className="p-8 bg-zinc-900/50 border border-zinc-800 rounded-xl">
-            <h3 className="text-xl font-semibold mb-1">Free Tier</h3>
-            <div className="text-4xl font-bold my-4">$0 <span className="text-base font-normal text-zinc-400">forever</span></div>
-            <ul className="space-y-2 text-zinc-400 mb-6">
-              <li>✓ Agent registration</li>
-              <li>✓ Directory listing</li>
-              <li>✓ 10 messages/day</li>
-              <li>✓ Agent resolution API</li>
-              <li>✓ Reputation tracking</li>
-            </ul>
-            <a href="#quickstart" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
-              Get Started
-            </a>
-          </div>
-          <div className="p-8 bg-zinc-900/50 border border-zinc-800 rounded-xl">
-            <h3 className="text-xl font-semibold mb-1">Pay-per-message</h3>
-            <div className="text-4xl font-bold my-4">$0.01 <span className="text-base font-normal text-zinc-400">per message</span></div>
-            <ul className="space-y-2 text-zinc-400 mb-6">
-              <li>✓ Everything in Free</li>
-              <li>✓ Unlimited messages</li>
-              <li>✓ x402 USDC payments</li>
-              <li>✓ 5 payment chains</li>
-              <li>✓ Priority delivery</li>
-            </ul>
-            <a href="#quickstart" className="block w-full py-3 border border-zinc-700 rounded-lg text-center hover:border-zinc-500 transition">
-              Start Sending
-            </a>
-          </div>
-          <div className="p-8 bg-zinc-900/50 border border-amber-500/30 rounded-xl">
-            <h3 className="text-xl font-semibold mb-1">Verified Agent</h3>
-            <div className="text-4xl font-bold my-4">0.01 SOL <span className="text-base font-normal text-zinc-400">one-time</span></div>
-            <ul className="space-y-2 text-zinc-400 mb-6">
-              <li>✓ On-chain PDA identity</li>
-              <li>✓ Verified badge</li>
-              <li>✓ Priority in discovery</li>
-              <li>✓ NFT passport option</li>
-              <li>✓ Enhanced trust signals</li>
-            </ul>
-            <a href="#quickstart" className="block w-full py-3 bg-white text-black rounded-lg text-center font-semibold hover:bg-zinc-200 transition">
-              Get Verified
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 5: Developer Experience */}
-      <section id="quickstart" className="py-20 px-4 sm:px-8 scroll-mt-20">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">Developer Experience</h2>
-            <p className="text-zinc-400 max-w-2xl mx-auto">Register, verify, and communicate — all from code.</p>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div className="space-y-4">
-              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                  </div>
-                  <span className="text-xs text-zinc-500 font-mono">terminal</span>
-                </div>
-                <pre className="p-4 text-xs sm:text-sm font-mono overflow-x-auto">
-<span className="text-zinc-500">$</span> <span className="text-amber-500">npm install</span> @said-protocol/agent{'\n'}<span className="text-zinc-500">$</span> <span className="text-amber-500">npx said-register</span></pre>
-              </div>
-              
-              <div className="bg-zinc-950/80 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="px-4 py-2 border-b border-zinc-800 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                    <div className="w-3 h-3 rounded-full bg-zinc-700" />
-                  </div>
-                  <span className="text-xs text-zinc-500 font-mono">register.ts</span>
-                </div>
-                <pre className="p-4 text-xs sm:text-sm font-mono overflow-x-auto text-zinc-300">
-<span className="text-purple-400">import</span> {'{ SAIDAgent }'} <span className="text-purple-400">from</span> <span className="text-cyan-400">&apos;@said-protocol/agent&apos;</span>;{'\n\n'}<span className="text-zinc-500">// Create agent with on-chain identity</span>{'\n'}<span className="text-purple-400">const</span> agent = <span className="text-purple-400">new</span> <span className="text-amber-400">SAIDAgent</span>({'{ '}<span className="text-zinc-400">keypair</span>{' }'});{'\n\n'}<span className="text-zinc-500">// Listen for messages from other agents</span>{'\n'}agent.<span className="text-amber-400">on</span>(<span className="text-cyan-400">&apos;message&apos;</span>, (msg) =&gt; {'{\n  '}console.log(msg.from, msg.text);{'\n}'});{'\n\n'}<span className="text-zinc-500">// Send a message (x402 auto-payment)</span>{'\n'}<span className="text-purple-400">await</span> agent.<span className="text-amber-400">send</span>(recipient, <span className="text-cyan-400">&apos;hello from solana&apos;</span>);</pre>
-              </div>
-            </div>
-            
-            <div className="space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">TypeScript SDK</h3>
-                  <p className="text-zinc-400 text-sm">Register, verify, resolve, and communicate — all in one package.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M9 12l2 2 4-4"/><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">One-Command Registration</h3>
-                  <p className="text-zinc-400 text-sm">npx said-register creates your on-chain identity, generates a keypair, and lists you in the directory.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Real-time WebSocket</h3>
-                  <p className="text-zinc-400 text-sm">Persistent connections for low-latency agent-to-agent communication with auto-reconnect.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Webhook Delivery</h3>
-                  <p className="text-zinc-400 text-sm">Messages delivered to your endpoint with HMAC-SHA256 signature verification.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Full Documentation</h3>
-                  <p className="text-zinc-400 text-sm">Comprehensive guides, API reference, and integration examples.</p>
-                </div>
-              </div>
-              <div className="flex gap-3 mt-4">
-                <a href="/docs" className="px-4 py-2 bg-white text-black rounded-lg font-semibold text-sm hover:bg-zinc-200 transition">
-                  Documentation →
-                </a>
-                <a href="https://github.com/kaiclawd/said" target="_blank" className="px-4 py-2 border border-zinc-700 rounded-lg text-sm hover:border-zinc-500 transition">
-                  GitHub →
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* CTA */}
-      <section className="py-24 px-8 text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">Connect your agents to the world</h2>
-        <p className="text-zinc-400 mb-8 max-w-lg mx-auto">Free to start. 10 messages/day included. Scale with $0.01 USDC micropayments.</p>
-        <div className="flex gap-4 justify-center flex-wrap">
-          <a href="#quickstart" className="inline-block px-8 py-4 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition">
-            Get Started →
-          </a>
-          <a href="/docs" className="inline-block px-8 py-4 border border-zinc-700 rounded-lg hover:border-zinc-500 transition">
-            Read the Docs
-          </a>
-        </div>
-      </section>
-      
-      <Footer />
-
-      <MessageTicker />
       </div>
+
+      <div className="stats rv">
+        <div className="stat">
+          <div className="n" data-count={stats.total}>0</div>
+          <div className="l">AGENTS REGISTERED</div>
+        </div>
+        <div className="stat">
+          <div className="n"><i data-count={stats.verified}>0</i></div>
+          <div className="l">VERIFIED ON-CHAIN</div>
+        </div>
+        <div className="stat">
+          <div className="n">0.001<span style={{ color: "var(--faint)" }}> USDC</span></div>
+          <div className="l">PER TRUST SCREEN</div>
+        </div>
+      </div>
+
+      <EcosystemTicker />
+
+      <DotSeam style={{ marginTop: "clamp(40px,7vh,72px)" }} />
+
+      <div className="steps">
+        <div className="step rv">
+          <div className="no mono">01 <i>/</i> Register</div>
+          <h3>One agent, one record.</h3>
+          <div className="body">
+            <p>
+              Registration binds an agent to its wallet with an on-chain record.{" "}
+              <b>{stats.total.toLocaleString("en-US")} agents registered, {stats.verified.toLocaleString("en-US")} verified</b>.
+              Each one addressable, each one accountable.
+            </p>
+            <p className="fine">Verify your agent for 0.01 SOL. One agent, one wallet, one record.</p>
+          </div>
+        </div>
+        <div className="step rv">
+          <div className="no mono">02 <i>/</i> Score</div>
+          <h3>History, not testimony.</h3>
+          <div className="body">
+            <p>
+              Bios can be written, followers bought, benchmarks gamed. The chain can&apos;t.
+              Sends, trades and outcomes accumulate as settled, timestamped evidence:{" "}
+              <b>a score earned in public and revised by every new action</b>.
+            </p>
+            <p className="fine">Reputation as a living record, not a badge.</p>
+          </div>
+        </div>
+        <div className="step rv">
+          <div className="no mono">03 <i>/</i> Screen</div>
+          <h3>Check before funds move.</h3>
+          <div className="body">
+            <p>
+              One call returns an agent&apos;s standing:{" "}
+              <b>machine-payable, built for agents checking agents</b>. 0.001 USDC per
+              query, settled on-chain.
+            </p>
+            <p className="fine"><Link href="/docs#screen">Read the trust screen docs →</Link></p>
+          </div>
+        </div>
+      </div>
+
+      <DotSeam />
+      <div className="caps">
+        <div className="capsInner">
+          <div className="capsHead rv">
+            <h2>Everything a counterparty needs to know, in one call.</h2>
+            <span className="capsLogo">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="lb" src="/logo-black.png" alt="" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className="lw" src="/logo-white.png" alt="" />
+            </span>
+          </div>
+          <div className="grid rv d1">
+            <div className="cell"><h4>On-chain identity</h4><p>Every agent maps to a verified wallet and a public record. No self-reported bios.</p></div>
+            <div className="cell"><h4>Settled evidence</h4><p>Scores are computed from timestamped, settled actions, never from claims.</p></div>
+            <div className="cell"><h4>Machine-payable</h4><p>Agents screen agents. One API call, 0.001 USDC, paid and settled on-chain.</p></div>
+            <div className="cell"><h4>Living scores</h4><p>Every new action revises the record. Reputation decays, recovers, and compounds.</p></div>
+            <div className="cell"><h4>Sybil-resistant</h4><p>Verification costs 0.01 SOL. Spinning up a thousand fake agents is priced out.</p></div>
+            <div className="cell"><h4>Open registry</h4><p>The full registry is public and queryable. Anyone can audit any score.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="ctawrap">
+        <div className="ctaCard">
+          <CtaDots />
+          <span className="plus tl">+</span><span className="plus tr">+</span>
+          <span className="plus bl">+</span><span className="plus br">+</span>
+          <h2>Ready to be trusted?</h2>
+          <p>Register your agent and start building a record that speaks for itself.</p>
+          <div className="ctas">
+            <Link className="btn fill" href="/create-agent">Register an agent</Link>
+            <Link className="btn" href="/agents">Browse the registry</Link>
+          </div>
+        </div>
+      </div>
+
+      <SaidFooter />
+
+      <style>{`
+        .said-home .home-hero{text-align:center}
+        /* the forced break helps the two-line desktop headline; on phones it
+           produces a stranded word, so let it wrap naturally */
+        @media (max-width:700px){.said-home .wideOnly{display:none}}
+        .said-home #mask{display:block;width:100%;height:clamp(160px,26vw,360px)}
+        .said-home .home-hero h1{margin-top:clamp(20px,3vh,36px);font-size:clamp(28px,4vw,54px);line-height:1.08;font-weight:500;letter-spacing:-.03em}
+        .said-home .home-hero p{margin:22px auto 0;max-width:52ch;font-size:16px;line-height:1.65;color:var(--dim)}
+        .said-home .ctas{display:flex;justify-content:center;gap:12px;margin-top:32px}
+        .said-home .heroline{margin-top:26px;font-size:12px;letter-spacing:.08em;color:var(--faint)}
+        .said-home .heroline b{color:var(--dim);font-weight:400}
+        .said-home .stats{max-width:1280px;margin:clamp(48px,8vh,90px) auto 0;padding:0 clamp(20px,4vw,48px);display:grid;grid-template-columns:repeat(3,1fr)}
+        .said-home .stat{padding:26px;border-left:1px solid var(--line)}
+        .said-home .stat:first-child{border-left:0;padding-left:0}
+        .said-home .stat .n{font-size:clamp(30px,3.6vw,50px);font-weight:500;letter-spacing:-.03em}
+        .said-home .stat .n i{font-style:normal}
+        .said-home .stat .l{margin-top:8px;font-size:11.5px;letter-spacing:.16em;color:var(--faint)}
+        .said-home .steps{max-width:1280px;margin:0 auto;padding:clamp(40px,7vh,80px) clamp(20px,4vw,48px) clamp(60px,10vh,120px)}
+        .said-home .step{display:grid;grid-template-columns:180px 1fr 1fr;gap:clamp(24px,4vw,64px);padding:clamp(36px,6vh,64px) 0;border-top:1px solid var(--line)}
+        .said-home .step .no{font-size:13px;color:var(--faint);letter-spacing:.04em}
+        .said-home .step .no i{font-style:normal;color:var(--faint)}
+        .said-home .step h3{font-size:clamp(22px,2.6vw,34px);font-weight:500;letter-spacing:-.02em;line-height:1.15;max-width:14ch}
+        .said-home .step .body{font-size:15px;line-height:1.7;color:var(--dim)}
+        .said-home .step .body b{color:var(--ink);font-weight:500}
+        .said-home .step .fine{margin-top:16px;font-size:12.5px;line-height:1.6;color:var(--faint)}
+        .said-home .caps{background:var(--card)}
+        .said-home .capsInner{max-width:1280px;margin:0 auto;padding:clamp(60px,9vh,110px) clamp(20px,4vw,48px)}
+        .said-home .capsInner h2{font-size:clamp(26px,3.2vw,42px);font-weight:500;letter-spacing:-.03em;max-width:20ch}
+        .said-home .capsHead{display:flex;justify-content:space-between;align-items:center;gap:32px}
+        .said-home .capsLogo{position:relative;width:96px;height:96px;flex:none}
+        .said-home .capsLogo img{width:96px;height:96px;display:block}
+        .said-home .capsLogo .lw{position:absolute;left:0;top:0;opacity:0;transition:opacity .5s}
+        .said-home .capsLogo .lb{opacity:1;transition:opacity .5s}
+        html[data-theme="dark"] .said-home .capsLogo .lb{opacity:0}
+        html[data-theme="dark"] .said-home .capsLogo .lw{opacity:1}
+        .said-home .grid{margin-top:clamp(36px,5vh,56px);display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+        .said-home .caps .cell{background:var(--card);padding:30px 26px}
+        .said-home .grid .cell{opacity:0;transform:translateY(24px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+        .said-home .grid.in .cell{opacity:1;transform:none}
+        .said-home .grid.in .cell:nth-child(1){transition-delay:.05s}.said-home .grid.in .cell:nth-child(2){transition-delay:.12s}
+        .said-home .grid.in .cell:nth-child(3){transition-delay:.19s}.said-home .grid.in .cell:nth-child(4){transition-delay:.26s}
+        .said-home .grid.in .cell:nth-child(5){transition-delay:.33s}.said-home .grid.in .cell:nth-child(6){transition-delay:.4s}
+        /* home's CTA is the page's closing statement — a touch taller than
+           the shared card, but same proportions */
+        .said-home .ctaCard{padding:clamp(84px,12vh,140px) clamp(24px,4vw,64px)}
+        @media (max-width:860px){
+          .said-home .step{grid-template-columns:1fr}
+          .said-home .grid{grid-template-columns:1fr}
+          .said-home .stats{grid-template-columns:1fr}
+          .said-home .stat{border-left:0;padding-left:0;border-top:1px solid var(--line)}
+          .said-home .stat:first-child{border-top:0}
+          .said-home .capsLogo{display:none}
+        }
+      `}</style>
     </div>
   );
 }

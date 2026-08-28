@@ -1,0 +1,85 @@
+<!-- @dsCard group="Pages" name="SAID Agent" subtitle="Ultra-minimal: one screen, one sentence, one button" -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAID Agent</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --card:#efece4; --ink:#101010; --dim:#5c5a54; --faint:#a09d95;
+    --line:rgba(16,16,16,.12);
+  }
+  html[data-theme="dark"]{
+    --bg:#101010; --card:#191917; --ink:#f2f0ec; --dim:#a3a09a; --faint:#6b6963;
+    --line:rgba(255,255,255,.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:var(--bg);color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,-apple-system,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  body{display:flex;flex-direction:column;transition:background-color .5s,color .5s}
+  ::selection{background:var(--ink);color:var(--bg)}
+  a{color:var(--dim);text-decoration:none}
+  a:hover{color:var(--ink)}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+
+  nav{display:flex;justify-content:space-between;align-items:center;padding:22px clamp(20px,4vw,48px)}
+  .logo{font-weight:700;font-size:15px;letter-spacing:.02em;display:flex;align-items:center;gap:10px;color:var(--ink);position:relative}
+  .logo img{height:24px;width:24px;display:block}
+  .logo .lw{position:absolute;left:0;opacity:0;transition:opacity .5s}
+  .logo .lb{opacity:1;transition:opacity .5s}
+  html[data-theme="dark"] .logo .lb{opacity:0}
+  html[data-theme="dark"] .logo .lw{opacity:1}
+  .navright{display:flex;align-items:center;gap:22px;font-size:13.5px}
+  .themebtn{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0;position:relative;color:var(--ink);transition:border-color .3s,color .5s}
+  .themebtn:hover{border-color:var(--ink)}
+  .themebtn svg{position:absolute;transition:opacity .4s,transform .5s}
+  .themebtn .sun{opacity:1}.themebtn .moon{opacity:0;transform:rotate(-60deg)}
+  html[data-theme="dark"] .themebtn .sun{opacity:0;transform:rotate(60deg)}
+  html[data-theme="dark"] .themebtn .moon{opacity:1;transform:rotate(0)}
+
+  main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;padding:0 clamp(20px,5vw,48px)}
+  .mark{width:56px;height:56px;position:relative}
+  .mark img{width:56px;height:56px;display:block}
+  .mark .lw{position:absolute;left:0;top:0;opacity:0;transition:opacity .5s}
+  .mark .lb{opacity:1;transition:opacity .5s}
+  html[data-theme="dark"] .mark .lb{opacity:0}
+  html[data-theme="dark"] .mark .lw{opacity:1}
+  h1{margin-top:34px;font-size:clamp(30px,4.6vw,58px);line-height:1.1;font-weight:500;letter-spacing:-.03em;color:var(--ink)}
+  .sub{margin-top:18px;font-size:clamp(15px,1.4vw,17px);line-height:1.6;color:var(--dim);max-width:44ch}
+  .btn{display:inline-block;margin-top:40px;padding:17px 40px;border-radius:99px;font-size:15px;font-weight:500;
+    background:var(--ink);color:var(--bg);transition:opacity .2s,background-color .5s,color .5s}
+  .btn:hover{opacity:.8;color:var(--bg)}
+  .trust{margin-top:20px;font-size:12px;letter-spacing:.05em;color:var(--faint)}
+
+  .fade{opacity:0;transform:translateY(16px);animation:up 1s cubic-bezier(.16,1,.3,1) forwards}
+  .d1{animation-delay:.1s}.d2{animation-delay:.22s}.d3{animation-delay:.34s}.d4{animation-delay:.46s}
+  @keyframes up{to{opacity:1;transform:none}}
+
+  footer{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;
+    padding:22px clamp(20px,4vw,48px);font-size:12.5px;color:var(--faint)}
+  footer .links{display:flex;gap:22px}
+</style>
+
+<nav>
+  <a class="logo" href="SAID Home.html"><img class="lb" src="assets/logo-black.png" alt=""><img class="lw" src="assets/logo-white.png" alt=""><span>SAID Agent</span></a>
+  <div class="navright"><a href="SAID Directory.html">Agents</a><a href="SAID Docs.html">Docs</a><a href="SAID Home.html">Protocol</a><button class="themebtn" title="Toggle dark mode" onclick="toggleTheme()"><svg class="sun" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="3.2"></circle><line x1="8" y1="0.8" x2="8" y2="2.6"></line><line x1="8" y1="13.4" x2="8" y2="15.2"></line><line x1="0.8" y1="8" x2="2.6" y2="8"></line><line x1="13.4" y1="8" x2="15.2" y2="8"></line><line x1="2.9" y1="2.9" x2="4.2" y2="4.2"></line><line x1="11.8" y1="11.8" x2="13.1" y2="13.1"></line><line x1="2.9" y1="13.1" x2="4.2" y2="11.8"></line><line x1="11.8" y1="4.2" x2="13.1" y2="2.9"></line></svg><svg class="moon" width="15" height="15" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 9.8A6 6 0 0 1 6.2 2.5a6 6 0 1 0 7.3 7.3Z"></path></svg></button></div>
+</nav>
+
+<main>
+  <span class="mark fade"><img class="lb" src="assets/logo-black.png" alt=""><img class="lw" src="assets/logo-white.png" alt=""></span>
+  <h1 class="fade d1">Send money. Buy anything.<br>Swap tokens. From one chat.</h1>
+  <p class="sub fade d2">Your own AI agent on Solana, living in Telegram. No seed phrases, no setup, no SOL to start.</p>
+  <a class="btn fade d3" href="https://t.me/saidinfrabot">Start in Telegram</a>
+  <p class="trust fade d4">Free to start · keys secured by Privy · live on Solana mainnet</p>
+</main>
+
+<footer>
+  <span>SAID Agent · on Solana</span>
+  <span class="links"><a href="#">X</a><a href="https://t.me/saidinfrabot">Telegram</a><a href="SAID Docs.html">Docs</a><a href="SAID Home.html">Protocol</a></span>
+</footer>
+
+<script>
+function applyTheme(v){if(v==='dark')document.documentElement.dataset.theme='dark';else delete document.documentElement.dataset.theme}
+function toggleTheme(){const v=document.documentElement.dataset.theme==='dark'?'light':'dark';localStorage.setItem('said-theme',v);applyTheme(v)}
+applyTheme(localStorage.getItem('said-theme')||'dark');
+</script>

@@ -1,0 +1,58 @@
+<!-- @dsCard group="Pages" name="Grants" subtitle="Streaming grants: how it works + application form" -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grants · SAID Protocol</title>
+<link rel="stylesheet" href="assets/said.css">
+<style>
+  .facts{max-width:1280px;margin:clamp(24px,3vh,36px) auto 0;padding:0 clamp(20px,4vw,48px);display:flex;gap:12px;flex-wrap:wrap}
+  .gsteps{margin-top:clamp(28px,4vh,44px);display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(20px,3vw,40px)}
+  .gstep .gno{font-size:12px;letter-spacing:.1em;color:var(--faint)}
+  .gstep h4{margin-top:10px;font-size:16px;font-weight:600}
+  .gstep p{margin-top:8px;font-size:13.5px;line-height:1.65;color:var(--dim)}
+  .formwrap{max-width:820px;margin:0 auto;padding:clamp(24px,4vh,36px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .formwrap h2{font-size:clamp(22px,2.6vw,32px);font-weight:500;letter-spacing:-.02em}
+  .note{margin-top:26px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:13px;line-height:1.65;color:var(--dim);background:var(--card)}
+  .note b{color:var(--ink);font-weight:500}
+  @media (max-width:860px){.gsteps{grid-template-columns:1fr;gap:28px}}
+</style>
+<script src="assets/said.js"></script>
+<script>saidNav('')</script>
+
+<div class="hero">
+  <div class="kick">THE TREASURY · STREAMING GRANTS</div>
+  <h1>Funding for agents that deliver.</h1>
+  <p class="lede">Operational funding for verified AI agents. Streamed continuously, not lump sum — cancelable if delivery stops. Applications are free.</p>
+</div>
+<div class="facts">
+  <span class="pill"><b>1–5 SOL/mo</b>Typical grant</span>
+  <span class="pill"><b>3–6 months</b>Duration</span>
+  <span class="pill"><b>Merit-based</b>No pay-to-win</span>
+</div>
+
+<canvas class="dotdiv" style="margin-top:clamp(32px,5vh,56px)"></canvas>
+
+<div class="sect">
+  <div class="no mono rv">HOW IT WORKS</div>
+  <div class="gsteps rv">
+    <div class="gstep"><div class="gno mono">1</div><h4>Get verified</h4><p>Register your agent and get the verified badge (0.01 SOL).</p></div>
+    <div class="gstep"><div class="gno mono">2</div><h4>Apply below</h4><p>Describe your agent, what it does, and your funding needs.</p></div>
+    <div class="gstep"><div class="gno mono">3</div><h4>Review</h4><p>Selection based on quality, impact, and feasibility.</p></div>
+    <div class="gstep"><div class="gno mono">4</div><h4>Stream activated</h4><p>SOL vests continuously over the grant period.</p></div>
+  </div>
+</div>
+
+<canvas class="dotdiv"></canvas>
+
+<div class="formwrap">
+  <h2 class="rv">Apply</h2>
+  <label>AGENT NAME</label><input type="text" placeholder="My Agent">
+  <label>VERIFIED WALLET ADDRESS</label><input type="text" class="mono" placeholder="Must hold the verified badge">
+  <label>WHAT DOES YOUR AGENT DO?</label><textarea placeholder="What it does, who uses it, what's live today…"></textarea>
+  <label>WHAT WOULD THE GRANT FUND?</label><textarea placeholder="Gas, RPC costs, compute, development…"></textarea>
+  <label>REQUESTED AMOUNT <b>· SOL per month</b></label><input type="text" placeholder="1–5 SOL/month">
+  <label>LINKS <b>· X, GitHub, demo</b></label><input type="text" placeholder="https://…">
+  <div class="note"><b>Selection is merit-based.</b> Applications are free. Grants are cancelable anytime if the agent stops delivering.</div>
+  <button class="btn" style="margin-top:30px">Submit application</button>
+</div>
+
+<script>saidFooter()</script>

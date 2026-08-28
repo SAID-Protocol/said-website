@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import AsciiBackground from '@/components/AsciiBackground';
+import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
+import ShimmerDots from '@/components/said/ShimmerDots';
+import AgentAvatar from '@/components/said/AgentAvatar';
 import ReputationAnalytics from '@/components/ReputationAnalytics';
-import CopyButton from '@/components/CopyButton';
 
 interface TrustScore {
   score: number;
@@ -63,7 +63,9 @@ interface SourcePlatform {
 function matchSource(agent: Agent): SourcePlatform | null {
   const src = agent.registrationSource ?? '';
   const desc = agent.description ?? '';
-  if (src === 'spawnr') return { key: 'spawnr', label: 'Spawnr', icon: '/platforms/spawnr.png', href: 'https://spawnr.io' };
+  // Spawnr shut down (spawnr.io 500s). The badge stays — where an agent
+  // registered is still true — but it no longer links anywhere.
+  if (src === 'spawnr') return { key: 'spawnr', label: 'Spawnr', icon: '/platforms/spawnr.png' };
   if (src === 'clawpump' || desc.includes('clawpump.tech')) return { key: 'clawpump', label: 'Claw Pump', icon: '/clawpump-logo.png', href: 'https://clawpump.tech' };
   if (src === 'said-hosting' || desc.includes('said-hosting') || desc.includes('host.saidprotocol')) return { key: 'said-hosting', label: 'SAID Hosted', icon: '/platforms/said-hosting.png', href: 'https://host.saidprotocol.com' };
   const web = agent.website ?? '';
@@ -72,13 +74,15 @@ function matchSource(agent: Agent): SourcePlatform | null {
   return null;
 }
 
-const TIER_COLORS: Record<string, { bg: string; text: string; border: string; label: string }> = {
-  platinum: { bg: 'bg-purple-500/10', text: 'text-purple-300', border: 'border-purple-500/30', label: 'Platinum' },
-  gold: { bg: 'bg-amber-500/10', text: 'text-amber-300', border: 'border-amber-500/30', label: 'Gold' },
-  silver: { bg: 'bg-zinc-400/10', text: 'text-zinc-200', border: 'border-zinc-400/30', label: 'Silver' },
-  bronze: { bg: 'bg-orange-600/10', text: 'text-orange-300', border: 'border-orange-600/30', label: 'Bronze' },
-  unverified: { bg: 'bg-zinc-700/10', text: 'text-zinc-500', border: 'border-zinc-700/30', label: 'Unverified' },
+// Tier accent colors — match the directory champion auras.
+const TIER_SOLID: Record<string, string> = {
+  platinum: '#a78bfa',
+  gold: '#d9a514',
+  silver: '#8fa3bb',
+  bronze: '#c2703d',
+  unverified: '#8a8a8a',
 };
+const tierLabel = (t: string) => (t ? t.charAt(0).toUpperCase() + t.slice(1) : 'Unverified');
 
 type Tab = 'overview' | 'feedback' | 'identity';
 
@@ -103,15 +107,14 @@ function isActive(lastActivity?: string): boolean {
   return Date.now() - new Date(lastActivity).getTime() < 7 * 24 * 60 * 60 * 1000;
 }
 
+const shortAddr = (v: string) => `${v.slice(0, 6)}…${v.slice(-6)}`;
+
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <AsciiBackground agentThemed />
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <Navbar />
-        {children}
-        <Footer />
-      </div>
+    <div className="said-page said-agent">
+      {children}
+      <SaidFooter />
+      <style>{agentStyles}</style>
     </div>
   );
 }
@@ -150,8 +153,9 @@ export default function AgentPage() {
       .then((data) => {
         if (cancelled || !data) return;
         const lb: LeaderboardEntry[] = data.leaderboard ?? [];
-        const entry = lb.find((e) => e.wallet === wallet);
-        if (entry) setRank(entry.rank);
+        // API entries carry no rank field — derive it from list position.
+        const idx = lb.findIndex((e) => e.wallet === wallet);
+        if (idx >= 0) setRank(lb[idx].rank ?? idx + 1);
       })
       .catch(() => {});
 
@@ -163,11 +167,8 @@ export default function AgentPage() {
   if (loading) {
     return (
       <Shell>
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin" />
-            <p className="mt-4 text-zinc-400">Loading agent...</p>
-          </div>
+        <main className="agentwrap center">
+          <p className="mono dimlabel">LOADING AGENT…</p>
         </main>
       </Shell>
     );
@@ -176,19 +177,10 @@ export default function AgentPage() {
   if (error || !agent) {
     return (
       <Shell>
-        <main className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <svg className="mx-auto mb-4 text-zinc-600" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="10" />
-              <path d="m15 9-6 6" />
-              <path d="m9 9 6 6" />
-            </svg>
-            <h1 className="text-2xl font-bold mb-2">Agent Not Found</h1>
-            <p className="text-zinc-400 mb-6">This agent doesn&apos;t exist or hasn&apos;t been registered yet.</p>
-            <Link href="/agents" className="px-4 py-2 bg-white text-black rounded-lg font-medium hover:bg-zinc-200 transition">
-              Browse Directory
-            </Link>
-          </div>
+        <main className="agentwrap center">
+          <h1 className="nfTitle">Agent not found</h1>
+          <p className="nfSub">This agent doesn&apos;t exist or hasn&apos;t been registered yet.</p>
+          <Link href="/agents" className="btn fill" style={{ marginTop: 26 }}>Browse the directory</Link>
         </main>
       </Shell>
     );
@@ -196,34 +188,39 @@ export default function AgentPage() {
 
   return (
     <Shell>
-      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 pt-28 sm:pt-32 pb-12 w-full">
-        {/* Top row: identity on the left, Trust Score as the hero on the right */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+      <main className="agentwrap">
+        <Link href="/agents" className="backlink mono">← DIRECTORY</Link>
+
+        <div className="topgrid">
+          <div>
             <HeaderSection agent={agent} />
             <StatusBadgesRow agent={agent} rank={rank} />
           </div>
-          <aside className="lg:col-span-1">
+          <aside>
             <TrustScoreCard score={agent.trustScore ?? null} />
           </aside>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6 mt-4">
-          {/* Main column */}
-          <div className="lg:col-span-2 space-y-6">
-            <TabBar
-              activeTab={activeTab}
-              onChange={setActiveTab}
-              feedbackCount={agent.feedbackCount || 0}
-            />
+        <DotSeam style={{ marginTop: 'clamp(20px,3vh,32px)' }} />
+
+        <div className="maingrid">
+          <div>
+            <div className="tabbar">
+              {([
+                ['overview', 'Overview'],
+                ['feedback', agent.feedbackCount > 0 ? `Feedback (${agent.feedbackCount})` : 'Feedback'],
+                ['identity', 'Identity'],
+              ] as Array<[Tab, string]>).map(([id, label]) => (
+                <button key={id} className={`tabbtn${activeTab === id ? ' on' : ''}`} onClick={() => setActiveTab(id)}>
+                  {label}
+                </button>
+              ))}
+            </div>
             {activeTab === 'overview' && <OverviewTab agent={agent} />}
             {activeTab === 'feedback' && <FeedbackTab agent={agent} />}
             {activeTab === 'identity' && <IdentityTab agent={agent} />}
           </div>
-
-          {/* Sidebar — offset down on desktop so the cards align with the tab
-              content (below the tab-underline divider), not the tab row itself. */}
-          <aside className="lg:col-span-1 space-y-6 lg:mt-16">
+          <aside className="sidecol">
             <OnChainIdentityCard agent={agent} />
             <EmbedBadgeCard agent={agent} />
           </aside>
@@ -235,53 +232,24 @@ export default function AgentPage() {
 
 function HeaderSection({ agent }: { agent: Agent }) {
   return (
-    <div className="flex flex-col sm:flex-row items-start gap-6 mb-6">
-      <img
-        src={agent.image || `https://api.saidprotocol.com/api/avatar/${agent.wallet}.svg`}
-        alt={agent.name || 'Agent'}
-        className="w-20 h-20 rounded-2xl flex-shrink-0 object-cover bg-zinc-900"
-      />
-      <div className="flex-1 min-w-0">
-        <div className="flex flex-wrap items-center gap-3 mb-2">
-          <h1 className="text-2xl sm:text-3xl font-bold">{agent.name || 'Unnamed Agent'}</h1>
-          {agent.isVerified && (
-            <span className="px-3 py-1 bg-green-500/10 text-green-400 border border-green-500/20 text-sm rounded-full flex items-center gap-1.5">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M20 6L9 17l-5-5" />
-              </svg>
-              Verified
-            </span>
-          )}
+    <div className="head">
+      <span className="avatar">
+        <AgentAvatar wallet={agent.wallet} image={agent.image} twitter={agent.twitter} name={agent.name} rounded="20px" />
+      </span>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="namerow">
+          <h1>{agent.name || 'Unnamed Agent'}</h1>
+          {agent.isVerified && <span className="vbadge">✓</span>}
         </div>
-        <p className="text-zinc-400 mb-4 max-w-2xl">{agent.description || 'No description provided'}</p>
-        <div className="flex flex-wrap gap-3">
+        <p className="desc">{agent.description || 'No description provided'}</p>
+        <div className="links">
           {agent.twitter && (
-            <a
-              href={`https://twitter.com/${agent.twitter.replace('@', '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm hover:border-zinc-600 transition flex items-center gap-2"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              <span className="truncate">{agent.twitter}</span>
+            <a className="pill" href={`https://twitter.com/${agent.twitter.replace('@', '')}`} target="_blank" rel="noopener noreferrer">
+              {agent.twitter}
             </a>
           )}
           {agent.website && (
-            <a
-              href={agent.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm hover:border-zinc-600 transition flex items-center gap-2"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M2 12h20" />
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-              </svg>
-              Website
-            </a>
+            <a className="pill" href={agent.website} target="_blank" rel="noopener noreferrer">Website ↗</a>
           )}
           <SourceBadge agent={agent} />
         </div>
@@ -295,15 +263,15 @@ function SourceBadge({ agent }: { agent: Agent }) {
   if (!src) return null;
   const inner = (
     <>
-      <img src={src.icon} alt={src.label} className="w-3.5 h-3.5 rounded-full" />
-      <span className="text-zinc-300">Launched on {src.label}</span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src.icon} alt="" />
+      <span>Launched on {src.label}</span>
     </>
   );
-  const className = 'px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-lg text-sm hover:border-zinc-600 transition flex items-center gap-2';
   return src.href ? (
-    <a href={src.href} target="_blank" rel="noopener noreferrer" className={className}>{inner}</a>
+    <a className="pill src" href={src.href} target="_blank" rel="noopener noreferrer">{inner}</a>
   ) : (
-    <span className={className}>{inner}</span>
+    <span className="pill src">{inner}</span>
   );
 }
 
@@ -313,66 +281,13 @@ function StatusBadgesRow({ agent, rank }: { agent: Agent; rank: number | null })
   const sourceCount = agent.trustScore?.sources?.length ?? 0;
 
   return (
-    <div className="flex flex-wrap gap-2 text-xs">
-      <span
-        className={`px-2.5 py-1 rounded-full border flex items-center gap-1.5 ${
-          active ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-zinc-800/50 border-zinc-700/50 text-zinc-500'
-        }`}
-      >
-        <span className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-green-400' : 'bg-zinc-500'}`} />
-        {active ? 'Active' : 'Inactive'}
+    <div className="statusrow mono">
+      <span className={`chip${active ? ' live' : ''}`}>
+        <i className="dot" />{active ? 'ACTIVE' : 'INACTIVE'}
       </span>
-      {rank !== null && (
-        <Link
-          href="/leaderboard"
-          className="px-2.5 py-1 rounded-full border bg-amber-500/10 border-amber-500/30 text-amber-300 font-medium uppercase tracking-wide hover:bg-amber-500/20 transition"
-        >
-          Rank #{rank}
-        </Link>
-      )}
-      {sourceCount > 0 && (
-        <span className="px-2.5 py-1 rounded-full border bg-zinc-800/50 border-zinc-700/50 text-zinc-400">
-          {sourceCount} verified {sourceCount === 1 ? 'source' : 'sources'}
-        </span>
-      )}
-      {lastActive && (
-        <span className="px-2.5 py-1 rounded-full border bg-zinc-800/50 border-zinc-700/50 text-zinc-400">
-          Last active {timeAgo(lastActive)}
-        </span>
-      )}
-    </div>
-  );
-}
-
-function TabBar({
-  activeTab,
-  onChange,
-  feedbackCount,
-}: {
-  activeTab: Tab;
-  onChange: (t: Tab) => void;
-  feedbackCount: number;
-}) {
-  const tabs: { id: Tab; label: string }[] = [
-    { id: 'overview', label: 'Overview' },
-    { id: 'feedback', label: feedbackCount > 0 ? `Feedback (${feedbackCount})` : 'Feedback' },
-    { id: 'identity', label: 'Identity' },
-  ];
-  return (
-    <div className="flex gap-1 border-b border-zinc-800">
-      {tabs.map((t) => (
-        <button
-          key={t.id}
-          onClick={() => onChange(t.id)}
-          className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-            activeTab === t.id
-              ? 'border-white text-white'
-              : 'border-transparent text-zinc-500 hover:text-zinc-300'
-          }`}
-        >
-          {t.label}
-        </button>
-      ))}
+      {rank !== null && <Link href="/leaderboard" className="chip rank">RANK #{rank}</Link>}
+      {sourceCount > 0 && <span className="chip">{sourceCount} VERIFIED {sourceCount === 1 ? 'SOURCE' : 'SOURCES'}</span>}
+      {lastActive && <span className="chip">LAST ACTIVE {timeAgo(lastActive).toUpperCase()}</span>}
     </div>
   );
 }
@@ -381,51 +296,37 @@ function OverviewTab({ agent }: { agent: Agent }) {
   const hasServices = Boolean(agent.mcpEndpoint || agent.a2aEndpoint || (agent.serviceTypes?.length ?? 0) > 0);
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatTile label="Reputation" value={agent.reputationScore?.toFixed(1) ?? '0'} />
-        <StatTile label="Feedback" value={String(agent.feedbackCount ?? 0)} />
-        <StatTile label="Activity" value={String(agent.activityCount ?? 0)} />
-        <StatTile label="Registered" value={timeAgo(agent.registeredAt)} />
+    <div className="tabbody">
+      <div className="tiles">
+        <StatTile label="REPUTATION" value={agent.reputationScore?.toFixed(1) ?? '0'} />
+        <StatTile label="FEEDBACK" value={String(agent.feedbackCount ?? 0)} />
+        <StatTile label="ACTIVITY" value={String(agent.activityCount ?? 0)} />
+        <StatTile label="REGISTERED" value={timeAgo(agent.registeredAt)} />
       </div>
 
-      {agent.trustScore && agent.trustScore.score > 0 && (
-        <TrustBreakdown score={agent.trustScore} />
-      )}
+      {agent.trustScore && agent.trustScore.score > 0 && <TrustBreakdown score={agent.trustScore} />}
 
       {agent.skills && agent.skills.length > 0 && (
         <section>
-          <h2 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">Skills</h2>
-          <div className="flex flex-wrap gap-2">
-            {agent.skills.map((skill) => (
-              <span key={skill} className="px-3 py-1.5 bg-zinc-800 border border-zinc-700 rounded-full text-sm">
-                {skill}
-              </span>
-            ))}
+          <h2 className="seclabel mono">SKILLS</h2>
+          <div className="pillrow">
+            {agent.skills.map((skill) => <span key={skill} className="pill">{skill}</span>)}
           </div>
         </section>
       )}
 
       {hasServices && (
         <section>
-          <h2 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">Services</h2>
-          <div className="space-y-2">
-            {agent.mcpEndpoint && (
-              <EndpointRow protocol="MCP" url={agent.mcpEndpoint} />
-            )}
-            {agent.a2aEndpoint && (
-              <EndpointRow protocol="A2A" url={agent.a2aEndpoint} />
-            )}
-            {agent.serviceTypes && agent.serviceTypes.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-1">
-                {agent.serviceTypes.map((t) => (
-                  <span key={t} className="px-2.5 py-0.5 text-xs bg-white/5 border border-white/10 rounded-full text-zinc-300">
-                    {t}
-                  </span>
-                ))}
-              </div>
-            )}
+          <h2 className="seclabel mono">SERVICES</h2>
+          <div className="eplist">
+            {agent.mcpEndpoint && <EndpointRow protocol="MCP" url={agent.mcpEndpoint} />}
+            {agent.a2aEndpoint && <EndpointRow protocol="A2A" url={agent.a2aEndpoint} />}
           </div>
+          {agent.serviceTypes && agent.serviceTypes.length > 0 && (
+            <div className="pillrow" style={{ marginTop: 10 }}>
+              {agent.serviceTypes.map((t) => <span key={t} className="pill">{t}</span>)}
+            </div>
+          )}
         </section>
       )}
     </div>
@@ -435,52 +336,36 @@ function OverviewTab({ agent }: { agent: Agent }) {
 function FeedbackTab({ agent }: { agent: Agent }) {
   if (!agent.feedbackCount || agent.feedbackCount === 0) {
     return (
-      <div className="p-10 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl text-center">
-        <svg className="mx-auto mb-3 text-zinc-600" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-        <h3 className="text-sm font-semibold mb-1">No feedback yet</h3>
-        <p className="text-zinc-500 text-xs max-w-sm mx-auto">
-          This agent hasn&apos;t received any on-chain feedback. Once users start leaving feedback, reputation analytics will appear here.
-        </p>
+      <div className="tabbody">
+        <div className="emptycard">
+          <h3>No feedback yet</h3>
+          <p>This agent hasn&apos;t received any on-chain feedback. Once users start leaving feedback, reputation analytics will appear here.</p>
+        </div>
       </div>
     );
   }
   return (
-    <ReputationAnalytics
-      wallet={agent.wallet}
-      currentScore={agent.reputationScore || 0}
-      feedbackCount={agent.feedbackCount || 0}
-    />
+    <div className="tabbody">
+      <ReputationAnalytics
+        wallet={agent.wallet}
+        currentScore={agent.reputationScore || 0}
+        feedbackCount={agent.feedbackCount || 0}
+      />
+    </div>
   );
 }
 
 function IdentityTab({ agent }: { agent: Agent }) {
   const lastActive = agent.lastActivity ?? agent.lastActiveAt;
   return (
-    <div className="space-y-4">
-      {/* Wallet + PDA live in the always-visible On-Chain Identity sidebar card;
-          this tab holds the registration record / metadata. */}
-      <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl space-y-3">
-        <Row
-          label="Registered"
-          value={agent.registeredAt ? `${timeAgo(agent.registeredAt)} · ${formatAbsolute(agent.registeredAt)}` : '—'}
-        />
-        {lastActive && (
-          <Row
-            label="Last Activity"
-            value={`${timeAgo(lastActive)} · ${formatAbsolute(lastActive)}`}
-          />
-        )}
+    <div className="tabbody">
+      <div className="card">
+        <Row label="REGISTERED" value={agent.registeredAt ? `${timeAgo(agent.registeredAt)} · ${formatAbsolute(agent.registeredAt)}` : '—'} />
+        {lastActive && <Row label="LAST ACTIVITY" value={`${timeAgo(lastActive)} · ${formatAbsolute(lastActive)}`} />}
         {agent.metadataUri && (
-          <div className="pt-2">
-            <span className="text-zinc-400 text-xs uppercase tracking-wider block mb-1">AgentCard</span>
-            <a
-              href={agent.metadataUri}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-xs text-blue-400 hover:underline font-mono break-all"
-            >
+          <div style={{ marginTop: 14 }}>
+            <span className="seclabel mono" style={{ marginBottom: 6, display: 'block' }}>AGENTCARD</span>
+            <a className="metalink mono" href={agent.metadataUri} target="_blank" rel="noopener noreferrer">
               {agent.metadataUri}
             </a>
           </div>
@@ -490,13 +375,11 @@ function IdentityTab({ agent }: { agent: Agent }) {
   );
 }
 
-function Row({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-      <span className="text-zinc-400 text-xs uppercase tracking-wider">{label}</span>
-      <code className={`text-xs ${mono ? 'bg-zinc-800 px-2 py-1 rounded font-mono' : ''} break-all`}>
-        {value}
-      </code>
+    <div className="krow">
+      <span className="seclabel mono">{label}</span>
+      <span className="kval">{value}</span>
     </div>
   );
 }
@@ -504,46 +387,34 @@ function Row({ label, value, mono }: { label: string; value: string; mono?: bool
 // Round to 1 decimal and drop trailing zeros: 8.9999→"9", 3.5→"3.5", 7.3→"7.3".
 const fmtDim = (v: number) => String(Math.round(v * 10) / 10);
 
-// Axis-agnostic breakdown row: label + value/max + a bar filled to value/max.
-type BreakdownDim = { label: string; value: number; max: number };
-
 function TrustBreakdown({ score }: { score: TrustScore }) {
   // PLACEHOLDER DATA — the legacy v0.6 pillars (each 0–10) while the reputation
-  // model is being finalized. The rendering below is axis-agnostic: to switch to
-  // the real reputation axes, just repoint `dims` (label/value/max) — no layout
-  // changes needed.
-  const dims: BreakdownDim[] = [
+  // model is being finalized. Rendering is axis-agnostic: repoint `dims` to the
+  // real axes when ready.
+  const dims = [
     { label: 'Identity', value: score.identity, max: 10 },
     { label: 'Activity', value: score.activity, max: 10 },
     { label: 'Economic', value: score.economic, max: 10 },
     { label: 'Ecosystem', value: score.ecosystem, max: 10 },
     { label: 'Longevity', value: score.longevity, max: 10 },
-    // FairScale arrives already on the 0–10 scale (e.g. Xona ~1.6), so no rescale.
+    // FairScale arrives already on the 0–10 scale, no rescale.
     { label: 'Fairscale', value: score.fairscale, max: 10 },
   ];
   const color = TIER_SOLID[score.tier] ?? TIER_SOLID.unverified;
 
   return (
     <section>
-      <h2 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">Trust Breakdown</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3.5">
+      <h2 className="seclabel mono">TRUST BREAKDOWN</h2>
+      <div className="bkgrid">
         {dims.map((d) => {
           const pct = d.max > 0 ? Math.max(0, Math.min(100, (d.value / d.max) * 100)) : 0;
           return (
             <div key={d.label}>
-              <div className="flex items-baseline justify-between mb-1.5">
-                <span className="text-zinc-300 text-xs">{d.label}</span>
-                <span className="text-[11px] font-mono text-zinc-300">
-                  {fmtDim(d.value)}
-                  <span className="text-zinc-600">/{d.max}</span>
-                </span>
+              <div className="bkhead">
+                <span>{d.label}</span>
+                <span className="mono">{fmtDim(d.value)}<i>/{d.max}</i></span>
               </div>
-              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-[width] duration-500"
-                  style={{ width: `${pct}%`, backgroundColor: color, opacity: 0.85 }}
-                />
-              </div>
+              <div className="bkbar"><i style={{ width: `${pct}%`, backgroundColor: color }} /></div>
             </div>
           );
         })}
@@ -554,60 +425,35 @@ function TrustBreakdown({ score }: { score: TrustScore }) {
 
 function StatTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="p-4 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl text-center">
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-zinc-400 text-xs uppercase tracking-wider mt-1">{label}</div>
+    <div className="tile">
+      <div className="tv">{value}</div>
+      <div className="tl mono">{label}</div>
     </div>
   );
 }
 
 function EndpointRow({ protocol, url }: { protocol: string; url: string }) {
   return (
-    <div className="flex items-center gap-3 p-3 bg-zinc-950/50 border border-zinc-800/60 rounded-lg">
-      <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-white/10 text-white rounded">
-        {protocol}
-      </span>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-zinc-300 hover:text-white transition text-xs font-mono break-all min-w-0 flex-1"
-      >
-        {url}
-      </a>
+    <div className="eprow">
+      <span className="proto mono">{protocol}</span>
+      <a href={url} target="_blank" rel="noopener noreferrer" className="mono">{url}</a>
     </div>
   );
 }
-
-const TIER_SOLID: Record<string, string> = {
-  platinum: '#C084FC',
-  gold: '#FBBF24',
-  silver: '#A1A1AA',
-  bronze: '#FB923C',
-  unverified: '#71717A',
-};
 
 function ScoreGauge({ score, color }: { score: number; color: string }) {
   const r = 34;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(100, score)) / 100;
   return (
-    <svg width="88" height="88" viewBox="0 0 88 88" className="flex-shrink-0">
-      <circle cx="44" cy="44" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="6" />
+    <svg width="88" height="88" viewBox="0 0 88 88" style={{ flexShrink: 0 }}>
+      <circle cx="44" cy="44" r={r} fill="none" stroke="var(--line)" strokeWidth="6" />
       <circle
-        cx="44"
-        cy="44"
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeDasharray={c}
-        strokeDashoffset={c * (1 - pct)}
-        transform="rotate(-90 44 44)"
+        cx="44" cy="44" r={r} fill="none" stroke={color} strokeWidth="6" strokeLinecap="round"
+        strokeDasharray={c} strokeDashoffset={c * (1 - pct)} transform="rotate(-90 44 44)"
       />
-      <text x="44" y="42" textAnchor="middle" dominantBaseline="middle" fontSize="26" fontWeight="800" fill="#f4f4f5" fontFamily="Inter, system-ui, sans-serif">{score}</text>
-      <text x="44" y="60" textAnchor="middle" fontSize="9" fontWeight="600" letterSpacing="0.08em" fill="#71717a" fontFamily="Inter, system-ui, sans-serif">/ 100</text>
+      <text x="44" y="42" textAnchor="middle" dominantBaseline="middle" fontSize="24" fontWeight="500" fill="var(--ink)" letterSpacing="-1">{score}</text>
+      <text x="44" y="60" textAnchor="middle" fontSize="9" letterSpacing="0.08em" fill="var(--faint)">/ 100</text>
     </svg>
   );
 }
@@ -615,27 +461,25 @@ function ScoreGauge({ score, color }: { score: number; color: string }) {
 function TrustScoreCard({ score }: { score: TrustScore | null }) {
   if (!score || score.score === 0) {
     return (
-      <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
-        <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-2">Trust Score</h3>
-        <p className="text-zinc-500 text-xs">
-          Trust score will be computed once this agent has on-chain activity and verifications.
-        </p>
+      <div className="card">
+        <h3 className="seclabel mono">TRUST SCORE</h3>
+        <p className="cardnote">Trust score will be computed once this agent has on-chain activity and verifications.</p>
       </div>
     );
   }
 
-  const tierStyles = TIER_COLORS[score.tier] ?? TIER_COLORS.unverified;
   const color = TIER_SOLID[score.tier] ?? TIER_SOLID.unverified;
   const sources = score.sources ?? [];
 
   return (
-    <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
-      <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-4">Trust Score</h3>
-      <div className="flex items-center gap-4">
+    <div className="card trustcard">
+      <ShimmerDots />
+      <h3 className="seclabel mono">TRUST SCORE</h3>
+      <div className="scorerow">
         <ScoreGauge score={score.score} color={color} />
-        <div className="min-w-0">
-          <div className={`text-lg font-bold leading-tight ${tierStyles.text}`}>{tierStyles.label}</div>
-          <div className="text-xs text-zinc-500 mt-1">
+        <div style={{ minWidth: 0 }}>
+          <div className="tiername" style={{ color }}>{tierLabel(score.tier)}</div>
+          <div className="cardnote" style={{ marginTop: 4 }}>
             {sources.length > 0
               ? `Verified across ${sources.length} ${sources.length === 1 ? 'source' : 'sources'}`
               : 'On-chain verified'}
@@ -643,14 +487,10 @@ function TrustScoreCard({ score }: { score: TrustScore | null }) {
         </div>
       </div>
       {sources.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-zinc-800/60">
-          <div className="text-[10px] uppercase tracking-wider text-zinc-500 mb-2">Verified Sources</div>
-          <div className="flex flex-wrap gap-1.5">
-            {sources.map((s) => (
-              <span key={s} className="text-[10px] px-2 py-0.5 bg-white/5 border border-white/10 rounded-full text-zinc-300">
-                {s}
-              </span>
-            ))}
+        <div className="cardsep">
+          <div className="seclabel mono" style={{ marginBottom: 8 }}>VERIFIED SOURCES</div>
+          <div className="pillrow">
+            {sources.map((s) => <span key={s} className="pill sm">{s}</span>)}
           </div>
         </div>
       )}
@@ -660,21 +500,16 @@ function TrustScoreCard({ score }: { score: TrustScore | null }) {
 
 function IdField({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-zinc-500 text-[10px] uppercase tracking-wider">{label}</span>
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[10px] text-blue-400 hover:underline"
-        >
-          Solscan →
-        </a>
+    <div className="idfield">
+      <div className="idhead">
+        <span className="seclabel mono">{label}</span>
+        <a className="solscan mono" href={href} target="_blank" rel="noopener noreferrer">SOLSCAN ↗</a>
       </div>
-      <div className="flex items-center gap-1 bg-zinc-800 rounded-lg pl-2.5 pr-1 py-1">
-        <code className="block flex-1 min-w-0 text-[11px] font-mono truncate text-zinc-300">{value}</code>
-        <CopyButton text={value} />
+      <div className="addr" style={{ padding: '10px 14px', marginTop: 6 }}>
+        {/* hidden full value first — the shared copy handler copies the first <code> */}
+        <code style={{ display: 'none' }}>{value}</code>
+        <code title={value}>{shortAddr(value)}</code>
+        <button className="copy">COPY</button>
       </div>
     </div>
   );
@@ -682,14 +517,10 @@ function IdField({ label, value, href }: { label: string; value: string; href: s
 
 function OnChainIdentityCard({ agent }: { agent: Agent }) {
   return (
-    <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
-      <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">On-Chain Identity</h3>
-      <div className="space-y-3">
-        <IdField label="Wallet" value={agent.wallet} href={`https://solscan.io/account/${agent.wallet}`} />
-        {agent.pda && (
-          <IdField label="Identity PDA" value={agent.pda} href={`https://solscan.io/account/${agent.pda}`} />
-        )}
-      </div>
+    <div className="card">
+      <h3 className="seclabel mono">ON-CHAIN IDENTITY</h3>
+      <IdField label="WALLET" value={agent.wallet} href={`https://solscan.io/account/${agent.wallet}`} />
+      {agent.pda && <IdField label="IDENTITY PDA" value={agent.pda} href={`https://solscan.io/account/${agent.pda}`} />}
     </div>
   );
 }
@@ -699,6 +530,7 @@ type EmbedFormat = (typeof EMBED_FORMATS)[number];
 
 function EmbedBadgeCard({ agent }: { agent: Agent }) {
   const [format, setFormat] = useState<EmbedFormat>('Markdown');
+  const [copied, setCopied] = useState(false);
 
   const badgeUrl = `https://api.saidprotocol.com/api/badge/${agent.wallet}.svg`;
   const profileUrl = `https://www.saidprotocol.com/agents/${agent.wallet}`;
@@ -712,45 +544,125 @@ function EmbedBadgeCard({ agent }: { agent: Agent }) {
   const snippet = snippets[format];
 
   return (
-    <div className="p-5 bg-zinc-950/50 backdrop-blur-md border border-zinc-800/60 rounded-xl">
-      <h3 className="text-sm uppercase tracking-wider text-zinc-500 mb-3">Embed Badge</h3>
+    <div className="card">
+      <h3 className="seclabel mono">EMBED BADGE</h3>
 
       {/* Live preview — exactly what gets embedded */}
-      <a
-        href={badgeUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block mb-3 rounded-xl overflow-hidden ring-1 ring-white/[0.06] transition hover:ring-white/20"
-      >
-        <img src={badgeUrl} alt={label} className="block w-full h-auto" />
+      <a href={badgeUrl} target="_blank" rel="noopener noreferrer" className="badgeprev">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={badgeUrl} alt={label} />
       </a>
 
-      <p className="text-zinc-400 text-xs leading-relaxed mb-3">
-        Show off this agent&apos;s verified SAID badge on your site, README, or docs. It updates live as the trust score changes.
+      <p className="cardnote">
+        Show off this agent&apos;s SAID badge on your site, README, or docs. It updates live
+        as the trust score changes.
       </p>
 
-      {/* Format toggle */}
-      <div className="flex gap-0.5 mb-2 p-0.5 bg-zinc-900/70 border border-zinc-800/60 rounded-lg">
+      <div className="fmtrow">
         {EMBED_FORMATS.map((f) => (
-          <button
-            key={f}
-            onClick={() => setFormat(f)}
-            className={`flex-1 text-[11px] font-medium py-1 rounded-md transition ${
-              format === f ? 'bg-zinc-700/70 text-white' : 'text-zinc-500 hover:text-zinc-300'
-            }`}
-          >
+          <button key={f} className={`fmtbtn${format === f ? ' on' : ''}`} onClick={() => setFormat(f)}>
             {f}
           </button>
         ))}
       </div>
 
-      {/* Snippet + copy */}
-      <div className="flex items-start gap-1 bg-zinc-800 rounded-lg p-2">
-        <code className="block flex-1 min-w-0 text-[10px] leading-relaxed overflow-x-auto whitespace-pre text-zinc-300">
-          {snippet}
-        </code>
-        <CopyButton text={snippet} />
+      <div className="snip">
+        <code className="mono">{snippet}</code>
+        <button
+          className="copy"
+          onClick={() => { navigator.clipboard.writeText(snippet); setCopied(true); setTimeout(() => setCopied(false), 1200); }}
+        >
+          {copied ? 'COPIED' : 'COPY'}
+        </button>
       </div>
     </div>
   );
 }
+
+const agentStyles = `
+  .said-agent .agentwrap{max-width:1180px;margin:0 auto;padding:clamp(32px,5vh,52px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .said-agent .agentwrap.center{text-align:center;padding-top:16vh;padding-bottom:16vh}
+  .said-agent .dimlabel{font-size:12px;letter-spacing:.14em;color:var(--faint)}
+  .said-agent .nfTitle{font-size:clamp(26px,3vw,38px);font-weight:500;letter-spacing:-.03em}
+  .said-agent .nfSub{margin-top:12px;color:var(--dim);font-size:14.5px}
+  .said-agent .backlink{display:inline-block;font-size:11px;letter-spacing:.14em;color:var(--faint);margin-bottom:30px}
+  .said-agent .backlink:hover{color:var(--ink)}
+  .said-agent .topgrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:clamp(20px,3vw,36px);align-items:start}
+  .said-agent .maingrid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:clamp(20px,3vw,36px);margin-top:clamp(28px,4vh,40px);align-items:start}
+  .said-agent .topgrid>*,.said-agent .maingrid>*{min-width:0}
+  .said-agent .sidecol{display:grid;gap:16px}
+  .said-agent .card{min-width:0;overflow:hidden}
+  .said-agent .trustcard{position:relative}
+  .said-agent .trustcard>*:not(canvas){position:relative}
+  .said-agent .maingrid{margin-top:clamp(20px,3vh,30px)}
+  .said-agent .head{display:flex;gap:22px;align-items:flex-start;margin-bottom:18px}
+  .said-agent .avatar{width:76px;height:76px;border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--line);flex-shrink:0;display:block}
+  .said-agent .namerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .said-agent .namerow h1{font-size:clamp(24px,2.8vw,34px);font-weight:500;letter-spacing:-.02em}
+  .said-agent .vbadge{flex:none;width:18px;height:18px;border-radius:50%;background:var(--ink);color:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:10px}
+  .said-agent .desc{margin-top:8px;font-size:14.5px;line-height:1.65;color:var(--dim);max-width:56ch}
+  .said-agent .links{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+  .said-agent .pill{font-size:12.5px;padding:7px 14px}
+  .said-agent .pill.sm{font-size:11px;padding:4px 10px}
+  .said-agent .pill.src{display:inline-flex;align-items:center;gap:8px}
+  .said-agent .pill.src img{width:15px;height:15px;border-radius:50%}
+  .said-agent .statusrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .said-agent .chip{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.1em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:6px 12px}
+  .said-agent .chip .dot{width:6px;height:6px;border-radius:50%;background:var(--faint)}
+  .said-agent .chip.live{color:var(--good);border-color:var(--good)}
+  .said-agent .chip.live .dot{background:var(--good)}
+  .said-agent .chip.rank:hover{border-color:var(--ink);color:var(--ink)}
+  .said-agent .card{border:1px solid var(--line);border-radius:16px;padding:20px 22px;background:var(--card)}
+  .said-agent .cardnote{margin-top:10px;font-size:12.5px;line-height:1.6;color:var(--dim)}
+  .said-agent .cardsep{margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+  .said-agent .seclabel{font-size:10.5px;letter-spacing:.16em;color:var(--faint)}
+  .said-agent .scorerow{display:flex;align-items:center;gap:18px;margin-top:14px}
+  .said-agent .tiername{font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .said-agent .tabbar{display:flex;gap:2px;border-bottom:1px solid var(--line)}
+  .said-agent .tabbtn{padding:11px 16px;font-size:13.5px;font-family:inherit;background:none;border:0;border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--dim);cursor:pointer}
+  .said-agent .tabbtn:hover{color:var(--ink)}
+  .said-agent .tabbtn.on{color:var(--ink);border-bottom-color:var(--ink)}
+  .said-agent .tabbody{margin-top:22px;display:grid;gap:26px}
+  .said-agent .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .said-agent .tile{border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+  .said-agent .tile .tv{font-size:22px;font-weight:500;letter-spacing:-.02em}
+  .said-agent .tile .tl{margin-top:6px;font-size:9.5px;letter-spacing:.14em;color:var(--faint)}
+  .said-agent .bkgrid{margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px 32px}
+  .said-agent .bkhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;font-size:12.5px;color:var(--dim)}
+  .said-agent .bkhead .mono{font-size:11px;color:var(--ink)}
+  .said-agent .bkhead .mono i{font-style:normal;color:var(--faint)}
+  .said-agent .bkbar{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+  .said-agent .bkbar i{display:block;height:100%;border-radius:2px;opacity:.85;transition:width .5s}
+  .said-agent .pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .said-agent .eplist{display:grid;gap:8px;margin-top:12px}
+  .said-agent .eprow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+  .said-agent .eprow .proto{font-size:10px;letter-spacing:.1em;color:var(--bg);background:var(--ink);border-radius:6px;padding:3px 8px}
+  .said-agent .eprow a{font-size:12px;color:var(--dim);word-break:break-all;min-width:0}
+  .said-agent .eprow a:hover{color:var(--ink)}
+  .said-agent .emptycard{border:1px solid var(--line);border-radius:16px;padding:40px 30px;text-align:center;background:var(--card)}
+  .said-agent .emptycard h3{font-size:15px;font-weight:600}
+  .said-agent .emptycard p{margin:8px auto 0;font-size:13px;line-height:1.65;color:var(--dim);max-width:42ch}
+  .said-agent .krow{display:flex;justify-content:space-between;gap:16px;padding:8px 0;flex-wrap:wrap}
+  .said-agent .kval{font-size:12.5px;color:var(--dim)}
+  .said-agent .metalink{font-size:11.5px;color:var(--dim);border-bottom:1px solid var(--line);word-break:break-all}
+  .said-agent .metalink:hover{color:var(--ink);border-color:var(--ink)}
+  .said-agent .idfield{margin-top:14px}
+  .said-agent .idhead{display:flex;justify-content:space-between;align-items:baseline}
+  .said-agent .solscan{font-size:10px;letter-spacing:.08em;color:var(--faint)}
+  .said-agent .solscan:hover{color:var(--ink)}
+  .said-agent .idfield .addr{background:var(--bg)}
+  .said-agent .badgeprev{display:block;margin-top:12px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+  .said-agent .badgeprev:hover{border-color:var(--ink)}
+  .said-agent .badgeprev img{display:block;width:100%;height:auto}
+  .said-agent .fmtrow{display:flex;gap:4px;margin-top:14px;border:1px solid var(--line);border-radius:99px;padding:3px}
+  .said-agent .fmtbtn{flex:1;font-size:11px;font-family:inherit;padding:6px 0;border:0;border-radius:99px;background:none;color:var(--dim);cursor:pointer}
+  .said-agent .fmtbtn.on{background:var(--ink);color:var(--bg)}
+  .said-agent .snip{display:flex;align-items:flex-start;gap:10px;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg)}
+  .said-agent .snip code{flex:1;min-width:0;font-size:10.5px;line-height:1.6;overflow-x:auto;white-space:pre;display:block}
+  .said-agent .snip .copy{margin-left:0}
+  @media (max-width:960px){
+    .said-agent .topgrid,.said-agent .maingrid{grid-template-columns:1fr}
+    .said-agent .tiles{grid-template-columns:1fr 1fr}
+    .said-agent .bkgrid{grid-template-columns:1fr}
+  }
+`;

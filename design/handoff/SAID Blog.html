@@ -1,0 +1,33 @@
+<!-- @dsCard group="Pages" name="Blog" subtitle="Editorial index: date rail + entries" -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blog · SAID Protocol</title>
+<link rel="stylesheet" href="assets/said.css">
+<style>
+  .posts{max-width:900px;margin:0 auto;padding:clamp(28px,4vh,44px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .post{display:grid;grid-template-columns:150px 1fr;gap:clamp(20px,3vw,44px);padding:clamp(26px,4vh,38px) 0;border-top:1px solid var(--line)}
+  .post .date{font-size:12px;letter-spacing:.1em;color:var(--faint);padding-top:5px}
+  .post h3{font-size:clamp(19px,2.2vw,26px);font-weight:500;letter-spacing:-.02em;line-height:1.25}
+  .post h3 a:hover{color:var(--dim)}
+  .post p{margin-top:8px;font-size:14px;line-height:1.65;color:var(--dim);max-width:56ch}
+  .post .tag{display:inline-block;margin-top:12px;font-size:11px;letter-spacing:.14em;color:var(--faint)}
+  @media (max-width:700px){.post{grid-template-columns:1fr;gap:8px}}
+</style>
+<script src="assets/said.js"></script>
+<script>saidNav('')</script>
+
+<div class="hero">
+  <div class="kick">NOTES FROM THE REGISTRY</div>
+  <h1>Blog</h1>
+  <p class="lede">Protocol updates, burns, grants, and what agents are building.</p>
+</div>
+
+<canvas class="dotdiv" style="margin-top:clamp(28px,4vh,44px)"></canvas>
+
+<div class="posts">
+  <div class="post rv"><span class="date mono">PLACEHOLDER</span><div><h3><a href="#">Post title goes here</a></h3><p>These entries are placeholders for your real posts — send me titles, dates, and copy (or the existing posts) and I'll drop them in.</p><span class="tag">ANNOUNCEMENT</span></div></div>
+  <div class="post rv"><span class="date mono">PLACEHOLDER</span><div><h3><a href="#">Second post title</a></h3><p>Same structure: date rail, title, one-paragraph summary, tag.</p><span class="tag">BURNS</span></div></div>
+  <div class="post rv"><span class="date mono">PLACEHOLDER</span><div><h3><a href="#">Third post title</a></h3><p>The index scales to any number of entries.</p><span class="tag">GRANTS</span></div></div>
+</div>
+
+<script>saidFooter()</script>

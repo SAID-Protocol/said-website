@@ -56,7 +56,7 @@ async function loadDocs(): Promise<string> {
 // back to the last good value (or empty) and never block the response.
 let lbCache: { text: string; at: number } | null = null;
 const LB_TTL_MS = 5 * 60_000;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 async function loadLeaderboard(): Promise<string> {
   if (lbCache && Date.now() - lbCache.at < LB_TTL_MS) return lbCache.text;
   try {

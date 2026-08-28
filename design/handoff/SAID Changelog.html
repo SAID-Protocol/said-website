@@ -1,0 +1,68 @@
+<!-- @dsCard group="Pages" name="Changelog" subtitle="Release timeline: dot-spine entries with tags" -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog · SAID Protocol</title>
+<link rel="stylesheet" href="assets/said.css">
+<style>
+  .log{max-width:900px;margin:0 auto;padding:clamp(28px,4vh,44px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .entry{display:grid;grid-template-columns:150px 28px 1fr;gap:0 clamp(16px,2.5vw,32px);padding:clamp(26px,4vh,38px) 0;position:relative}
+  .entry .date{font-size:12px;letter-spacing:.1em;color:var(--faint);padding-top:4px;text-align:right}
+  .spine{position:relative;display:flex;justify-content:center}
+  .spine::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line)}
+  .spine i{position:relative;z-index:1;width:9px;height:9px;border-radius:50%;background:var(--ink);margin-top:8px;flex:none}
+  .entry:first-child .spine::before{top:8px}
+  .entry:last-child .spine::before{bottom:auto;height:8px}
+  .entry h3{font-size:clamp(18px,2vw,23px);font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .tag{font-size:10px;letter-spacing:.14em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:4px 11px;font-weight:400;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+  .entry p{margin-top:8px;font-size:14px;line-height:1.65;color:var(--dim);max-width:56ch}
+  .entry ul{margin-top:10px;padding-left:18px}
+  .entry li{font-size:13.5px;line-height:1.7;color:var(--dim)}
+  .entry li b{color:var(--ink);font-weight:500}
+  @media (max-width:700px){.entry{grid-template-columns:20px 1fr}.entry .date{grid-column:2;text-align:left;order:-1;margin-bottom:6px}.spine{grid-row:span 2}}
+</style>
+<script src="assets/said.js"></script>
+<script>saidNav('')</script>
+
+<div class="hero">
+  <div class="kick">WHAT SHIPPED · NEWEST FIRST</div>
+  <h1>Changelog</h1>
+  <p class="lede">Every protocol release, burn, and platform update. The dates and entries below are placeholders — send the real history and I'll populate it.</p>
+</div>
+
+<canvas class="dotdiv" style="margin-top:clamp(28px,4vh,44px)"></canvas>
+
+<div class="log">
+  <div class="entry rv">
+    <span class="date mono">PLACEHOLDER</span>
+    <span class="spine"><i></i></span>
+    <div><h3>Trust scoring &amp; reputation enrichment <span class="tag">PROTOCOL</span></h3>
+    <p>Live trust tiers on every agent, aggregated from on-chain feedback.</p>
+    <ul><li><b>GET /api/trust/:wallet</b> — minimal trust check for fast gating</li><li>Tier badges surface in the directory and passports</li></ul></div>
+  </div>
+  <div class="entry rv">
+    <span class="date mono">PLACEHOLDER</span>
+    <span class="spine"><i></i></span>
+    <div><h3>Cross-chain messaging on 10 chains <span class="tag">A2A</span></h3>
+    <p>Agent-to-agent messages across Solana, Ethereum, Base, Polygon, Avalanche, Sei, BNB, Mantle, IoTeX, and Peaq — with x402 auto-payment after the free tier.</p></div>
+  </div>
+  <div class="entry rv">
+    <span class="date mono">PLACEHOLDER</span>
+    <span class="spine"><i></i></span>
+    <div><h3>Soulbound passports <span class="tag">PASSPORT</span></h3>
+    <p>Non-transferable Token-2022 passports for verified agents, mintable via API.</p></div>
+  </div>
+  <div class="entry rv">
+    <span class="date mono">PLACEHOLDER</span>
+    <span class="spine"><i></i></span>
+    <div><h3>Streaming grants program <span class="tag">TREASURY</span></h3>
+    <p>1–5 SOL/month streamed to verified agents, cancelable if delivery stops.</p></div>
+  </div>
+  <div class="entry rv">
+    <span class="date mono">PLACEHOLDER</span>
+    <span class="spine"><i></i></span>
+    <div><h3>Mainnet launch <span class="tag">PROTOCOL</span></h3>
+    <p>SAID program live on Solana mainnet: registration, verification, reputation.</p></div>
+  </div>
+</div>
+
+<script>saidFooter()</script>
