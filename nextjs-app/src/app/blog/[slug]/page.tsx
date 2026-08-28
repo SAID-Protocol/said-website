@@ -3,9 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import AsciiBackground from '@/components/AsciiBackground';
+import SaidFooter from '@/components/said/SaidFooter';
 import { mdxComponents } from '@/components/blog/mdx';
 import { getPost } from '@/lib/blog';
 
@@ -86,78 +84,83 @@ export default async function BlogPostPage({
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <AsciiBackground />
+    <div className="said-page said-post">
 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <main className="relative z-10 mx-auto w-full max-w-3xl flex-1 px-4 pb-16 pt-28 sm:px-8 sm:pt-32">
-        <Link
-          href="/blog"
-          className="mb-8 inline-flex items-center gap-1.5 text-sm text-zinc-500 transition hover:text-white"
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          All posts
-        </Link>
+      <main className="postwrap">
+        <Link href="/blog" className="backlink mono">← ALL POSTS</Link>
 
         <article>
-          <div className="mb-4 flex items-center gap-2 text-xs">
-            <span className="rounded-full border border-zinc-700 bg-zinc-800/60 px-2.5 py-0.5 font-medium text-zinc-300">
-              {post.category}
-            </span>
-            <time dateTime={post.date} className="text-zinc-500">
-              {formatDate(post.date)}
-            </time>
+          <div className="meta">
+            <span className="cat mono">{post.category.toUpperCase()}</span>
+            <time dateTime={post.date} className="mono">{formatDate(post.date).toUpperCase()}</time>
           </div>
 
-          <h1 className="mb-3 text-4xl font-bold leading-tight">{post.title}</h1>
-          {post.excerpt && <p className="mb-8 text-lg text-zinc-400">{post.excerpt}</p>}
+          <h1>{post.title}</h1>
+          {post.excerpt && <p className="standfirst">{post.excerpt}</p>}
 
           {post.cover && (
-            <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950">
+            <div className="cover">
               <Image
                 src={post.cover}
                 alt={post.title}
                 fill
                 sizes="(max-width: 768px) 100vw, 768px"
                 priority
-                className={`object-cover ${post.coverPosition === 'top' ? 'object-top' : 'object-center'}`}
+                style={{ objectFit: 'cover', objectPosition: post.coverPosition === 'top' ? 'top' : 'center' }}
               />
             </div>
           )}
 
-          <div className="prose prose-invert prose-zinc max-w-none border-t border-zinc-800 pt-8 prose-headings:font-semibold prose-a:text-white prose-a:underline-offset-4">
+          <div className="postprose">
             <MDXRemote source={post.content} components={mdxComponents} />
           </div>
         </article>
 
-        <div className="mt-12 border-t border-zinc-800 pt-8">
-          <p className="text-sm text-zinc-500">
-            Building an agent?{' '}
-            <Link href="/create-agent" className="text-white underline underline-offset-4">
-              Get started
-            </Link>{' '}
-            or follow{' '}
-            <a
-              href="https://x.com/saidinfra"
-              target="_blank"
-              rel="noreferrer"
-              className="text-white underline underline-offset-4"
-            >
-              @saidinfra
-            </a>
-            .
+        <div className="postfoot">
+          <p>
+            Building an agent? <Link href="/create-agent">Get started</Link> or follow{' '}
+            <a href="https://x.com/saidinfra" target="_blank" rel="noreferrer">@saidinfra</a>.
           </p>
         </div>
       </main>
 
-      <Footer />
+      <SaidFooter />
+
+      <style>{`
+        .said-post .postwrap{max-width:760px;margin:0 auto;padding:clamp(36px,6vh,64px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+        .said-post .backlink{display:inline-block;font-size:11px;letter-spacing:.14em;color:var(--faint);margin-bottom:34px}
+        .said-post .backlink:hover{color:var(--ink)}
+        .said-post .meta{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+        .said-post .meta .cat{font-size:10.5px;letter-spacing:.14em;color:var(--dim);border:1px solid var(--line);border-radius:99px;padding:5px 12px}
+        .said-post .meta time{font-size:11px;letter-spacing:.12em;color:var(--faint)}
+        .said-post article h1{font-size:clamp(28px,3.8vw,44px);font-weight:500;letter-spacing:-.03em;line-height:1.12}
+        .said-post .standfirst{margin-top:16px;font-size:16.5px;line-height:1.65;color:var(--dim)}
+        .said-post .cover{position:relative;aspect-ratio:16/9;width:100%;margin-top:28px;border-radius:20px;overflow:hidden;border:1px solid var(--line)}
+        .said-post .postprose{margin-top:34px;padding-top:34px;border-top:1px solid var(--line)}
+        .said-post .postprose h2{font-size:22px;font-weight:600;letter-spacing:-.01em;margin-top:38px}
+        .said-post .postprose h3{font-size:16px;font-weight:600;margin-top:28px}
+        .said-post .postprose p{margin-top:14px;font-size:15px;line-height:1.75;color:var(--dim)}
+        .said-post .postprose strong,.said-post .postprose b{color:var(--ink);font-weight:500}
+        .said-post .postprose a{color:var(--ink);border-bottom:1px solid var(--line)}
+        .said-post .postprose a:hover{border-color:var(--ink)}
+        .said-post .postprose ul,.said-post .postprose ol{margin-top:14px;padding-left:22px}
+        .said-post .postprose li{margin-top:8px;font-size:15px;line-height:1.7;color:var(--dim)}
+        .said-post .postprose blockquote{margin-top:18px;border-left:2px solid var(--ink);padding-left:18px;color:var(--dim);font-style:italic}
+        .said-post .postprose code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.9em;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+        .said-post .postprose pre{margin-top:16px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;overflow-x:auto}
+        .said-post .postprose pre code{background:none;border:0;padding:0;font-size:12.5px;line-height:1.65}
+        .said-post .postprose img{max-width:100%;border-radius:14px;border:1px solid var(--line);margin-top:18px}
+        .said-post .postprose hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+        .said-post .postfoot{margin-top:52px;border-top:1px solid var(--line);padding-top:26px}
+        .said-post .postfoot p{font-size:13.5px;color:var(--faint);line-height:1.7}
+        .said-post .postfoot a{color:var(--dim);border-bottom:1px solid var(--line)}
+        .said-post .postfoot a:hover{color:var(--ink);border-color:var(--ink)}
+      `}</style>
     </div>
   );
 }

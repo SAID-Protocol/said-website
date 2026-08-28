@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
+import SaidAssistant from "@/components/SaidAssistant";
+import SaidFx from "@/components/said/SaidFx";
+import PageFade from "@/components/said/PageFade";
+import SiteNav from "@/components/said/SiteNav";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -45,10 +49,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Apply saved theme before first paint — avoids light/dark flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('said-theme')==='dark')document.documentElement.dataset.theme='dark'}catch(e){}`,
+          }}
+        />
+      </head>
       <body className={`${inter.variable} antialiased`}>
         <Providers>
-          {children}
+          <SaidFx />
+          <SiteNav />
+          <PageFade>{children}</PageFade>
+          <SaidAssistant />
         </Providers>
       </body>
     </html>

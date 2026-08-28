@@ -63,9 +63,9 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
 
   if (loading) {
     return (
-      <div className="py-8 text-center text-zinc-400">
-        <div className="inline-block w-6 h-6 border-2 border-zinc-600 border-t-white rounded-full animate-spin"></div>
-        <p className="mt-2 text-sm">Loading analytics...</p>
+      <div className="ra-loading mono">
+        <div style={{display:"none"}}></div>
+        <p className="ra-loadtext">Loading analytics...</p>
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
 
   // Calculate cumulative average over time
   const sortedDates = Array.from(dayMap.keys()).sort();
-  let runningScores: number[] = [];
+  const runningScores: number[] = [];
   const trendData = sortedDates.map(date => {
     runningScores.push(...dayMap.get(date)!);
     const avg = runningScores.reduce((a, b) => a + b, 0) / runningScores.length;
@@ -203,36 +203,36 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
   const percentile = Math.round((positive / feedback.length) * 100);
 
   return (
-    <section className="mb-8">
-      <h2 className="text-lg font-semibold mb-4">Reputation Analytics</h2>
+    <section className="ra">
+      <h2 className="ra-h">Reputation Analytics</h2>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-1">Percentile Rank</div>
-          <div className="text-3xl font-bold">{percentile}%</div>
-          <div className="text-sm text-zinc-500 mt-1">Top {100 - percentile}% of agents</div>
+      <div className="ra-tiles">
+        <div className="ra-tile">
+          <div className="ra-tl mono">Percentile Rank</div>
+          <div className="ra-tv">{percentile}%</div>
+          <div className="ra-ts">Top {100 - percentile}% of agents</div>
         </div>
-        <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-1">Total Reviews</div>
-          <div className="text-3xl font-bold">{feedbackCount}</div>
-          <div className="text-sm text-zinc-500 mt-1">
-            <span className="text-green-400">{positive} positive</span>
+        <div className="ra-tile">
+          <div className="ra-tl mono">Total Reviews</div>
+          <div className="ra-tv">{feedbackCount}</div>
+          <div className="ra-ts">
+            <span className="ra-up">{positive} positive</span>
           </div>
         </div>
-        <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl">
-          <div className="text-zinc-400 text-xs font-semibold uppercase tracking-wider mb-1">Current Score</div>
-          <div className="text-3xl font-bold">{currentScore.toFixed(2)}</div>
-          <div className="text-sm text-zinc-500 mt-1">Out of 100</div>
+        <div className="ra-tile">
+          <div className="ra-tl mono">Current Score</div>
+          <div className="ra-tv">{currentScore.toFixed(2)}</div>
+          <div className="ra-ts">Out of 100</div>
         </div>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="ra-charts">
         {/* Trend Chart */}
         {trendData.length > 0 && (
-          <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-            <h3 className="text-sm font-semibold mb-4">30-Day Reputation Trend</h3>
+          <div className="ra-card">
+            <h3 className="ra-ch">30-Day Reputation Trend</h3>
             <div className="h-64">
               <Line data={lineChartData} options={chartOptions} />
             </div>
@@ -240,13 +240,32 @@ export default function ReputationAnalytics({ wallet, currentScore, feedbackCoun
         )}
 
         {/* Sentiment Breakdown */}
-        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-xl">
-          <h3 className="text-sm font-semibold mb-4">Feedback Sentiment</h3>
+        <div className="ra-card">
+          <h3 className="ra-ch">Feedback Sentiment</h3>
           <div className="h-64">
             <Pie data={pieChartData} options={pieOptions} />
           </div>
         </div>
       </div>
+      <style>{`
+        .said-agent .ra{margin-bottom:8px}
+        .said-agent .ra-loading{padding:40px 0;text-align:center;font-size:11px;letter-spacing:.14em;color:var(--faint)}
+        .said-agent .ra-loadtext{font-size:11px;letter-spacing:.14em}
+        .said-agent .ra-h{font-size:10.5px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;margin-bottom:14px}
+        .said-agent .ra-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+        .said-agent .ra-tile{border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card)}
+        .said-agent .ra-tl{font-size:9.5px;letter-spacing:.14em;color:var(--faint);margin-bottom:6px}
+        .said-agent .ra-tv{font-size:24px;font-weight:500;letter-spacing:-.02em}
+        .said-agent .ra-ts{margin-top:4px;font-size:12px;color:var(--dim)}
+        .said-agent .ra-up{color:var(--good)}
+        .said-agent .ra-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .said-agent .ra-card{border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--card)}
+        .said-agent .ra-ch{font-size:10.5px;letter-spacing:.16em;color:var(--faint);text-transform:uppercase;margin-bottom:14px}
+        @media (max-width:820px){
+          .said-agent .ra-tiles{grid-template-columns:1fr}
+          .said-agent .ra-charts{grid-template-columns:1fr}
+        }
+      `}</style>
     </section>
   );
 }

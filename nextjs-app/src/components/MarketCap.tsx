@@ -38,14 +38,9 @@ export default function MarketCap({ tokenAddress }: { tokenAddress: string }) {
   }, [tokenAddress]);
 
   return (
-    <div className="mt-4">
-      <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5">
-        <span className="text-xs uppercase tracking-wider text-zinc-500">Market Cap</span>
-        <span className="text-zinc-700">·</span>
-        <span className="text-sm text-white font-semibold">
-          {marketCap !== null ? formatMarketCap(marketCap) : '—'}
-        </span>
-      </div>
-    </div>
+    <span className="pill" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+      <b>MARKET CAP</b>
+      {marketCap !== null ? formatMarketCap(marketCap) : "—"}
+    </span>
   );
 }

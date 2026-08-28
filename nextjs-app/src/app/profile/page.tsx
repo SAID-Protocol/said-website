@@ -3,74 +3,110 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import AsciiBackground from '@/components/AsciiBackground';
-import Footer from '@/components/Footer';
+import SaidFooter from '@/components/said/SaidFooter';
+import DotSeam from '@/components/said/DotSeam';
+import ShimmerDots from '@/components/said/ShimmerDots';
 import { useAuth } from '@/hooks/useAuth';
+import { fetchMyAgents, fetchAgentKey, rotateAgentKey } from '@/lib/my-agents';
+import { readCache, writeCache } from '@/lib/cache';
+import { API_URL } from '@/lib/api';
+
+interface CachedProfile {
+  displayName: string;
+  username: string;
+  avatarUrl: string;
+  agentCount: number;
+  verifiedCount: number;
+  memberSince: string;
+  apiKeys: Array<{ agentId: string; agentName: string; key: string }>;
+}
+
+interface ApiKeyEntry {
+  agentId: string;
+  agentName: string;
+  key: string;
+  revealed: boolean;
+}
 
 export default function ProfilePage() {
   const { authenticated, user, login } = usePrivy();
-  const { sessionToken } = useAuth();
+  const { sessionToken, privyAccessToken } = useAuth();
   const [agentCount, setAgentCount] = useState(0);
   const [verifiedCount, setVerifiedCount] = useState(0);
-  const [feedbackGiven, setFeedbackGiven] = useState(0);
+  const [feedbackGiven] = useState(0);
   const [memberSince, setMemberSince] = useState('');
   const [loading, setLoading] = useState(true);
-  
+
   // Profile data from database
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  
-  // API Keys
-  const [apiKeys, setApiKeys] = useState<Array<{ agentId: string; agentName: string; key: string; revealed: boolean }>>([]);
+
+  const [apiKeys, setApiKeys] = useState<ApiKeyEntry[]>([]);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   // Edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [editDisplayName, setEditDisplayName] = useState('');
   const [editUsername, setEditUsername] = useState('');
   const [saving, setSaving] = useState(false);
-  
-  // Profile picture
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const email = user?.email?.address;
 
   useEffect(() => {
-    if (sessionToken) {
-      loadProfileData();
-    } else {
+    if (!sessionToken) { setLoading(false); return; }
+
+    // Paint last-known data on the first frame, then revalidate behind it.
+    const cached = readCache<CachedProfile>('profile', sessionToken);
+    if (cached) {
+      setDisplayName(cached.displayName);
+      setUsername(cached.username);
+      setAvatarUrl(cached.avatarUrl);
+      setAgentCount(cached.agentCount);
+      setVerifiedCount(cached.verifiedCount);
+      setMemberSince(cached.memberSince);
+      setApiKeys(cached.apiKeys.map((k) => ({ ...k, revealed: false })));
       setLoading(false);
     }
+    loadProfileData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionToken]);
 
   const loadProfileData = async () => {
-    await Promise.all([fetchUserProfile(), fetchAgentStats()]);
-    setLoading(false);
+    // The identity card only needs /auth/me, so stop blocking the page on the
+    // agents+keys chain — it used to gate the whole render on the slowest
+    // request, which was very visible on mobile. Stats fill in behind it.
+    const identity = fetchUserProfile().finally(() => setLoading(false));
+    await Promise.all([identity, fetchAgentStats()]);
   };
+
+  // Snapshot whatever is currently rendered so the next visit paints instantly.
+  useEffect(() => {
+    if (!sessionToken || loading || !displayName) return;
+    writeCache<CachedProfile>('profile', sessionToken, {
+      displayName, username, avatarUrl, agentCount, verifiedCount, memberSince,
+      apiKeys: apiKeys.map(({ agentId, agentName, key }) => ({ agentId, agentName, key })),
+    });
+  }, [sessionToken, loading, displayName, username, avatarUrl, agentCount, verifiedCount, memberSince, apiKeys]);
 
   const fetchUserProfile = async () => {
     if (!sessionToken) return;
-    
     try {
-      const res = await fetch('https://api.saidprotocol.com/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${sessionToken}`,
-        },
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: { 'Authorization': `Bearer ${sessionToken}` },
       });
-      
       if (res.ok) {
         const data = await res.json();
-        const user = data.user;
-        // Use database values, or fall back to email-derived defaults
-        setDisplayName(user.displayName || email?.split('@')[0] || 'Anonymous');
-        setUsername(user.username || email?.split('@')[0] || 'anonymous');
-        setAvatarUrl(user.avatarUrl || '');
+        const u = data.user;
+        setDisplayName(u.displayName || email?.split('@')[0] || 'Anonymous');
+        setUsername(u.username || email?.split('@')[0] || 'anonymous');
+        setAvatarUrl(u.avatarUrl || '');
       }
     } catch (err) {
       console.error('Failed to fetch user profile:', err);
-      // Fall back to email-derived defaults
       setDisplayName(email?.split('@')[0] || 'Anonymous');
       setUsername(email?.split('@')[0] || 'anonymous');
     }
@@ -78,62 +114,46 @@ export default function ProfilePage() {
 
   const fetchAgentStats = async () => {
     if (!sessionToken) return;
-    
     try {
-      const res = await fetch('https://api.saidprotocol.com/api/agents', {
-        headers: {
-          'Authorization': `Bearer ${sessionToken}`,
-        },
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        const agents = Array.isArray(data) ? data : (data.agents || []);
-        setAgentCount(agents.length);
-        setVerifiedCount(agents.filter((a: any) => a.isVerified).length);
-        
-        if (agents.length > 0) {
-          const oldest = agents.reduce((oldest: any, current: any) => {
-            return new Date(current.registeredAt) < new Date(oldest.registeredAt) ? current : oldest;
-          });
-          const date = new Date(oldest.registeredAt);
-          setMemberSince(date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
-        }
+      const privyToken = privyAccessToken ? await privyAccessToken() : null;
+      const agents = await fetchMyAgents(sessionToken, privyToken);
 
-        // Fetch API keys for each agent
-        const keys = await Promise.all(agents.map(async (agent: any) => {
-          try {
-            const keyRes = await fetch(`https://api.saidprotocol.com/api/agents/${agent.id}/api-key`, {
-              headers: { 'Authorization': `Bearer ${sessionToken}` },
-            });
-            if (keyRes.ok) {
-              const keyData = await keyRes.json();
-              if (keyData.gatewayToken) {
-                return { agentId: agent.id, agentName: agent.name || 'Agent', key: keyData.gatewayToken, revealed: false };
-              }
-            }
-          } catch {}
-          return null;
-        }));
-        setApiKeys(keys.filter(Boolean) as typeof apiKeys);
+      setAgentCount(agents.length);
+      setVerifiedCount(agents.filter((a) => a.isVerified).length);
+
+      // "Member since" = the oldest agent registration we can see.
+      const dated = agents.map((a) => a.registeredAt).filter(Boolean) as string[];
+      if (dated.length > 0) {
+        const oldest = dated.reduce((a, b) => (new Date(a) < new Date(b) ? a : b));
+        setMemberSince(
+          new Date(oldest).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+        );
       }
+
+      // Keys live on the hosting API only, and only hosted agents have one.
+      const entries = await Promise.all(
+        agents
+          .filter((a) => a.source === 'hosted')
+          .map(async (agent) => {
+            const key = agent.gatewayToken ?? (await fetchAgentKey(agent.id, privyToken));
+            return key
+              ? { agentId: agent.id, agentName: agent.name, key, revealed: false }
+              : null;
+          })
+      );
+      setApiKeys(entries.filter(Boolean) as ApiKeyEntry[]);
     } catch (err) {
       console.error('Failed to fetch agent stats:', err);
     }
   };
 
   const rotateProfileKey = async (agentId: string) => {
-    if (!sessionToken) return;
-    try {
-      const res = await fetch(`https://api.saidprotocol.com/api/agents/${agentId}/rotate-key`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${sessionToken}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setApiKeys(prev => prev.map(k => k.agentId === agentId ? { ...k, key: data.gatewayToken } : k));
-      }
-    } catch {}
+    if (!confirm('This will invalidate the old API key. Any integrations using it will stop working. Continue?')) return;
+    const privyToken = privyAccessToken ? await privyAccessToken() : null;
+    const rotated = await rotateAgentKey(agentId, privyToken);
+    if (rotated) {
+      setApiKeys((prev) => prev.map((k) => (k.agentId === agentId ? { ...k, key: rotated } : k)));
+    }
   };
 
   const handleEditClick = () => {
@@ -142,47 +162,32 @@ export default function ProfilePage() {
     setIsEditing(true);
   };
 
-  const [saveSuccess, setSaveSuccess] = useState(false);
-
   const handleSaveProfile = async () => {
     if (!sessionToken) {
       alert('Session expired. Please refresh and try again.');
       return;
     }
-    
     setSaving(true);
     setSaveSuccess(false);
     try {
-      const res = await fetch('https://api.saidprotocol.com/auth/me', {
+      const res = await fetch(`${API_URL}/auth/me`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${sessionToken}`,
         },
-        body: JSON.stringify({
-          displayName: editDisplayName,
-          username: editUsername,
-        }),
+        body: JSON.stringify({ displayName: editDisplayName, username: editUsername }),
       });
-      
       const data = await res.json();
-      console.log('Profile save response:', data);
-      
+
       if (res.ok) {
-        // Update local state with new values
         setDisplayName(data.user?.displayName || editDisplayName);
         setUsername(data.user?.username || editUsername);
         setSaveSuccess(true);
-        // Close modal after showing success
-        setTimeout(() => {
-          setIsEditing(false);
-          setSaveSuccess(false);
-        }, 1000);
+        setTimeout(() => { setIsEditing(false); setSaveSuccess(false); }, 1000);
       } else {
         console.error('Profile save failed:', data);
-        if (data.error?.includes('username')) {
-          alert('Username already taken. Please choose another.');
-        } else if (data.error?.includes('Unique constraint')) {
+        if (data.error?.includes('username') || data.error?.includes('Unique constraint')) {
           alert('Username already taken. Please choose another.');
         } else {
           alert(data.error || 'Failed to update profile');
@@ -196,34 +201,25 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !sessionToken) return;
-    
-    // Validate file type and size
+
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
-    if (file.size > 500000) { // 500KB max
+    if (file.size > 500000) {
       alert('Image too large. Please select an image under 500KB.');
       return;
     }
-    
+
     setUploadingAvatar(true);
-    
     try {
-      // Convert to base64
       const reader = new FileReader();
       reader.onload = async (event) => {
         const base64 = event.target?.result as string;
-        
-        // Upload to API
-        const res = await fetch('https://api.saidprotocol.com/auth/me', {
+        const res = await fetch(`${API_URL}/auth/me`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -231,7 +227,6 @@ export default function ProfilePage() {
           },
           body: JSON.stringify({ avatarUrl: base64 }),
         });
-        
         if (res.ok) {
           const data = await res.json();
           setAvatarUrl(data.user.avatarUrl || base64);
@@ -255,277 +250,219 @@ export default function ProfilePage() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-      <AsciiBackground />
-        <div className="flex-1 flex items-center justify-center relative z-10">
-          <div className="text-center px-8">
-            <h1 className="text-2xl font-bold mb-4">Please log in to view your profile</h1>
-            <button
-              onClick={login}
-              className="px-6 py-3 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition"
-            >
-              Log In
-            </button>
+      <div className="said-page said-me">
+        <div className="hero" style={{ textAlign: 'center', minHeight: '52vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div className="kick">YOUR ACCOUNT</div>
+          <h1>Sign in to view your profile.</h1>
+          <div style={{ marginTop: 28 }}>
+            <button className="btn fill" onClick={login}>Log in</button>
           </div>
         </div>
-        <Footer />
+        <SaidFooter />
+        <style>{meStyles}</style>
       </div>
     );
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-      <AsciiBackground />
-        <div className="flex-1 flex items-center justify-center relative z-10">
-          <div className="text-center">
-            <div className="inline-block w-8 h-8 border-2 border-zinc-600 border-t-white rounded-full animate-spin mb-4"></div>
-            <p className="text-zinc-400">Loading profile...</p>
-          </div>
+      <div className="said-page said-me">
+        <div className="hero" style={{ textAlign: 'center', minHeight: '52vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <p className="mono" style={{ fontSize: 11, letterSpacing: '.16em', color: 'var(--faint)' }}>LOADING PROFILE…</p>
         </div>
-        <Footer />
+        <SaidFooter />
+        <style>{meStyles}</style>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <AsciiBackground />
-      
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-8 pt-28 sm:pt-32 pb-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
-          
-          {/* Left: User Card */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 text-center h-fit lg:sticky lg:top-24">
-            {/* Avatar with hover edit */}
-            <div 
-              className="relative w-28 h-28 mx-auto mb-5 group cursor-pointer"
-              onClick={handleAvatarClick}
-            >
+    <div className="said-page said-me">
+
+      <main className="mewrap">
+        <DotSeam style={{ marginBottom: 'clamp(20px,3vh,30px)' }} />
+
+        <div className="megrid">
+          {/* Identity card */}
+          <div className="card usercard">
+            <ShimmerDots />
+            {/* label belongs to the card it titles — it read as an orphaned
+                page header when it sat above the grid */}
+            <div className="kick mono">YOUR ACCOUNT</div>
+            <button className="avatarbtn" onClick={() => fileInputRef.current?.click()} title="Change photo">
               {avatarUrl ? (
-                <img 
-                  src={avatarUrl} 
-                  alt="Profile" 
-                  className="w-28 h-28 rounded-full object-cover border-2 border-zinc-600"
-                />
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatarUrl} alt="Profile" />
               ) : (
-                <div className="w-28 h-28 rounded-full bg-zinc-700 flex items-center justify-center border-2 border-zinc-600">
-                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="12" cy="7" r="4"></circle>
-                  </svg>
-                </div>
+                <span className="avatarfallback">
+                  {(displayName || 'A').slice(0, 1).toUpperCase()}
+                </span>
               )}
-              {uploadingAvatar && (
-                <div className="absolute inset-0 bg-black/80 rounded-full flex items-center justify-center">
-                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
-              <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                  <circle cx="12" cy="13" r="4"></circle>
-                </svg>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </div>
-            
-            <h1 className="text-xl font-bold mb-1">{displayName}</h1>
-            <p className="text-zinc-400 text-sm">@{username}</p>
-            
-            <button 
-              onClick={handleEditClick}
-              className="w-full mt-5 px-4 py-2.5 bg-white text-black rounded-lg font-semibold hover:bg-zinc-200 transition flex items-center justify-center gap-2 text-sm"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-              </svg>
-              Edit Profile
+              <span className="avataroverlay mono">{uploadingAvatar ? 'UPLOADING…' : 'CHANGE'}</span>
             </button>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+
+            <h1>{displayName}</h1>
+            <p className="handle mono">@{username}</p>
+            {email && <p className="email">{email}</p>}
+
+            <button className="btn fill" style={{ marginTop: 22, width: '100%' }} onClick={handleEditClick}>
+              Edit profile
+            </button>
+            <Link className="btn" style={{ marginTop: 8, width: '100%', textAlign: 'center' }} href="/my-agents">
+              My agents
+            </Link>
           </div>
 
-          {/* Right: Content */}
-          <div className="space-y-6">
-            
-            {/* Activity Stats */}
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h2 className="text-lg font-semibold mb-5">Activity Stats</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                      <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{loading ? '-' : agentCount}</div>
-                    <div className="text-xs text-zinc-400">Agents Created</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{feedbackGiven}</div>
-                    <div className="text-xs text-zinc-400">Feedback Given</div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                      <line x1="16" y1="2" x2="16" y2="6"></line>
-                      <line x1="8" y1="2" x2="8" y2="6"></line>
-                      <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold">{memberSince || 'Feb 2026'}</div>
-                    <div className="text-xs text-zinc-400">Member Since</div>
-                  </div>
-                </div>
+          {/* Content */}
+          <div className="mecol">
+            <section className="card">
+              <h2 className="seclabel mono">ACTIVITY</h2>
+              <div className="tiles">
+                <div className="tile"><div className="tv">{agentCount}</div><div className="tl mono">AGENTS CREATED</div></div>
+                <div className="tile"><div className="tv">{verifiedCount}</div><div className="tl mono">VERIFIED</div></div>
+                <div className="tile"><div className="tv">{feedbackGiven}</div><div className="tl mono">FEEDBACK GIVEN</div></div>
+                <div className="tile"><div className="tv sm">{memberSince || '—'}</div><div className="tl mono">MEMBER SINCE</div></div>
               </div>
             </section>
 
-            {/* Recent Activity */}
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <h2 className="text-lg font-semibold mb-5">Recent Activity</h2>
-              <div className="text-center py-6 text-zinc-500 text-sm">
-                No recent activity
-              </div>
-            </section>
-
-            {/* API Keys */}
-            <section className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-lg font-semibold">API Keys</h2>
-              </div>
+            <section className="card">
+              <h2 className="seclabel mono">API KEYS</h2>
               {apiKeys.length === 0 ? (
-                <div className="text-center py-6 text-zinc-500 text-sm">
-                  No agents yet. <Link href="/create-agent" className="text-white hover:underline">Create one</Link> to get an API key.
-                </div>
+                <p className="emptynote">
+                  No agents yet. <Link href="/create-agent">Register one</Link> to get an API key.
+                </p>
               ) : (
-                <div className="space-y-3">
+                <div className="keylist">
                   {apiKeys.map(({ agentId, agentName, key, revealed }) => (
-                    <div key={agentId} className="bg-zinc-800 border border-zinc-700 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium">{agentName}</span>
-                        <div className="flex gap-2">
+                    <div key={agentId} className="keyrow">
+                      <div className="keyhead">
+                        <span className="keyname">{agentName}</span>
+                        <code className={`keyval mono${revealed ? '' : ' masked'}`} title={revealed ? key : undefined}>
+                          {revealed ? key : '•'.repeat(20)}
+                        </code>
+                        <div className="keyacts">
                           <button
-                            onClick={() => setApiKeys(prev => prev.map(k => k.agentId === agentId ? { ...k, revealed: !revealed } : k))}
-                            className="px-2 py-0.5 text-xs bg-zinc-700 rounded hover:bg-zinc-600 transition"
+                            className="minibtn"
+                            onClick={() => setApiKeys((prev) => prev.map((k) => (k.agentId === agentId ? { ...k, revealed: !revealed } : k)))}
                           >
-                            {revealed ? 'Hide' : 'Show'}
+                            {revealed ? 'HIDE' : 'SHOW'}
                           </button>
-                          {revealed && (
                           <button
-                            onClick={() => { navigator.clipboard.writeText(key); }}
-                            className="px-2 py-0.5 text-xs bg-zinc-700 rounded hover:bg-zinc-600 transition"
+                            className={`minibtn copybtn${copiedKey === agentId ? ' copied' : ''}`}
+                            onClick={() => { navigator.clipboard.writeText(key); setCopiedKey(agentId); setTimeout(() => setCopiedKey(null), 1200); }}
+                            aria-label="Copy API key"
                           >
-                            Copy
+                            <span className="ci label">COPY</span>
+                            <span className="ci tick" aria-hidden="true">✓</span>
                           </button>
-                          )}
-                          <button
-                            onClick={() => rotateProfileKey(agentId)}
-                            className="px-2 py-0.5 text-xs bg-zinc-700 text-red-400 rounded hover:bg-zinc-600 transition"
-                          >
-                            Rotate
-                          </button>
+                          <button className="minibtn danger" onClick={() => rotateProfileKey(agentId)}>ROTATE</button>
                         </div>
-                      </div>
-                      <div className="font-mono text-xs text-zinc-400 break-all">
-                        {revealed ? key : key.substring(0, 12) + '••••••••••••'}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
             </section>
+
+            <section className="card">
+              <h2 className="seclabel mono">RECENT ACTIVITY</h2>
+              <p className="emptynote">No recent activity.</p>
+            </section>
           </div>
         </div>
       </main>
 
-      {/* Edit Profile Modal */}
+      {/* Edit profile modal */}
       {isEditing && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 w-full max-w-md">
-            <h2 className="text-xl font-bold mb-6">Edit Profile</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-2">Display Name</label>
-                <input
-                  type="text"
-                  value={editDisplayName}
-                  onChange={(e) => setEditDisplayName(e.target.value)}
-                  className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg focus:outline-none focus:border-zinc-500"
-                  placeholder="Your display name"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-zinc-400 mb-2">Username</label>
-                <div className="flex">
-                  <span className="px-4 py-3 bg-zinc-800 border border-r-0 border-zinc-700 rounded-l-lg text-zinc-500">@</span>
-                  <input
-                    type="text"
-                    value={editUsername}
-                    onChange={(e) => setEditUsername(e.target.value)}
-                    className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-r-lg focus:outline-none focus:border-zinc-500"
-                    placeholder="username"
-                  />
-                </div>
-              </div>
+        <div className="modalwrap" onClick={(e) => { if (e.target === e.currentTarget) setIsEditing(false); }}>
+          <div className="modal">
+            <h2>Edit profile</h2>
+            <label>DISPLAY NAME</label>
+            <input type="text" value={editDisplayName} onChange={(e) => setEditDisplayName(e.target.value)} placeholder="Your display name" />
+            <label>USERNAME</label>
+            <div className="atfield">
+              <span className="at mono">@</span>
+              <input type="text" value={editUsername} onChange={(e) => setEditUsername(e.target.value)} placeholder="username" />
             </div>
-            
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="flex-1 px-4 py-3 border border-zinc-700 rounded-lg font-medium hover:border-zinc-500 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveProfile}
-                disabled={saving || saveSuccess}
-                className={`flex-1 px-4 py-3 rounded-lg font-semibold transition disabled:opacity-50 flex items-center justify-center gap-2 ${
-                  saveSuccess 
-                    ? 'bg-green-500 text-white' 
-                    : 'bg-white text-black hover:bg-zinc-200'
-                }`}
-              >
-                {saveSuccess ? (
-                  <>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                      <path d="M20 6L9 17l-5-5"/>
-                    </svg>
-                    Saved
-                  </>
-                ) : saving ? 'Saving...' : 'Save Changes'}
+            <div className="modalacts">
+              <button className="btn" onClick={() => setIsEditing(false)}>Cancel</button>
+              <button className="btn fill" onClick={handleSaveProfile} disabled={saving || saveSuccess}>
+                {saveSuccess ? 'Saved ✓' : saving ? 'Saving…' : 'Save changes'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <Footer />
+      <SaidFooter />
+      <style>{meStyles}</style>
     </div>
   );
 }
+
+const meStyles = `
+  .said-me .mewrap{max-width:1180px;margin:0 auto;padding:clamp(32px,5vh,52px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .said-me .usercard .kick{font-size:10px;letter-spacing:.18em;color:var(--faint);margin-bottom:16px}
+  .said-me .megrid{display:grid;grid-template-columns:320px minmax(0,1fr);gap:clamp(20px,3vw,32px);align-items:start}
+  .said-me .mecol{display:grid;gap:16px;min-width:0}
+  .said-me .card{border:1px solid var(--line);border-radius:18px;padding:24px 26px;background:var(--card);min-width:0}
+  .said-me .usercard{position:relative;overflow:hidden;text-align:center;position:sticky;top:80px}
+  .said-me .usercard>*:not(canvas){position:relative}
+  .said-me .seclabel{font-size:10.5px;letter-spacing:.16em;color:var(--faint);display:block}
+  .said-me .avatarbtn{position:relative;width:104px;height:104px;margin:4px auto 18px;display:block;border-radius:50%;border:1px solid var(--line);background:var(--bg);cursor:pointer;padding:0;overflow:hidden}
+  .said-me .avatarbtn:hover{border-color:var(--ink)}
+  .said-me .avatarbtn img{width:100%;height:100%;object-fit:cover;display:block}
+  .said-me .avatarfallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:34px;font-weight:500;color:var(--dim)}
+  .said-me .avataroverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(16,16,16,.62);color:#f2f0ec;font-size:9.5px;letter-spacing:.14em;opacity:0;transition:opacity .25s}
+  .said-me .avatarbtn:hover .avataroverlay{opacity:1}
+  .said-me .usercard h1{font-size:21px;font-weight:500;letter-spacing:-.02em}
+  .said-me .handle{margin-top:5px;font-size:12.5px;color:var(--dim)}
+  .said-me .email{margin-top:8px;font-size:12px;color:var(--faint);word-break:break-all}
+  .said-me .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:16px}
+  .said-me .tile{border:1px solid var(--line);border-radius:14px;padding:16px 12px;text-align:center;background:var(--bg)}
+  .said-me .tile .tv{font-size:24px;font-weight:500;letter-spacing:-.02em}
+  .said-me .tile .tv.sm{font-size:13.5px;font-weight:500;padding:5px 0}
+  .said-me .tile .tl{margin-top:6px;font-size:9px;letter-spacing:.12em;color:var(--faint)}
+  .said-me .emptynote{margin-top:14px;font-size:13px;color:var(--dim);line-height:1.7}
+  .said-me .emptynote a{color:var(--ink);border-bottom:1px solid var(--line)}
+  .said-me .emptynote a:hover{border-color:var(--ink)}
+  .said-me .keylist{display:grid;gap:10px;margin-top:16px}
+  .said-me .keyrow{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--bg)}
+  .said-me .keyhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .said-me .keyname{font-size:14px;font-weight:500}
+  .said-me .keyacts{display:flex;gap:6px;margin-left:auto}
+  .said-me .copybtn{position:relative;min-width:62px;height:26px;padding:0 11px}
+  .said-me .copybtn .ci{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .18s ease-out,transform .18s ease-out}
+  .said-me .copybtn .tick{opacity:0;transform:scale(.7);color:var(--good);font-size:13px}
+  .said-me .copybtn.copied{border-color:var(--good)}
+  .said-me .copybtn.copied .label{opacity:0;transform:scale(.9)}
+  .said-me .copybtn.copied .tick{opacity:1;transform:none}
+  .said-me .minibtn{font-size:10px;letter-spacing:.08em;font-family:ui-monospace,"SF Mono",Menlo,monospace;color:var(--dim);background:none;border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer}
+  .said-me .minibtn:hover{color:var(--ink);border-color:var(--ink)}
+  .said-me .minibtn.danger:hover{color:#c0392b;border-color:#c0392b}
+  /* the key shares the row with the name and the pills, so SHOW swaps
+     characters rather than changing the card's height */
+  .said-me .keyval{flex:1;min-width:0;font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .said-me .keyval.masked{color:var(--faint);letter-spacing:.1em;user-select:none}
+  @media (max-width:600px){ .said-me .keyval{flex:1 0 100%;order:3;margin-top:2px} }
+  .said-me .modalwrap{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,16,16,.55);backdrop-filter:blur(6px)}
+  .said-me .modal{width:100%;max-width:440px;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:28px}
+  .said-me .modal h2{font-size:20px;font-weight:500;letter-spacing:-.02em}
+  .said-me .atfield{display:flex;align-items:stretch}
+  .said-me .atfield .at{display:flex;align-items:center;padding:0 14px;border:1px solid var(--line);border-right:0;border-radius:12px 0 0 12px;color:var(--faint);font-size:13px}
+  .said-me .atfield input{border-radius:0 12px 12px 0}
+  .said-me .modalacts{display:flex;gap:10px;margin-top:26px}
+  .said-me .modalacts .btn{flex:1;text-align:center}
+  .said-me .modalacts .btn:disabled{opacity:.6;cursor:default}
+  @media (max-width:900px){
+    .said-me .megrid{grid-template-columns:1fr}
+    .said-me .usercard{position:static}
+    .said-me .tiles{grid-template-columns:1fr 1fr}
+    /* The leading seam separated the card from a page header that no longer
+       exists — on a phone it was just a gap under the nav. Drop it and pull
+       the card up. */
+    .said-me .mewrap{padding-top:14px}
+    .said-me .mewrap > .dotdiv:first-child{display:none}
+  }
+`;

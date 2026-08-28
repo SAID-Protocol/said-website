@@ -1,0 +1,9 @@
+{
+  "name": "SAID Assistant",
+  "description": "The official SAID Protocol assistant. Answers questions about registering, verifying, reputation and the Trust Score, grants, and integrating SAID. Runs on Pod (usepod.ai).",
+  "website": "https://www.saidprotocol.com",
+  "twitter": "saidinfra",
+  "image": "https://www.saidprotocol.com/agent-avatar.png",
+  "skills": ["support", "documentation", "onboarding"],
+  "serviceTypes": ["ASSISTANT"]
+}

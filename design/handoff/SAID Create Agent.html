@@ -1,0 +1,50 @@
+<!-- @dsCard group="Pages" name="Create Agent" subtitle="Registration flow: wallet choice + form" -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Register Your Agent · SAID Protocol</title>
+<link rel="stylesheet" href="assets/said.css">
+<style>
+  .choice{max-width:820px;margin:clamp(28px,4vh,44px) auto 0;padding:0 clamp(20px,4vw,48px);display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .opt{border:1px solid var(--line);border-radius:20px;padding:28px;cursor:pointer;background:none;text-align:left;font-family:inherit;color:var(--ink)}
+  .opt:hover{border-color:var(--ink)}
+  .opt.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .opt h3{font-size:17px;font-weight:600}
+  .opt p{margin-top:8px;font-size:13.5px;line-height:1.6;color:var(--dim)}
+  .opt.on p{color:inherit;opacity:.7}
+  .formwrap{max-width:820px;margin:0 auto;padding:clamp(24px,4vh,36px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .note{margin-top:26px;border:1px solid var(--line);border-radius:14px;padding:16px 18px;font-size:13px;line-height:1.65;color:var(--dim);background:var(--card)}
+  .note b{color:var(--ink);font-weight:500}
+  .submit{margin-top:30px}
+  @media (max-width:700px){.choice{grid-template-columns:1fr}}
+</style>
+<script src="assets/said.js"></script>
+<script>saidNav('')</script>
+
+<div class="hero" style="text-align:center">
+  <div class="kick">FREE · ONE STEP · ON-CHAIN</div>
+  <h1>Register your agent</h1>
+  <p class="lede" style="margin-left:auto;margin-right:auto">Add your AI agent to the SAID registry. Custodial wallet, on-chain registration, and an API key — no CLI needed.</p>
+</div>
+
+<div class="choice">
+  <button class="opt on" id="optHave"><h3>I have a wallet</h3><p>Register an existing Solana wallet as your agent's identity.</p></button>
+  <button class="opt" id="optNew"><h3>Generate new wallet</h3><p>Create a fresh Solana wallet for your new agent.</p></button>
+</div>
+
+<div class="formwrap">
+  <div id="walletField"><label>SOLANA WALLET ADDRESS</label><input type="text" placeholder="e.g. 8GReKrDQ…8Veb" class="mono"></div>
+  <label>AGENT NAME</label><input type="text" placeholder="My Agent">
+  <label>DESCRIPTION <b>· what does it do?</b></label><textarea placeholder="Trades on Jupiter, answers support tickets, runs a newsletter…"></textarea>
+  <label>X HANDLE <b>· optional</b></label><input type="text" placeholder="@myagent">
+  <label>WEBSITE <b>· optional</b></label><input type="text" placeholder="https://myagent.com">
+  <div class="note"><b>What happens next?</b> We create a custodial wallet for your agent (or use yours), register it on-chain, and give you an API key. Registration is free; the verified badge is 0.01 SOL, once.</div>
+  <button class="btn submit">Register agent</button>
+  <a class="btn ghost submit" style="margin-left:10px" href="SAID Docs.html">Prefer the CLI? Read the docs</a>
+</div>
+
+<script>saidFooter()</script>
+<script>
+const oh=document.getElementById('optHave'),on=document.getElementById('optNew'),wf=document.getElementById('walletField');
+function pick(e){oh.classList.toggle('on',e===oh);on.classList.toggle('on',e===on);wf.style.display=e===oh?'':'none'}
+oh.addEventListener('click',()=>pick(oh));on.addEventListener('click',()=>pick(on));
+</script>
