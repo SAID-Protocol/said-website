@@ -76,8 +76,11 @@ export default function ProfilePage() {
   }, [sessionToken]);
 
   const loadProfileData = async () => {
-    await Promise.all([fetchUserProfile(), fetchAgentStats()]);
-    setLoading(false);
+    // The identity card only needs /auth/me, so stop blocking the page on the
+    // agents+keys chain — it used to gate the whole render on the slowest
+    // request, which was very visible on mobile. Stats fill in behind it.
+    const identity = fetchUserProfile().finally(() => setLoading(false));
+    await Promise.all([identity, fetchAgentStats()]);
   };
 
   // Snapshot whatever is currently rendered so the next visit paints instantly.

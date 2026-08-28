@@ -36,65 +36,60 @@ export async function fetchMyAgents(
   sessionToken: string | null,
   privyToken: string | null,
 ): Promise<MyAgent[]> {
+  // Both backends are hit in parallel — they used to run one after the other,
+  // which doubled the wait on a mobile connection for no reason.
+  const [hostedRes, protocolRes] = await Promise.all([
+    privyToken
+      ? fetch(`${HOSTING_URL}/api/agents`, { headers: { Authorization: `Bearer ${privyToken}` } })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch((err) => { console.error('[fetchMyAgents] hosted fetch failed:', err); return null; })
+      : Promise.resolve(null),
+    sessionToken
+      ? fetch(`${API_URL}/api/agents?mine=true`, { headers: { Authorization: `Bearer ${sessionToken}` } })
+          .then((r) => (r.ok ? r.json() : null))
+          .catch((err) => { console.error('[fetchMyAgents] protocol fetch failed:', err); return null; })
+      : Promise.resolve(null),
+  ]);
+
   const hosted: MyAgent[] = [];
   const protocol: MyAgent[] = [];
 
-  if (privyToken) {
-    try {
-      const res = await fetch(`${HOSTING_URL}/api/agents`, {
-        headers: { Authorization: `Bearer ${privyToken}` },
+  if (hostedRes) {
+    const list = Array.isArray(hostedRes) ? hostedRes : (hostedRes.agents || []);
+    for (const a of list) {
+      hosted.push({
+        id: a.id,
+        wallet: a.walletAddress || a.wallet || '',
+        name: a.name || 'Unnamed',
+        description: a.description,
+        isVerified: a.isVerified ?? false,
+        twitter: a.twitter,
+        gatewayToken: a.gatewayToken,
+        registeredAt: a.registeredAt ?? a.createdAt,
+        source: 'hosted',
+        hasApiKey: true,
       });
-      if (res.ok) {
-        const data = await res.json();
-        const list = Array.isArray(data) ? data : (data.agents || []);
-        for (const a of list) {
-          hosted.push({
-            id: a.id,
-            wallet: a.walletAddress || a.wallet || '',
-            name: a.name || 'Unnamed',
-            description: a.description,
-            isVerified: a.isVerified ?? false,
-            twitter: a.twitter,
-            gatewayToken: a.gatewayToken,
-            registeredAt: a.registeredAt ?? a.createdAt,
-            source: 'hosted',
-            hasApiKey: true,
-          });
-        }
-      }
-    } catch (err) {
-      console.error('[fetchMyAgents] hosted fetch failed:', err);
     }
   }
 
-  if (sessionToken) {
-    try {
-      const res = await fetch(`${API_URL}/api/agents?mine=true`, {
-        headers: { Authorization: `Bearer ${sessionToken}` },
+  if (protocolRes) {
+    const list = Array.isArray(protocolRes) ? protocolRes : (protocolRes.agents || []);
+    const ids = new Set(hosted.map((a) => a.id));
+    const wallets = new Set(hosted.map((a) => a.wallet));
+    for (const a of list) {
+      const wallet = a.wallet || a.walletAddress || '';
+      if (ids.has(a.id) || wallets.has(wallet)) continue;
+      protocol.push({
+        id: a.id,
+        wallet,
+        name: a.name || 'Unnamed',
+        description: a.description,
+        isVerified: a.isVerified ?? false,
+        twitter: a.twitter,
+        registeredAt: a.registeredAt ?? a.createdAt,
+        source: 'protocol',
+        hasApiKey: false,
       });
-      if (res.ok) {
-        const data = await res.json();
-        const list = Array.isArray(data) ? data : (data.agents || []);
-        const ids = new Set(hosted.map((a) => a.id));
-        const wallets = new Set(hosted.map((a) => a.wallet));
-        for (const a of list) {
-          const wallet = a.wallet || a.walletAddress || '';
-          if (ids.has(a.id) || wallets.has(wallet)) continue;
-          protocol.push({
-            id: a.id,
-            wallet,
-            name: a.name || 'Unnamed',
-            description: a.description,
-            isVerified: a.isVerified ?? false,
-            twitter: a.twitter,
-            registeredAt: a.registeredAt ?? a.createdAt,
-            source: 'protocol',
-            hasApiKey: false,
-          });
-        }
-      }
-    } catch (err) {
-      console.error('[fetchMyAgents] protocol fetch failed:', err);
     }
   }
 
