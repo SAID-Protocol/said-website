@@ -3,15 +3,10 @@
 import { useState, useEffect } from 'react';
 import SaidFooter from '@/components/said/SaidFooter';
 import DotSeam from '@/components/said/DotSeam';
-import { UPSTREAM_URL } from '@/lib/api';
 
-// ⚠️ SECURITY: these are compiled into the client bundle and readable by
-// anyone who views source. They gate the UI only — the API's admin endpoints
-// are effectively public to whoever reads them. Moving grant review behind a
-// real server-side session is tracked separately; this restyle deliberately
-// did not change the auth mechanism.
-const ADMIN_SECRET = 'temp-link-2026';
-const ADMIN_PASSWORD = 'said-admin-2026';
+// No credentials live here any more. The password is checked and the upstream
+// admin secret injected by /api/admin (server-side); the browser only ever
+// holds an httpOnly session cookie it cannot read.
 
 interface GrantApplication {
   id: string;
@@ -37,9 +32,14 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState('');
 
+  // Ask the server whether this browser already holds a valid session cookie.
   useEffect(() => {
-    if (sessionStorage.getItem('said-admin') === 'true') setAuthed(true);
+    fetch('/api/admin/session')
+      .then((r) => r.json())
+      .then((d) => setAuthed(Boolean(d.authed)))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -47,24 +47,47 @@ export default function AdminPage() {
      
   }, [authed]);
 
-  const handleLogin = () => {
-    if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem('said-admin', 'true');
-      setAuthed(true);
-      setPwError('');
-    } else {
-      setPwError('Incorrect password');
+  const handleLogin = async () => {
+    setPwError('');
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setAuthed(true);
+        setPassword('');
+      } else {
+        setPwError(data.error || 'Incorrect password');
+      }
+    } catch {
+      setPwError('Could not reach the server. Try again.');
     }
   };
 
   const fetchGrants = async () => {
     setLoading(true);
+    setLoadError('');
     try {
-      const res = await fetch(`${UPSTREAM_URL}/admin/grants?secret=${ADMIN_SECRET}`);
-      const data = await res.json();
+      const res = await fetch('/api/admin/grants');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        // Don't render a failed request as "no applications" — that is exactly
+        // how the query-param auth bug stayed invisible.
+        setLoadError(
+          res.status === 404
+            ? 'The API rejected the admin secret (it answers 404 rather than 401 to hide the endpoint). Check ADMIN_SECRET on the API and SAID_ADMIN_SECRET here match.'
+            : data.error || `Request failed (${res.status}).`
+        );
+        setApplications([]);
+        return;
+      }
       setApplications(data.applications || []);
     } catch (err) {
       console.error(err);
+      setLoadError('Could not reach the server.');
     } finally {
       setLoading(false);
     }
@@ -73,9 +96,9 @@ export default function AdminPage() {
   const handleAction = async (id: string, action: 'approve' | 'reject') => {
     setActionLoading(id + action);
     try {
-      await fetch(`${UPSTREAM_URL}/admin/grants/${id}/${action}`, {
+      await fetch(`/api/admin/grants/${id}/${action}`, {
         method: 'POST',
-        headers: { 'x-admin-secret': ADMIN_SECRET, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
       });
       await fetchGrants();
     } catch (err) {
@@ -134,6 +157,11 @@ export default function AdminPage() {
       <div className="adminwrap">
         {loading ? (
           <p className="empty mono">LOADING APPLICATIONS…</p>
+        ) : loadError ? (
+          <div className="loaderr">
+            <span className="seclabel mono">COULD NOT LOAD APPLICATIONS</span>
+            <p>{loadError}</p>
+          </div>
         ) : applications.length === 0 ? (
           <p className="empty mono">NO APPLICATIONS YET.</p>
         ) : (
@@ -220,6 +248,8 @@ const adminStyles = `
   .said-admin .tools{max-width:1100px;margin:clamp(20px,3vh,28px) auto 0;padding:0 clamp(20px,4vw,48px);display:flex;justify-content:flex-end}
   .said-admin .tools .btn{padding:10px 20px;font-size:13px}
   .said-admin .adminwrap{max-width:1100px;margin:0 auto;padding:clamp(20px,3vh,30px) clamp(20px,4vw,48px) clamp(56px,9vh,90px)}
+  .said-admin .loaderr{border:1px solid #c0392b;border-radius:16px;padding:22px 24px;background:var(--card)}
+  .said-admin .loaderr p{margin-top:10px;font-size:13.5px;line-height:1.7;color:var(--dim);max-width:70ch}
   .said-admin .empty{padding:60px 0;text-align:center;font-size:12px;letter-spacing:.12em;color:var(--faint)}
   .said-admin .applist{display:grid;gap:10px}
   .said-admin .app{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--card)}
