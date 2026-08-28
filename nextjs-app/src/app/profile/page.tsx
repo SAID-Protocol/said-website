@@ -338,6 +338,9 @@ export default function ProfilePage() {
                     <div key={agentId} className="keyrow">
                       <div className="keyhead">
                         <span className="keyname">{agentName}</span>
+                        <code className={`keyval mono${revealed ? '' : ' masked'}`} title={revealed ? key : undefined}>
+                          {revealed ? key : '•'.repeat(20)}
+                        </code>
                         <div className="keyacts">
                           <button
                             className="minibtn"
@@ -345,22 +348,17 @@ export default function ProfilePage() {
                           >
                             {revealed ? 'HIDE' : 'SHOW'}
                           </button>
-                          {revealed && (
-                            <button
-                              className={`minibtn copybtn${copiedKey === agentId ? ' copied' : ''}`}
-                              onClick={() => { navigator.clipboard.writeText(key); setCopiedKey(agentId); setTimeout(() => setCopiedKey(null), 1200); }}
-                              aria-label="Copy API key"
-                            >
-                              <span className="ci label">COPY</span>
-                              <span className="ci tick" aria-hidden="true">✓</span>
-                            </button>
-                          )}
+                          <button
+                            className={`minibtn copybtn${copiedKey === agentId ? ' copied' : ''}`}
+                            onClick={() => { navigator.clipboard.writeText(key); setCopiedKey(agentId); setTimeout(() => setCopiedKey(null), 1200); }}
+                            aria-label="Copy API key"
+                          >
+                            <span className="ci label">COPY</span>
+                            <span className="ci tick" aria-hidden="true">✓</span>
+                          </button>
                           <button className="minibtn danger" onClick={() => rotateProfileKey(agentId)}>ROTATE</button>
                         </div>
                       </div>
-                      <code className="keyval mono">
-                        {revealed ? key : key.substring(0, 12) + '••••••••••••'}
-                      </code>
                     </div>
                   ))}
                 </div>
@@ -431,9 +429,9 @@ const meStyles = `
   .said-me .emptynote a:hover{border-color:var(--ink)}
   .said-me .keylist{display:grid;gap:10px;margin-top:16px}
   .said-me .keyrow{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--bg)}
-  .said-me .keyhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .said-me .keyhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
   .said-me .keyname{font-size:14px;font-weight:500}
-  .said-me .keyacts{display:flex;gap:6px}
+  .said-me .keyacts{display:flex;gap:6px;margin-left:auto}
   .said-me .copybtn{position:relative;min-width:62px;height:26px;padding:0 11px}
   .said-me .copybtn .ci{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .18s ease-out,transform .18s ease-out}
   .said-me .copybtn .tick{opacity:0;transform:scale(.7);color:var(--good);font-size:13px}
@@ -443,7 +441,11 @@ const meStyles = `
   .said-me .minibtn{font-size:10px;letter-spacing:.08em;font-family:ui-monospace,"SF Mono",Menlo,monospace;color:var(--dim);background:none;border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer}
   .said-me .minibtn:hover{color:var(--ink);border-color:var(--ink)}
   .said-me .minibtn.danger:hover{color:#c0392b;border-color:#c0392b}
-  .said-me .keyval{display:block;margin-top:10px;font-size:11.5px;color:var(--faint);word-break:break-all}
+  /* the key shares the row with the name and the pills, so SHOW swaps
+     characters rather than changing the card's height */
+  .said-me .keyval{flex:1;min-width:0;font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .said-me .keyval.masked{color:var(--faint);letter-spacing:.1em;user-select:none}
+  @media (max-width:600px){ .said-me .keyval{flex:1 0 100%;order:3;margin-top:2px} }
   .said-me .modalwrap{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(16,16,16,.55);backdrop-filter:blur(6px)}
   .said-me .modal{width:100%;max-width:440px;background:var(--bg);border:1px solid var(--line);border-radius:20px;padding:28px}
   .said-me .modal h2{font-size:20px;font-weight:500;letter-spacing:-.02em}

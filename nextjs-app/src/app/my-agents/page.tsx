@@ -185,6 +185,11 @@ export default function MyAgentsPage() {
                 <div className="akey">
                   <div className="akeyhead">
                     <span className="seclabel mono">{agent.source === 'hosted' ? 'API KEY' : 'TRANSACTIONS'}</span>
+                    {key && (
+                      <code className={`akeyinline mono${shown ? '' : ' masked'}`} title={shown ? key : undefined}>
+                        {shown ? key : '•'.repeat(20)}
+                      </code>
+                    )}
                     <div className="akeyacts">
                       {key ? (
                         <>
@@ -221,13 +226,7 @@ export default function MyAgentsPage() {
                       )}
                     </div>
                   </div>
-                  {key ? (
-                    <code className={`akeyval mono${shown ? '' : ' masked'}`}>
-                      {shown ? key : '•'.repeat(44)}
-                    </code>
-                  ) : shown ? (
-                    <code className="akeyval mono">Loading…</code>
-                  ) : null}
+                  {!key && shown && <code className="akeyval mono">Loading…</code>}
                 </div>
               </div>
             );
@@ -264,16 +263,23 @@ const mineStyles = `
   .said-mine .adesc{margin-top:8px;font-size:13.5px;line-height:1.6;color:var(--dim);max-width:56ch}
   .said-mine .pill{font-size:12px;padding:6px 13px;flex:none}
   .said-mine .akey{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
-  .said-mine .akeyhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-  .said-mine .akeyacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .said-mine .akeyhead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .said-mine .akeyacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-left:auto}
   .said-mine .minibtn{font-size:10px;letter-spacing:.08em;font-family:ui-monospace,"SF Mono",Menlo,monospace;color:var(--dim);background:none;border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer}
   .said-mine .minibtn:hover{color:var(--ink);border-color:var(--ink)}
   .said-mine .minibtn:disabled{opacity:.5;cursor:default}
   .said-mine .minibtn.danger:hover{color:#c0392b;border-color:#c0392b}
   .said-mine .akeyacts .btn{padding:9px 18px;font-size:12.5px}
-  .said-mine .akeyval{display:block;margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:11.5px;color:var(--dim);word-break:break-all;transition:color .2s}
-  /* masked state shows the row exists without revealing anything */
-  .said-mine .akeyval.masked{color:var(--faint);letter-spacing:.06em;user-select:none;overflow:hidden;white-space:nowrap;text-overflow:clip}
+  .said-mine .akeyval{display:block;margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:11.5px;color:var(--dim);word-break:break-all}
+  /* the key lives on the same row as the label and the pills, so revealing it
+     swaps characters instead of changing the card's height */
+  .said-mine .akeyinline{flex:1;min-width:0;font-size:11.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .said-mine .akeyinline.masked{color:var(--faint);letter-spacing:.1em;user-select:none}
+  /* below this the inline slot is too narrow to read, so the key takes its own
+     line — still always rendered, so revealing it never changes the height */
+  @media (max-width:600px){
+    .said-mine .akeyinline{flex:1 0 100%;order:3;margin-top:2px}
+  }
   /* fixed width so swapping COPY→tick can't resize the pill */
   .said-mine .copybtn{position:relative;min-width:62px;height:26px;padding:0 11px}
   .said-mine .copybtn .ci{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .18s ease-out,transform .18s ease-out}
