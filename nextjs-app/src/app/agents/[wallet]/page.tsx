@@ -63,7 +63,9 @@ interface SourcePlatform {
 function matchSource(agent: Agent): SourcePlatform | null {
   const src = agent.registrationSource ?? '';
   const desc = agent.description ?? '';
-  if (src === 'spawnr') return { key: 'spawnr', label: 'Spawnr', icon: '/platforms/spawnr.png', href: 'https://spawnr.io' };
+  // Spawnr shut down (spawnr.io 500s). The badge stays — where an agent
+  // registered is still true — but it no longer links anywhere.
+  if (src === 'spawnr') return { key: 'spawnr', label: 'Spawnr', icon: '/platforms/spawnr.png' };
   if (src === 'clawpump' || desc.includes('clawpump.tech')) return { key: 'clawpump', label: 'Claw Pump', icon: '/clawpump-logo.png', href: 'https://clawpump.tech' };
   if (src === 'said-hosting' || desc.includes('said-hosting') || desc.includes('host.saidprotocol')) return { key: 'said-hosting', label: 'SAID Hosted', icon: '/platforms/said-hosting.png', href: 'https://host.saidprotocol.com' };
   const web = agent.website ?? '';
