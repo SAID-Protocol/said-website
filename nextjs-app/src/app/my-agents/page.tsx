@@ -188,8 +188,13 @@ export default function MyAgentsPage() {
                     <div className="akeyacts">
                       {key ? (
                         <>
-                          <button className="minibtn" onClick={() => copyKey(agent.id, key)}>
-                            {copiedId === agent.id ? 'COPIED' : 'COPY'}
+                          <button
+                            className={`minibtn copybtn${copiedId === agent.id ? ' copied' : ''}`}
+                            onClick={() => copyKey(agent.id, key)}
+                            aria-label="Copy API key"
+                          >
+                            <span className="ci label">COPY</span>
+                            <span className="ci tick" aria-hidden="true">✓</span>
                           </button>
                           <button className="minibtn" onClick={() => setShowKeyForId(shown ? null : agent.id)}>
                             {shown ? 'HIDE' : 'SHOW'}
@@ -216,7 +221,13 @@ export default function MyAgentsPage() {
                       )}
                     </div>
                   </div>
-                  {shown && <code className="akeyval mono">{key || 'Loading…'}</code>}
+                  {key ? (
+                    <code className={`akeyval mono${shown ? '' : ' masked'}`}>
+                      {shown ? key : '•'.repeat(44)}
+                    </code>
+                  ) : shown ? (
+                    <code className="akeyval mono">Loading…</code>
+                  ) : null}
                 </div>
               </div>
             );
@@ -260,7 +271,16 @@ const mineStyles = `
   .said-mine .minibtn:disabled{opacity:.5;cursor:default}
   .said-mine .minibtn.danger:hover{color:#c0392b;border-color:#c0392b}
   .said-mine .akeyacts .btn{padding:9px 18px;font-size:12.5px}
-  .said-mine .akeyval{display:block;margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:11.5px;color:var(--dim);word-break:break-all}
+  .said-mine .akeyval{display:block;margin-top:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg);font-size:11.5px;color:var(--dim);word-break:break-all;transition:color .2s}
+  /* masked state shows the row exists without revealing anything */
+  .said-mine .akeyval.masked{color:var(--faint);letter-spacing:.06em;user-select:none;overflow:hidden;white-space:nowrap;text-overflow:clip}
+  /* fixed width so swapping COPY→tick can't resize the pill */
+  .said-mine .copybtn{position:relative;min-width:62px;height:26px;padding:0 11px}
+  .said-mine .copybtn .ci{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .18s ease-out,transform .18s ease-out}
+  .said-mine .copybtn .tick{opacity:0;transform:scale(.7);color:var(--good);font-size:13px}
+  .said-mine .copybtn.copied{border-color:var(--good)}
+  .said-mine .copybtn.copied .label{opacity:0;transform:scale(.9)}
+  .said-mine .copybtn.copied .tick{opacity:1;transform:none}
   @media (max-width:700px){
     .said-mine .minehead{align-items:flex-start;flex-direction:column}
     .said-mine .ahead{flex-wrap:wrap}

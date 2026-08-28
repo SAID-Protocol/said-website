@@ -347,10 +347,12 @@ export default function ProfilePage() {
                           </button>
                           {revealed && (
                             <button
-                              className="minibtn"
+                              className={`minibtn copybtn${copiedKey === agentId ? ' copied' : ''}`}
                               onClick={() => { navigator.clipboard.writeText(key); setCopiedKey(agentId); setTimeout(() => setCopiedKey(null), 1200); }}
+                              aria-label="Copy API key"
                             >
-                              {copiedKey === agentId ? 'COPIED' : 'COPY'}
+                              <span className="ci label">COPY</span>
+                              <span className="ci tick" aria-hidden="true">✓</span>
                             </button>
                           )}
                           <button className="minibtn danger" onClick={() => rotateProfileKey(agentId)}>ROTATE</button>
@@ -432,6 +434,12 @@ const meStyles = `
   .said-me .keyhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .said-me .keyname{font-size:14px;font-weight:500}
   .said-me .keyacts{display:flex;gap:6px}
+  .said-me .copybtn{position:relative;min-width:62px;height:26px;padding:0 11px}
+  .said-me .copybtn .ci{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transition:opacity .18s ease-out,transform .18s ease-out}
+  .said-me .copybtn .tick{opacity:0;transform:scale(.7);color:var(--good);font-size:13px}
+  .said-me .copybtn.copied{border-color:var(--good)}
+  .said-me .copybtn.copied .label{opacity:0;transform:scale(.9)}
+  .said-me .copybtn.copied .tick{opacity:1;transform:none}
   .said-me .minibtn{font-size:10px;letter-spacing:.08em;font-family:ui-monospace,"SF Mono",Menlo,monospace;color:var(--dim);background:none;border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer}
   .said-me .minibtn:hover{color:var(--ink);border-color:var(--ink)}
   .said-me .minibtn.danger:hover{color:#c0392b;border-color:#c0392b}
