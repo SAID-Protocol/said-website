@@ -12,6 +12,7 @@ const SECTIONS: Array<[string, string]> = [
   ['introduction', 'Introduction'],
   ['identity', 'Agent Identity'],
   ['multiwallet', 'Multi-Wallet'],
+  ['metadata', 'Update Metadata'],
   ['verification', 'Verification'],
   ['passport', 'Passport API'],
   ['reputation', 'Reputation'],
@@ -86,6 +87,39 @@ await agent.linkWallet(newWalletKeypair);`}</pre>
             <p>Recovery mechanism: any linked wallet can become the new authority.</p>
             <pre><Copy /><span className="cm">{'// Called from the new authority (must be a linked wallet)'}</span>{'\n'}await agent.transferAuthority(agentIdentityPubkey);</pre>
             <div className="callout"><span className="t">WHY THIS MATTERS</span><p>Agents often rotate wallets for security or operational reasons. Multi-wallet support means your identity, reputation, and verification persist across wallet changes. One identity, many wallets.</p></div>
+          </section>
+
+          <section id="metadata">
+            <h2>Update Metadata</h2>
+            <p>Change your agent&apos;s name, description, links, image, skills or service endpoints after registration. No Solana transaction needed: the on-chain <code>metadataUri</code> points at the card SAID serves, so the update is live the moment it lands.</p>
+            <h3>1. Get the message to sign</h3>
+            <pre><Copy /><span className="cm">{'// POST https://api.saidprotocol.com/api/agents/:wallet/metadata/message'}</span>{'\n'}{`const res = await fetch(\`https://api.saidprotocol.com/api/agents/\${wallet}/metadata/message\`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    signer: wallet,
+    changes: { name: 'Atlas', website: 'https://atlas.example', skills: ['research', 'trading'] }
+  })
+});
+const { message, timestamp, changes } = await res.json();`}{'\n'}<span className="cm">{'// message: "SAID:update:<wallet>:<timestamp>:<sha256 of changes>"'}</span></pre>
+            <h3>2. Sign it and apply</h3>
+            <p>Sign with the agent wallet or the owner wallet you registered with. The signature only authorises these exact changes, for 5 minutes.</p>
+            <pre><Copy />{`import nacl from 'tweetnacl';
+import bs58 from 'bs58';
+
+const signature = bs58.encode(
+  nacl.sign.detached(new TextEncoder().encode(message), keypair.secretKey)
+);
+
+await fetch(\`https://api.saidprotocol.com/api/agents/\${wallet}\`, {
+  method: 'PATCH',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ signer: wallet, signature, timestamp, changes })
+});`}{'\n'}<span className="cm">{'// { success: true, authorisedBy: "agent", updated: ["name","website","skills"], agent: {...} }'}</span></pre>
+            <h3>Fields</h3>
+            <p><code>name</code> · <code>description</code> · <code>twitter</code> · <code>github</code> · <code>website</code> · <code>image</code> · <code>skills</code> · <code>serviceTypes</code> · <code>mcpEndpoint</code> · <code>a2aEndpoint</code>. Send <code>null</code> to clear a field; omitted fields are untouched. Verification status, owner, registration source and reputation are read-only.</p>
+            <div className="callout"><span className="t">PLATFORMS</span><p>If you registered agents through a platform integration, send the same <code>X-Platform-Key</code> header instead of a signature. The key must belong to the platform the agent was registered through.</p></div>
+            <div className="callout"><span className="t">LAYER-2 VERIFIED?</span><p>Moving <code>mcpEndpoint</code> or <code>a2aEndpoint</code> off the URL your Layer-2 verification was earned against resets that verification. Re-run the challenge against the new endpoint to restore it.</p></div>
           </section>
 
           <section id="verification">
@@ -349,6 +383,8 @@ const agents = await client.discover();`}</pre>
               <div className="ep"><span className="m mono">GET</span><code>/api/agents</code><span className="d">List all registered agents. Supports search, filter, and pagination</span></div>
               <div className="ep"><span className="m mono">GET</span><code>/api/agents/:wallet</code><span className="d">Get full details for a specific agent</span></div>
               <div className="ep"><span className="m mono">POST</span><code>/api/agents/:wallet/feedback</code><span className="d">Submit feedback for an agent. Requires wallet signature</span></div>
+              <div className="ep"><span className="m mono">PATCH</span><code>/api/agents/:wallet</code><span className="d">Update an agent&apos;s metadata. Requires agent/owner wallet signature or platform key</span></div>
+              <div className="ep"><span className="m mono">POST</span><code>/api/agents/:wallet/metadata/message</code><span className="d">Get the message to sign for a metadata update</span></div>
             </div>
             <h3>Cross-Chain Endpoints</h3>
             <div className="eps">
