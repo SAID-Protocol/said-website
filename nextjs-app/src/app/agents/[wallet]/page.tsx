@@ -58,6 +58,8 @@ interface SourcePlatform {
   label: string;
   icon: string;
   href?: string;
+  /** Pill text. Defaults to "Launched on {label}". */
+  text?: string;
 }
 
 function matchSource(agent: Agent): SourcePlatform | null {
@@ -67,6 +69,16 @@ function matchSource(agent: Agent): SourcePlatform | null {
   // registered is still true — but it no longer links anywhere.
   if (src === 'spawnr') return { key: 'spawnr', label: 'Spawnr', icon: '/platforms/spawnr.png' };
   if (src === 'clawpump' || desc.includes('clawpump.tech')) return { key: 'clawpump', label: 'Claw Pump', icon: '/clawpump-logo.png', href: 'https://clawpump.tech' };
+  // Atcha (formerly SAID Agent / Butler): the personal agent product. Its
+  // agents register through the same hosting path as SAID Hosting deploys,
+  // so until the API tags them `atcha` at registration the description is
+  // what tells the two apart. Every personal agent butler has provisioned
+  // carries one of these three phrasings; hosted deploys never do.
+  const isAtcha =
+    src === 'atcha' ||
+    src === 'butler' ||
+    ((src === 'said-hosting' || !src) && /personal AI agent on SAID|SAID (Butler )?agent (on|for) telegram/i.test(desc));
+  if (isAtcha) return { key: 'atcha', label: 'Atcha', text: 'Atcha by SAID', icon: '/platforms/atcha.png', href: 'https://atcha.cash' };
   if (src === 'said-hosting' || desc.includes('said-hosting') || desc.includes('host.saidprotocol')) return { key: 'said-hosting', label: 'SAID Hosted', icon: '/platforms/said-hosting.png', href: 'https://host.saidprotocol.com' };
   const web = agent.website ?? '';
   if (src === 'xona-orbit' || web.includes('orbit-agents.com') || web.includes('xona-agent.com') || web.includes('xona-orbit')) return { key: 'xona-orbit', label: 'Xona Orbit', icon: '/platforms/xona-orbit.png', href: 'https://xona-agent.com' };
@@ -265,7 +277,7 @@ function SourceBadge({ agent }: { agent: Agent }) {
     <>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src.icon} alt="" />
-      <span>Launched on {src.label}</span>
+      <span>{src.text ?? `Launched on ${src.label}`}</span>
     </>
   );
   return src.href ? (
