@@ -13,7 +13,7 @@ const LINKS: Array<[string, string, boolean?]> = [
   ["Directory", "/agents"],
   ["Docs", "/docs"],
   ["$SAID", "/token"],
-  ["Agent", "https://agent.saidprotocol.com", true],
+  ["Atcha", "https://atcha.cash", true],
 ];
 
 /** Redesign navbar — handoff design language, existing Privy auth preserved. */
