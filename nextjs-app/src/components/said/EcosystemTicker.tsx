@@ -2,9 +2,11 @@
 
 // Partner roster carried over from the pre-redesign PartnerTicker.
 const partners = [
+  { name: 'Atcha', logo: '/platforms/atcha-mark.png', url: 'https://atcha.cash' },
   { name: 'OpenClaw', logo: '/platforms/openclaw.png', url: 'https://openclaw.ai' },
   { name: 'Atelier', logo: '/platforms/atelier.jpg', url: 'https://atelierai.xyz/' },
   { name: 'Claw Pump', logo: '/clawpump-logo.png', url: 'https://clawpump.tech' },
+  { name: 'Corine', logo: '/platforms/corine.png', url: 'https://corine.xyz' },
   { name: 'FairScale', logo: '/platforms/fairscale.jpg', url: 'https://fairscale.xyz/' },
   { name: 'Xona Orbit', logo: '/platforms/xona-orbit.png', url: 'https://www.xona-agent.com/' },
   { name: 'Metaplex', logo: '/platforms/metaplex.jpg', url: 'https://www.metaplex.com/' },
