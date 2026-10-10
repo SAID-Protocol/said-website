@@ -19,7 +19,6 @@ const partners = [
   { name: 'Idle', logo: '/platforms/idle.jpg', url: 'https://earnidle.com' },
   { name: 'AlphArena', logo: '/platforms/alpharena.jpg', url: 'https://alpharena.ai' },
   { name: 'DegenTools', logo: '/platforms/degentools.jpg', url: 'https://degentools.co' },
-  { name: 'Modulr', logo: '/platforms/modulr.jpg', url: 'https://modulr402.com' },
 ];
 
 /** Ecosystem partner marquee, in the redesign's pill language. */
